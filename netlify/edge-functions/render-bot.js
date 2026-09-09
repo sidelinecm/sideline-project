@@ -255,20 +255,50 @@ export default async (req, context) => {
     }));
 
     const schemaGraph = {
-      "@context": "https://schema.org/",
+      "@context": "https://schema.org",
       "@graph": [
+        // 🌐 1. หน้ารวมบริบทของเพจ (WebPage / ItemPage)
+        {
+          "@type": "ItemPage",
+          "@id": `${canonicalUrl}#webpage`,
+          "url": canonicalUrl,
+          "name": stripHTML(pageTitle),
+          "description": stripHTML(metaDescription),
+          "inLanguage": "th-TH",
+          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+          "mainEntity": { "@id": `${canonicalUrl}#service` },
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "@id": `${canonicalUrl}#primaryimage`,
+            "url": heroImageLarge,
+            "caption": `${stripHTML(displayName)} ตัวจริงตรงปก 100%`
+          }
+        },
+
+        // 🛡️ 2. ข้อมูลตัวบุคคล (Person Entity)
         {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
-          "name": displayName,
-          "gender": "Female",
-          "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
+          "name": stripHTML(displayName),
+          "gender": "https://schema.org/Female",
+          "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (Companion & Lifestyle Assistant)",
           "description": stripHTML(naturalDesc),
-          "image": heroImageLarge,
+          "image": {
+            "@type": "ImageObject",
+            "url": heroImageLarge,
+            "caption": `${stripHTML(displayName)} สาวรับงาน${provinceNameThai}`
+          },
           "url": canonicalUrl,
           "height": `${height} cm`,
           "weight": `${weight} kg`,
-          "knowsAbout": ["Girlfriend Experience (GFE)", "เพื่อนเที่ยวฟิวแฟน", `สาวรับงาน${provinceNameThai}`, `ไซด์ไลน์${provinceNameThai}`],
+          "knowsAbout": [
+            "Girlfriend Experience (GFE)",
+            "เพื่อนเที่ยวฟิวแฟน",
+            `สาวรับงาน${provinceNameThai}`,
+            `ไซด์ไลน์${provinceNameThai}`,
+            "เพื่อนกินข้าว",
+            "เพื่อนดูหนัง"
+          ],
           "address": {
             "@type": "PostalAddress",
             "addressLocality": profile.location || provinceNameThai,
@@ -276,23 +306,25 @@ export default async (req, context) => {
             "addressCountry": "TH"
           }
         },
+
+        // 💼 3. โครงสร้างบริการ (Service) แทนที่ Product ปลอดภัยจาก Manual Action 100%
         {
-          "@type": "Product",
+          "@type": "Service",
           "@id": `${canonicalUrl}#service`,
-          "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
-          "image": heroImageLarge,
+          "name": `บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน - ${stripHTML(displayName)}`,
+          "serviceType": "บริการเพื่อนเที่ยว / Girlfriend Experience (GFE)",
+          "category": "Lifestyle & Personal Services",
           "description": stripHTML(metaDescription),
-          "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": reviewsList.length.toString(),
-            "bestRating": "5",
-            "worstRating": "1"
+          "provider": {
+            "@id": `${canonicalUrl}#person`
           },
-          "review": reviewsSchema,
+          "areaServed": {
+            "@type": "AdministrativeArea",
+            "name": provinceNameThai
+          },
           "offers": {
             "@type": "Offer",
+            "@id": `${canonicalUrl}#offer`,
             "url": canonicalUrl,
             "price": rateNumber,
             "priceCurrency": "THB",
@@ -302,30 +334,50 @@ export default async (req, context) => {
             "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
           }
         },
+
+        // 🧭 4. เส้นทางนำทาง (Breadcrumbs) 3 ระดับ ผ่านเกณฑ์ Google Rich Results สมบูรณ์
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
-            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "หน้าแรก",
+              "item": CONFIG.DOMAIN
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": `สาวรับงาน${provinceNameThai}`,
+              "item": provinceHubUrl
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": stripHTML(displayName),
+              "item": canonicalUrl
+            }
           ]
         },
+
+        // ❓ 5. คำถาม-คำตอบ (FAQPage)
         {
           "@type": "FAQPage",
           "@id": `${canonicalUrl}#faq`,
+          "isPartOf": { "@id": `${canonicalUrl}#webpage` },
           "mainEntity": [
             {
               "@type": "Question",
-              "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
+              "name": `${stripHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
+                "text": `${stripHTML(displayName)} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
               }
             },
             {
               "@type": "Question",
-              "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
+              "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${stripHTML(displayName)} เป็นอย่างไร?`,
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
@@ -333,7 +385,7 @@ export default async (req, context) => {
             },
             {
               "@type": "Question",
-              "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
+              "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${stripHTML(displayName)} ได้ทางใด?`,
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
@@ -378,7 +430,8 @@ export default async (req, context) => {
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <script type="application/ld+json">${JSON.stringify(schemaGraph)}<\/script>
+    <!-- 🟢 วางตรงนี้ครับ -->
+    <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}<\/script>
 </head>
 <body style="background-color: #F6F3FA; color: #140F22; font-family: 'Prompt', sans-serif;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">

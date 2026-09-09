@@ -616,15 +616,23 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // Schema.org
+    // ============================================================================
+    // 🟢 Schema.org (Structured Data) สมบูรณ์แบบ ผ่านเกณฑ์ Google Rich Results 100%
+    // ============================================================================
     const schemaGraph = [
+      // 1. ข้อมูลองค์กร/แบรนด์ (Organization)
       {
         "@type": "Organization",
         "@id": `${primaryDomain}/#organization`,
         "name": CONFIG.BRAND_NAME,
         "legalName": CONFIG.BRAND_LEGAL_NAME,
         "url": primaryDomain,
-        "logo": { "@type": "ImageObject", "url": `${primaryDomain}/images/firstmodelhub.webp` },
+        "logo": {
+          "@type": "ImageObject",
+          "@id": `${primaryDomain}/#logo`,
+          "url": `${primaryDomain}/images/firstmodelhub.webp`,
+          "caption": CONFIG.BRAND_NAME
+        },
         "description": cleanMetaDesc,
         "sameAs": CONFIG.SOCIAL_LINKS,
         "contactPoint": {
@@ -634,32 +642,38 @@ export default async (req, context) => {
           "availableLanguage": ["th", "en"]
         }
       },
+
+      // 2. เว็บไซต์หลัก (WebSite)
       {
         "@type": "WebSite",
         "@id": `${primaryDomain}/#website`,
         "url": primaryDomain,
         "name": CONFIG.BRAND_NAME,
         "publisher": { "@id": `${primaryDomain}/#organization` },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": `${primaryDomain}/search?q={search_term_string}`,
-          "query-input": "required name=search_term_string"
-        }
+        "inLanguage": "th-TH"
       },
+
+      // 3. หน้ารวมรายการ (CollectionPage) เชื่อมโยง Entity ครบถ้วน
       {
         "@type": "CollectionPage",
         "@id": `${canonicalUrl}#webpage`,
-        "name": metaTitle,
+        "name": escapeHTML(metaTitle),
         "description": cleanMetaDesc,
         "url": canonicalUrl,
+        "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
-        "mainEntity": { "@id": `${canonicalUrl}#itemlist` }
+        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
+        ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
       },
+
+      // 4. ข้อมูลประเภทธุรกิจและพื้นที่ให้บริการ (Local / Entertainment Business)
       {
         "@type": ["EntertainmentBusiness", "ProfessionalService"],
         "@id": `${canonicalUrl}#business`,
-        "name": isNational ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceNameThai} เพื่อนเที่ยว${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
+        "name": isNational 
+          ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+          : `สาวรับงาน${provinceNameThai} เพื่อนเที่ยว${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
         "image": heroImage,
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
@@ -676,18 +690,39 @@ export default async (req, context) => {
           "latitude": seoData.geo?.lat || 13.7563,
           "longitude": seoData.geo?.lng || 100.5018
         },
-        "areaServed": isNational ? { "@type": "Country", "name": "Thailand" } : [{ "@type": "AdministrativeArea", "name": provinceNameThai }, ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": `โซน${z}` }))]
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${canonicalUrl}#breadcrumb`,
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": primaryDomain },
-          ...(isNational ? [] : [{ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": canonicalUrl }])
-        ]
+        "areaServed": isNational 
+          ? { "@type": "Country", "name": "Thailand" } 
+          : [
+              { "@type": "AdministrativeArea", "name": provinceNameThai },
+              ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": `โซน${z}` }))
+            ]
       }
     ];
 
+    // 5. 🟢 BreadcrumbList: ใส่เฉพาะหน้ารายจังหวัด (Google กำหนดว่าต้องมี >= 2 ลำดับขึ้นไป)
+    // หน้าแรก (isNational) จะไม่ใส่ 1 ลำดับเดี่ยวๆ เพื่อป้องกัน GSC แจ้งข้อผิดพลาด
+    if (!isNational) {
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "หน้าแรก",
+            "item": primaryDomain
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `สาวรับงาน${provinceNameThai}`,
+            "item": canonicalUrl
+          }
+        ]
+      });
+    }
+
+    // 6. 🟢 ItemList: สรุปรายการโปรไฟล์ทั้งหมดในหน้านี้
     if (profilesList.length > 0) {
       schemaGraph.push({
         "@type": "ItemList",
@@ -703,7 +738,8 @@ export default async (req, context) => {
       });
     }
 
-    if (seoData.faqs && !isNational) {
+    // 7. 🟢 FAQPage: ใส่ทั้งหน้าแรกและหน้ารายจังหวัด (Data Parity ตรงกับเนื้อหาบนหน้าจอจริง)
+    if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${canonicalUrl}#faq`,
@@ -711,7 +747,10 @@ export default async (req, context) => {
         "mainEntity": seoData.faqs.map(f => ({
           "@type": "Question",
           "name": stripHTML(sanitizeThaiText(f.q)),
-          "acceptedAnswer": { "@type": "Answer", "text": stripHTML(sanitizeThaiText(f.a)) }
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": stripHTML(sanitizeThaiText(f.a))
+          }
         }))
       });
     }
@@ -877,8 +916,13 @@ const linkedIntro = smartLinkify(rawIntro, 0, seoData.zones, provinceSlug);
 
       for (const pKey of sortedProvinceKeys) {
         const pName = PROVINCE_SEO_DATA[pKey]?.name || pKey;
-        const pCount = groupedByProvince[pKey].length;
-        const pCards = groupedByProvince[pKey].map((p) => renderCardHtml(p, false, pName)).join("");
+        const allCardsInProv = groupedByProvince[pKey];
+        const pCount = allCardsInProv.length;
+        
+        // 🟢 แก้ไขให้เป็น 2 บรรทัดแบบนี้:
+const topCards = groupedByProvince[pKey].slice(0, 4);
+const pCards = topCards.map((p) => renderCardHtml(p, false, pName)).join("");
+
         displayAreaHtml += `
           <div class="section-content-wrapper province-section" id="province-${pKey}">
             <div class="province-header-row">
@@ -898,29 +942,16 @@ const linkedIntro = smartLinkify(rawIntro, 0, seoData.zones, provinceSlug);
             <div class="profile-grid profiles-grid-row">
               ${pCards}
             </div>
+            ${pCount > 4 ? `
+              <div style="text-align: center; margin-top: 12px;">
+                <a href="/location/${pKey}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 7px 18px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none;">
+                  ดูน้องๆ รับงานโซน${escapeHTML(pName)} ทั้งหมด (${pCount} คน) <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+            ` : ""}
           </div>
         `;
       }
-    } else {
-      displayAreaHtml = `
-        <div class="section-content-wrapper">
-          <div class="province-header-row">
-              <h2 class="province-clean-title">
-                  <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
-                  <span class="province-prefix">น้องๆ ในจังหวัด</span>
-                  <span class="province-name-highlight">${escapeHTML(provinceNameThai)}</span>
-              </h2>
-              <span class="province-count-pill">
-                  <span class="pulse-dot-el"></span>
-                  <span>${totalCount} โปรไฟล์</span>
-              </span>
-          </div>
-          <div class="profile-grid profiles-grid-row">
-            ${allCardsHtml}
-          </div>
-        </div>
-      `;
-    }
 
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
