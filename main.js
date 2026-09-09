@@ -1954,11 +1954,15 @@ async function getSupabaseClient() {
       }, { passive: true });
     })();
 
+    // ==========================================================================
+    // 🟢 ระบบดึงข้อมูล: ดึงจาก SSR ทันที (0-Query) ไม่ยิง Database ซ้ำซ้อน
+    // ==========================================================================
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
 
       try {
+        // 1. ดึงรายชื่อจังหวัดจาก SSR
         if (window.provincesData && Array.isArray(window.provincesData)) {
           appState.provincesMap.clear();
           window.provincesData.forEach(p => {
@@ -1969,12 +1973,14 @@ async function getSupabaseClient() {
           });
         }
 
+        // 2. ⚡ ถ้ามีข้อมูลโปรไฟล์จาก SSR แล้ว ให้นำมาใช้ทันที (ไม่ต้องยิง Supabase ซ้ำ!)
         if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           appState.allProfiles = window.profilesData.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
         }
 
+        // 3. กรณีเปิดหน้าเว็บที่ไม่มี SSR (Fallback) ถึงค่อยยิงขอ Supabase
         const client = await getSupabaseClient();
         if (!client) throw new Error("Supabase client not initialized");
 
@@ -2017,15 +2023,21 @@ async function getSupabaseClient() {
     });
   }
 
-  // 🟢 ฟังก์ชันสร้างแถบวงกลม Story Highlights วิ่งสไลด์อัตโนมัติ
+  // ==========================================================================
+  // 🟢 ฟังก์ชัน Stories: ทำงานสมบูรณ์ + ป้องกันการสร้างรูปซ้ำซ้อน
+  // ==========================================================================
   function initAgencyStories() {
     const trackEl = document.getElementById("agency-stories-track");
     if (!trackEl) return;
 
+    // 1. ถ้าใน HTML มีการเรนเดอร์มาแล้ว ให้หยุดทำงานทันที (ไม่ลบของเก่าทิ้ง)
+    if (trackEl.children.length > 0) return;
+
     const profiles = appState.allProfiles;
     if (!profiles || profiles.length === 0) return;
 
-    const topModels = profiles.slice(0, 15);
+    // 2. ดึงเฉพาะ 10 คนแรกพอ เพื่อประหยัดแบนด์วิธและไม่ทำให้ Googlebot ค้าง
+    const topModels = profiles.slice(0, 10);
     let singleHtml = "";
 
     topModels.forEach(p => {
@@ -2044,7 +2056,7 @@ async function getSupabaseClient() {
         <div class="story-item-el interactive-card" onclick="window.location.href='/sideline/${slug}'">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
+              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" decoding="async" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
             </div>
             <span class="story-status-dot ${statusClass}"></span>
           </div>
@@ -2053,10 +2065,11 @@ async function getSupabaseClient() {
       `;
     });
 
-    // 🟢 เบิ้ล 2 รอบเพื่อให้สไลด์วิ่งวนลูปแบบไร้รอยต่อ
+    // 3. เบิ้ล 2 ชุด เพื่อให้ CSS Animation หมุนวนลูปแบบไร้รอยต่อ (Seamless Loop)
     trackEl.innerHTML = singleHtml + singleHtml;
   }
 
+  // เริ่มการทำงานของระบบ
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initApplication);
   } else {
