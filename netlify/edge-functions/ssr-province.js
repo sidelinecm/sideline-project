@@ -10,21 +10,21 @@ const CONFIG = {
   get SUPABASE_URL() {
     try {
       return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
-    } catch {
+    } catch (_err) {
       return "https://zxetzqwjaiumqhrpumln.supabase.co";
     }
   },
   get SUPABASE_KEY() {
     try {
       return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    } catch {
+    } catch (_err) {
       return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
     }
   },
   get PURGE_SECRET() {
     try {
       return Deno.env.get("PURGE_SECRET") || "fmh_secure_purge_2026";
-    } catch {
+    } catch (_err) {
       return "fmh_secure_purge_2026";
     }
   },
@@ -73,9 +73,7 @@ const PROVINCE_SEO_DATA = {
     zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
     faqs: [
       { q: "สาวรับงานเชียงราย โซนบ้านดู่ และ มฟล. นัดหมายสะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนบ้านดู่ หน้ามหาวิทยาลัยแม่ฟ้าหลวง และใจกลางเมืองเชียงราย พร้อมเดินทางไปดูแลที่พักของท่านรวดเร็ว" },
-      { q: "ไซด์ไลน์เชียงราย การันตีตรงปกและปลอดภัยอย่างไร?", a: "โปรไฟล์ของน้องๆ ทุกคนผ่านการยืนยันตัวตน 100% ปลอดภัยด้วยระบบนัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระค่าบริการ" },
-      { q: "มีบริการรับงานแบบค้างคืน (Long Time) ในเชียงรายหรือไม่?", a: "มีครับ น้องๆ หลายท่านรับงานแบบค้างคืน ดูแลยาวๆ จนถึงเช้า สามารถตกลงเรทราคาที่หน้าโปรไฟล์ได้เลย" },
-      { q: "ต้องการเด็กเอ็นไปร้านเหล้าแถวหอนาฬิกา มีไหม?", a: "มีครับ เรามีน้องๆ สายปาร์ตี้ EN VIP ที่สามารถไปชงเหล้า เอ็นเตอร์เทนที่ร้านอาหารหรือผับในตัวเมืองได้ครับ" }
+      { q: "ไซด์ไลน์เชียงราย การันตีตรงปกและปลอดภัยอย่างไร?", a: "โปรไฟล์ของน้องๆ ทุกคนผ่านการยืนยันตัวตน 100% ปลอดภัยด้วยระบบนัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระค่าบริการ" }
     ]
   },
   lampang: {
@@ -84,8 +82,7 @@ const PROVINCE_SEO_DATA = {
     zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
     faqs: [
       { q: "นัดพบสาวรับงานลำปาง ในตัวเมืองหรือแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมืองลำปาง, ย่านสวนดอก, ถนนรอบเวียง และละแวก ม.ราชภัฏลำปาง เดินทางสะดวกและเป็นส่วนตัวครับ" },
-      { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการ" },
-      { q: "มีน้องเด็กเอ็น (EN) ไปนั่งทานข้าวเป็นเพื่อนไหม?", a: "มีครับ บริการเพื่อนเที่ยว ทานข้าว ดูหนัง (GFE) เป็นบริการหลักของเรา น้องๆ สุภาพและวางตัวดีมากครับ" }
+      { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการ" }
     ]
   },
   lamphun: {
@@ -93,9 +90,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 18.5772, lng: 99.0087 },
     zones: ["ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
     faqs: [
-      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถแจ้งพิกัดโรงแรมหรือที่พักให้น้องเดินทางไปหาได้เลยครับ" },
-      { q: "บริการฟิวแฟน (GFE) คืออะไร?", a: "คือบริการดูแลเทคแคร์เสมือนแฟนตัวจริง กอด จูบ ลูบ คลำได้ มีความสุภาพ อ่อนโยน และไม่เร่งเวลาลูกค้าครับ" },
-      { q: "จ่ายเงินช่องทางไหนได้บ้าง?", a: "สามารถชำระด้วยเงินสดหรือโอนเข้าบัญชีน้องได้โดยตรง 'ที่หน้างานเมื่อเจอตัวจริงแล้วเท่านั้น' ครับ" }
+      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถแจ้งพิกัดโรงแรมหรือที่พักให้น้องเดินทางไปหาได้เลยครับ" }
     ]
   },
   phitsanulok: {
@@ -103,9 +98,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.8211, lng: 100.2659 },
     zones: ["ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
     faqs: [
-      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน., ท่าโพธิ์ และใจกลางเมือง ลูกค้าสามารถทักไลน์นัดหมายแจ้งพิกัดโรงแรมได้เลยครับ" },
-      { q: "บริการตรงปก 100% จริงไหม?", a: "จริงครับ โปรไฟล์ผ่านการตรวจสอบ (Verified) ถ้ารูปไม่ตรงปก ลูกค้ามีสิทธิ์ยกเลิกหน้างานได้ทันทีโดยไม่เสียเงินครับ" },
-      { q: "มีน้องเด็กเอ็น (EN) สายปาร์ตี้ ชงเหล้า ไหม?", a: "มีบริการเด็กเอ็นเตอร์เทน (EN) ไปดูแลชงเหล้าที่ร้านอาหาร ผับ หรือปาร์ตี้ส่วนตัวในบ้านพักครับ" }
+      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน., ท่าโพธิ์ และใจกลางเมือง ลูกค้าสามารถทักไลน์นัดหมายแจ้งพิกัดโรงแรมได้เลยครับ" }
     ]
   },
   bangkok: {
@@ -113,10 +106,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
     faqs: [
-      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ ทั้งสุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา นัดพบในโรงแรมหรือคอนโดส่วนตัวได้เลยครับ" },
-      { q: "มีน้องที่พูดภาษาอังกฤษได้ (English Speaking) ไหม?", a: "มีครับ โซนสุขุมวิท ทองหล่อ มีน้องๆ พรีเมียมที่สื่อสารภาษาอังกฤษได้ดีเยี่ยม เหมาะสำหรับดูแลลูกค้าชาวต่างชาติ (Expat/Tourist)" },
-      { q: "มีบริการรับงานนอกสถานที่ (Outcall) หรือไม่?", a: "บริการส่วนใหญ่ของกรุงเทพฯ เป็นรูปแบบ Outcall คือน้องๆ จะเดินทางไปหาลูกค้าที่พิกัดโรงแรมหรือห้องพักของลูกค้าครับ" },
-      { q: "เด็กเอ็น VIP สำหรับดินเนอร์หรู มีบริการไหม?", a: "มีครับ บริการเพื่อนเที่ยวทานข้าว ดินเนอร์ ออกงานสังคม (Companion) น้องๆ โปรไฟล์ระดับพริตตี้ วางตัวดี สวยงามครับ" }
+      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ ทั้งสุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา นัดพบในโรงแรมหรือคอนโดส่วนตัวได้เลยครับ" }
     ]
   },
   chonburi: {
@@ -124,10 +114,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.3611, lng: 100.9847 },
     zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
     faqs: [
-      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนเพื่อความปลอดภัย 100% ครับ" },
-      { q: "รับงานปาร์ตี้ พูลวิลล่า ในพัทยาไหม?", a: "รับครับ มีบริการเด็กเอ็น (EN) สำหรับปาร์ตี้สระว่ายน้ำ พูลวิลล่า ชงเหล้า เอ็นเตอร์เทน สร้างบรรยากาศสนุกสนาน" },
-      { q: "ศรีราชา มีน้องสไตล์ไหนบ้าง?", a: "โซนศรีราชา บางแสน มีน้องๆ สไตล์วัยใส นักศึกษา ผิวขาว น่ารัก เอาใจเก่ง (GFE) สแตนด์บายเยอะมากครับ" },
-      { q: "หาเด็กเอ็นที่สามารถพูดภาษาอังกฤษได้ มีไหม?", a: "โซนพัทยาและจอมเทียน มีน้องๆ พรีเมียมที่สื่อสารภาษาอังกฤษได้ดี พร้อมดูแลลูกค้าชาวต่างชาติครับ" }
+      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนเพื่อความปลอดภัย 100% ครับ" }
     ]
   },
   khonkaen: {
@@ -135,9 +122,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
     faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" },
-      { q: "บริการฟิวแฟนขอนแก่น ทำอะไรได้บ้าง?", a: "ฟิวแฟน (GFE) คือบริการที่น้องจะเทคแคร์เสมือนแฟนจริงๆ กอด จูบ ลูบ คลำได้ มีความอ่อนโยน สุภาพ และไม่เร่งเวลาครับ" },
-      { q: "รับงานค้างคืน (Long Time) ต้องจ่ายเท่าไหร่?", a: "เรทค้างคืนจะเฉลี่ยอยู่ที่ประมาณ 4,000 - 6,000 บาทขึ้นไป ขึ้นอยู่กับโปรไฟล์น้องๆ สามารถตรวจสอบราคาได้ที่หน้าโปรไฟล์ครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" }
     ]
   },
   "khon-kaen": {
@@ -145,8 +130,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
     faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" },
-      { q: "บริการฟิวแฟนขอนแก่น ทำอะไรได้บ้าง?", a: "ฟิวแฟน (GFE) คือบริการที่น้องจะเทคแคร์เสมือนแฟนจริงๆ กอด จูบ ลูบ คลำได้ มีความอ่อนโยน สุภาพ และไม่เร่งเวลาครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" }
     ]
   },
   phuket: {
@@ -154,10 +138,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 7.8804, lng: 98.3923 },
     zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์"],
     faqs: [
-      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" },
-      { q: "รับงานพูลวิลล่า หรือไปเที่ยวเกาะด้วยได้ไหม?", a: "ได้ครับ มีบริการเพื่อนเที่ยว (Companion) ทั้งแบบรายวันและค้างคืน พาไปปาร์ตี้พูลวิลล่าหรือล่องเรือยอร์ชได้ครับ" },
-      { q: "มีน้องที่พูดภาษาอังกฤษได้ (English Speaking) ไหม?", a: "มีจำนวนมากครับ ภูเก็ตเป็นเมืองท่องเที่ยว น้องๆ ระดับพรีเมียมสามารถสื่อสารภาษาอังกฤษเพื่อดูแลลูกค้าต่างชาติได้เป็นอย่างดี" },
-      { q: "ถ้าพักอยู่ไกล เช่น แถวบางเทา หรือ เชิงทะเล น้องไปได้ไหม?", a: "ไปได้แน่นอนครับ บริการเราเป็น Outcall ทั่วเกาะภูเก็ต (อาจมีค่าเดินทางเพิ่มเติมตามระยะทางเล็กน้อย ตกลงก่อนได้ครับ)" }
+      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" }
     ]
   },
   udonthani: {
@@ -165,10 +146,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
     faqs: [
-      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกสุดครับ" },
-      { q: "ต้องการน้องไปชงเหล้าที่ร้านอาหาร หรือผับในอุดร มีไหม?", a: "มีครับ เรามีบริการเด็กเอ็น (EN) สำหรับเอ็นเตอร์เทน ชงเหล้า คุยสนุก คอยดูแลคุณและเพื่อนๆ ที่ร้านอาหารหรือปาร์ตี้ครับ" },
-      { q: "บริการแบบชั่วคราว (Short Time) ใช้เวลาเท่าไหร่?", a: "เรทมาตรฐาน Short Time จะอยู่ที่ประมาณ 1.5 - 2 ชั่วโมงครับ ให้บริการเทคแคร์สไตล์ฟิวแฟน ไม่เร่งเวลา" },
-      { q: "ต้องโอนมัดจำเพื่อจองคิวไหม?", a: "ไม่ต้องโอนมัดจำครับ! ระบบของเราให้ลูกค้าเจอน้องตัวจริงก่อน แล้วค่อยชำระเงินเต็มจำนวนหน้างาน" }
+      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกสุดครับ" }
     ]
   },
   default: {
@@ -185,7 +163,6 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
-// 🟢 เพิ่มตัวแก้วลีพิมพ์ผิดอัตโนมัติ
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -208,8 +185,6 @@ function sanitizeThaiText(text) {
     .replace(/\s+/g, " ")
     .trim();
 }
-
-
 
 function escapeHTML(str) {
   if (str == null) return "";
@@ -332,8 +307,6 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   `;
 }
 
-
-// 🟢 แก้ไขการสร้างข้อความรีวิวไม่ให้หลุดคำว่า "ตัวเมืองทั่วไทย"
 function getDynamicReviews(provinceName) {
   const isNational = provinceName === "ทั่วไทย";
   const isChiangMai = provinceName === "เชียงใหม่";
@@ -381,7 +354,9 @@ async function getTemplateHtml(url, context) {
       TEMPLATE_HTML_CACHE = await res.text();
       return TEMPLATE_HTML_CACHE;
     }
-  } catch {}
+  } catch (_err) {
+    // ignore
+  }
   return "";
 }
 
@@ -501,7 +476,6 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
-    // ⚡ 1. On-Demand Purge: ล้างแคชเมื่อหลังบ้านสั่งมาเท่านั้น
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
       const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
       if (secret === CONFIG.PURGE_SECRET) {
@@ -520,7 +494,6 @@ export default async (req, context) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
-    // Bypass Static Assets
     if (req.headers.get("x-ssr-bypass") === "true" || STATIC_EXT_REGEX.test(url.pathname)) {
       return await context.next();
     }
@@ -534,14 +507,12 @@ export default async (req, context) => {
       return Response.redirect(`${primaryDomain}/`, 301);
     }
 
-    // ⚡ 2. ตรวจสอบแคชใน Memory (ถ้ามีแคชส่งทันที 0 Database Query)
     const cacheKey = `${req.method}:${cleanPath}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
     if (cachedPage && cachedPage.version === GLOBAL_VERSION) {
       return new Response(cachedPage.html, { headers: cachedPage.headers });
     }
     
-    // ⚡ 3. ถ้าไม่มีแคช -> ยิง Supabase ดึงข้อมูล
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
     const segments = url.pathname.split("/").filter(Boolean);
@@ -554,14 +525,14 @@ export default async (req, context) => {
     } else if (segments[0] === "location" && segments[1]) {
       try {
         provinceSlug = decodeURIComponent(segments[1]).toLowerCase();
-      } catch {
+      } catch (_err) {
         provinceSlug = segments[1].toLowerCase();
       }
     } else {
       const lastSeg = segments[segments.length - 1] || "";
       try {
         provinceSlug = decodeURIComponent(lastSeg).toLowerCase();
-      } catch {
+      } catch (_err) {
         provinceSlug = lastSeg.toLowerCase();
       }
     }
@@ -617,10 +588,9 @@ export default async (req, context) => {
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
     // ============================================================================
-    // 🟢 Schema.org (Structured Data) สมบูรณ์แบบ ผ่านเกณฑ์ Google Rich Results 100%
+    // 🟢 Schema.org: 100% Compliant with Google Rich Results (No Single-Item Breadcrumb)
     // ============================================================================
     const schemaGraph = [
-      // 1. ข้อมูลองค์กร/แบรนด์ (Organization)
       {
         "@type": "Organization",
         "@id": `${primaryDomain}/#organization`,
@@ -642,8 +612,6 @@ export default async (req, context) => {
           "availableLanguage": ["th", "en"]
         }
       },
-
-      // 2. เว็บไซต์หลัก (WebSite)
       {
         "@type": "WebSite",
         "@id": `${primaryDomain}/#website`,
@@ -652,8 +620,6 @@ export default async (req, context) => {
         "publisher": { "@id": `${primaryDomain}/#organization` },
         "inLanguage": "th-TH"
       },
-
-      // 3. หน้ารวมรายการ (CollectionPage) เชื่อมโยง Entity ครบถ้วน
       {
         "@type": "CollectionPage",
         "@id": `${canonicalUrl}#webpage`,
@@ -666,8 +632,6 @@ export default async (req, context) => {
         ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
         ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
       },
-
-      // 4. ข้อมูลประเภทธุรกิจและพื้นที่ให้บริการ (Local / Entertainment Business)
       {
         "@type": ["EntertainmentBusiness", "ProfessionalService"],
         "@id": `${canonicalUrl}#business`,
@@ -699,8 +663,6 @@ export default async (req, context) => {
       }
     ];
 
-    // 5. 🟢 BreadcrumbList: ใส่เฉพาะหน้ารายจังหวัด (Google กำหนดว่าต้องมี >= 2 ลำดับขึ้นไป)
-    // หน้าแรก (isNational) จะไม่ใส่ 1 ลำดับเดี่ยวๆ เพื่อป้องกัน GSC แจ้งข้อผิดพลาด
     if (!isNational) {
       schemaGraph.push({
         "@type": "BreadcrumbList",
@@ -722,7 +684,6 @@ export default async (req, context) => {
       });
     }
 
-    // 6. 🟢 ItemList: สรุปรายการโปรไฟล์ทั้งหมดในหน้านี้
     if (profilesList.length > 0) {
       schemaGraph.push({
         "@type": "ItemList",
@@ -738,7 +699,6 @@ export default async (req, context) => {
       });
     }
 
-    // 7. 🟢 FAQPage: ใส่ทั้งหน้าแรกและหน้ารายจังหวัด (Data Parity ตรงกับเนื้อหาบนหน้าจอจริง)
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -787,8 +747,8 @@ export default async (req, context) => {
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
-const rawIntro = seoData.seoContent ? seoData.seoContent : getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
-const linkedIntro = smartLinkify(rawIntro, 0, seoData.zones, provinceSlug);
+    const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
+    const linkedIntro = smartLinkify(introText, 0, seoData.zones, provinceSlug);
 
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
@@ -892,7 +852,6 @@ const linkedIntro = smartLinkify(rawIntro, 0, seoData.zones, provinceSlug);
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-    // แก้ไข: ถ้าไม่ใช่หน้าทั่วไทย ให้คงแท็ก Section ไว้แต่ใส่ style="display: none;" ป้องกัน JS หาไม่เจอ
     if (isNational) {
       finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`);
     } else {
@@ -919,9 +878,9 @@ const linkedIntro = smartLinkify(rawIntro, 0, seoData.zones, provinceSlug);
         const allCardsInProv = groupedByProvince[pKey];
         const pCount = allCardsInProv.length;
         
-        // 🟢 แก้ไขให้เป็น 2 บรรทัดแบบนี้:
-const topCards = groupedByProvince[pKey].slice(0, 4);
-const pCards = topCards.map((p) => renderCardHtml(p, false, pName)).join("");
+        // 🟢 ดึง 4 คนแรกมาเรนเดอร์ในหน้าแรก เพื่อแก้ปัญหา Googlebot Timeout
+        const topCards = allCardsInProv.slice(0, 4);
+        const pCards = topCards.map((p) => renderCardHtml(p, false, pName)).join("");
 
         displayAreaHtml += `
           <div class="section-content-wrapper province-section" id="province-${pKey}">
@@ -952,6 +911,26 @@ const pCards = topCards.map((p) => renderCardHtml(p, false, pName)).join("");
           </div>
         `;
       }
+    } else {
+      displayAreaHtml = `
+        <div class="section-content-wrapper">
+          <div class="province-header-row">
+              <h2 class="province-clean-title">
+                  <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
+                  <span class="province-prefix">น้องๆ ในจังหวัด</span>
+                  <span class="province-name-highlight">${escapeHTML(provinceNameThai)}</span>
+              </h2>
+              <span class="province-count-pill">
+                  <span class="pulse-dot-el"></span>
+                  <span>${totalCount} โปรไฟล์</span>
+              </span>
+          </div>
+          <div class="profile-grid profiles-grid-row">
+            ${allCardsHtml}
+          </div>
+        </div>
+      `;
+    }
 
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
