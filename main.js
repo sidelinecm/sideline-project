@@ -1399,25 +1399,18 @@ async function getSupabaseClient() {
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 7. ปุ่มแอดไลน์จองคิวหลัก
-    const detailsParent = document.querySelector(".lightbox-details");
-    if (detailsParent) {
-      const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
-      if (oldLineBtn) oldLineBtn.remove();
+  // 7. ปุ่มแอดไลน์จองคิวหลัก
+    const rawLine = String(profile.lineId || profile.line_id || "ksLUWB89Y_").trim();
+    let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
+    if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
+      lineUrl = rawLine;
+    } else {
+      const cleanHandle = rawLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
+      if (cleanHandle) lineUrl = `https://line.me/ti/p/${cleanHandle}`;
+    }
 
-      const rawLine = String(profile.lineId || profile.line_id || "ksLUWB89Y_").trim();
-      let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
-      if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
-        lineUrl = rawLine;
-      } else {
-        const cleanHandle = rawLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-        if (cleanHandle) lineUrl = `https://line.me/ti/p/${cleanHandle}`;
-      }
-
-      const lineWrapper = document.createElement("div");
-      lineWrapper.id = "line-btn-sticky-wrapper";
-      lineWrapper.style.cssText = "margin-top: 10px; width: 100%;";
-      
+    const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
+    if (lineWrapper) {
       const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
       lineWrapper.innerHTML = `
         <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);">
@@ -1425,10 +1418,11 @@ async function getSupabaseClient() {
             <span>${lineBtnText}</span>
         </a>
       `;
-      detailsParent.appendChild(lineWrapper);
     }
 
     const parseFn = window.parseRateToNumber || parseRateToNumber;
+
+    
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
 
     // 💰 8.1 ตารางเรทราคา 3 ช่อง
@@ -2052,17 +2046,18 @@ async function getSupabaseClient() {
       
       const statusClass = isOnline ? "online" : "busy";
 
-      singleHtml += `
-        <div class="story-item-el interactive-card" onclick="window.location.href='/sideline/${slug}'">
-          <div class="story-ring-wrap">
-            <div class="story-ring-glow">
-              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" decoding="async" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
-            </div>
-            <span class="story-status-dot ${statusClass}"></span>
-          </div>
-          <span class="story-label">${escapeHTML(name)}</span>
-        </div>
-      `;
+     // ✅ โค้ดที่ถูกต้อง: เปลี่ยนจาก <div onclick> เป็น Semantic <a> เพื่อ SEO และ a11y
+singleHtml += `
+  <a href="/sideline/${slug}" class="story-item-el interactive-card" aria-label="ดูโปรไฟล์ ${escapeHTML(name)}">
+    <div class="story-ring-wrap">
+      <div class="story-ring-glow">
+        <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" decoding="async" width="56" height="56" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
+      </div>
+      <span class="story-status-dot ${statusClass}" aria-hidden="true"></span>
+    </div>
+    <span class="story-label">${escapeHTML(name)}</span>
+  </a>
+`;
     });
 
     // 3. เบิ้ล 2 ชุด เพื่อให้ CSS Animation หมุนวนลูปแบบไร้รอยต่อ (Seamless Loop)
