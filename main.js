@@ -513,7 +513,7 @@ async function getSupabaseClient() {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/drffioary/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
   function normalizeProfile(raw) {
