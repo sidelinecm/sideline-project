@@ -209,17 +209,15 @@ function optimizeImg(path, width = 400, height = 560) {
     return CONFIG.DEFAULT_OG_IMAGE;
   }
   const cleanPath = path.trim();
-  const cropParam = height ? `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face` : `f_auto,q_auto:best,w_${width},c_scale`;
+  const cropParam = height ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_auto` : `f_auto,q_auto,w_${width},c_scale`;
   
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIndex = cleanPath.indexOf("/upload/");
     if (uploadIndex !== -1) {
       const base = cleanPath.substring(0, uploadIndex + 8);
       let rest = cleanPath.substring(uploadIndex + 8);
+      // ลบเฉพาะค่า transform เก่าออก โดยคง version และ public_id เดิมไว้ทั้งหมด
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      if (!rest.includes("images/") && !rest.startsWith("images/")) {
-        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
-      }
       return `${base}${cropParam}/${rest}`;
     }
     return cleanPath;
@@ -229,10 +227,7 @@ function optimizeImg(path, width = 400, height = 560) {
     return cleanPath;
   }
   
-  let formatted = cleanPath.replace(/^\/+/, "");
-  if (!formatted.startsWith("images/")) {
-    formatted = `images/${formatted}`;
-  }
+  const formatted = cleanPath.replace(/^\/+/, "");
   return `${CONFIG.CLOUDINARY_BASE_URL}${cropParam}/${formatted}`;
 }
 
@@ -419,7 +414,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                loading="${isPriorityLCP ? "eager" : "lazy"}"
                fetchpriority="${isPriorityLCP ? "high" : "auto"}"
                decoding="async"
-               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
+onerror="this.onerror=null; this.removeAttribute('srcset'); this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div class="profile-card-gradient-overlay"></div>
 
