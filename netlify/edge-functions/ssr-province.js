@@ -263,10 +263,29 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   `;
 }
 
-// 🟢 ประกาศฟังก์ชัน smartLinkify แก้ปัญหา ReferenceError
-function smartLinkify(htmlText, _maxLinks = 0, _zones = [], _provinceSlug = "chiangmai") {
+// 🟢 แปลงชื่อโซนในข้อความเป็น Internal Link อัตโนมัติ (SEO Friendly)
+function smartLinkify(htmlText, maxLinks = 3, zones = [], provinceSlug = "chiangmai") {
   if (!htmlText || typeof htmlText !== "string") return "";
-  return htmlText;
+  if (!zones || zones.length === 0 || maxLinks <= 0) return htmlText;
+
+  const targetUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
+  let linkedCount = 0;
+  let result = htmlText;
+
+  // กรองคำว่า "ทั้งหมด" ออก และเรียงจากคำยาวไปสั้น
+  const cleanZones = zones.filter(z => z && z !== "ทั้งหมด").sort((a, b) => b.length - a.length);
+
+  for (const zone of cleanZones) {
+    if (linkedCount >= maxLinks) break;
+    // ดักเฉพาะคำที่ยังไม่ได้ถูกครอบด้วยแท็ก <a>
+    const regex = new RegExp(`(?<!<[^>]*)${zone}(?![^<]*<\/a>)`, "g");
+    if (regex.test(result)) {
+      result = result.replace(regex, `<a href="${targetUrl}" class="kw-zone">${zone}</a>`);
+      linkedCount++;
+    }
+  }
+
+  return result;
 }
 
 function getDynamicReviews(provinceName) {

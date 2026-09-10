@@ -413,7 +413,6 @@ export default async (req, context) => {
       ]
     };
 
-    // 🟢 8. HTML Template ฉบับสมบูรณ์ (พร้อม Zero-CLS, Accessibility AAA และ High-CTR Structure)
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
 <head>
@@ -421,27 +420,65 @@ export default async (req, context) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#F6F3FA">
     <meta name="color-scheme" content="light">
+
+    <!-- 🟢 1. Page Title & Meta Description (ความยาวและคีย์เวิร์ดมาตรฐาน) -->
     <title>${escapeHTML(pageTitle)} | ${CONFIG.BRAND_NAME}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
+
+    <!-- 🟢 2. Robots & Indexing (เปิดให้รูปขนาดใหญ่ขึ้น Google Discover) -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+    <!-- 🟢 3. Canonical Link & Hreflang (ป้องกัน Duplicate Content) -->
     <link rel="canonical" href="${canonicalUrl}">
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    
-   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-<link rel="dns-prefetch" href="https://res.cloudinary.com">
-...
-<link rel="stylesheet" href="/styles.css">
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</noscript>
-    
-    <!-- 🟢 Schema.org Structured Data -->
+
+    <!-- 📱 4. Open Graph (แชร์ลง LINE, Facebook, Telegram สวยงาม 100%) -->
+    <meta property="og:locale" content="th_TH">
+    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="${escapeHTML(pageTitle)}">
+    <meta property="og:description" content="${escapeHTML(metaDescription)}">
+    <meta property="og:url" content="${canonicalUrl}">
+    <meta property="og:image" content="${heroImageLarge}">
+    <meta property="og:image:secure_url" content="${heroImageLarge}">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="800">
+    <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
+
+    <!-- 🐦 5. Twitter (X) Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
+    <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
+    <meta name="twitter:image" content="${heroImageLarge}">
+    <meta name="twitter:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
+
+    <!-- 🌟 6. Favicon & Icons (ช่วยให้โลโก้แสดงในหน้าผลการค้นหา Google SERP) -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+
+    <!-- ⚡ 7. Speed & Preconnect CDNs -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+
+    <!-- 🟢 8. Preload Fonts (ป้องกันตัวหนังสือกระตุก CLS 0.00) -->
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
+
+    <!-- 🎨 9. Stylesheets & Non-blocking FontAwesome (แก้แท็กหลุดสมบูรณ์) -->
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </noscript>
+
+    <!-- 🟢 10. Schema.org Structured Data (JSON-LD) -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 </head>
+
 <body style="background-color: #F8F6FC; color: #140F22; font-family: 'Prompt', sans-serif;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); backdrop-filter: blur(10px);">
