@@ -992,7 +992,7 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   ✨ 8. FILTER PILLS & PROVINCE RIBBON
+   ✨ 8. FILTER PILLS & PROVINCE RIBBON (คลีนสมบูรณ์ 100%)
    ============================================================================== */
 .filter-pills-scroll-row {
   display: flex !important;
@@ -1044,7 +1044,7 @@ footer.fmh-footer .brand-logo-text *,
   width: 100% !important;
 }
 
-/* 🟢 แถบหัวข้อจังหวัด Glass Ribbon: ป้องกันตัวหนังสือชนหรือทับกัน 100% */
+/* แถบหัวข้อจังหวัด Glass Ribbon */
 .province-header-row {
   display: flex !important;
   align-items: center !important;
@@ -1108,7 +1108,6 @@ footer.fmh-footer .brand-logo-text *,
   white-space: nowrap !important;
 }
 
-/* 🟢 ป้ายจำนวนโปรไฟล์: กระชับ เรียบหรู ไม่เบียดตัวหนังสือฝั่งซ้าย */
 .province-count-pill {
   background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(236, 253, 245, 0.95) 100%) !important;
   border: 1px solid rgba(16, 185, 129, 0.35) !important;
@@ -1124,7 +1123,10 @@ footer.fmh-footer .brand-logo-text *,
   flex-shrink: 0 !important;
   box-shadow: 0 2px 6px rgba(5, 150, 105, 0.1), inset 0 1px 1px #FFFFFF !important;
   text-decoration: none !important;
+  transition: transform 0.2s ease !important;
 }
+
+.province-count-pill:active { transform: scale(0.96) !important; }
 
 .province-count-pill .pulse-dot-el {
   width: 5px !important;
@@ -1140,63 +1142,6 @@ footer.fmh-footer .brand-logo-text *,
   font-size: 8px !important;
   color: #059669 !important;
   flex-shrink: 0 !important;
-}
-.province-pin-icon {
-  color: #E11D48 !important;
-  font-size: 14px !important;
-  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.35)) !important;
-  flex-shrink: 0 !important;
-}
-
-.province-prefix {
-  color: #1E293B !important;
-  font-weight: 800 !important;
-  white-space: nowrap !important;
-}
-
-.province-name-highlight {
-  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  font-weight: 900 !important;
-  white-space: nowrap !important;
-}
-
-.province-count-pill {
-  background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(236, 253, 245, 0.95) 100%) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
-  border-radius: 100px !important;
-  padding: 4px 9px !important;
-  font-size: clamp(9.5px, 2.6vw, 11px) !important;
-  font-weight: 800 !important;
-  color: #065F46 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12), inset 0 1px 1px #FFFFFF !important;
-  text-decoration: none !important;
-  transition: transform 0.2s ease !important;
-}
-
-.province-count-pill:active { transform: scale(0.96) !important; }
-
-.province-count-pill .pulse-dot-el {
-  width: 6px !important;
-  height: 6px !important;
-  border-radius: 50% !important;
-  background-color: #00E676 !important;
-  box-shadow: 0 0 8px #00E676 !important;
-  animation: pulseGreen 1.8s infinite ease-in-out !important;
-  flex-shrink: 0 !important;
-}
-
-.province-count-pill .arrow-mini {
-  font-size: 8.5px !important;
-  color: #059669 !important;
-  flex-shrink: 0 !important;
-  margin-left: 1px !important;
 }
 
 .featured-header-clean-row {
@@ -1242,9 +1187,8 @@ footer.fmh-footer .brand-logo-text *,
   gap: 3px !important;
   white-space: nowrap !important;
 }
-
 /* ==============================================================================
-   💎 9. MASTER PROFILE GRID & CONTRAST-PROOF BADGES
+   💎 9. MASTER PROFILE GRID & CONTRAST-PROOF BADGES (ฉบับสมบูรณ์ 100%)
    ============================================================================== */
 #featured-profiles { 
   margin-top: 32px !important;
@@ -1328,6 +1272,7 @@ footer.fmh-footer .brand-logo-text *,
   transform: scale(0.97) translateZ(0) !important; 
 }
 
+/* แสงวิบวับพาดผ่านการ์ดเมื่อ Hover */
 .profile-card-new::before,
 .vip-card-item::before {
   content: "" !important;
@@ -1352,6 +1297,8 @@ footer.fmh-footer .brand-logo-text *,
 .vip-card-item:hover::before {
   left: 150% !important;
 }
+
+/* 🟢 รูปการ์ด: คมชัดระดับ Retina + ซ่อน Alt Text สีดำไม่ให้หลุดมาทับรูปตอนเน็ตช้า */
 .profile-card-img { 
   position: absolute !important; 
   inset: 0 !important; 
@@ -1359,28 +1306,13 @@ footer.fmh-footer .brand-logo-text *,
   height: 100% !important; 
   object-fit: cover !important; 
   object-position: top center !important; 
-  color: transparent !important; /* 🟢 ซ่อนตัวหนังสือ Alt Text ไม่ให้หลุดออกมาประจานหน้าเว็บ */
-  font-size: 0 !important;       /* 🟢 ตัดขนาดตัวหนังสือทิ้ง 100% */
+  color: transparent !important;
+  font-size: 0 !important;
   image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
   filter: brightness(1.03) contrast(1.04) saturate(1.06) !important;
   transform: translateZ(0) !important;
   will-change: transform !important;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.profile-card-img { 
-  position: absolute !important; 
-  inset: 0 !important; 
-  width: 100% !important; 
-  height: 100% !important; 
-  object-fit: cover !important; 
-  object-position: top center !important; 
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  filter: brightness(1.03) contrast(1.04) saturate(1.06) !important;
-  transform: translateZ(0) !important;
-  will-change: transform !important;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .profile-card-new:hover .profile-card-img {
@@ -1426,6 +1358,7 @@ footer.fmh-footer .brand-logo-text *,
   gap: 4px !important; 
 }
 
+/* ป้ายสถานะรับงาน */
 .badge-status { 
   display: inline-flex !important; 
   align-items: center !important; 
@@ -1473,6 +1406,7 @@ footer.fmh-footer .brand-logo-text *,
   50% { transform: scale(1.4); box-shadow: 0 0 10px #00E676; }
 }
 
+/* ป้ายการันตีตรงปก */
 .badge-verified-top {
   display: inline-flex !important;
   align-items: center !important;
@@ -1490,6 +1424,7 @@ footer.fmh-footer .brand-logo-text *,
   letter-spacing: 0.2px !important;
 }
 
+/* ป้ายยอดนิยม HOT */
 .badge-hot-tag {
   display: inline-flex !important;
   background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important;
@@ -1621,7 +1556,7 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   🌟 10. BENTO CONCIERGE: กระจกฝ้าสีทองใสไล่เฉดแชมเปญ (CHAMPAGNE GOLD BENTO)
+   🌟 10. BENTO CONCIERGE: CHAMPAGNE GOLD BENTO (ปรับสี Contrast ผ่าน WCAG AAA)
    ============================================================================== */
 .concierge-luxury-section {
   width: 100% !important;
@@ -1631,11 +1566,10 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 .luxury-bento-wrapper {
-  /* 🟢 กระจกฝ้าสีทองใสไล่เฉดแชมเปญพรีเมียม */
   background: linear-gradient(155deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 251, 240, 0.90) 45%, rgba(248, 245, 255, 0.95) 100%) !important;
   backdrop-filter: blur(25px) !important;
   -webkit-backdrop-filter: blur(25px) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.28) !important; /* ขอบทองแชมเปญ */
+  border: 1.5px solid rgba(245, 158, 11, 0.28) !important;
   border-radius: 28px !important;
   padding: 28px 18px !important;
   box-shadow: 
@@ -1658,15 +1592,15 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 .bento-tag-pill {
-  background: rgba(245, 158, 11, 0.12) !important;
-  color: #78350F !important; /* 🟢 เปลี่ยนจุดนี้เป็นสีเข้ม (ผ่านเกณฑ์ Contrast ทันที) */
-  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #78350F !important; /* 🟢 สีเข้ม Contrast 7.5:1+ อ่านชัดเจนบนพื้นสว่าง */
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
   font-size: 10px !important;
   font-weight: 800 !important;
   letter-spacing: 0.5px !important;
   padding: 3px 12px !important;
   border-radius: 100px !important;
-  display: inline-flex !important; /* แนะนำใช้ inline-flex เพื่อให้ไอคอนกับตัวหนังสืออยู่กึ่งกลางสวยงาม */
+  display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
 }
@@ -1684,51 +1618,6 @@ footer.fmh-footer .brand-logo-text *,
   margin: 0 !important; 
 }
 
-/* 🟢 การ์ด 3 ขั้นตอนด้านใน: รองรับกระจกฝ้าสีทองใส */
-.steps-compact-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin-bottom: 20px !important;
-  box-sizing: border-box !important;
-}
-
-.step-compact-card {
-  background: rgba(255, 255, 255, 0.88) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(245, 158, 11, 0.18) !important;
-  border-radius: 16px !important;
-  padding: 12px 6px !important;
-  text-align: center !important;
-  min-width: 0 !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.04) !important;
-}
-
-.step-number-tag {
-  font-size: 8.5px !important;
-  font-weight: 900 !important;
-  color: var(--crimson-main) !important;
-  display: block !important;
-  margin-bottom: 2px !important;
-}
-
-.step-title { 
-  font-size: clamp(10.5px, 2.7vw, 12px) !important; 
-  font-weight: 800 !important; 
-  color: var(--text-main) !important; 
-  margin-bottom: 2px !important; 
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.step-desc { 
-  font-size: clamp(8.5px, 2.3vw, 10px) !important; 
-  color: var(--text-muted) !important; 
-  line-height: 1.35 !important; 
-  margin: 0 !important; 
-}
 
 /* ==============================================================================
    11. REVIEWS & FAQ
