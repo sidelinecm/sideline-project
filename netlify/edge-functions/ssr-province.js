@@ -1,3 +1,5 @@
+
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
@@ -178,8 +180,7 @@ function sanitizeThaiText(text) {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-   // 🟢 แก้เป็นแบบนี้ (ล็อกไม่ให้แตะต้องเลข 69 ถ้าอยู่หลังเครื่องหมาย #)
-.replace(/(?<!#[0-9a-fA-F]{0,6})\b(69|➏➒)\b|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    .replace(/(?<!#[0-9a-fA-F]{0,6})\b(69|➏➒)\b|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
@@ -210,14 +211,11 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  
-  // 🟢 ล็อกเหลือ 2 ไซส์หลัก: รูปการ์ด (400x560) และ รูปสตอรี่ (120x120)
   const isThumb = width <= 150;
   const transform = isThumb 
     ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
     : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
 
-  // รองรับ Cloudinary บัญชีใหม่ dyynjlbuj
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
@@ -263,6 +261,12 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
       <p>ให้บริการตอบโจทย์ทุกไลฟ์สไตล์ ทั้งนัดพบส่วนตัวแบบชั่วคราว (Short Time) หรือต้องการคนดูแลยาวๆ แบบค้างคืน (Long Time / Overnight) เรทราคาและสัดส่วนแสดงชัดเจนบนหน้าโปรไฟล์ ปลอดภัยนัดเจอ ชำระหน้างาน ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>
     </div>
   `;
+}
+
+// 🟢 ประกาศฟังก์ชัน smartLinkify แก้ปัญหา ReferenceError
+function smartLinkify(htmlText, _maxLinks = 0, _zones = [], _provinceSlug = "chiangmai") {
+  if (!htmlText || typeof htmlText !== "string") return "";
+  return htmlText;
 }
 
 function getDynamicReviews(provinceName) {
@@ -318,10 +322,6 @@ async function getTemplateHtml(url, context) {
   return "";
 }
 
-function generateCardSrcSet(rawImg) {
-  return "";
-}
-
 function formatLuxuryRate(rate) {
   if (!rate) return "1.5k";
   const num = parseInt(String(rate).replace(/\D/g, ""), 10);
@@ -351,7 +351,6 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
   const cardImg = optimizeImg(rawImg, 400, 560);
-  const cardSrcSet = generateCardSrcSet(rawImg);
   const luxuryPrice = formatLuxuryRate(p.rate);
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
@@ -368,14 +367,14 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
          <img src="${cardImg}" 
-     alt="น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub"
-     width="400"
-     height="560"
-     class="profile-card-img"
-     loading="${isPriorityLCP ? "eager" : "lazy"}"
-     fetchpriority="${isPriorityLCP ? "high" : "auto"}"
-     decoding="async"
-     onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
+              alt="น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub"
+              width="400"
+              height="560"
+              class="profile-card-img"
+              loading="${isPriorityLCP ? "eager" : "lazy"}"
+              fetchpriority="${isPriorityLCP ? "high" : "auto"}"
+              decoding="async"
+              onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div class="profile-card-gradient-overlay"></div>
 
@@ -417,10 +416,10 @@ const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
   return faqs.map(f => `
     <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
-        <div style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">
+        <div style="font-size: 13px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">
             Q: ${escapeHTML(sanitizeThaiText(f.q))}
         </div>
-        <div style="font-size: 12px; color: var(--text-gray); line-height: 1.5;">
+        <div style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.5;">
             ${escapeHTML(sanitizeThaiText(f.a))}
         </div>
     </div>
@@ -544,7 +543,7 @@ export default async (req, context) => {
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
     // ============================================================================
-    // 🟢 Schema.org: 100% Compliant with Google Rich Results (No Single-Item Breadcrumb)
+    // 🟢 Schema.org: 100% Compliant with Google Rich Results (Carousel & ItemList)
     // ============================================================================
     const schemaGraph = [
       {
@@ -646,10 +645,11 @@ export default async (req, context) => {
         "@id": `${canonicalUrl}#itemlist`,
         "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceNameThai}`,
         "numberOfItems": totalCount,
-        "itemListElement": profilesList.map((p, i) => ({
+        "itemListElement": profilesList.slice(0, 30).map((p, i) => ({
           "@type": "ListItem",
           "position": i + 1,
           "name": `น้อง${(p.name || "").replace(/^น้อง\s?/, "").trim()}`,
+          "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
           "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
         }))
       });
@@ -724,6 +724,9 @@ export default async (req, context) => {
 
     const exactCount = String(totalCount);
 
+    // ============================================================================
+    // 🟢 SEO Replacements & Meta Tags
+    // ============================================================================
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -742,9 +745,10 @@ export default async (req, context) => {
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
     finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
+    // ============================================================================
+    // 🟢 SSR Layout & Headings
+    // ============================================================================
     const ssrH1Html = isNational
       ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`
       : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`;
@@ -758,14 +762,47 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
 
+    // ============================================================================
+    // 🟢 Stories Bar SSR Rendering (ป้องกัน CLS และเพิ่ม SEO)
+    // ============================================================================
+   const topStoryProfiles = profilesList.slice(0, 10);
+
+// ฟังก์ชันสร้างไอเทมสตอรี่
+const renderStoryItem = (p, idx, isClone = false) => {
+  const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
+  const sSlug = encodeURIComponent(p.slug || p.id);
+  const sImg = optimizeImg(p.imagePath || p.image_url || "", 120, 120);
+  const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
+  return `
+    <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
+      <div class="story-ring-wrap">
+        <div class="story-ring-glow">
+          <img src="${sImg}" alt="${sName}" loading="${idx < 4 && !isClone ? "eager" : "lazy"}" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+        </div>
+        <span class="story-status-dot online" aria-hidden="true"></span>
+      </div>
+      <span class="story-label">${sName}</span>
+    </a>
+  `;
+};
+
+const primaryStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
+const cloneStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
+const ssrStoriesHtml = primaryStoriesHtml + cloneStoriesHtml;
+
+if (ssrStoriesHtml) {
+  finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
+}
+
+    // ============================================================================
+    // 🟢 Schema.org Injection
+    // ============================================================================
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
-    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
-    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
-    finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-
+    // ============================================================================
+    // 🟢 Content Inner & FAQ & Reviews
+    // ============================================================================
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
 
     if (faqsHtml) {
@@ -775,6 +812,9 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
+    // ============================================================================
+    // 🟢 Hot Swiper Cards
+    // ============================================================================
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -783,25 +823,25 @@ export default async (req, context) => {
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
       
       return `
-  <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
-    <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
-    <span class="hot-rank-badge">#${i + 1} HOT</span>
-    <img src="${img}" 
-         alt="น้อง${cleanName} สาวรับงาน${provinceNameThai} ย่าน${loc} ฟิวแฟน ตรงปก 100% - FirstModelHub" 
-         width="175" 
-         height="245" 
-         loading="${i === 0 ? "eager" : "lazy"}" 
-         fetchpriority="${i === 0 ? "high" : "auto"}" 
-         decoding="async"
-         onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-    <div class="vip-card-overlay"></div>
-    <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-    <div class="vip-card-info">
-      <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
-      <div class="vip-location">${loc}</div>
-    </div>
-  </div>
-`;
+        <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
+          <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
+          <span class="hot-rank-badge">#${i + 1} HOT</span>
+          <img src="${img}" 
+               alt="น้อง${cleanName} สาวรับงาน${provinceNameThai} ย่าน${loc} ฟิวแฟน ตรงปก 100% - FirstModelHub" 
+               width="175" 
+               height="245" 
+               loading="${i === 0 ? "eager" : "lazy"}" 
+               fetchpriority="${i === 0 ? "high" : "auto"}" 
+               decoding="async" 
+               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <div class="vip-card-overlay"></div>
+          <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+          <div class="vip-card-info">
+            <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
+            <div class="vip-location">${loc}</div>
+          </div>
+        </div>
+      `;
     }).join("");
 
     if (hotSwiperCardsHtml) {
@@ -814,6 +854,9 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[^>]*>/i, `<section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading" style="display: none;">`);
     }
 
+    // ============================================================================
+    // 🟢 Display Area per Province / Grouped
+    // ============================================================================
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -833,8 +876,6 @@ export default async (req, context) => {
         const pName = PROVINCE_SEO_DATA[pKey]?.name || pKey;
         const allCardsInProv = groupedByProvince[pKey];
         const pCount = allCardsInProv.length;
-        
-        // 🟢 ดึง 4 คนแรกมาเรนเดอร์ในหน้าแรก เพื่อแก้ปัญหา Googlebot Timeout
         const topCards = allCardsInProv.slice(0, 4);
         const pCards = topCards.map((p) => renderCardHtml(p, false, pName)).join("");
 
@@ -888,18 +929,22 @@ export default async (req, context) => {
       `;
     }
 
+    // แทนที่ Main Profiles Display Area
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
+    // สร้างตัวเลือก Dropdown จังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
+    // ใส่ลิงก์พื้นที่ยอดนิยมใน Footer
     if (popularLocationsFooter) { 
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
+    // แปลงข้อมูลโปรไฟล์ส่งเข้า Script Client-side (0-Query Hydration)
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -967,12 +1012,27 @@ export default async (req, context) => {
     `;
 
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
+
+    // ============================================================================
+    // 🟢 กวาดล้าง Placeholders & Cache Busting ให้เกลี้ยง 100%
+    // ============================================================================
+    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
+    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
+    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
+    finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
+    finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
+    finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
- const responseHeaders = {
+    // กวาดล้างตัวแปร {{...}} ตกค้างทั้งหมด ป้องกันหลุดสู่หน้าผลการค้นหา Google (SERP)
+    finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+
+    // บังคับเปลี่ยนเลขเวอร์ชัน JS ป้องกันเบราว์เซอร์จำแคช main.js เก่า
+    finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
+
+    const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      // 🟢 s-maxage=60 คือ ให้จำไว้ 1 นาที หลังจากนั้นถ้ามีคนเข้าเว็บ ให้แอบดึงรูปใหม่จาก Supabase มาอัปเดตทันที
       "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
       "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
       "ETag": `"${GLOBAL_VERSION}"`,

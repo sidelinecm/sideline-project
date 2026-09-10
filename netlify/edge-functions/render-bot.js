@@ -623,7 +623,7 @@ export default async (req, context) => {
       // 🟢 s-maxage=60 คือ ให้จำไว้ 1 นาที หลังจากนั้นถ้ามีคนเข้าเว็บ ให้แอบดึงรูปใหม่จาก Supabase มาอัปเดตทันที
       "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
       "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
-      "ETag": `"${GLOBAL_VERSION}"`,
+      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
