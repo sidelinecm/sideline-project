@@ -1942,33 +1942,33 @@ async function getSupabaseClient() {
       }, { passive: true });
     })();
 
-    // ==========================================================================
-    // 🟢 ระบบดึงข้อมูล: ดึงจาก SSR ทันที (0-Query) ไม่ยิง Database ซ้ำซ้อน
+   // ==========================================================================
+    // 🟢 ระบบดึงข้อมูล: ดึงจาก SSR ทันที (0-Query) ประหยัดโควตา Supabase 100%
     // ==========================================================================
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
 
       try {
-        // 1. ดึงรายชื่อจังหวัดจาก SSR
+        // 1. ดึงรายชื่อจังหวัดจาก SSR (ถ้ามี)
         if (window.provincesData && Array.isArray(window.provincesData)) {
           appState.provincesMap.clear();
           window.provincesData.forEach(p => {
             const nameThai = p.nameThai || p.name_thai || p.name;
-            let k = (p.key || p.slug || p.id).toString().toLowerCase();
-            if (k === "chiang_mai") k = "chiangmai";
+            let k = (p.key || p.slug || p.id || "").toString().toLowerCase();
+            if (k === "chiang_mai" || k === "chiang-mai") k = "chiangmai";
             if (k && nameThai) appState.provincesMap.set(k, nameThai);
           });
         }
 
-        // 2. ⚡ ถ้ามีข้อมูลโปรไฟล์จาก SSR แล้ว ให้นำมาใช้ทันที (ไม่ต้องยิง Supabase ซ้ำ!)
+        // 2. ⚡ ถ้ามีข้อมูลโปรไฟล์จาก SSR ให้ใช้ทันที (จบการทำงาน 0-Query ไม่ยิง Database ซ้ำ)
         if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           appState.allProfiles = window.profilesData.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
-          return true;
+          return true; // 🟢 ดึงข้อมูลเสร็จสิ้นทันที
         }
 
-        // 3. กรณีเปิดหน้าเว็บที่ไม่มี SSR (Fallback) ถึงค่อยยิงขอ Supabase
+        // 3. Fallback: กรณีเปิดหน้าเว็บที่ไม่มี SSR จริงๆ ค่อยขอข้อมูลจาก Supabase
         const client = await getSupabaseClient();
         if (!client) throw new Error("Supabase client not initialized");
 
@@ -1981,8 +1981,8 @@ async function getSupabaseClient() {
           appState.provincesMap.clear();
           provincesRes.data.forEach(p => {
             const nameThai = p.nameThai || p.name;
-            let k = (p.key || p.slug || p.id).toString().toLowerCase();
-            if (k === "chiang_mai") k = "chiangmai";
+            let k = (p.key || p.slug || p.id || "").toString().toLowerCase();
+            if (k === "chiang_mai" || k === "chiang-mai") k = "chiangmai";
             if (k && nameThai) appState.provincesMap.set(k, nameThai);
           });
         }
@@ -2003,15 +2003,17 @@ async function getSupabaseClient() {
       }
     })();
 
+    // จัดการ Routing ของ URL และซ่อนตัวโหลด
     await handleUrlRouting(true);
     hideGlobalLoader();
 
+    // ดักจับการกดย้อนกลับ/ไปข้างหน้าของเบราว์เซอร์
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
-  }
+  } // 🟢 ปิดฟังก์ชัน initApplication
 
-// ==========================================================================
+  // ==========================================================================
   // 🟢 ฟังก์ชัน Stories: ทำงานสมบูรณ์ 100% (โหลดไว 3KB, เปิด Lightbox ได้ทันที, Zero CLS)
   // ==========================================================================
   function initAgencyStories() {
@@ -2086,7 +2088,7 @@ async function getSupabaseClient() {
     trackEl.innerHTML = primaryHtml + cloneHtml;
   }
 
-  // เริ่มการทำงานของระบบ
+  // เริ่มต้นการทำงานของระบบ
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initApplication);
   } else {
