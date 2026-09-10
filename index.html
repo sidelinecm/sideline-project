@@ -50,7 +50,9 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ⚡ SPEED & CDNs -->
+  <!-- ⚡ SPEED & CDNs: เปิดท่อเชื่อมต่อ Network ล่วงหน้าให้ครบทุก CDN -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
@@ -59,11 +61,18 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-  <!-- 🎨 Stylesheets & Module Preload (มี ?v=2.0 ล้างแคช) -->
+  <!-- 🎨 Critical Stylesheet (โครงสร้างหลักหน้าเว็บ) -->
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
- <link rel="modulepreload" href="/main.js?v=9.9">
-  <!-- Schema.org Template -->
+
+  <!-- 🚀 Non-blocking FontAwesome (แก้ปัญหา Render-blocking ถาวร 100%) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
+
+  <link rel="modulepreload" href="/main.js?v=9999">
+
+  <!-- Schema.org Dynamic Template (รอ SSR เข้ามาแทนที่ตัวเต็ม) -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -662,7 +671,7 @@
 </script>
 
 <!-- บรรทัดล่างสุดใน index.html -->
-<script type="module" src="/main.js?v=9.9"></script>
+<script type="module" src="/main.js?v=9999"></script>
 <!-- PWA Service Worker (เชื่อม sw.js และรองรับ offline.html) -->
 <script>
   if ('serviceWorker' in navigator) {
