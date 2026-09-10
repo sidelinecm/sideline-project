@@ -37,7 +37,7 @@ const CONFIG = {
   },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dyynjlbuj/image/upload/",
   DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 

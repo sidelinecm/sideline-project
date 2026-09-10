@@ -29,7 +29,7 @@ const CONFIG = {
     }
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dyynjlbuj/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
@@ -235,7 +235,7 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/drffioary/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
 function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
