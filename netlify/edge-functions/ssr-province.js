@@ -644,8 +644,10 @@ export default async (req, context) => {
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceNameThai}`,
-        "numberOfItems": totalCount,
-        "itemListElement": profilesList.slice(0, 30).map((p, i) => ({
+        // 🟢 ดึงจำนวนจริงตามที่แสดงบนหน้าเว็บ (มี 53 คน ก็นับ 53, มี 102 คน ก็นับ 102)
+        "numberOfItems": profilesList.length,
+        // 🟢 เอา .slice(0, 30) ออก เพื่อให้ส่งข้อมูลน้องๆ ครบทุกคนตามจำนวนจริง
+        "itemListElement": profilesList.map((p, i) => ({
           "@type": "ListItem",
           "position": i + 1,
           "name": `น้อง${(p.name || "").replace(/^น้อง\s?/, "").trim()}`,

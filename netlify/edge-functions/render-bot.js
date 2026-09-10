@@ -428,25 +428,16 @@ export default async (req, context) => {
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="preload" as="image" href="${heroImageSmall}" ${heroSrcSet ? `imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ""} fetchpriority="high">
-    
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="${escapeHTML(pageTitle)}">
-    <meta property="og:description" content="${escapeHTML(metaDescription)}">
-    <meta property="og:image" content="${heroImageLarge}">
-    <meta property="og:url" content="${canonicalUrl}">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
-    <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
-    <meta name="twitter:image" content="${heroImageLarge}">
-
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="dns-prefetch" href="https://res.cloudinary.com">
+...
+<link rel="stylesheet" href="/styles.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</noscript>
     
     <!-- 🟢 Schema.org Structured Data -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
