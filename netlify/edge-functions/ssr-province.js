@@ -207,18 +207,17 @@ const replaceGlobal = (str, target, replacement) => str.split(target).join(repla
 
 function optimizeImg(imagePath, width = 400, height = 560) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath) return DEFAULT_FALLBACK_IMG;
-  if (Array.isArray(imagePath)) imagePath = imagePath[0];
-  if (typeof imagePath === "object" && imagePath !== null) {
-    imagePath = imagePath.src || imagePath.url || imagePath.imagePath || imagePath.image_url || "";
-  }
-  if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const transform = height 
-    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
-    : `f_auto,q_auto:good,w_${width},c_scale`;
+  
+  // 🟢 ล็อกเหลือ 2 ไซส์หลัก: รูปการ์ด (400x560) และ รูปสตอรี่ (120x120)
+  const isThumb = width <= 150;
+  const transform = isThumb 
+    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
+    : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
 
+  // รองรับ Cloudinary บัญชีใหม่ dyynjlbuj
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
@@ -236,49 +235,6 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 
   let formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
-}
-
-function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
-  if (!text) return "";
-  let formatted = sanitizeThaiText(text);
-  const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
-
-  const replaceFirstSafe = (content, pattern, template) => {
-    const regex = new RegExp(`(${pattern})(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)`, "i");
-    return content.replace(regex, template);
-  };
-
-  if (zones && Array.isArray(zones) && zones.length > 0) {
-    zones.slice(0, 4).forEach(zone => {
-      if (!zone || zone === "ทั้งหมด") return;
-      const cleanZone = sanitizeThaiText(zone);
-      formatted = replaceFirstSafe(
-        formatted,
-        cleanZone,
-        `<a href="${locationUrl}" class="kw-zone">$1</a>`
-      );
-    });
-  }
-
-  formatted = replaceFirstSafe(
-    formatted,
-    "สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|ฟิวแฟน",
-    '<strong class="kw-purple">$1</strong>'
-  );
-
-  formatted = replaceFirstSafe(
-    formatted,
-    "ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|นัดเจอตัวจริง",
-    '<strong class="kw-green">$1</strong>'
-  );
-
-  formatted = replaceFirstSafe(
-    formatted,
-    "ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน",
-    '<strong class="kw-red">$1</strong>'
-  );
-
-  return formatted;
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
@@ -1014,9 +970,11 @@ export default async (req, context) => {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
-    const responseHeaders = {
+ const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate",
+      // 🟢 s-maxage=60 คือ ให้จำไว้ 1 นาที หลังจากนั้นถ้ามีคนเข้าเว็บ ให้แอบดึงรูปใหม่จาก Supabase มาอัปเดตทันที
+      "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
       "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",

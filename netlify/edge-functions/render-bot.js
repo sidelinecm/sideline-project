@@ -128,26 +128,36 @@ function extractCleanNumber(price) {
   return num >= 500 ? num : 1500;
 }
 
-function optimizeImg(imagePath, width = 600, height = 800) {
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
-    return CONFIG.DEFAULT_FALLBACK_IMAGE;
-  }
+function optimizeImg(imagePath, width = 400, height = 560) {
+  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+
   const cleanPath = imagePath.trim();
-  const cropParam = height 
-    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
-    : `f_auto,q_auto:good,w_${width},c_scale`;
   
+  // 🟢 ล็อกเหลือ 2 ไซส์หลัก: รูปการ์ด (400x560) และ รูปสตอรี่ (120x120)
+  const isThumb = width <= 150;
+  const transform = isThumb 
+    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
+    : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
+
+  // รองรับ Cloudinary บัญชีใหม่ dyynjlbuj
   if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIndex = cleanPath.indexOf("/upload/");
-    if (uploadIndex !== -1) {
-      const base = cleanPath.substring(0, uploadIndex + 8);
-      let rest = cleanPath.substring(uploadIndex + 8);
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const base = cleanPath.substring(0, uploadIdx + 8);
+      let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${cropParam}/${rest}`;
+      return `${base}${transform}/${rest}`;
     }
     return cleanPath;
   }
-  return cleanPath;
+
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
+  }
+
+  let formatted = cleanPath.replace(/^\/+/, "");
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
 function generateSrcSet(imagePath) {
@@ -608,10 +618,12 @@ export default async (req, context) => {
 </body>
 </html>`;
 
-    const responseHeaders = {
+ const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate",
-      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
+      // 🟢 s-maxage=60 คือ ให้จำไว้ 1 นาที หลังจากนั้นถ้ามีคนเข้าเว็บ ให้แอบดึงรูปใหม่จาก Supabase มาอัปเดตทันที
+      "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
+      "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
