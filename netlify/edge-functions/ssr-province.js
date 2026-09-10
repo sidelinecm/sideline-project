@@ -178,7 +178,8 @@ function sanitizeThaiText(text) {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
+   // 🟢 แก้เป็นแบบนี้ (ล็อกไม่ให้แตะต้องเลข 69 ถ้าอยู่หลังเครื่องหมาย #)
+.replace(/(?<!#[0-9a-fA-F]{0,6})\b(69|➏➒)\b|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
@@ -209,16 +210,15 @@ function optimizeImg(path, width = 400, height = 560) {
     return CONFIG.DEFAULT_OG_IMAGE;
   }
   const cleanPath = path.trim();
-  const cropParam = height ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_auto` : `f_auto,q_auto,w_${width},c_scale`;
   
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIndex = cleanPath.indexOf("/upload/");
     if (uploadIndex !== -1) {
       const base = cleanPath.substring(0, uploadIndex + 8);
       let rest = cleanPath.substring(uploadIndex + 8);
-      // ลบเฉพาะค่า transform เก่าออก โดยคง version และ public_id เดิมไว้ทั้งหมด
+      // ตัดคำสั่งแปลงรูป (f_auto, w_xxx, c_fill, g_auto) ออกทั้งหมด ดึงไฟล์ต้นฉบับตรงๆ
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${cropParam}/${rest}`;
+      return `${base}${rest}`;
     }
     return cleanPath;
   }
@@ -228,7 +228,7 @@ function optimizeImg(path, width = 400, height = 560) {
   }
   
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `${CONFIG.CLOUDINARY_BASE_URL}${cropParam}/${formatted}`;
+  return `${CONFIG.CLOUDINARY_BASE_URL}${formatted}`;
 }
 
 function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
@@ -356,8 +356,7 @@ async function getTemplateHtml(url, context) {
 }
 
 function generateCardSrcSet(rawImg) {
-  if (!rawImg || typeof rawImg !== "string" || !rawImg.trim()) return "";
-  return `${optimizeImg(rawImg, 320, 448)} 320w, ${optimizeImg(rawImg, 400, 560)} 400w, ${optimizeImg(rawImg, 600, 840)} 600w`;
+  return "";
 }
 
 function formatLuxuryRate(rate) {
@@ -414,7 +413,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                loading="${isPriorityLCP ? "eager" : "lazy"}"
                fetchpriority="${isPriorityLCP ? "high" : "auto"}"
                decoding="async"
-onerror="this.onerror=null; this.removeAttribute('srcset'); this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
+               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div class="profile-card-gradient-overlay"></div>
 
