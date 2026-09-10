@@ -484,42 +484,36 @@ async function getSupabaseClient() {
   }
 
   function optimizeImg(imagePath, width = 400, height = null) {
-    if (!imagePath) return DEFAULT_FALLBACK_IMG;
-    if (Array.isArray(imagePath)) imagePath = imagePath[0];
-    if (typeof imagePath === "object" && imagePath !== null) {
-      imagePath = imagePath.src || imagePath.url || imagePath.imagePath || imagePath.image_url || "";
-    }
-    if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
-
-    const cleanPath = imagePath.trim();
-    const cropParam = height
-      ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_face`
-      : `c_scale,w_${width},q_auto,f_auto`;
-
-    if (cleanPath.includes("res.cloudinary.com")) {
-      const uploadIdx = cleanPath.indexOf("/upload/");
-      if (uploadIdx !== -1) {
-        const base = cleanPath.substring(0, uploadIdx + 8);
-        let rest = cleanPath.substring(uploadIdx + 8);
-        rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-        if (!rest.includes("images/") && !rest.startsWith("images/")) {
-          rest = `images/${rest.replace(/^v\d+\//i, "")}`;
-        }
-        return `${base}${cropParam}/${rest}`;
-      }
-      return cleanPath;
-    }
-
-    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-      return cleanPath;
-    }
-
-    let formatted = cleanPath.replace(/^\/+/, "");
-    if (!formatted.startsWith("images/")) {
-      formatted = `images/${formatted}`;
-    }
-    return `https://res.cloudinary.com/drffioary/image/upload/${cropParam}/${formatted}`;
+  if (!imagePath) return DEFAULT_FALLBACK_IMG;
+  if (Array.isArray(imagePath)) imagePath = imagePath[0];
+  if (typeof imagePath === "object" && imagePath !== null) {
+    imagePath = imagePath.src || imagePath.url || imagePath.imagePath || imagePath.image_url || "";
   }
+  if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+
+  const cleanPath = imagePath.trim();
+  const cropParam = height
+    ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_auto`
+    : `c_scale,w_${width},q_auto,f_auto`;
+
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const base = cleanPath.substring(0, uploadIdx + 8);
+      let rest = cleanPath.substring(uploadIdx + 8);
+      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      return `${base}${cropParam}/${rest}`;
+    }
+    return cleanPath;
+  }
+
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
+  }
+
+  const formatted = cleanPath.replace(/^\/+/, "");
+  return `https://res.cloudinary.com/drffioary/image/upload/${cropParam}/${formatted}`;
+}
 
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
@@ -1160,7 +1154,7 @@ async function getSupabaseClient() {
            loading="${index < 4 ? "eager" : "lazy"}"
            fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
-           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
+           onerror="this.onerror=null; this.removeAttribute('srcset'); this.src='${DEFAULT_FALLBACK_IMG}';" />
            
       <div class="profile-card-gradient-overlay"></div>
 
