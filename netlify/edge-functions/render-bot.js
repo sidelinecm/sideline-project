@@ -133,7 +133,9 @@ function optimizeImg(imagePath, width = 600, height = 800) {
     return CONFIG.DEFAULT_FALLBACK_IMAGE;
   }
   const cleanPath = imagePath.trim();
-  const cropParam = height ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` : `f_auto,q_auto:eco,w_${width},c_scale`;
+  const cropParam = height 
+    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
+    : `f_auto,q_auto:good,w_${width},c_scale`;
   
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIndex = cleanPath.indexOf("/upload/");
@@ -141,9 +143,6 @@ function optimizeImg(imagePath, width = 600, height = 800) {
       const base = cleanPath.substring(0, uploadIndex + 8);
       let rest = cleanPath.substring(uploadIndex + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      if (!rest.includes("images/") && !rest.startsWith("images/")) {
-        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
-      }
       return `${base}${cropParam}/${rest}`;
     }
     return cleanPath;

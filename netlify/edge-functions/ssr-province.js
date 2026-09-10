@@ -205,7 +205,8 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-function optimizeImg(imagePath, width = 400, height = null) {
+function optimizeImg(imagePath, width = 400, height = 560) {
+  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath) return DEFAULT_FALLBACK_IMG;
   if (Array.isArray(imagePath)) imagePath = imagePath[0];
   if (typeof imagePath === "object" && imagePath !== null) {
@@ -214,18 +215,17 @@ function optimizeImg(imagePath, width = 400, height = null) {
   if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
+  const transform = height 
+    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
+    : `f_auto,q_auto:good,w_${width},c_scale`;
+
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      
-      // 🟢 เติม images/ ให้อัตโนมัติถ้าไม่มี
-      if (!rest.includes("images/") && !rest.startsWith("images/")) {
-        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
-      }
-      return `${base}${rest}`;
+      return `${base}${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -235,10 +235,7 @@ function optimizeImg(imagePath, width = 400, height = null) {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  if (!formatted.includes("images/") && !formatted.startsWith("images/")) {
-    formatted = `images/${formatted.replace(/^v\d+\//i, "")}`;
-  }
-  return `https://res.cloudinary.com/drffioary/image/upload/${formatted}`;
+  return `https://res.cloudinary.com/drffioary/image/upload/${transform}/${formatted}`;
 }
 
 function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
