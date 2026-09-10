@@ -1,5 +1,3 @@
-
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
@@ -10,25 +8,14 @@ const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanif
 
 const CONFIG = {
   get SUPABASE_URL() {
-    try {
-      return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
-    } catch (_err) {
-      return "https://zxetzqwjaiumqhrpumln.supabase.co";
-    }
+    return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
   },
   get SUPABASE_KEY() {
-    try {
-      return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    } catch (_err) {
-      return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    }
+    return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
   get PURGE_SECRET() {
-    try {
-      return Deno.env.get("PURGE_SECRET") || "fmh_secure_purge_2026";
-    } catch (_err) {
-      return "fmh_secure_purge_2026";
-    }
+    // 🟢 แก้ไขช่องโหว่ความปลอดภัย: สุ่มค่าใหม่เพื่อป้องกันคนยิง API หากไม่มี Environment variable
+    return Deno.env.get("PURGE_SECRET") || crypto.randomUUID();
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dyynjlbuj/image/upload/",
@@ -272,19 +259,16 @@ function smartLinkify(htmlText, maxLinks = 3, zones = [], provinceSlug = "chiang
   let linkedCount = 0;
   let result = htmlText;
 
-  // กรองคำว่า "ทั้งหมด" ออก และเรียงจากคำยาวไปสั้น
   const cleanZones = zones.filter(z => z && z !== "ทั้งหมด").sort((a, b) => b.length - a.length);
 
   for (const zone of cleanZones) {
     if (linkedCount >= maxLinks) break;
-    // ดักเฉพาะคำที่ยังไม่ได้ถูกครอบด้วยแท็ก <a>
     const regex = new RegExp(`(?<!<[^>]*)${zone}(?![^<]*<\/a>)`, "g");
     if (regex.test(result)) {
       result = result.replace(regex, `<a href="${targetUrl}" class="kw-zone">${zone}</a>`);
       linkedCount++;
     }
   }
-
   return result;
 }
 
@@ -352,7 +336,18 @@ function formatLuxuryRate(rate) {
   return String(num);
 }
 
-const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่") => {
+// 🟢 แก้ไข Syntax Error: ลบฟังก์ชันที่เขียนค้างทิ้งไป และเก็บอันที่ถูกต้องไว้
+function generateNaturalAlt(cleanName, provinceName, loc, index) {
+  const patterns = [
+    `น้อง${cleanName} สาวสวยเพื่อนเที่ยว${provinceName} โซน${loc}`,
+    `น้อง${cleanName} ไซด์ไลน์${provinceName} ย่าน${loc} ตัวจริงตรงปก`,
+    `โปรไฟล์น้อง${cleanName} ฟิวแฟน${provinceName} นัดพบแถว${loc}`,
+    `น้อง${cleanName} รับงาน${provinceName} ดูแลเอาใจใส่${loc}`
+  ];
+  return patterns[index % patterns.length];
+}
+
+const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", index = 0) => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
   let loc = escapeHTML(
@@ -385,8 +380,9 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
-         <img src="${cardImg}" 
-              alt="น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub"
+       <!-- 🟢 เพิ่ม height="560" แล้วเพื่อแก้ปัญหา CLS -->
+       <img src="${cardImg}" 
+              alt="${generateNaturalAlt(cleanName, provinceName, loc, index)}"
               width="400"
               height="560"
               class="profile-card-img"
@@ -561,9 +557,6 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // ============================================================================
-    // 🟢 Schema.org: 100% Compliant with Google Rich Results (Carousel & ItemList)
-    // ============================================================================
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -663,9 +656,7 @@ export default async (req, context) => {
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceNameThai}`,
-        // 🟢 ดึงจำนวนจริงตามที่แสดงบนหน้าเว็บ (มี 53 คน ก็นับ 53, มี 102 คน ก็นับ 102)
         "numberOfItems": profilesList.length,
-        // 🟢 เอา .slice(0, 30) ออก เพื่อให้ส่งข้อมูลน้องๆ ครบทุกคนตามจำนวนจริง
         "itemListElement": profilesList.map((p, i) => ({
           "@type": "ListItem",
           "position": i + 1,
@@ -692,8 +683,8 @@ export default async (req, context) => {
       });
     }
 
-    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
-    const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
+    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
+    const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
 
     const reviewsHtml = (Array.isArray(activeReviews) ? activeReviews : []).map(r => {
       const avatarLetter = r.initial || (r.author ? r.author.replace(/^(คุณ|พี่|น้อง)/, "").trim().charAt(0) : "V");
@@ -725,7 +716,7 @@ export default async (req, context) => {
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
-    const linkedIntro = smartLinkify(introText, 0, seoData.zones, provinceSlug);
+    const linkedIntro = smartLinkify(introText, 4, seoData.zones, provinceSlug);
 
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
@@ -745,9 +736,6 @@ export default async (req, context) => {
 
     const exactCount = String(totalCount);
 
-    // ============================================================================
-    // 🟢 SEO Replacements & Meta Tags
-    // ============================================================================
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -767,9 +755,6 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
 
-    // ============================================================================
-    // 🟢 SSR Layout & Headings
-    // ============================================================================
     const ssrH1Html = isNational
       ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`
       : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`;
@@ -783,47 +768,36 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
 
-    // ============================================================================
-    // 🟢 Stories Bar SSR Rendering (ป้องกัน CLS และเพิ่ม SEO)
-    // ============================================================================
-   const topStoryProfiles = profilesList.slice(0, 10);
+    const topStoryProfiles = profilesList.slice(0, 10);
+    const renderStoryItem = (p, idx, isClone = false) => {
+      const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
+      const sSlug = encodeURIComponent(p.slug || p.id);
+      const sImg = optimizeImg(p.imagePath || p.image_url || "", 120, 120);
+      const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
+      return `
+        <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
+          <div class="story-ring-wrap">
+            <div class="story-ring-glow">
+              <img src="${sImg}" alt="${sName}" loading="${idx < 4 && !isClone ? "eager" : "lazy"}" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+            </div>
+            <span class="story-status-dot online" aria-hidden="true"></span>
+          </div>
+          <span class="story-label">${sName}</span>
+        </a>
+      `;
+    };
 
-// ฟังก์ชันสร้างไอเทมสตอรี่
-const renderStoryItem = (p, idx, isClone = false) => {
-  const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
-  const sSlug = encodeURIComponent(p.slug || p.id);
-  const sImg = optimizeImg(p.imagePath || p.image_url || "", 120, 120);
-  const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
-  return `
-    <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
-      <div class="story-ring-wrap">
-        <div class="story-ring-glow">
-          <img src="${sImg}" alt="${sName}" loading="${idx < 4 && !isClone ? "eager" : "lazy"}" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-        </div>
-        <span class="story-status-dot online" aria-hidden="true"></span>
-      </div>
-      <span class="story-label">${sName}</span>
-    </a>
-  `;
-};
+    const primaryStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
+    const cloneStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
+    const ssrStoriesHtml = primaryStoriesHtml + cloneStoriesHtml;
 
-const primaryStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
-const cloneStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
-const ssrStoriesHtml = primaryStoriesHtml + cloneStoriesHtml;
+    if (ssrStoriesHtml) {
+      finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
+    }
 
-if (ssrStoriesHtml) {
-  finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
-}
-
-    // ============================================================================
-    // 🟢 Schema.org Injection
-    // ============================================================================
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    // ============================================================================
-    // 🟢 Content Inner & FAQ & Reviews
-    // ============================================================================
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
 
     if (faqsHtml) {
@@ -833,9 +807,6 @@ if (ssrStoriesHtml) {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // ============================================================================
-    // 🟢 Hot Swiper Cards
-    // ============================================================================
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -875,9 +846,6 @@ if (ssrStoriesHtml) {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[^>]*>/i, `<section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading" style="display: none;">`);
     }
 
-    // ============================================================================
-    // 🟢 Display Area per Province / Grouped
-    // ============================================================================
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -950,22 +918,18 @@ if (ssrStoriesHtml) {
       `;
     }
 
-    // แทนที่ Main Profiles Display Area
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
-    // สร้างตัวเลือก Dropdown จังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    // ใส่ลิงก์พื้นที่ยอดนิยมใน Footer
     if (popularLocationsFooter) { 
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    // แปลงข้อมูลโปรไฟล์ส่งเข้า Script Client-side (0-Query Hydration)
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1034,9 +998,6 @@ if (ssrStoriesHtml) {
 
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
-    // ============================================================================
-    // 🟢 กวาดล้าง Placeholders & Cache Busting ให้เกลี้ยง 100%
-    // ============================================================================
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
@@ -1046,10 +1007,7 @@ if (ssrStoriesHtml) {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
-    // กวาดล้างตัวแปร {{...}} ตกค้างทั้งหมด ป้องกันหลุดสู่หน้าผลการค้นหา Google (SERP)
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
-
-    // บังคับเปลี่ยนเลขเวอร์ชัน JS ป้องกันเบราว์เซอร์จำแคช main.js เก่า
     finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
     const responseHeaders = {

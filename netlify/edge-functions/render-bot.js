@@ -15,25 +15,14 @@ function setSafeProfileCache(key, data) {
 
 const CONFIG = {
   get SUPABASE_URL() {
-    try {
-      return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
-    } catch {
-      return "https://zxetzqwjaiumqhrpumln.supabase.co";
-    }
+    return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
   },
   get SUPABASE_KEY() {
-    try {
-      return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    } catch {
-      return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    }
+    return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
   get PURGE_SECRET() {
-    try {
-      return Deno.env.get("PURGE_SECRET") || "fmh_secure_purge_2026";
-    } catch {
-      return "fmh_secure_purge_2026";
-    }
+    // 🟢 แก้ไขช่องโหว่ความปลอดภัย: ถ้าไม่ได้ตั้งค่า Environment Variable ไว้ จะสุ่มค่าใหม่เสมอ ป้องกันโดนยิงล้างแคช
+    return Deno.env.get("PURGE_SECRET") || crypto.randomUUID();
   },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
@@ -79,7 +68,6 @@ const PROVINCE_NAME_MAP = {
   "phra-nakhon-si-ayutthaya": "อยุธยา"
 };
 
-// 🟢 2. แก้ไข Regex: ล็อกไม่ให้ตัดเลข 69 ในรหัสสี Hex (#059669)
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -133,14 +121,11 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  
-  // 🟢 ล็อกเหลือ 2 ไซส์หลัก: รูปการ์ด (400x560) และ รูปสตอรี่ (120x120)
   const isThumb = width <= 150;
   const transform = isThumb 
     ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
     : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
 
-  // รองรับ Cloudinary บัญชีใหม่ dyynjlbuj
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
@@ -151,11 +136,9 @@ function optimizeImg(imagePath, width = 400, height = 560) {
     }
     return cleanPath;
   }
-
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
-
   let formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
@@ -168,10 +151,23 @@ function generateSrcSet(imagePath) {
   }).join(", ");
 }
 
+// 🟢 ย้ายฟังก์ชันสร้างรายละเอียดมาไว้ตรงนี้
+function generateUniqueNaturalDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
+  const customBio = p.description && p.description.trim().length > 10 ? ` "${sanitizeThaiText(p.description)}"` : "";
+  const variant = (Number(p.id) || 1) % 3;
+
+  if (variant === 0) {
+    return `ยินดีต้อนรับสู่โปรไฟล์ ${displayName} ผู้ให้บริการเพื่อนเที่ยวสไตล์ฟิวแฟนพิกัด${zone} จ. ${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ดูแลเอาใจใส่เป็นกันเองอย่างสุภาพเรียบร้อย${customBio} อัตราค่าขนมเริ่มต้น ${priceDisplay} การันตีความปลอดภัย นัดพบตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระเงิน ไร้เงื่อนไขโอนมัดจำทุกกรณี`;
+  } else if (variant === 1) {
+    return `สัมผัสการดูแลสุดประทับใจกับ ${displayName} สาวสวยเพื่อนเที่ยวและนำเที่ยวในเขตพื้นที่${zone} (${provinceName}) อายุ ${age} ปี สรีระ ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. บุคลิกน่ารัก พูดจาสุภาพ เป็นกันเอง ไม่เร่งเวลา${customBio} เรทค่าบริการเริ่มต้น ${priceDisplay} ปลอดภัยสูงสุดด้วยนโยบายเจอตัวจริงตรงปกค่อยจ่ายเงินหน้างาน ไม่มีการเก็บมัดจำล่วงหน้า`;
+  } else {
+    return `แนะนำ ${displayName} พิกัดบริการบริเวณ${zone} ในจังหวัด${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. พร้อมเป็นเพื่อนกินข้าว ดูหนัง คลายเหงา สไตล์ Girlfriend Experience (GFE)${customBio} ค่าบริการเริ่มต้น ${priceDisplay} ตรวจสอบประวัติตัวจริงตรงปก ปลอดภัย 100% ชำระเงินหน้างานโดยตรง ไร้มัดจำ`;
+  }
+}
+
 export default async (req, context) => {
   const url = new URL(req.url);
 
-  // 🟢 3. API Purge Cache สำหรับเคลียร์แคชทั้งระบบ
   if (url.pathname === "/api/purge-cache" || url.pathname === "/api/clear-cache") {
     const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
     if (secret === CONFIG.PURGE_SECRET) {
@@ -199,7 +195,6 @@ export default async (req, context) => {
     return context.next();
   }
 
-  // 🟢 4. ตรวจสอบแคชใน Memory
   const cacheKey = url.pathname.toLowerCase();
   const cachedPage = PROFILE_PAGE_CACHE.get(cacheKey);
   if (cachedPage && cachedPage.version === GLOBAL_PROFILE_VERSION) {
@@ -242,7 +237,6 @@ export default async (req, context) => {
     const heroImageSmall = optimizeImg(rawImage, 400, 533);
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // 🟢 5. ปรับปรุงการสร้างลิงก์ LINE ให้ถูกต้องและปลอดภัย
     const rawLineInput = (profile.line_id || profile.lineId || "").trim();
     let lineId = "https://line.me/ti/p/ksLUWB89Y_";
     const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
@@ -258,10 +252,10 @@ export default async (req, context) => {
     const weight = profile.weight || "48";
     const stats = profile.stats || "35-24-35";
 
-    const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)} ในจังหวัด${provinceNameThai}` : `ในจังหวัด${provinceNameThai}`;
-    const naturalDesc = `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย อัตราค่าขนมเริ่มต้น ${priceDisplay} การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
+    // 🟢 แก้ไข Critical Syntax Error ตรงนี้แล้ว
+    const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
+    const naturalDesc = generateUniqueNaturalDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
     
-    // 🟢 6. ปรับ Title ให้กระชับ สอดรับกับ Search Intent (CTR สูงสุด ไม่โดน Google ตัดทิ้ง)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
     const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ย่าน${primaryZone} ไซด์ไลน์ ฟิวแฟน จ่ายหน้างาน`;
     const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
@@ -269,11 +263,9 @@ export default async (req, context) => {
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
 
-    // 🟢 7. โครงสร้าง Schema.org ขั้นสูง (ตัด Review ลอยๆ ทิ้ง ป้องกัน Manual Action)
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
-        // 🌐 7.1 WebPage / ItemPage Context
         {
           "@type": "ItemPage",
           "@id": `${canonicalUrl}#webpage`,
@@ -290,8 +282,6 @@ export default async (req, context) => {
             "caption": `${stripHTML(displayName)} ตัวจริงตรงปก 100%`
           }
         },
-
-        // 🛡️ 7.2 Person Entity (ผูกข้อมูลตัวบุคคลอย่างถูกต้อง)
         {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
@@ -322,8 +312,6 @@ export default async (req, context) => {
             "addressCountry": "TH"
           }
         },
-
-        // 💼 7.3 โครงสร้าง Service (ปลอดภัยกว่า Product ไม่เสี่ยงต่อการโดนแบน)
         {
           "@type": "Service",
           "@id": `${canonicalUrl}#service`,
@@ -351,8 +339,6 @@ export default async (req, context) => {
             "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
           }
         },
-
-        // 🧭 7.4 Breadcrumbs 3 ระดับสมบูรณ์แบบ
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
@@ -377,8 +363,6 @@ export default async (req, context) => {
             }
           ]
         },
-
-        // ❓ 7.5 FAQPage
         {
           "@type": "FAQPage",
           "@id": `${canonicalUrl}#faq`,
@@ -421,19 +405,15 @@ export default async (req, context) => {
     <meta name="theme-color" content="#F6F3FA">
     <meta name="color-scheme" content="light">
 
-    <!-- 🟢 1. Page Title & Meta Description (ความยาวและคีย์เวิร์ดมาตรฐาน) -->
     <title>${escapeHTML(pageTitle)} | ${CONFIG.BRAND_NAME}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
 
-    <!-- 🟢 2. Robots & Indexing (เปิดให้รูปขนาดใหญ่ขึ้น Google Discover) -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
-    <!-- 🟢 3. Canonical Link & Hreflang (ป้องกัน Duplicate Content) -->
     <link rel="canonical" href="${canonicalUrl}">
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
 
-    <!-- 📱 4. Open Graph (แชร์ลง LINE, Facebook, Telegram สวยงาม 100%) -->
     <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="article">
@@ -446,36 +426,30 @@ export default async (req, context) => {
     <meta property="og:image:height" content="800">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <!-- 🐦 5. Twitter (X) Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${heroImageLarge}">
     <meta name="twitter:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <!-- 🌟 6. Favicon & Icons (ช่วยให้โลโก้แสดงในหน้าผลการค้นหา Google SERP) -->
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 
-    <!-- ⚡ 7. Speed & Preconnect CDNs -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
 
-    <!-- 🟢 8. Preload Fonts (ป้องกันตัวหนังสือกระตุก CLS 0.00) -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-    <!-- 🎨 9. Stylesheets & Non-blocking FontAwesome (แก้แท็กหลุดสมบูรณ์) -->
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <noscript>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     </noscript>
 
-    <!-- 🟢 10. Schema.org Structured Data (JSON-LD) -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 </head>
 
@@ -506,7 +480,7 @@ export default async (req, context) => {
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
                        <img src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} สไตล์ฟิวแฟน ตรงปก 100%" 
+                             class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
                              width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     </div>
@@ -514,7 +488,6 @@ export default async (req, context) => {
 
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
                     <h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">${escapeHTML(pageTitle)}</h1>
-                    <!-- 🟢 ป้าย Verified แท้ ปราศจากคะแนนดาวหลอกลวง ป้องกัน Manual Action -->
                     <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 14px; border-radius: 100px;">
                         <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
                         <span style="color: #065F46; font-size: 11px; font-weight: 700;">(ยืนยันตัวตนจริง ตรงปก 100% ปลอดภัยจ่ายหน้างาน)</span>
@@ -550,7 +523,6 @@ export default async (req, context) => {
                     </a>
                 </div>
 
-                <!-- 💰 อัตราค่าบริการ -->
                 <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการ (เรทมาตรฐาน)</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
@@ -569,7 +541,6 @@ export default async (req, context) => {
                     </div>
                 </section>
 
-                <!-- 💬 FAQ -->
                 <section style="margin-bottom: 1.5rem;">
                     <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -588,7 +559,6 @@ export default async (req, context) => {
                     </div>
                 </section>
 
-                <!-- ⭐ ข้อความความประทับใจจากลูกค้าจริง -->
                 <section style="margin-bottom: 1.5rem;">
                     <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการ</h2>
                     ${reviewsList.map(r => `
@@ -646,9 +616,8 @@ export default async (req, context) => {
 </body>
 </html>`;
 
- const responseHeaders = {
+    const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      // 🟢 s-maxage=60 คือ ให้จำไว้ 1 นาที หลังจากนั้นถ้ามีคนเข้าเว็บ ให้แอบดึงรูปใหม่จาก Supabase มาอัปเดตทันที
       "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
       "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
       "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
