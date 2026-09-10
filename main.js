@@ -492,17 +492,13 @@ async function getSupabaseClient() {
   if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const cropParam = height
-    ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_auto`
-    : `c_scale,w_${width},q_auto,f_auto`;
-
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${cropParam}/${rest}`;
+      return `${base}${rest}`;
     }
     return cleanPath;
   }
@@ -512,7 +508,7 @@ async function getSupabaseClient() {
   }
 
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/drffioary/image/upload/${cropParam}/${formatted}`;
+  return `https://res.cloudinary.com/drffioary/image/upload/${formatted}`;
 }
 
   function normalizeProfile(raw) {
@@ -1085,7 +1081,7 @@ async function getSupabaseClient() {
 
     const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
     const imgSrc = optimizeImg(rawImg, 400, 560);
-    const cardSrcSet = `${optimizeImg(rawImg, 320, 448)} 320w, ${optimizeImg(rawImg, 400, 560)} 400w, ${optimizeImg(rawImg, 600, 840)} 600w`;
+    const cardSrcSet = "";
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
