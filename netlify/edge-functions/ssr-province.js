@@ -205,30 +205,40 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-function optimizeImg(path, width = 400, height = 560) {
-  if (!path || typeof path !== "string" || !path.trim()) {
-    return CONFIG.DEFAULT_OG_IMAGE;
+function optimizeImg(imagePath, width = 400, height = null) {
+  if (!imagePath) return DEFAULT_FALLBACK_IMG;
+  if (Array.isArray(imagePath)) imagePath = imagePath[0];
+  if (typeof imagePath === "object" && imagePath !== null) {
+    imagePath = imagePath.src || imagePath.url || imagePath.imagePath || imagePath.image_url || "";
   }
-  const cleanPath = path.trim();
-  
+  if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+
+  const cleanPath = imagePath.trim();
   if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIndex = cleanPath.indexOf("/upload/");
-    if (uploadIndex !== -1) {
-      const base = cleanPath.substring(0, uploadIndex + 8);
-      let rest = cleanPath.substring(uploadIndex + 8);
-      // ตัดคำสั่งแปลงรูป (f_auto, w_xxx, c_fill, g_auto) ออกทั้งหมด ดึงไฟล์ต้นฉบับตรงๆ
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const base = cleanPath.substring(0, uploadIdx + 8);
+      let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      
+      // 🟢 เติม images/ ให้อัตโนมัติถ้าไม่มี
+      if (!rest.includes("images/") && !rest.startsWith("images/")) {
+        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
+      }
       return `${base}${rest}`;
     }
     return cleanPath;
   }
-  
+
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
-  
-  const formatted = cleanPath.replace(/^\/+/, "");
-  return `${CONFIG.CLOUDINARY_BASE_URL}${formatted}`;
+
+  let formatted = cleanPath.replace(/^\/+/, "");
+  if (!formatted.includes("images/") && !formatted.startsWith("images/")) {
+    formatted = `images/${formatted.replace(/^v\d+\//i, "")}`;
+  }
+  return `https://res.cloudinary.com/drffioary/image/upload/${formatted}`;
 }
 
 function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
@@ -404,16 +414,15 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
-          <img src="${cardImg}" 
-               ${cardSrcSet ? `srcset="${cardSrcSet}" sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"` : ""}
-               alt="น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub"
-               width="400"
-               height="560"
-               class="profile-card-img"
-               loading="${isPriorityLCP ? "eager" : "lazy"}"
-               fetchpriority="${isPriorityLCP ? "high" : "auto"}"
-               decoding="async"
-               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
+         <img src="${cardImg}" 
+     alt="น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub"
+     width="400"
+     height="560"
+     class="profile-card-img"
+     loading="${isPriorityLCP ? "eager" : "lazy"}"
+     fetchpriority="${isPriorityLCP ? "high" : "auto"}"
+     decoding="async"
+     onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div class="profile-card-gradient-overlay"></div>
 
