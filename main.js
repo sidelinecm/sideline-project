@@ -498,6 +498,11 @@ async function getSupabaseClient() {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      
+      // 🟢 เติม images/ ให้อัตโนมัติถ้าไม่มี
+      if (!rest.includes("images/") && !rest.startsWith("images/")) {
+        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
+      }
       return `${base}${rest}`;
     }
     return cleanPath;
@@ -507,7 +512,10 @@ async function getSupabaseClient() {
     return cleanPath;
   }
 
-  const formatted = cleanPath.replace(/^\/+/, "");
+  let formatted = cleanPath.replace(/^\/+/, "");
+  if (!formatted.includes("images/") && !formatted.startsWith("images/")) {
+    formatted = `images/${formatted.replace(/^v\d+\//i, "")}`;
+  }
   return `https://res.cloudinary.com/drffioary/image/upload/${formatted}`;
 }
 
@@ -667,14 +675,14 @@ async function getSupabaseClient() {
         <div class="vip-card-item ${idx === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${statusLabel}</span>
           <span class="hot-rank-badge">${rankBadge}</span>
-          <img src="${imgSrc}" 
-               alt="${escapeHTML(p.displayName)} สาวรับงาน${escapeHTML(p.provinceNameThai || '')} ฟิวแฟน ตรงปก 100%" 
-               width="175" 
-               height="245" 
-               loading="${idx === 0 ? "eager" : "lazy"}" 
-               fetchpriority="${idx === 0 ? "high" : "auto"}" 
-               decoding="async" 
-               onerror="this.src='${DEFAULT_FALLBACK_IMG}'">
+    <img src="${imgSrc}" 
+     alt="${escapeHTML(p.displayName)}" 
+     width="175" 
+     height="245" 
+     loading="${idx === 0 ? "eager" : "lazy"}" 
+     fetchpriority="${idx === 0 ? "high" : "auto"}" 
+     decoding="async" 
+     onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์ ${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
@@ -1070,7 +1078,7 @@ async function getSupabaseClient() {
     popover.style.display = "block";
   }
 
-  function createProfileCardDOM(p, index = 20) {
+ function createProfileCardDOM(p, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
 
@@ -1081,7 +1089,6 @@ async function getSupabaseClient() {
 
     const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
     const imgSrc = optimizeImg(rawImg, 400, 560);
-    const cardSrcSet = "";
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1137,12 +1144,12 @@ async function getSupabaseClient() {
       : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
+    
+    // 🟢 ประกาศตัวแปร richAltText ให้ถูกต้องตรงนี้ (แก้ ReferenceError 100%)
     const richAltText = `${modelName} สาวรับงาน${p.provinceNameThai || ''} ย่าน${locName} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub`;
 
     article.innerHTML = `
       <img src="${imgSrc}" 
-           srcset="${cardSrcSet}"
-           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
            alt="${escapeHTML(richAltText)}"
            width="400"
            height="560"
@@ -1150,7 +1157,7 @@ async function getSupabaseClient() {
            loading="${index < 4 ? "eager" : "lazy"}"
            fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
-           onerror="this.onerror=null; this.removeAttribute('srcset'); this.src='${DEFAULT_FALLBACK_IMG}';" />
+           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
       <div class="profile-card-gradient-overlay"></div>
 

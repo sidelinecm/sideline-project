@@ -1352,7 +1352,22 @@ footer.fmh-footer .brand-logo-text *,
 .vip-card-item:hover::before {
   left: 150% !important;
 }
-
+.profile-card-img { 
+  position: absolute !important; 
+  inset: 0 !important; 
+  width: 100% !important; 
+  height: 100% !important; 
+  object-fit: cover !important; 
+  object-position: top center !important; 
+  color: transparent !important; /* 🟢 ซ่อนตัวหนังสือ Alt Text ไม่ให้หลุดออกมาประจานหน้าเว็บ */
+  font-size: 0 !important;       /* 🟢 ตัดขนาดตัวหนังสือทิ้ง 100% */
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  filter: brightness(1.03) contrast(1.04) saturate(1.06) !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
 .profile-card-img { 
   position: absolute !important; 
   inset: 0 !important; 
