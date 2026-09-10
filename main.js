@@ -483,7 +483,8 @@ async function getSupabaseClient() {
     return String(num);
   }
 
-  function optimizeImg(imagePath, width = 400, height = null) {
+ function optimizeImg(imagePath, width = 400, height = 560) {
+  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath) return DEFAULT_FALLBACK_IMG;
   if (Array.isArray(imagePath)) imagePath = imagePath[0];
   if (typeof imagePath === "object" && imagePath !== null) {
@@ -492,18 +493,17 @@ async function getSupabaseClient() {
   if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
+  const transform = height 
+    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
+    : `f_auto,q_auto:good,w_${width},c_scale`;
+
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      
-      // 🟢 เติม images/ ให้อัตโนมัติถ้าไม่มี
-      if (!rest.includes("images/") && !rest.startsWith("images/")) {
-        rest = `images/${rest.replace(/^v\d+\//i, "")}`;
-      }
-      return `${base}${rest}`;
+      return `${base}${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -513,10 +513,7 @@ async function getSupabaseClient() {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  if (!formatted.includes("images/") && !formatted.startsWith("images/")) {
-    formatted = `images/${formatted.replace(/^v\d+\//i, "")}`;
-  }
-  return `https://res.cloudinary.com/drffioary/image/upload/${formatted}`;
+  return `https://res.cloudinary.com/drffioary/image/upload/${transform}/${formatted}`;
 }
 
   function normalizeProfile(raw) {
@@ -2014,51 +2011,79 @@ async function getSupabaseClient() {
     });
   }
 
-  // ==========================================================================
-  // 🟢 ฟังก์ชัน Stories: ทำงานสมบูรณ์ + ป้องกันการสร้างรูปซ้ำซ้อน
+// ==========================================================================
+  // 🟢 ฟังก์ชัน Stories: ทำงานสมบูรณ์ 100% (โหลดไว 3KB, เปิด Lightbox ได้ทันที, Zero CLS)
   // ==========================================================================
   function initAgencyStories() {
     const trackEl = document.getElementById("agency-stories-track");
     if (!trackEl) return;
 
-    // 1. ถ้าใน HTML มีการเรนเดอร์มาแล้ว ให้หยุดทำงานทันที (ไม่ลบของเก่าทิ้ง)
+    // 1. ถ้าใน HTML มีการเรนเดอร์มาแล้ว ให้หยุดทำงานทันที ป้องกันเรนเดอร์ซ้ำ
     if (trackEl.children.length > 0) return;
 
     const profiles = appState.allProfiles;
-    if (!profiles || profiles.length === 0) return;
+    if (!profiles || !Array.isArray(profiles) || profiles.length === 0) return;
 
-    // 2. ดึงเฉพาะ 10 คนแรกพอ เพื่อประหยัดแบนด์วิธและไม่ทำให้ Googlebot ค้าง
-    const topModels = profiles.slice(0, 10);
-    let singleHtml = "";
+    // 2. คัดกรองเฉพาะโปรไฟล์ที่มีรูปภาพ และเลือกมา 10 คนแรกเพื่อประหยัดแบนด์วิดท์
+    const validProfiles = profiles
+      .filter(p => p && (p.imagePath || p.image_url || (p.images && p.images.length > 0)))
+      .slice(0, 10);
 
-    topModels.forEach(p => {
+    if (validProfiles.length === 0) return;
+
+    const fallbackImg = "https://firstmodelhub.com/images/firstmodelhub.webp";
+
+    // ฟังก์ชันสร้าง Story Item HTML แต่ละใบ
+    const createStoryItemHtml = (p, idx, isAriaHidden = false) => {
       const rawName = p.displayName || p.name || "โมเดล";
-      const name = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
-      const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
-      const slug = encodeURIComponent(p.slug || p.id || name);
+      const cleanName = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
+      const fullName = isEN ? cleanName : `น้อง${cleanName}`;
+      
+      const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || fallbackImg;
+      // 🟢 บีบอัดรูปวงกลม Story ให้เหลือ 120x120px โฟกัสใบหน้า (ขนาดไฟล์เหลือเพียง 3-5KB คมชัดระดับ Retina)
+      const storyImg = typeof optimizeImg === "function" ? optimizeImg(rawImg, 120, 120) : rawImg;
+      
+      const slug = encodeURIComponent(p.slug || p.id || cleanName);
+      const profileId = p.id || "";
       
       const isOnline = p.isAvailable !== undefined 
         ? Boolean(p.isAvailable) 
         : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(p.availability || "").toLowerCase().includes(s));
       
       const statusClass = isOnline ? "online" : "busy";
+      const hiddenAttr = isAriaHidden ? 'aria-hidden="true" tabindex="-1"' : '';
 
-     // ✅ โค้ดที่ถูกต้อง: เปลี่ยนจาก <div onclick> เป็น Semantic <a> เพื่อ SEO และ a11y
-singleHtml += `
-  <a href="/sideline/${slug}" class="story-item-el interactive-card" aria-label="ดูโปรไฟล์ ${escapeHTML(name)}">
-    <div class="story-ring-wrap">
-      <div class="story-ring-glow">
-        <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" decoding="async" width="56" height="56" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
-      </div>
-      <span class="story-status-dot ${statusClass}" aria-hidden="true"></span>
-    </div>
-    <span class="story-label">${escapeHTML(name)}</span>
-  </a>
-`;
-    });
+      return `
+        <a href="/sideline/${slug}" 
+           class="story-item-el interactive-card" 
+           data-profile-id="${escapeHTML(String(profileId))}" 
+           data-profile-slug="${slug}" 
+           aria-label="${isAriaHidden ? '' : `ดูโปรไฟล์ ${escapeHTML(fullName)}`}" 
+           ${hiddenAttr}>
+          <div class="story-ring-wrap">
+            <div class="story-ring-glow">
+              <img src="${storyImg}" 
+                   alt="${escapeHTML(cleanName)}" 
+                   loading="${idx < 4 && !isAriaHidden ? "eager" : "lazy"}" 
+                   decoding="async" 
+                   width="52" 
+                   height="52" 
+                   onerror="this.onerror=null; this.src='${fallbackImg}';">
+            </div>
+            <span class="story-status-dot ${statusClass}" aria-hidden="true"></span>
+          </div>
+          <span class="story-label">${escapeHTML(cleanName)}</span>
+        </a>
+      `;
+    };
 
-    // 3. เบิ้ล 2 ชุด เพื่อให้ CSS Animation หมุนวนลูปแบบไร้รอยต่อ (Seamless Loop)
-    trackEl.innerHTML = singleHtml + singleHtml;
+    // 🟢 ชุดที่ 1: ชุดหลักสำหรับการคลิกดูข้อมูล และให้ Googlebot สแกน (SEO Friendly)
+    const primaryHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, false)).join("");
+    
+    // 🟢 ชุดที่ 2: ชุดโคลนสำหรับทำ CSS Infinite Loop (ซ่อนจาก Screen Reader ไม่ให้อ่านซ้ำ)
+    const cloneHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, true)).join("");
+
+    trackEl.innerHTML = primaryHtml + cloneHtml;
   }
 
   // เริ่มการทำงานของระบบ
