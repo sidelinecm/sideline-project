@@ -545,9 +545,11 @@ async function getSupabaseClient() {
 
     let images = [...new Set(combinedPhotos)].map(img => {
       if (typeof img === "object" && img !== null) {
+        const srcUrl = img.src || img.url || img.imagePath || img.image_url || DEFAULT_FALLBACK_IMG;
+        const fullSrcUrl = img.fullSrc || img.fullUrl || srcUrl;
         return {
-          src: img.src || img.url || DEFAULT_FALLBACK_IMG,
-          fullSrc: img.fullSrc || img.fullUrl || img.src || img.url || DEFAULT_FALLBACK_IMG
+          src: optimizeImg(srcUrl, 400, 560),
+          fullSrc: optimizeImg(fullSrcUrl, 1000, null)
         };
       }
       return {
@@ -564,9 +566,11 @@ async function getSupabaseClient() {
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
 
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
+    
+    // 🟢 แก้ไข: ใช้ parseRateToNumber ป้องกันบั๊กราคา 15.-
     const rawRate = raw.rate || raw.price || raw.fee || raw.cost || 0;
-    const numPrice = Number(String(rawRate).replace(/\D/g, "")) || 0;
-    const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : typeof rawRate === "string" && rawRate.trim() !== "" ? rawRate : (isEN ? "Inquire" : "สอบถาม");
+    const numPrice = parseRateToNumber(rawRate);
+    const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : (isEN ? "Inquire" : "สอบถาม");
 
     let statsStr = "-";
     const bust = raw.bust || raw.breast || "";
@@ -2395,80 +2399,101 @@ async function getSupabaseClient() {
     modal.style.transform = "translate(-50%, -50%) scale(1)";
   }
 
+  // ==========================================================================
+  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (ฉบับแก้ไข: ดักจับการแตะที่ดาว ไม่ให้เด้งเปลี่ยนหน้า)
+  // ==========================================================================
   function initStealthAdminPurge() {
-    const starElement = document.querySelector(".brand-logo-text .star, .brand-logo-text");
-    if (!starElement) return;
+    // ดักจับเฉพาะตัวดาว 🌟 หรือโลโก้
+    const starElements = document.querySelectorAll(".brand-logo-text .star, .dancing-neon-star, .star");
+    if (!starElements || starElements.length === 0) return;
 
     let tapCount = 0;
-    let lastTapTime = 0;
+    let resetTimer = null;
     const ADMIN_SECRET = "fmh_super_admin_2026";
     const ADMIN_PIN = "8888";
 
-    starElement.style.cursor = "pointer";
+    starElements.forEach(star => {
+      star.style.cursor = "pointer";
+      star.style.userSelect = "none";
+      star.style.webkitUserSelect = "none";
 
-    starElement.addEventListener("click", () => {
-      const now = Date.now();
-      if (now - lastTapTime < 500) {
+      const handleTap = (e) => {
+        // 🛑 ป้องกันไม่ให้แท็ก <a> ลิงก์พาเปลี่ยนหน้าเว็บ
+        e.preventDefault();
+        e.stopPropagation();
+
         tapCount++;
-      } else {
-        tapCount = 1;
-      }
-      lastTapTime = now;
+        if (typeof triggerHaptic === "function") triggerHaptic("light");
 
-      if (tapCount >= 5) {
-        tapCount = 0;
-        if (typeof triggerHaptic === "function") triggerHaptic("medium");
+        // ล้างเวลาเดิม ถ้าไม่กดต่อภายใน 1.2 วินาที จะรีเซ็ตการนับ
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+          tapCount = 0;
+        }, 1200);
 
-        const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nกรุณาใส่รหัสผ่านเพื่อล้างแคชและดึงข้อมูลสดล่าสุด:");
-        
-        if (inputPin === ADMIN_PIN) {
-          showAdminStatusModal(
-            "loading", 
-            "กำลังล้างแคชระดับ Edge CDN...", 
-            "ระบบกำลังติดต่อ Netlify และ Supabase เพื่อเคลียร์หน่วยความจำทั่วโลก กรุณารอสักครู่..."
-          );
+        // แตะครบ 5 ครั้ง -> แสดงหน้าต่างใส่รหัส
+        if (tapCount >= 5) {
+          tapCount = 0;
+          clearTimeout(resetTimer);
+          if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
-          fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
-            method: "GET",
-            headers: { "x-purge-secret": ADMIN_SECRET }
-          })
-          .then(async (res) => {
-            const data = await res.json();
-            if (!res.ok || !data.success) {
-              throw new Error(data.error || `HTTP Status ${res.status}`);
+          // หน่วงเวลาเล็กน้อยเพื่อให้ UI พร้อมรับคำสั่ง
+          setTimeout(() => {
+            const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nกรุณาใส่รหัสผ่านเพื่อล้างแคชและดึงข้อมูลสดล่าสุด:");
+            
+            if (inputPin === ADMIN_PIN) {
+              showAdminStatusModal(
+                "loading", 
+                "กำลังล้างแคชระดับ Edge CDN...", 
+                "ระบบกำลังติดต่อ Netlify และ Supabase เพื่อเคลียร์หน่วยความจำทั่วโลก กรุณารอสักครู่..."
+              );
+
+              fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
+                method: "GET",
+                headers: { "x-purge-secret": ADMIN_SECRET }
+              })
+              .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                  throw new Error(data.error || `HTTP Status ${res.status}`);
+                }
+                return data;
+              })
+              .then((data) => {
+                if (window.sessionStorage) sessionStorage.clear();
+                if (window.localStorage) localStorage.removeItem("cachedProfiles_v3_2026");
+
+                showAdminStatusModal(
+                  "success", 
+                  "ล้างแคชสำเร็จ 100%!", 
+                  `เวอร์ชันใหม่: <strong>${data.version || "Updated"}</strong><br>ดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ...`
+                );
+
+                setTimeout(() => {
+                  window.location.href = window.location.pathname + "?refresh=" + ADMIN_SECRET + "&t=" + Date.now();
+                }, 1200);
+              })
+              .catch((err) => {
+                showAdminStatusModal(
+                  "error", 
+                  "เกิดข้อผิดพลาดในการล้างแคช!", 
+                  `สาเหตุ: <span style="color: #FF85C0;">${err.message}</span><br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือรหัสผ่านระบบ`
+                );
+              });
+
+            } else if (inputPin !== null) {
+              showAdminStatusModal(
+                "error", 
+                "รหัสผ่านไม่ถูกต้อง!", 
+                "คุณไม่มีสิทธิ์ในการสั่งล้างแคชระบบ (Access Denied)"
+              );
             }
-            return data;
-          })
-          .then((data) => {
-            if (window.sessionStorage) sessionStorage.clear();
-            if (window.localStorage) localStorage.removeItem("cachedProfiles_v3_2026");
-
-            showAdminStatusModal(
-              "success", 
-              "ล้างแคชสำเร็จ 100%!", 
-              `เวอร์ชันใหม่: <strong>${data.version || "Updated"}</strong><br>ดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ...`
-            );
-
-            setTimeout(() => {
-              window.location.href = window.location.pathname + "?refresh=" + ADMIN_SECRET + "&t=" + Date.now();
-            }, 1200);
-          })
-          .catch((err) => {
-            showAdminStatusModal(
-              "error", 
-              "เกิดข้อผิดพลาดในการล้างแคช!", 
-              `สาเหตุ: <span style="color: #FF85C0;">${err.message}</span><br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือรหัสผ่านระบบ`
-            );
-          });
-
-        } else if (inputPin !== null) {
-          showAdminStatusModal(
-            "error", 
-            "รหัสผ่านไม่ถูกต้อง!", 
-            "คุณไม่มีสิทธิ์ในการสั่งล้างแคชระบบ (Access Denied)"
-          );
+          }, 50);
         }
-      }
+      };
+
+      star.addEventListener("click", handleTap);
+      star.addEventListener("touchend", handleTap, { passive: false });
     });
   }
 
