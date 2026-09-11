@@ -106,13 +106,20 @@ function getDeterministicReviews(seedStr, count = 3) {
   return result;
 }
 
-function extractCleanNumber(price) {
-  if (!price) return 1500;
-  const match = String(price).replace(/,/g, "").match(/\d+/);
-  if (!match) return 1500;
-  let num = parseInt(match[0], 10);
-  if (num > 0 && num < 500) num *= 10;
-  return num >= 500 ? num : 1500;
+// 🟢 แก้ไขฟังก์ชันแปลงราคาให้รองรับทั้งตัวเลข, k, และทศนิยม
+function extractCleanNumber(rate) {
+  if (!rate) return 1500;
+  const str = String(rate).trim().toLowerCase();
+  if (str.includes("k")) {
+    const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
+    return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
+  }
+  const cleanDigits = str.replace(/\D/g, "");
+  const num = parseInt(cleanDigits, 10);
+  if (isNaN(num) || num <= 0) return 1500;
+  if (num < 10) return num * 1000;   // เช่น ใส่ 2 -> แปลงเป็น 2000
+  if (num < 500) return num * 10;    // เช่น ใส่ 150 -> แปลงเป็น 1500
+  return num;
 }
 
 function optimizeImg(imagePath, width = 400, height = 560) {

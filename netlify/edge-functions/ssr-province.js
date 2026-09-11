@@ -598,122 +598,153 @@ const metaDescription = isNational
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 B: ปรับแต่ง Schema Graph ระดับพรีเมียม (จัดการชื่อวิกิพีเดียให้เป๊ะ)
+   // 🟢 สร้าง Schema Graph ระดับพรีเมียม (แก้ปัญหา Dangling Pointer + เติม FAQPage และ ItemList ครบถ้วน)
     const wikiTarget = provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`;
     const provinceWikiUrl = isNational 
       ? "https://th.wikipedia.org/wiki/ประเทศไทย" 
       : `https://th.wikipedia.org/wiki/${encodeURIComponent(wikiTarget)}`;
 
-const schemaGraph = [
-  {
-    "@type": "Organization",
-    "@id": `${primaryDomain}/#organization`,
-    "name": CONFIG.BRAND_NAME,
-    "legalName": CONFIG.BRAND_LEGAL_NAME,
-    "url": primaryDomain,
-    "logo": {
-      "@type": "ImageObject",
-      "@id": `${primaryDomain}/#logo`,
-      "url": `${primaryDomain}/images/firstmodelhub.webp`,
-      "caption": CONFIG.BRAND_NAME
-    },
-    "description": cleanMetaDesc,
-    "sameAs": CONFIG.SOCIAL_LINKS,
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "telephone": CONFIG.DEFAULT_TELEPHONE,
-      "availableLanguage": ["th", "en"]
-    }
-  },
-  {
-    "@type": "WebSite",
-    "@id": `${primaryDomain}/#website`,
-    "url": primaryDomain,
-    "name": CONFIG.BRAND_NAME,
-    "publisher": { "@id": `${primaryDomain}/#organization` },
-    "inLanguage": "th-TH"
-  },
-  {
-    "@type": "CollectionPage",
-    "@id": `${canonicalUrl}#webpage`,
-    "name": escapeHTML(metaTitle),
-    "description": cleanMetaDesc,
-    "url": canonicalUrl,
-    "inLanguage": "th-TH",
-    "isPartOf": { "@id": `${primaryDomain}/#website` },
-    "about": { "@id": `${canonicalUrl}#business` },
-    ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
-    ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
-  },
-  {
-    "@type": ["EntertainmentBusiness", "ProfessionalService"],
-    "@id": `${canonicalUrl}#business`,
-    "name": isNational 
-      ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-      : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-    "image": heroImage,
-    "telephone": CONFIG.DEFAULT_TELEPHONE,
-    "priceRange": "฿฿",
-    "url": canonicalUrl,
-    "description": cleanMetaDesc,
-    "knowsAbout": [
-      "Personal Lifestyle Companion",
-      "Girlfriend Experience (GFE)",
-      `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
-      "บริการเพื่อนทานข้าวและออกงานสังคม",
-      "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
-    ],
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
-      "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
-      "addressCountry": "TH"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": seoData.geo?.lat || 13.7563,
-      "longitude": seoData.geo?.lng || 100.5018
-    },
-    "areaServed": isNational 
-      ? { 
-          "@type": "Country", 
-          "name": "Thailand",
-          "sameAs": provinceWikiUrl
-        } 
-      : [
-          { 
-            "@type": "AdministrativeArea", 
-            "name": provinceNameThai,
-            "sameAs": provinceWikiUrl
-          },
-          // 🟢 ตัดคำว่า "โซน" ออก ให้เหลือชื่อย่านจริงตามมาตรฐาน Geographical Entity
-          ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
-        ]
-  }
-];
-
-// 🟢 ปรับชื่อ Breadcrumb ให้ตรงกันกับ Meta Title และหน้า Profile ย่อย
-if (!isNational) {
-  schemaGraph.push({
-    "@type": "BreadcrumbList",
-    "@id": `${canonicalUrl}#breadcrumb`,
-    "itemListElement": [
+    const schemaGraph = [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "หน้าแรก",
-        "item": primaryDomain
+        "@type": "Organization",
+        "@id": `${primaryDomain}/#organization`,
+        "name": CONFIG.BRAND_NAME,
+        "legalName": CONFIG.BRAND_LEGAL_NAME,
+        "url": primaryDomain,
+        "logo": {
+          "@type": "ImageObject",
+          "@id": `${primaryDomain}/#logo`,
+          "url": `${primaryDomain}/images/firstmodelhub.webp`,
+          "caption": CONFIG.BRAND_NAME
+        },
+        "description": cleanMetaDesc,
+        "sameAs": CONFIG.SOCIAL_LINKS,
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "telephone": CONFIG.DEFAULT_TELEPHONE,
+          "availableLanguage": ["th", "en"]
+        }
       },
       {
-        "@type": "ListItem",
-        "position": 2,
-        "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
-        "item": canonicalUrl
+        "@type": "WebSite",
+        "@id": `${primaryDomain}/#website`,
+        "url": primaryDomain,
+        "name": CONFIG.BRAND_NAME,
+        "publisher": { "@id": `${primaryDomain}/#organization` },
+        "inLanguage": "th-TH"
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": `${canonicalUrl}#webpage`,
+        "name": escapeHTML(metaTitle),
+        "description": cleanMetaDesc,
+        "url": canonicalUrl,
+        "inLanguage": "th-TH",
+        "isPartOf": { "@id": `${primaryDomain}/#website` },
+        "about": { "@id": `${canonicalUrl}#business` },
+        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
+        ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
+      },
+      {
+        "@type": ["EntertainmentBusiness", "ProfessionalService"],
+        "@id": `${canonicalUrl}#business`,
+        "name": isNational 
+          ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+          : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
+        "image": heroImage,
+        "telephone": CONFIG.DEFAULT_TELEPHONE,
+        "priceRange": "฿฿",
+        "url": canonicalUrl,
+        "description": cleanMetaDesc,
+        "knowsAbout": [
+          "Personal Lifestyle Companion",
+          "Girlfriend Experience (GFE)",
+          `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
+          "บริการเพื่อนทานข้าวและออกงานสังคม",
+          "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
+          "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
+          "addressCountry": "TH"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": seoData.geo?.lat || 13.7563,
+          "longitude": seoData.geo?.lng || 100.5018
+        },
+        "areaServed": isNational 
+          ? { 
+              "@type": "Country", 
+              "name": "Thailand",
+              "sameAs": provinceWikiUrl
+            } 
+          : [
+              { 
+                "@type": "AdministrativeArea", 
+                "name": provinceNameThai,
+                "sameAs": provinceWikiUrl
+              },
+              ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
+            ]
       }
-    ]
-  });
-}
+    ];
+
+    // 🟢 1. เติม Breadcrumb สำหรับหน้ารายจังหวัด
+    if (!isNational) {
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "หน้าแรก",
+            "item": primaryDomain
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+            "item": canonicalUrl
+          }
+        ]
+      });
+    }
+
+    // 🟢 2. เติม ItemList จริง (แก้ปัญหา Dangling Pointer #itemlist 100%)
+    if (profilesList.length > 0) {
+      schemaGraph.push({
+        "@type": "ItemList",
+        "@id": `${canonicalUrl}#itemlist`,
+        "numberOfItems": profilesList.length,
+        "itemListElement": profilesList.slice(0, 12).map((p, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
+          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
+        }))
+      });
+    }
+
+    // 🟢 3. เติม FAQPage Schema อัตโนมัติ (ดึงจาก seoData.faqs ตรงกับบนหน้าเว็บ 100%)
+    if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
+      schemaGraph.push({
+        "@type": "FAQPage",
+        "@id": `${canonicalUrl}#faq`,
+        "isPartOf": { "@id": `${canonicalUrl}#webpage` },
+        "mainEntity": seoData.faqs.map(f => ({
+          "@type": "Question",
+          "name": sanitizeThaiText(f.q),
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": sanitizeThaiText(f.a)
+          }
+        }))
+      });
+    }
 
     const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
     const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
