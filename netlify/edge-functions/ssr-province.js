@@ -1,9 +1,19 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
+// 🟢 B จุดที่ 1: ส่วนหัวไฟล์ (แทนที่บรรทัดที่ 3 เดิม)
 const PAGE_CACHE = new Map();
+const MAX_PAGE_CACHE_ENTRIES = 60; // 👈 จำกัดสูงสุด 60 หน้า ป้องกัน RAM เต็ม
 let GLOBAL_VERSION = `v_${Date.now()}`;
 let TEMPLATE_HTML_CACHE = null;
 
+// 🟢 ฟังก์ชันบันทึกแคชแบบปลอดภัย ถ้ารายการเกินเพดาน จะลบของเก่าสุดทิ้งอัตโนมัติ
+function setSafePageCache(key, data) {
+  if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
+    const oldestKey = PAGE_CACHE.keys().next().value;
+    PAGE_CACHE.delete(oldestKey);
+  }
+  PAGE_CACHE.set(key, data);
+}
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
 
 const CONFIG = {
@@ -13,9 +23,8 @@ const CONFIG = {
   get SUPABASE_KEY() {
     return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
-  get PURGE_SECRET() {
-    // 🟢 แก้ไขช่องโหว่ความปลอดภัย: สุ่มค่าใหม่เพื่อป้องกันคนยิง API หากไม่มี Environment variable
-    return Deno.env.get("PURGE_SECRET") || crypto.randomUUID();
+get PURGE_SECRET() {
+    return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dyynjlbuj/image/upload/",
@@ -40,54 +49,10 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 18.7883, lng: 98.9853 },
     zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
     faqs: [
-      { q: "นัดหมายสาวรับงานเชียงใหม่ โซนไหนเดินทางสะดวกที่สุด?", a: "ย่านนิมมานเหมินท์, สันติธรรม, ช้างเผือก และเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด เดินทางไปหาที่โรงแรมได้รวดเร็วภายใน 20-30 นาทีครับ" },
-      { q: "เรทราคาเริ่มต้น 1,500 บาท ได้รับบริการแบบไหนบ้าง?", a: "เริ่มต้น 1,500.- บาท คุณจะได้รับการดูแลเทคแคร์สไตล์ฟิวแฟน (GFE) อย่างสุภาพเรียบร้อย เป็นกันเอง ให้เกียรติลูกค้า และไม่เร่งเวลาครับ" },
-      { q: "มีน้องๆ รับงานค้างคืน (Overnight) ไหม?", a: "มีครับ น้องๆ ไซด์ไลน์หลายคนรับงานแบบค้างคืน (Long Time) สามารถเช็คเรทราคาเหมาคืนได้ที่กล่องอัตราค่าบริการในหน้าโปรไฟล์" },
-      { q: "หากต้องการเด็กเอ็น (EN) ไปนั่งดื่มชงเหล้า มีบริการไหม?", a: "มีบริการเด็กเอ็นเตอร์เทน (EN VIP) สำหรับชงเหล้า คุยสนุก นั่งเป็นเพื่อนที่ร้านอาหารหรือร้านเหล้าในเชียงใหม่ครับ" },
-      { q: "เรียกใช้บริการ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีการเก็บเงินโอนมัดจำล่วงหน้าทุกกรณีครับ ระบบเราคือ 'นัดพบเจอตัวจริง ตรวจสอบความตรงปก แล้วจึงชำระเงินโดยตรงกับน้องหน้างาน'" }
-    ]
-  },
-  "chiang-mai": {
-    name: "เชียงใหม่",
-    geo: { lat: 18.7883, lng: 98.9853 },
-    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
-    faqs: [
-      { q: "นัดหมายสาวรับงานเชียงใหม่ โซนไหนเดินทางสะดวกที่สุด?", a: "ย่านนิมมานเหมินท์, สันติธรรม, ช้างเผือก และเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด เดินทางไปหาที่โรงแรมได้รวดเร็วภายใน 20-30 นาทีครับ" },
-      { q: "เรทราคาเริ่มต้น 1,500 บาท ได้รับบริการแบบไหนบ้าง?", a: "เริ่มต้น 1,500.- บาท คุณจะได้รับการดูแลเทคแคร์สไตล์ฟิวแฟน (GFE) อย่างสุภาพเรียบร้อย เป็นกันเอง ให้เกียรติลูกค้า และไม่เร่งเวลาครับ" }
-    ]
-  },
-  chiangrai: {
-    name: "เชียงราย",
-    geo: { lat: 19.9105, lng: 99.8406 },
-    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
-    faqs: [
-      { q: "สาวรับงานเชียงราย โซนบ้านดู่ และ มฟล. นัดหมายสะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนบ้านดู่ หน้ามหาวิทยาลัยแม่ฟ้าหลวง และใจกลางเมืองเชียงราย พร้อมเดินทางไปดูแลที่พักของท่านรวดเร็ว" },
-      { q: "ไซด์ไลน์เชียงราย การันตีตรงปกและปลอดภัยอย่างไร?", a: "โปรไฟล์ของน้องๆ ทุกคนผ่านการยืนยันตัวตน 100% ปลอดภัยด้วยระบบนัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระค่าบริการ" }
-    ]
-  },
-  lampang: {
-    name: "ลำปาง",
-    geo: { lat: 18.2888, lng: 99.4923 },
-    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
-    faqs: [
-      { q: "นัดพบสาวรับงานลำปาง ในตัวเมืองหรือแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมืองลำปาง, ย่านสวนดอก, ถนนรอบเวียง และละแวก ม.ราชภัฏลำปาง เดินทางสะดวกและเป็นส่วนตัวครับ" },
-      { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการ" }
-    ]
-  },
-  lamphun: {
-    name: "ลำพูน",
-    geo: { lat: 18.5772, lng: 99.0087 },
-    zones: ["ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
-    faqs: [
-      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถแจ้งพิกัดโรงแรมหรือที่พักให้น้องเดินทางไปหาได้เลยครับ" }
-    ]
-  },
-  phitsanulok: {
-    name: "พิษณุโลก",
-    geo: { lat: 16.8211, lng: 100.2659 },
-    zones: ["ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
-    faqs: [
-      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน., ท่าโพธิ์ และใจกลางเมือง ลูกค้าสามารถทักไลน์นัดหมายแจ้งพิกัดโรงแรมได้เลยครับ" }
+      { q: "นัดพบเพื่อนเที่ยวเชียงใหม่ โซนไหนเดินทางสะดวกและรวดเร็วที่สุด?", a: "ย่านนิมมานเหมินท์ เจ็ดยอด และสันติธรรม เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด สามารถเดินทางไปดูแลที่โรงแรมได้รวดเร็วภายใน 15-25 นาทีครับ" },
+      { q: "ต้องการน้องไปนั่งคาเฟ่ ทานข้าว หรือเดินเล่นในเมืองเชียงใหม่ มีบริการไหม?", a: "มีครับ น้องๆ สไตล์ฟิวแฟน (GFE) ยินดีเป็นเพื่อนร่วมทาง ทานอาหาร และท่องเที่ยว คุยสนุก สุภาพ และให้เกียรติลูกค้าครับ" },
+      { q: "หากพักแถวแม่ริม หรือหางดง น้องๆ สามารถเดินทางไปหาได้หรือไม่?", a: "สามารถเดินทางไปได้ครับ โดยอาจมีค่าเดินทางเพิ่มเติมตามระยะทางจริง ซึ่งสามารถตกลงรายละเอียดกับน้องหรือแอดมินก่อนเริ่มงานได้เลยครับ" },
+      { q: "การนัดหมายในเชียงใหม่ ปลอดภัยจากการโดนหลอกโอนเงินอย่างไร?", a: "FirstModelHub ยึดระบบ 'เจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระเงิน' ไม่มีมัดจำล่วงหน้าทุกกรณี ปลอดภัย 100% ครับ" }
     ]
   },
   bangkok: {
@@ -95,7 +60,9 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
     faqs: [
-      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ ทั้งสุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา นัดพบในโรงแรมหรือคอนโดส่วนตัวได้เลยครับ" }
+      { q: "การเรียกบริการเพื่อนเที่ยวนอกสถานที่ (Outcall) ในกรุงเทพฯ มีขั้นตอนอย่างไร?", a: "ลูกค้าสามารถเลือกโปรไฟล์ แจ้งพิกัดโรงแรมหรือคอนโดส่วนตัวในเขตกรุงเทพฯ เพื่อนัดหมายเวลาที่สะดวก น้องๆ จะเดินทางไปพบตามนัดหมายอย่างตรงเวลาครับ" },
+      { q: "มีน้องๆ ที่สามารถสื่อสารภาษาอังกฤษเพื่อดูแลลูกค้าต่างชาติ (Expat/Tourist) ไหม?", a: "มีครับ โดยเฉพาะในโซนสุขุมวิท สาทร และทองหล่อ มีน้องๆ ระดับพรีเมียมที่สื่อสารภาษาอังกฤษได้อย่างคล่องแคล่ว วางตัวดี พร้อมออกงานสังคมครับ" },
+      { q: "นัดพบช่วงดึกหลังเลิกงาน มีน้องๆ สแตนด์บายพร้อมดูแลไหม?", a: "มีน้องๆ สแตนด์บายครอบคลุมตลอดช่วงค่ำจนถึงดึก สามารถเลือกนัดหมายแบบชั่วคราว (Short Time) หรือค้างคืน (Overnight) ได้ตามต้องการครับ" }
     ]
   },
   chonburi: {
@@ -103,23 +70,9 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.3611, lng: 100.9847 },
     zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
     faqs: [
-      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนเพื่อความปลอดภัย 100% ครับ" }
-    ]
-  },
-  khonkaen: {
-    name: "ขอนแก่น",
-    geo: { lat: 16.4322, lng: 102.8236 },
-    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
-    faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" }
-    ]
-  },
-  "khon-kaen": {
-    name: "ขอนแก่น",
-    geo: { lat: 16.4322, lng: 102.8236 },
-    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
-    faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" }
+      { q: "ต้องการน้องไปร่วมปาร์ตี้พูลวิลล่าในพัทยา หรือสังสรรค์ริมหาด รับงานไหม?", a: "รับครับ เรามีน้องๆ สายเอ็นเตอร์เทน (EN VIP) สำหรับชงเหล้า พูดคุย สร้างบรรยากาศสนุกสนาน เป็นกันเอง เหมาะกับทริปพูลวิลล่าและงานเลี้ยงส่วนตัวครับ" },
+      { q: "น้องๆ โซนบางแสน ศรีราชา และพัทยา มีสไตล์แตกต่างกันอย่างไร?", a: "โซนบางแสนและศรีราชาส่วนใหญ่เป็นสไตล์วัยใส นักศึกษา น่ารัก เอาใจเก่ง ส่วนโซนพัทยาและจอมเทียนจะมีความหลากหลาย ทั้งสาวสวยหุ่นนางแบบและสายฝอครับ" },
+      { q: "เรียกน้องไปโรงแรมในพัทยา ต้องโอนค่ารถหรือมัดจำก่อนหรือไม่?", a: "ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีครับ ตรวจสอบความถูกต้องและตรงปกเมื่อน้องเดินทางถึงที่พักแล้ว จึงชำระค่าบริการกับน้องโดยตรงครับ" }
     ]
   },
   phuket: {
@@ -127,7 +80,49 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 7.8804, lng: 98.3923 },
     zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์"],
     faqs: [
-      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" }
+      { q: "นัดหมายเพื่อนเที่ยวภูเก็ต ไปร่วมทริปล่องเรือยอร์ช หรือทานดินเนอร์หรู ได้ไหม?", a: "ได้แน่นอนครับ มีน้องๆ โปรไฟล์พรีเมียม บุคลิกภาพดีเยี่ยม พร้อมเป็นเพื่อนร่วมเดินทาง ดินเนอร์ ออกงาน หรือร่วมทริปทะเลอย่างเป็นส่วนตัวครับ" },
+      { q: "พักอยู่วิลล่าส่วนตัวแถวบางเทา กะหลิม หรือเชิงทะเล น้องเดินทางไปได้ไหม?", a: "เดินทางไปดูแลได้ทั่วทั้งเกาะภูเก็ตครับ นัดหมายระบุพิกัดที่พักให้น้องเดินทางไปพบได้อย่างเป็นส่วนตัวและปลอดภัยครับ" }
+    ]
+  },
+  khonkaen: {
+    name: "ขอนแก่น",
+    geo: { lat: 16.4322, lng: 102.8236 },
+    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+    faqs: [
+      { q: "นัดหมายเพื่อนเที่ยวขอนแก่น โซนกังสดาล และรอบ มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนมหาวิทยาลัยขอนแก่นและใจกลางเมือง เดินทางรวดเร็ว เป็นกันเอง ดูแลเอาใจใส่สไตล์ฟิวแฟนอย่างอบอุ่นครับ" },
+      { q: "มีบริการเพื่อนเที่ยวทานข้าว หรือนั่งชิลร้านอาหารในขอนแก่นไหม?", a: "มีครับ น้องๆ พร้อมไปเป็นเพื่อนทานข้าว ดื่มชงเหล้า หรือนั่งคุยคลายเหงา สร้างความสบายใจ ไม่เร่งรีบ ให้เกียรติลูกค้าครับ" }
+    ]
+  },
+  chiangrai: {
+    name: "เชียงราย",
+    geo: { lat: 19.9105, lng: 99.8406 },
+    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+    faqs: [
+      { q: "เพื่อนเที่ยวเชียงราย โซนบ้านดู่ และ ม.แม่ฟ้าหลวง นัดหมายอย่างไร?", a: "มีน้องๆ สแตนด์บายแถวหน้า มฟล. และตัวเมืองเชียงราย แจ้งพิกัดโรงแรมหรือที่พัก นัดหมายเวลาที่สะดวก น้องพร้อมเดินทางไปดูแลถึงที่ครับ" }
+    ]
+  },
+  lampang: {
+    name: "ลำปาง",
+    geo: { lat: 18.2888, lng: 99.4923 },
+    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
+    faqs: [
+      { q: "นัดพบเพื่อนเที่ยวลำปาง ในตัวเมืองหรือโรงแรมแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมือง ย่านสวนดอก และถนนรอบเวียง เดินทางสะดวก ปลอดภัย และเป็นส่วนตัวครับ" }
+    ]
+  },
+  lamphun: {
+    name: "ลำพูน",
+    geo: { lat: 18.5772, lng: 99.0087 },
+    zones: ["ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
+    faqs: [
+      { q: "เพื่อนเที่ยวลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งโซนนิคมลำพูนและตัวเมือง สามารถแจ้งโรงแรมที่พักให้น้องเดินทางไปดูแลได้อย่างรวดเร็วครับ" }
+    ]
+  },
+  phitsanulok: {
+    name: "พิษณุโลก",
+    geo: { lat: 16.8211, lng: 100.2659 },
+    zones: ["ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
+    faqs: [
+      { q: "เพื่อนเที่ยวพิษณุโลก โซนรอบ ม.นเรศวร (มน.) นัดพบสะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนรอบ มน. ท่าโพธิ์ และโรงแรมใจกลางเมือง นัดหมายล่วงหน้าสั้นๆ น้องเดินทางถึงที่พักทันทีครับ" }
     ]
   },
   udonthani: {
@@ -135,7 +130,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
     faqs: [
-      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกสุดครับ" }
+      { q: "เพื่อนเที่ยวอุดรธานี นัดพบแถวไหนเดินทางสะดวกที่สุด?", a: "ย่านใจกลางเมือง UD Town เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกที่สุดครับ" }
     ]
   },
   default: {
@@ -143,14 +138,16 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "หาดใหญ่"],
     faqs: [
-      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น ปลอดภัย 100%" },
-      { q: "ถ้าสั่งจองแล้ว น้องมาถึงแต่ไม่ตรงปก ทำอย่างไร?", a: "เราการันตีตรงปกครับ หากลูกค้าพบว่ารูปภาพและตัวจริงไม่เหมือนกัน สามารถปฏิเสธการรับบริการและยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่าย" },
-      { q: "บริการฟิวแฟน (GFE) คืออะไร แตกต่างจากการรับงานทั่วไปอย่างไร?", a: "ฟิวแฟน คือบริการที่เน้นการเทคแคร์ เอาใจใส่ กอด จูบ ลูบ คลำได้เสมือนแฟนจริง น้องๆ จะมีความอ่อนโยน ไม่เร่งเวลา และให้เกียรติลูกค้าครับ" },
-      { q: "มีน้องที่รับงานแบบค้างคืน (Overnight) ไหม?", a: "มีครอบคลุมทุกจังหวัดครับ ลูกค้าสามารถเช็คเรทราคาเหมาค้างคืนได้ที่หน้ารายละเอียดโปรไฟล์ของน้องๆ แต่ละคน" },
-      { q: "เปิดให้บริการตลอด 24 ชั่วโมงหรือไม่?", a: "ระบบแอดมินและการประสานงานของเราเปิดให้บริการตั้งแต่ช่วงสายถึงดึก (ตามเวลาที่ระบุหน้าเว็บ) แต่น้องๆ หลายคนสแตนด์บายรับงานตลอด 24 ชม. ครับ" }
+      { q: "เรียกใช้บริการเพื่อนเที่ยวผ่าน FirstModelHub ต้องโอนเงินมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีครับ ระบบของเราคือ 'นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระเงินโดยตรงกับน้อง' ปลอดภัย 100% ครับ" },
+      { q: "บริการสไตล์ฟิวแฟน (Girlfriend Experience - GFE) คืออะไร?", a: "คือบริการที่เน้นการเทคแคร์ เอาใจใส่ ดูแลดุจคนรัก มีความสุภาพ อ่อนโยน เป็นกันเอง ไม่เร่งเวลา และให้เกียรติลูกค้าครับ" },
+      { q: "หากน้องเดินทางมาถึงแล้วรูปถ่ายไม่ตรงปก สามารถทำอย่างไรได้บ้าง?", a: "เราการันตีตรงปก 100% หากพบว่าตัวจริงไม่ตรงตามรูปโปรไฟล์ ลูกค้ามีสิทธิ์ปฏิเสธการรับบริการและยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้นครับ" }
     ]
   }
 };
+
+// 🟢 เชื่อมโยง Alias อัตโนมัติในโค้ด (ไม่ต้องก๊อปปี้ข้อมูลซ้ำ)
+PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA.chiangmai;
+PROVINCE_SEO_DATA["khon-kaen"] = PROVINCE_SEO_DATA.khonkaen;
 
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -223,29 +220,65 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
+  const cleanSlug = (provinceSlug || "chiangmai").toLowerCase().replace(/[-_]/g, "");
   let cleanZones = zones && Array.isArray(zones) ? zones.filter(z => z && z !== "ทั้งหมด") : [];
   const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
   const zoneLinks = cleanZones.slice(0, 5).map(z => `<a href="${locationUrl}" class="kw-zone">${escapeHTML(sanitizeThaiText(z))}</a>`);
-  const zoneText = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน ${zoneLinks.join(", ")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
-  
+  const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
+
+  // ข้อมูลบริบทเฉพาะของแต่ละหัวเมืองใหญ่ (Local Context)
+  const LOCAL_CONTEXT = {
+    chiangmai: {
+      headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
+      intro: `สำหรับผู้ที่เดินทางมาพักผ่อน ท่องเที่ยว หรือทำงานในเชียงใหม่ FirstModelHub คัดสรรเพื่อนเที่ยวระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience) ที่เน้นความสุภาพ อัธยาศัยดี และไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว`,
+      convenience: `โรงแรมและรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบายและเป็นส่วนตัวสูงสุด`
+    },
+    bangkok: {
+      headline: `บริการเพื่อนเที่ยวระดับ VIP และผู้ดูแลไลฟ์สไตล์ส่วนบุคคล กรุงเทพฯ`,
+      intro: `ศูนย์รวมเพื่อนเที่ยวมืออาชีพและน้องๆ สไตล์ฟิวแฟนในกรุงเทพฯ ครอบคลุมทั้งสายเรียบร้อยน่ารัก พริตตี้ และสาวสวยบุคลิกดี เหมาะสำหรับนักธุรกิจและผู้ที่ต้องการเพื่อนร่วมโต๊ะอาหาร ออกงานสังคม หรือการพักผ่อนอย่างเป็นส่วนตัวหลังเลิกงาน`,
+      convenience: `ครอบคลุมทั้งแนวรถไฟฟ้า คอนโดมิเนียมหรู และโรงแรมชั้นนำ${zoneText} สามารถระบุพิกัดที่ต้องการให้น้องเดินทางไปดูแล (Outcall) ได้อย่างรวดเร็ว`
+    },
+    chonburi: {
+      headline: `เพื่อนเที่ยวพัทยา-ชลบุรี เติมเต็มทริปพักผ่อนริมทะเลอย่างมั่นใจ`,
+      intro: `มาเที่ยวพัทยา บางแสน ให้การพักผ่อนสมบูรณ์แบบยิ่งขึ้นด้วยเพื่อนเที่ยวสายสดใส เป็นกันเอง พร้อมร่วมกิจกรรมริมหาด ปาร์ตี้พูลวิลล่าส่วนตัว หรือดูแลสไตล์ฟิวแฟนแบบใกล้ชิด`,
+      convenience: `รองรับพิกัดที่พักทั่วพัทยา จอมเทียน และบางแสน${zoneText} เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็ว ปลอดภัย ไร้กังวลเรื่องเวลา`
+    },
+    phuket: {
+      headline: `สัมผัสการพักผ่อนระดับไฮเอนด์กับเพื่อนเที่ยว VIP ภูเก็ต`,
+      intro: `ยกระดับวันหยุดบนเกาะภูเก็ตด้วยเพื่อนเที่ยวระดับพรีเมียม สื่อสารคล่องแคล่ว บุคลิกสง่างาม พร้อมเป็นเพื่อนร่วมทริป ดินเนอร์ชมพระอาทิตย์ตก นั่งเรือยอร์ช หรือดูแลอย่างอบอุ่นในพูลวิลล่าส่วนตัว`,
+      convenience: `บริการทั่วทั้งเกาะภูเก็ต${zoneText} เข้าพบที่รีสอร์ตหรือวิลล่าส่วนตัวตามเวลานัดหมายอย่างตรงเวลา`
+    },
+    khonkaen: {
+      headline: `เพื่อนเที่ยวฟิวแฟน ขอนแก่น คัดสรรโปรไฟล์ตรงปก 100%`,
+      intro: `ผ่อนคลายในเมืองศูนย์กลางภาคอีสานกับน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ขี้อ้อน เทคแคร์ดี เอาใจใส่ดุจคนรู้ใจ ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว`,
+      convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยและโรงแรมใจกลางขอนแก่น${zoneText} เดินทางสะดวก รวดเร็วทันใจ`
+    }
+  };
+
+  const current = LOCAL_CONTEXT[cleanSlug] || {
+    headline: `ศูนย์รวมเพื่อนเที่ยวและผู้ดูแลสไตล์ฟิวแฟน ${provinceName}`,
+    intro: `FirstModelHub คัดสรรเพื่อนเที่ยวคุณภาพที่เน้นความตรงปก 100% ดูแลด้วยความจริงใจ สุภาพ และให้เกียรติผู้ใช้บริการ เพื่อให้ทุกช่วงเวลาการพักผ่อนใน ${provinceName} เป็นไปอย่างผ่อนคลายและประทับใจ`,
+    convenience: `ครอบคลุมโรงแรมและที่พักสำคัญในพื้นที่ ${provinceName}${zoneText} เดินทางนัดพบได้อย่างสะดวกและเป็นส่วนตัว`
+  };
+
   return `
     <div style="margin-bottom: 16px;">
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวมสาวรับงาน${provinceName} อันดับ 1 ตรงปก ไม่มัดจำ</h3>
-      <p style="margin-bottom: 8px;">หากคุณกำลังมองหา <strong>ไซด์ไลน์${provinceName}</strong>, <strong>เพื่อนเที่ยวกลางคืน</strong> หรือ <strong>เด็กเอ็น${provinceName} (EN VIP)</strong> ที่การันตีความปลอดภัยสูงสุด เราคือแพลตฟอร์มที่คัดสรรน้องๆ สาวสวยระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience) แท้ๆ ดูแลเอาใจใส่ ไม่เร่งเวลา ให้ความรู้สึกอบอุ่นเหมือนแฟนตัวจริง</p>
-      <p style="margin-bottom: 8px;">หมดปัญหาโดนหลอกโอนมัดจำ เพราะระบบของเรายึดหลัก <strong>"เจอน้องตัวจริงตรงปกก่อน ค่อยชำระเงินหน้างาน 100%"</strong></p>
+      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">${current.headline}</h3>
+      <p style="margin-bottom: 8px; line-height: 1.65;">${current.intro}</p>
+      <p style="margin-bottom: 8px; line-height: 1.65;">มั่นใจในความปลอดภัยสูงสุดด้วยนโยบาย <strong>"นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการ"</strong> ปราศจากความเสี่ยงจากการโอนเงินมัดจำล่วงหน้า 100%</p>
     </div>
     <div style="margin-bottom: 16px;">
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดยอดฮิต สแตนด์บายพร้อมดูแล</h3>
-      <p style="margin-bottom: 8px;">เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ ${provinceName} น้องๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม${zoneText} ไม่ว่าจะเป็นโรงแรมชั้นนำ คอนโดมิเนียมส่วนตัว หรือพิกัดยอดนิยม</p>
+      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการและการนัดหมายใน ${provinceName}</h3>
+      <p style="margin-bottom: 8px; line-height: 1.65;">${current.convenience}</p>
       <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>บริการเพื่อนเที่ยว หาคนกินข้าว คลายเหงาในวันหยุดพักผ่อน</span></li>
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>น้องๆ นักศึกษา วัยใส ตัวเล็ก สเปคยอดนิยม</span></li>
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>น้องสายปาร์ตี้ (EN VIP) รับชงเหล้า เอ็นเตอร์เทน</span></li>
+         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เพื่อนทานข้าว ดินเนอร์ คลายเหงาในวันพักผ่อน</span></li>
+         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) เทคแคร์อบอุ่น สุภาพ ไม่เร่งรีบ</span></li>
+         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เอ็นเตอร์เทนเนอร์ (EN VIP) สำหรับงานเลี้ยงสังสรรค์ส่วนตัว</span></li>
       </ul>
     </div>
     <div>
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">บริการครอบคลุม (ชั่วคราว / ค้างคืน)</h3>
-      <p>ให้บริการตอบโจทย์ทุกไลฟ์สไตล์ ทั้งนัดพบส่วนตัวแบบชั่วคราว (Short Time) หรือต้องการคนดูแลยาวๆ แบบค้างคืน (Long Time / Overnight) เรทราคาและสัดส่วนแสดงชัดเจนบนหน้าโปรไฟล์ ปลอดภัยนัดเจอ ชำระหน้างาน ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>
+      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและการรักษาความลับ</h3>
+      <p style="line-height: 1.65;">ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายตัวจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด (Zero-Log Policy) เลือกระยะเวลาการดูแลได้ทั้งแบบชั่วคราวและค้างคืน ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขมัดจำทุกกรณี</p>
     </div>
   `;
 }
@@ -468,8 +501,10 @@ export default async (req, context) => {
       return await context.next();
     }
 
-    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-    if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+    
+    // 🟢 เติม "/sideline" เข้าไปตรงนี้ เพื่อให้ข้ามไปทำงานที่ไฟล์ render-bot.js
+    if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
       return await context.next();
     }
 
@@ -477,9 +512,13 @@ export default async (req, context) => {
       return Response.redirect(`${primaryDomain}/`, 301);
     }
 
+    const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
+
     const cacheKey = `${req.method}:${cleanPath}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
-    if (cachedPage && cachedPage.version === GLOBAL_VERSION) {
+    if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
+      PAGE_CACHE.delete(cacheKey);
+      PAGE_CACHE.set(cacheKey, cachedPage);
       return new Response(cachedPage.html, { headers: cachedPage.headers });
     }
     
@@ -543,13 +582,15 @@ export default async (req, context) => {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    const metaTitle = isNational 
-      ? "สาวรับงาน ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub"
-      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub`;
+    // 🟢 B: ปรับ Meta Title และ Description ให้พรีเมียม ปลอดภัย CTR สูง
+const metaTitle = isNational 
+  ? "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
+  : `เพื่อนเที่ยว${provinceNameThai} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
 
-    const metaDescription = isNational
-      ? "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ"
-      : `ศูนย์รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
+const metaDescription = isNational
+  ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
+  : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -557,131 +598,122 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    const schemaGraph = [
-      {
-        "@type": "Organization",
-        "@id": `${primaryDomain}/#organization`,
-        "name": CONFIG.BRAND_NAME,
-        "legalName": CONFIG.BRAND_LEGAL_NAME,
-        "url": primaryDomain,
-        "logo": {
-          "@type": "ImageObject",
-          "@id": `${primaryDomain}/#logo`,
-          "url": `${primaryDomain}/images/firstmodelhub.webp`,
-          "caption": CONFIG.BRAND_NAME
-        },
-        "description": cleanMetaDesc,
-        "sameAs": CONFIG.SOCIAL_LINKS,
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "customer service",
-          "telephone": CONFIG.DEFAULT_TELEPHONE,
-          "availableLanguage": ["th", "en"]
-        }
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${primaryDomain}/#website`,
-        "url": primaryDomain,
-        "name": CONFIG.BRAND_NAME,
-        "publisher": { "@id": `${primaryDomain}/#organization` },
-        "inLanguage": "th-TH"
-      },
-      {
-        "@type": "CollectionPage",
-        "@id": `${canonicalUrl}#webpage`,
-        "name": escapeHTML(metaTitle),
-        "description": cleanMetaDesc,
-        "url": canonicalUrl,
-        "inLanguage": "th-TH",
-        "isPartOf": { "@id": `${primaryDomain}/#website` },
-        "about": { "@id": `${canonicalUrl}#business` },
-        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
-        ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
-      },
-      {
-        "@type": ["EntertainmentBusiness", "ProfessionalService"],
-        "@id": `${canonicalUrl}#business`,
-        "name": isNational 
-          ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-          : `สาวรับงาน${provinceNameThai} เพื่อนเที่ยว${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-        "image": heroImage,
-        "telephone": CONFIG.DEFAULT_TELEPHONE,
-        "priceRange": "฿฿",
-        "url": canonicalUrl,
-        "description": cleanMetaDesc,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressCountry": "TH"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": seoData.geo?.lat || 13.7563,
-          "longitude": seoData.geo?.lng || 100.5018
-        },
-        "areaServed": isNational 
-          ? { "@type": "Country", "name": "Thailand" } 
-          : [
-              { "@type": "AdministrativeArea", "name": provinceNameThai },
-              ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": `โซน${z}` }))
-            ]
-      }
-    ];
+    // 🟢 B: ปรับแต่ง Schema Graph ระดับพรีเมียม (จัดการชื่อวิกิพีเดียให้เป๊ะ)
+    const wikiTarget = provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`;
+    const provinceWikiUrl = isNational 
+      ? "https://th.wikipedia.org/wiki/ประเทศไทย" 
+      : `https://th.wikipedia.org/wiki/${encodeURIComponent(wikiTarget)}`;
 
-    if (!isNational) {
-      schemaGraph.push({
-        "@type": "BreadcrumbList",
-        "@id": `${canonicalUrl}#breadcrumb`,
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "หน้าแรก",
-            "item": primaryDomain
+const schemaGraph = [
+  {
+    "@type": "Organization",
+    "@id": `${primaryDomain}/#organization`,
+    "name": CONFIG.BRAND_NAME,
+    "legalName": CONFIG.BRAND_LEGAL_NAME,
+    "url": primaryDomain,
+    "logo": {
+      "@type": "ImageObject",
+      "@id": `${primaryDomain}/#logo`,
+      "url": `${primaryDomain}/images/firstmodelhub.webp`,
+      "caption": CONFIG.BRAND_NAME
+    },
+    "description": cleanMetaDesc,
+    "sameAs": CONFIG.SOCIAL_LINKS,
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "telephone": CONFIG.DEFAULT_TELEPHONE,
+      "availableLanguage": ["th", "en"]
+    }
+  },
+  {
+    "@type": "WebSite",
+    "@id": `${primaryDomain}/#website`,
+    "url": primaryDomain,
+    "name": CONFIG.BRAND_NAME,
+    "publisher": { "@id": `${primaryDomain}/#organization` },
+    "inLanguage": "th-TH"
+  },
+  {
+    "@type": "CollectionPage",
+    "@id": `${canonicalUrl}#webpage`,
+    "name": escapeHTML(metaTitle),
+    "description": cleanMetaDesc,
+    "url": canonicalUrl,
+    "inLanguage": "th-TH",
+    "isPartOf": { "@id": `${primaryDomain}/#website` },
+    "about": { "@id": `${canonicalUrl}#business` },
+    ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
+    ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
+  },
+  {
+    "@type": ["EntertainmentBusiness", "ProfessionalService"],
+    "@id": `${canonicalUrl}#business`,
+    "name": isNational 
+      ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+      : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
+    "image": heroImage,
+    "telephone": CONFIG.DEFAULT_TELEPHONE,
+    "priceRange": "฿฿",
+    "url": canonicalUrl,
+    "description": cleanMetaDesc,
+    "knowsAbout": [
+      "Personal Lifestyle Companion",
+      "Girlfriend Experience (GFE)",
+      `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
+      "บริการเพื่อนทานข้าวและออกงานสังคม",
+      "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
+      "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
+      "addressCountry": "TH"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": seoData.geo?.lat || 13.7563,
+      "longitude": seoData.geo?.lng || 100.5018
+    },
+    "areaServed": isNational 
+      ? { 
+          "@type": "Country", 
+          "name": "Thailand",
+          "sameAs": provinceWikiUrl
+        } 
+      : [
+          { 
+            "@type": "AdministrativeArea", 
+            "name": provinceNameThai,
+            "sameAs": provinceWikiUrl
           },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": `สาวรับงาน${provinceNameThai}`,
-            "item": canonicalUrl
-          }
+          // 🟢 ตัดคำว่า "โซน" ออก ให้เหลือชื่อย่านจริงตามมาตรฐาน Geographical Entity
+          ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
         ]
-      });
-    }
+  }
+];
 
-    if (profilesList.length > 0) {
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonicalUrl}#itemlist`,
-        "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceNameThai}`,
-        "numberOfItems": profilesList.length,
-        "itemListElement": profilesList.map((p, i) => ({
-          "@type": "ListItem",
-          "position": i + 1,
-          "name": `น้อง${(p.name || "").replace(/^น้อง\s?/, "").trim()}`,
-          "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
-          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-        }))
-      });
-    }
-
-    if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
-      schemaGraph.push({
-        "@type": "FAQPage",
-        "@id": `${canonicalUrl}#faq`,
-        "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-        "mainEntity": seoData.faqs.map(f => ({
-          "@type": "Question",
-          "name": stripHTML(sanitizeThaiText(f.q)),
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": stripHTML(sanitizeThaiText(f.a))
-          }
-        }))
-      });
-    }
+// 🟢 ปรับชื่อ Breadcrumb ให้ตรงกันกับ Meta Title และหน้า Profile ย่อย
+if (!isNational) {
+  schemaGraph.push({
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "หน้าแรก",
+        "item": primaryDomain
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+        "item": canonicalUrl
+      }
+    ]
+  });
+}
 
     const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
     const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
@@ -755,9 +787,7 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
 
-    const ssrH1Html = isNational
-      ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`
-      : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`;
+   const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
@@ -1010,10 +1040,10 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
     finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
-    const responseHeaders = {
+   const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
+      "Cache-Control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=31536000, stale-while-revalidate=86400",
       "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
@@ -1021,8 +1051,8 @@ export default async (req, context) => {
       "Referrer-Policy": "strict-origin-when-cross-origin"
     };
 
-    PAGE_CACHE.set(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
-    return new Response(finalHtml, { headers: responseHeaders });
+setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
+return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);

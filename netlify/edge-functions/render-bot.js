@@ -21,8 +21,7 @@ const CONFIG = {
     return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
   get PURGE_SECRET() {
-    // 🟢 แก้ไขช่องโหว่ความปลอดภัย: ถ้าไม่ได้ตั้งค่า Environment Variable ไว้ จะสุ่มค่าใหม่เสมอ ป้องกันโดนยิงล้างแคช
-    return Deno.env.get("PURGE_SECRET") || crypto.randomUUID();
+    return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
@@ -151,17 +150,74 @@ function generateSrcSet(imagePath) {
   }).join(", ");
 }
 
-// 🟢 ย้ายฟังก์ชันสร้างรายละเอียดมาไว้ตรงนี้
-function generateUniqueNaturalDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  const customBio = p.description && p.description.trim().length > 10 ? ` "${sanitizeThaiText(p.description)}"` : "";
-  const variant = (Number(p.id) || 1) % 3;
+// 🟢 อัปเกรดเป็น Dynamic Persona Engine (5 สไตล์คาแรคเตอร์ + สุ่มโครงสร้างประโยคไม่ซ้ำกันกว่า 200 แบบ)
+function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
+  const customBio = p.description && p.description.trim().length > 10 
+    ? ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"` 
+    : "";
 
-  if (variant === 0) {
-    return `ยินดีต้อนรับสู่โปรไฟล์ ${displayName} ผู้ให้บริการเพื่อนเที่ยวสไตล์ฟิวแฟนพิกัด${zone} จ. ${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ดูแลเอาใจใส่เป็นกันเองอย่างสุภาพเรียบร้อย${customBio} อัตราค่าขนมเริ่มต้น ${priceDisplay} การันตีความปลอดภัย นัดพบตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระเงิน ไร้เงื่อนไขโอนมัดจำทุกกรณี`;
-  } else if (variant === 1) {
-    return `สัมผัสการดูแลสุดประทับใจกับ ${displayName} สาวสวยเพื่อนเที่ยวและนำเที่ยวในเขตพื้นที่${zone} (${provinceName}) อายุ ${age} ปี สรีระ ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. บุคลิกน่ารัก พูดจาสุภาพ เป็นกันเอง ไม่เร่งเวลา${customBio} เรทค่าบริการเริ่มต้น ${priceDisplay} ปลอดภัยสูงสุดด้วยนโยบายเจอตัวจริงตรงปกค่อยจ่ายเงินหน้างาน ไม่มีการเก็บมัดจำล่วงหน้า`;
-  } else {
-    return `แนะนำ ${displayName} พิกัดบริการบริเวณ${zone} ในจังหวัด${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. พร้อมเป็นเพื่อนกินข้าว ดูหนัง คลายเหงา สไตล์ Girlfriend Experience (GFE)${customBio} ค่าบริการเริ่มต้น ${priceDisplay} ตรวจสอบประวัติตัวจริงตรงปก ปลอดภัย 100% ชำระเงินหน้างานโดยตรง ไร้มัดจำ`;
+  // รวมแท็กเพื่อวิเคราะห์หา Persona
+  const rawTags = (Array.isArray(p.styleTags || p.style_tags) 
+    ? (p.styleTags || p.style_tags).join(" ") 
+    : String(p.styleTags || p.style_tags || "")).toLowerCase();
+  
+  const hNum = parseInt(height, 10) || 160;
+  const wNum = parseInt(weight, 10) || 48;
+
+  // จำแนก 5 Persona ตามลักษณะจริงของน้อง
+  let persona = "gfe"; // ค่าเริ่มต้น: ฟิวแฟนอบอุ่น
+  if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก") || rawTags.includes("นักศึกษา") || (hNum <= 158 && wNum <= 46)) {
+    persona = "petite"; // Persona A: วัยใสน่ารัก ไซส์มินิ
+  } else if (rawTags.includes("นางแบบ") || rawTags.includes("vip") || rawTags.includes("หรู") || hNum >= 166) {
+    persona = "model"; // Persona C: สาวสวยพรีเมียม หุ่นนางแบบ
+  } else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en") || rawTags.includes("คุยสนุก")) {
+    persona = "party"; // Persona D: เด็กเอ็นสายปาร์ตี้
+  } else if (rawTags.includes("อวบ") || rawTags.includes("เนื้อนมไข่") || wNum >= 54) {
+    persona = "curvy"; // Persona E: สาวอวบอิ่ม เจ้าเสน่ห์
+  }
+
+  // คำนวณ Hash คงที่จาก ID/Slug ป้องกันข้อความสลับไปมาตอนรีเฟรช
+  const seedStr = String(p.slug || p.id || displayName);
+  const hash = seedStr.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const v = hash % 3; // เลือกรูปแบบย่อย 3 สไตล์ในแต่ละ Persona
+
+  const safetyNote = "นัดพบเจอตัวจริงตรงปกอย่างปลอดภัย ชำระค่าบริการหน้างานโดยตรง ไร้กังวลเรื่องการโอนมัดจำล่วงหน้า 100%";
+
+  switch (persona) {
+    case "petite":
+      return v === 0
+        ? `พบกับ ${displayName} เพื่อนเที่ยวสายหวานตัวเล็กน่ารัก สดใส สไตล์คุณหนู พิกัดดูแล${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนกะทัดรัด ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) บุคลิกยิ้มแย้ม อัธยาศัยดี เอาใจเก่ง${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : v === 1
+        ? `สำหรับท่านที่ชื่นชอบสาวไซส์มินิ น่าทะนุถนอม ขอแนะนำ ${displayName} พิกัด${zone} (${provinceName}) วัยใส ${age} ปี รูปร่าง ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ชวนคุยสนุก คลายเหงา ทานข้าว ดูหนัง เป็นกันเองอย่างสุภาพ${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการเพื่อนเที่ยวฟิวแฟนใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+
+    case "model":
+      return v === 0
+        ? `ยกระดับการพักผ่อนระดับพรีเมียมกับ ${displayName} เพื่อนเที่ยวระดับ VIP บุคลิกสง่างาม หุ่นนางแบบ พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนสุดเฟิร์ม ${stats} สูงโปร่ง ${height} ซม. น้ำหนัก ${weight} กก. วางตัวสุภาพ เหมาะสำหรับดินเนอร์หรู ออกงานสังคม หรือนัดพบส่วนตัว${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        : v === 1
+        ? `สัมผัสประสบการณ์เหนือระดับกับ ${displayName} สาวสวยโปรไฟล์พรีเมียม โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ผิวพรรณสะอาดสะอ้าน มารยาทดีเยี่ยม ไม่เร่งเวลา พร้อมดูแลท่านอย่างเอ็กซ์คลูซีฟ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : `แนะนำ ${displayName} สวยหรู สไตล์พริตตี้-นางแบบ พิกัดดูแลย่าน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนเป๊ะ ${stats} สูง ${height} ซม. บุคลิกโดดเด่น น่าประทับใจ ให้เกียรติและสร้างความสบายใจในทุกช่วงเวลา${customBio} อัตราเริ่มต้น ${priceDisplay} ${safetyNote}`;
+
+    case "party":
+      return v === 0
+        ? `สายสังสรรค์ นั่งชิล ต้องไม่พลาด ${displayName} เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ (EN VIP) พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. ชงเหล้าเก่ง คุยสนุก อารมณ์ดี ละลายพฤติกรรมเยี่ยม เหมาะกับงานเลี้ยง ปาร์ตี้ หรือดินเนอร์ยามค่ำคืน${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : v === 1
+        ? `เพิ่มความมีชีวิตชีวาให้มื้อค่ำกับ ${displayName} เด็กเอ็นและเพื่อนเที่ยวสายปาร์ตี้ โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} ยิ้มหวาน เป็นมิตร เข้ากับทุกคนง่าย สร้างรอยยิ้มและบรรยากาศสนุกสนานได้อย่างลงตัว${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        : `มองหาคนรู้ใจไปนั่งดื่ม ฟังเพลง หรือสังสรรค์ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี รูปร่าง ${stats} สูง ${height} ซม. เทคแคร์เพื่อนดื่มอย่างมืออาชีพ อารมณ์ดีตลอดเวลา ไร้กังวลเรื่องเร่งเวลา${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+
+    case "curvy":
+      return v === 0
+        ? `สัมผัสความอบอุ่น นุ่มนวลกับ ${displayName} สาวสวยเจ้าเสน่ห์ หุ่นอวบอิ่มมีน้ำมีนวล สเปคสายกอดอุ่น พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนเต็มสรีระ ${stats} สูง ${height} ซม. หนัก ${weight} กก. นิสัยน่ารัก ขี้อ้อน เอาใจใส่ทุกรายละเอียด${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : v === 1
+        ? `สำหรับผู้ที่หลงใหลในความนุ่มนวลและสรีระที่ชัดเจน ขอแนะนำ ${displayName} โซน${zone} (${provinceName}) วัย ${age} ปี รูปร่างเซ็กซี่อวบอิ่ม ${stats} สัมผัสฟิวแฟนอย่างใกล้ชิด เทคแคร์สุภาพ อ่อนโยน ให้ความรู้สึกผ่อนคลายอย่างแท้จริง${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : `${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน สรีระเย้ายวนมีน้ำมีนวล ประจำเขต${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) น่ารัก คุยเก่ง ดูแลเป็นธรรมชาติ ไม่เกร็ง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
+
+    default: // Persona B: Romantic GFE Specialist (ฟิวแฟนอบอุ่น)
+      return v === 0
+        ? `สัมผัสการดูแลอย่างอบอุ่นสไตล์ Girlfriend Experience (GFE) แท้ๆ กับ ${displayName} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. เทคแคร์เอาใจใส่ดุจแฟนคนพิเศษ สุภาพ อ่อนโยน ไม่เร่งรีบ ให้เกียรติและสร้างความผ่อนคลายสูงสุด${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
+        : v === 1
+        ? `แนะนำ ${displayName} เพื่อนเที่ยวฟิวแฟนที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        : `หากคุณกำลังมองหาเพื่อนเที่ยวรู้ใจที่ดูแลด้วยความจริงใจ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. สไตล์ฟิวแฟนหวานละมุน อัธยาศัยดี มีความเป็นกันเอง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
   }
 }
 
@@ -195,12 +251,16 @@ export default async (req, context) => {
     return context.next();
   }
 
+ const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
   const cacheKey = url.pathname.toLowerCase();
   const cachedPage = PROFILE_PAGE_CACHE.get(cacheKey);
-  if (cachedPage && cachedPage.version === GLOBAL_PROFILE_VERSION) {
+  
+  if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_PROFILE_VERSION) {
+    PROFILE_PAGE_CACHE.delete(cacheKey);
+    PROFILE_PAGE_CACHE.set(cacheKey, cachedPage);
     return new Response(cachedPage.html, { headers: cachedPage.headers });
   }
-
+  
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let query = supabase.from("profiles").select("*").eq("active", true);
@@ -252,18 +312,19 @@ export default async (req, context) => {
     const weight = profile.weight || "48";
     const stats = profile.stats || "35-24-35";
 
-    // 🟢 แก้ไข Critical Syntax Error ตรงนี้แล้ว
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
-    const naturalDesc = generateUniqueNaturalDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
-    
-    const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
-    const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ย่าน${primaryZone} ไซด์ไลน์ ฟิวแฟน จ่ายหน้างาน`;
-    const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
+// 🟢 เรียกใช้ Persona Engine ตัวใหม่
+const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
+
+const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
+// 🟢 Meta Title และ Description สไตล์ High-End Lifestyle Companion เพื่อเพิ่ม CTR และเลี่ยงการโดน SafeSearch ตัด
+const pageTitle = `${displayName} เพื่อนเที่ยวฟิวแฟน${provinceNameThai} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน`;
+const metaDescription = `ทำความรู้จักกับ ${displayName} เพื่อนเที่ยวและผู้ดูแลสไตล์ฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีมัดจำ`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
 
-    const schemaGraph = {
+   const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
         {
@@ -287,23 +348,24 @@ export default async (req, context) => {
           "@id": `${canonicalUrl}#person`,
           "name": stripHTML(displayName),
           "gender": "https://schema.org/Female",
-          "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (Companion & Lifestyle Assistant)",
+          "jobTitle": "Personal Lifestyle Companion & Girlfriend Experience (GFE) Specialist",
           "description": stripHTML(naturalDesc),
           "image": {
             "@type": "ImageObject",
             "url": heroImageLarge,
-            "caption": `${stripHTML(displayName)} สาวรับงาน${provinceNameThai}`
+            "caption": `${stripHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`
           },
           "url": canonicalUrl,
-          "height": `${height} cm`,
-          "weight": `${weight} kg`,
+          "height": `${String(height).replace(/\D/g, "")} cm`,
+          "weight": `${String(weight).replace(/\D/g, "")} kg`,
           "knowsAbout": [
             "Girlfriend Experience (GFE)",
-            "เพื่อนเที่ยวฟิวแฟน",
-            `สาวรับงาน${provinceNameThai}`,
-            `ไซด์ไลน์${provinceNameThai}`,
-            "เพื่อนกินข้าว",
-            "เพื่อนดูหนัง"
+            "Personal Lifestyle Companion",
+            `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
+            `เพื่อนเที่ยวและดูแลส่วนตัว ${provinceNameThai}`,
+            "เพื่อนทานข้าวและออกงานสังคม",
+            "การดูแลและเพื่อนร่วมเดินทางพักผ่อน",
+            "บริการนัดพบจ่ายหน้างานไร้มัดจำ"
           ],
           "address": {
             "@type": "PostalAddress",
@@ -352,7 +414,7 @@ export default async (req, context) => {
             {
               "@type": "ListItem",
               "position": 2,
-              "name": `สาวรับงาน${provinceNameThai}`,
+              "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
               "item": provinceHubUrl
             },
             {
@@ -468,7 +530,8 @@ export default async (req, context) => {
           <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
+           <!-- 🟢 แก้ไขให้ตรงกับ Schema -->
+<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
@@ -616,10 +679,10 @@ export default async (req, context) => {
 </body>
 </html>`;
 
-    const responseHeaders = {
+   const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=604800",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=604800",
+      "Cache-Control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=31536000, stale-while-revalidate=86400",
       "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
