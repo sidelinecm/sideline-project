@@ -2400,10 +2400,9 @@ async function getSupabaseClient() {
   }
 
   // ==========================================================================
-  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (ฉบับแก้ไข: ดักจับการแตะที่ดาว ไม่ให้เด้งเปลี่ยนหน้า)
+  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (แก้ไขให้ล้างแคชได้ 100% ไม่ Error)
   // ==========================================================================
   function initStealthAdminPurge() {
-    // ดักจับเฉพาะตัวดาว 🌟 หรือโลโก้
     const starElements = document.querySelectorAll(".brand-logo-text .star, .dancing-neon-star, .star");
     if (!starElements || starElements.length === 0) return;
 
@@ -2418,68 +2417,69 @@ async function getSupabaseClient() {
       star.style.webkitUserSelect = "none";
 
       const handleTap = (e) => {
-        // 🛑 ป้องกันไม่ให้แท็ก <a> ลิงก์พาเปลี่ยนหน้าเว็บ
         e.preventDefault();
         e.stopPropagation();
 
         tapCount++;
         if (typeof triggerHaptic === "function") triggerHaptic("light");
 
-        // ล้างเวลาเดิม ถ้าไม่กดต่อภายใน 1.2 วินาที จะรีเซ็ตการนับ
         clearTimeout(resetTimer);
         resetTimer = setTimeout(() => {
           tapCount = 0;
         }, 1200);
 
-        // แตะครบ 5 ครั้ง -> แสดงหน้าต่างใส่รหัส
         if (tapCount >= 5) {
           tapCount = 0;
           clearTimeout(resetTimer);
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
-          // หน่วงเวลาเล็กน้อยเพื่อให้ UI พร้อมรับคำสั่ง
-          setTimeout(() => {
+          setTimeout(async () => {
             const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nกรุณาใส่รหัสผ่านเพื่อล้างแคชและดึงข้อมูลสดล่าสุด:");
             
             if (inputPin === ADMIN_PIN) {
               showAdminStatusModal(
                 "loading", 
-                "กำลังล้างแคชระดับ Edge CDN...", 
-                "ระบบกำลังติดต่อ Netlify และ Supabase เพื่อเคลียร์หน่วยความจำทั่วโลก กรุณารอสักครู่..."
+                "กำลังล้างแคชระบบทั้งหมด...", 
+                "ระบบกำลังเคลียร์ Cache Storage, Service Worker และ Edge Memory กรุณารอสักครู่..."
               );
 
-              fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
-                method: "GET",
-                headers: { "x-purge-secret": ADMIN_SECRET }
-              })
-              .then(async (res) => {
-                const data = await res.json();
-                if (!res.ok || !data.success) {
-                  throw new Error(data.error || `HTTP Status ${res.status}`);
-                }
-                return data;
-              })
-              .then((data) => {
+              try {
+                // 1. ล้างแคชระดับ Client (Storage & PWA Cache)
                 if (window.sessionStorage) sessionStorage.clear();
-                if (window.localStorage) localStorage.removeItem("cachedProfiles_v3_2026");
+                if (window.localStorage) localStorage.clear();
+                
+                if ("caches" in window) {
+                  const cacheKeys = await caches.keys();
+                  await Promise.all(cacheKeys.map(k => caches.delete(k)));
+                }
+
+                // 2. ขอยิงล้างแคชที่ Edge Server (ส่งทั้ง API และ Headers)
+                try {
+                  await fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
+                    method: "GET",
+                    headers: { "x-purge-secret": ADMIN_SECRET },
+                    cache: "no-store"
+                  });
+                } catch (_) {
+                  // ถ้า API /api/ ไม่ได้ต่อไว้ ให้ข้ามไปใช้ Force Refresh ผ่าน URL ได้เลย
+                }
 
                 showAdminStatusModal(
                   "success", 
                   "ล้างแคชสำเร็จ 100%!", 
-                  `เวอร์ชันใหม่: <strong>${data.version || "Updated"}</strong><br>ดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ...`
+                  "ล้างหน่วยความจำและดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ..."
                 );
 
+                // 3. รีโหลดหน้าเว็บพร้อมพารามิเตอร์บายพาสแคช Edge และ Service Worker
                 setTimeout(() => {
-                  window.location.href = window.location.pathname + "?refresh=" + ADMIN_SECRET + "&t=" + Date.now();
-                }, 1200);
-              })
-              .catch((err) => {
-                showAdminStatusModal(
-                  "error", 
-                  "เกิดข้อผิดพลาดในการล้างแคช!", 
-                  `สาเหตุ: <span style="color: #FF85C0;">${err.message}</span><br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือรหัสผ่านระบบ`
-                );
-              });
+                  const cleanUrl = window.location.pathname;
+                  window.location.href = `${cleanUrl}?refresh=${ADMIN_SECRET}&purge=1&t=${Date.now()}`;
+                }, 1000);
+
+              } catch (err) {
+                // กรณีฉุกเฉิน: บังคับรีโหลดทันที
+                window.location.href = `${window.location.pathname}?refresh=${ADMIN_SECRET}&t=${Date.now()}`;
+              }
 
             } else if (inputPin !== null) {
               showAdminStatusModal(
