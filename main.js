@@ -1,4 +1,3 @@
-// 🟢 ประกาศฟังก์ชันแปลงราคาแบบ Global (ป้องกันหาฟังก์ชันไม่เจอ 100%)
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
@@ -9,7 +8,8 @@ function parseRateToNumber(rate) {
   const cleanDigits = str.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 500) return num * 1000;
+  if (num < 10) return num * 1000;  // กรณีพิมพ์ 1 หรือ 2 ให้เป็น 1,000 หรือ 2,000
+  if (num < 500) return num * 10;   // ✅ กรณีพิมพ์ 150 ให้เป็น 1,500 (ตรงกับ render-bot.js)
   return num;
 }
 window.parseRateToNumber = parseRateToNumber;
@@ -440,6 +440,22 @@ async function getSupabaseClient() {
   };
 
   const domCache = {};
+  
+  // 🟢 1. NATIVE HAPTIC FEEDBACK (สั่นเบาๆ ตอบสนองนิ้วมือแบบแอปแท้ๆ)
+  function triggerHaptic(type = "light") {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        if (type === "light") {
+          navigator.vibrate(12); // สั่นแตะเบาๆ 12ms ตอนกดปุ่ม/ฟิลเตอร์
+        } else if (type === "medium") {
+          navigator.vibrate(20); // สั่นพอดีๆ ตอนเปิดการ์ดโปรไฟล์
+        } else if (type === "success") {
+          navigator.vibrate([15, 40, 15]); // สั่นสองจังหวะตอนเปิดอ่านหรือจองคิว
+        }
+      } catch (_) {}
+    }
+  }
+  window.triggerHaptic = triggerHaptic;
 
   function sanitizeThaiText(text) {
     if (!text || typeof text !== "string") return "";
@@ -1237,7 +1253,90 @@ async function getSupabaseClient() {
     return wrapper;
   }
 
-// 🟢 ฟังก์ชัน Lightbox ที่ถูกต้องและสมบูรณ์ 100%
+// 🟢 ฟังก์ชัน Lightbox ที่ถูกต้องและสมบูรณ์ 100% (รองรับปัดซ้าย-ขวาดูรูป + ปัดลงปิดหน้าต่าง)
+  let currentActivePhotoIdx = 0;
+  let currentActivePhotoList = [];
+
+  // ฟังก์ชันเปลี่ยนรูปภาพใหญ่พร้อมแอนิเมชันและปรับจุดไข่ปลา
+  function updateLightboxPhoto(idx) {
+    if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
+
+    // วนลูปรูปภาพ (ถ้าปัดเกินให้วนกลับมาหน้าแรก/หลังสุด)
+    if (idx < 0) idx = currentActivePhotoList.length - 1;
+    if (idx >= currentActivePhotoList.length) idx = 0;
+
+    currentActivePhotoIdx = idx;
+    const heroImg = document.getElementById("lightboxHeroImage");
+    if (!heroImg) return;
+
+    if (typeof triggerHaptic === "function") triggerHaptic("light");
+
+    heroImg.style.opacity = "0.25";
+    heroImg.style.transform = "scale(0.98)";
+    setTimeout(() => {
+      heroImg.src = currentActivePhotoList[idx].fullSrc || currentActivePhotoList[idx].src || DEFAULT_FALLBACK_IMG;
+      heroImg.style.opacity = "1";
+      heroImg.style.transform = "scale(1)";
+    }, 110);
+
+    // ปรับสถานะ Active บนแถบ Thumbnail
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+    if (thumbStrip) {
+      thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach((t, i) => {
+        t.classList.toggle("active", i === idx);
+        if (i === idx) {
+          t.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+      });
+    }
+
+    // ปรับสถานะจุดไข่ปลา (Dots Indicator)
+    const dotsContainer = document.getElementById("lightbox-dots-indicator");
+    if (dotsContainer) {
+      dotsContainer.querySelectorAll(".gallery-dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === idx);
+      });
+    }
+  }
+
+  // ระบบตรวจจับการปัดรูปซ้าย-ขวาบนภาพใหญ่
+  function initLightboxImageSwipe() {
+    const heroContainer = document.querySelector(".lightbox-hero-container");
+    if (!heroContainer || heroContainer.dataset.swipeBound === "true") return;
+    heroContainer.dataset.swipeBound = "true";
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    heroContainer.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchEndX = touchStartX;
+      touchEndY = touchStartY;
+    }, { passive: true });
+
+    heroContainer.addEventListener("touchmove", (e) => {
+      touchEndX = e.touches[0].clientX;
+      touchEndY = e.touches[0].clientY;
+    }, { passive: true });
+
+    heroContainer.addEventListener("touchend", () => {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      // 🔒 ตรวจสอบว่าเป็นการปัดแนวนอนชัดเจน (แกน X ต้องเคลื่อนที่มากกว่าแกน Y 1.3 เท่า และระยะเกิน 38px)
+      if (Math.abs(diffX) > 38 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+        if (diffX < 0) {
+          updateLightboxPhoto(currentActivePhotoIdx + 1); // ปัดซ้าย -> รูปถัดไป
+        } else {
+          updateLightboxPhoto(currentActivePhotoIdx - 1); // ปัดขวา -> รูปก่อนหน้า
+        }
+      }
+    }, { passive: true });
+  }
+
   window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
@@ -1264,7 +1363,7 @@ async function getSupabaseClient() {
       
     const statusColor = isAvail ? "#059669" : "#E11D48";
 
-    // 2. ชื่อ และ ป้ายสถานะ (แก้ไขให้ประกาศตัวแปรถูกต้อง ไม่พัง)
+    // 2. ชื่อ และ ป้ายสถานะ
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
@@ -1283,15 +1382,41 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 3. รูปภาพใหญ่ & Thumbnails
+    // 3. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots)
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG }];
+
+    currentActivePhotoList = images;
+    currentActivePhotoIdx = 0;
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
       heroImg.src = images[0]?.fullSrc || images[0]?.src || DEFAULT_FALLBACK_IMG;
       heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
+      heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+      heroImg.style.transform = "scale(1)";
+      heroImg.style.opacity = "1";
+    }
+
+    // สร้างจุดไข่ปลา (Dots Indicator) เหนือรูปภาพแบบ IG/Tinder
+    const heroContainer = document.querySelector(".lightbox-hero-container");
+    let dotsContainer = document.getElementById("lightbox-dots-indicator");
+    if (heroContainer) {
+      if (!dotsContainer) {
+        dotsContainer = document.createElement("div");
+        dotsContainer.id = "lightbox-dots-indicator";
+        dotsContainer.className = "lightbox-dots-wrapper";
+        heroContainer.appendChild(dotsContainer);
+      }
+      if (images.length > 1) {
+        dotsContainer.style.display = "flex";
+        dotsContainer.innerHTML = images.map((_, i) => `
+          <span class="gallery-dot ${i === 0 ? "active" : ""}"></span>
+        `).join("");
+      } else {
+        dotsContainer.style.display = "none";
+      }
     }
 
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
@@ -1306,14 +1431,8 @@ async function getSupabaseClient() {
 
         thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
           item.addEventListener("click", () => {
-            thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(t => t.classList.remove("active"));
-            item.classList.add("active");
             const idx = parseInt(item.getAttribute("data-img-idx"), 10);
-            if (images[idx] && heroImg) {
-              heroImg.style.opacity = "0.3";
-              heroImg.src = images[idx].fullSrc || images[idx].src;
-              setTimeout(() => { heroImg.style.opacity = "1"; }, 120);
-            }
+            updateLightboxPhoto(idx);
           });
         });
       } else {
@@ -1340,7 +1459,7 @@ async function getSupabaseClient() {
       });
     }
 
-    // 5. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน (#F0ECF8)
+    // 5. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน
     const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
     const safeStats = profile.safeStats || profile.stats || "ไม่ระบุ";
     const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "ไม่ระบุ");
@@ -1383,17 +1502,18 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 6. คำบรรยายรายละเอียด
+    // 6. คำบรรยายรายละเอียด (ป้องกัน XSS 100%)
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
       const defaultDesc = `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
-      descContent.innerHTML = (profile.description || defaultDesc).replace(/\n/g, "<br>");
+      const rawDesc = (profile.description && profile.description.trim()) ? profile.description : defaultDesc;
+      descContent.innerHTML = escapeHTML(rawDesc).replace(/\n/g, "<br>");
       descContent.style.color = "#4A4458";
     }
     if (descContainer) descContainer.style.display = "block";
 
-  // 7. ปุ่มแอดไลน์จองคิวหลัก
+    // 7. ปุ่มแอดไลน์จองคิวหลัก
     const rawLine = String(profile.lineId || profile.line_id || "ksLUWB89Y_").trim();
     let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
@@ -1415,8 +1535,6 @@ async function getSupabaseClient() {
     }
 
     const parseFn = window.parseRateToNumber || parseRateToNumber;
-
-    
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
 
     // 💰 8.1 ตารางเรทราคา 3 ช่อง
@@ -1486,7 +1604,7 @@ async function getSupabaseClient() {
       `).join("");
     }
 
-    // 🎀 8.4 น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน (ฉบับแก้ซ้ำซ้อนเรียบร้อย)
+    // 🎀 8.4 น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
     const relatedTitle = document.getElementById("lightboxRelatedTitle");
     if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
     
@@ -1544,29 +1662,44 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 9. แสดงผลหน้าต่าง Lightbox
-    lightboxEl.classList.add("active");
+    // 🟢 เปิดเด้งสปริง 60 FPS + ล็อกพื้นหลังไม่ให้เลื่อนตาม
+    if (typeof triggerHaptic === "function") triggerHaptic("medium");
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";
     lightboxEl.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "";
+    document.body.classList.add("lightbox-open");
 
-    if (window.gsap && contentWrapperEl) {
-      try {
-        window.gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
-        window.gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
-      } catch (_) {}
-    }
+    const scrollBodyEl = document.getElementById("lightboxScrollBody");
+    if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
+
+    requestAnimationFrame(() => {
+      lightboxEl.classList.add("active");
+      lightboxEl.style.opacity = "1";
+      if (contentWrapperEl) {
+        contentWrapperEl.style.transform = "translateY(0) scale(1)";
+        contentWrapperEl.style.opacity = "1";
+      }
+    });
   };
 
+  // 🟢 ปิดสไลด์ลงนุ่มๆ + ปลดล็อกพื้นหลัง
   window.closeLightboxModal = function (updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
+    const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (lightboxEl) {
-      lightboxEl.style.display = "none";
-      lightboxEl.classList.remove("active");
-      lightboxEl.style.pointerEvents = "none";
-      lightboxEl.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
+      if (contentWrapperEl) {
+        contentWrapperEl.style.transform = "translateY(40px) scale(0.97)";
+        contentWrapperEl.style.opacity = "0";
+      }
+      lightboxEl.style.opacity = "0";
+      
+      setTimeout(() => {
+        lightboxEl.style.display = "none";
+        lightboxEl.classList.remove("active");
+        lightboxEl.style.pointerEvents = "none";
+        lightboxEl.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("lightbox-open");
+      }, 240);
 
       if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
@@ -1582,12 +1715,114 @@ async function getSupabaseClient() {
     }
   };
 
+  // 🟢 ระบบ Swipe-to-Dismiss อัจฉริยะ (แยกแกน X กับแกน Y ชัดเจน ไม่ตีกับการปัดเปลี่ยนรูป)
+  function initLightboxSwipeDown() {
+    const lightboxEl = document.getElementById("lightbox");
+    const contentEl = document.getElementById("lightbox-content-wrapper-el");
+    const dragBar = document.getElementById("lightbox-drag-bar");
+    const scrollBody = document.getElementById("lightboxScrollBody");
+    if (!lightboxEl || !contentEl) return;
+
+    // ผูกระบบปัดรูปซ้าย-ขวาเข้าด้วยกันทันทีในตัว
+    initLightboxImageSwipe();
+
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let isDragging = false;
+    let isEligible = false;
+    let isHorizontalGesture = false;
+
+    const onTouchStart = (e) => {
+      const isFromDragBar = dragBar && dragBar.contains(e.target);
+      const isTopHeader = e.target.closest(".lightbox-top-brand") || e.target.closest(".sheet-drag-pill-bar");
+      const isAtTop = !scrollBody || scrollBody.scrollTop <= 0;
+
+      if (isFromDragBar || isTopHeader || isAtTop) {
+        isEligible = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentX = startX;
+        currentY = startY;
+        isHorizontalGesture = false;
+      } else {
+        isEligible = false;
+      }
+    };
+
+    const onTouchMove = (e) => {
+      if (!isEligible) return;
+
+      currentX = e.touches[0].clientX;
+      currentY = e.touches[0].clientY;
+      const deltaX = Math.abs(currentX - startX);
+      const deltaY = currentY - startY;
+
+      // 🔒 ถ้าผู้ใช้เคลื่อนที่แนวนอนมากกว่า -> ล็อกไว้ว่ากำลังปัดรูป ไม่ใช่การปิดกล่อง
+      if (deltaX > deltaY && deltaX > 15) {
+        isHorizontalGesture = true;
+      }
+
+      if (isHorizontalGesture) {
+        if (isDragging) {
+          contentEl.style.transform = "translateY(0)";
+          isDragging = false;
+        }
+        return;
+      }
+
+      // รูดลงดิ่งเฉพาะเมื่อ deltaY ชนะ deltaX และอยู่บนสุด
+      if (deltaY > 0 && deltaY > deltaX && (!scrollBody || scrollBody.scrollTop <= 0)) {
+        if (e.cancelable) e.preventDefault();
+        isDragging = true;
+        contentEl.style.transition = "none";
+        const resistanceY = Math.pow(deltaY, 0.92);
+        contentEl.style.transform = `translateY(${resistanceY}px)`;
+      } else {
+        if (isDragging) {
+          contentEl.style.transform = "translateY(0)";
+          isDragging = false;
+        }
+      }
+    };
+
+    const onTouchEnd = () => {
+      if (!isEligible && !isDragging) return;
+
+      const deltaY = currentY - startY;
+      isEligible = false;
+
+      if (isDragging && !isHorizontalGesture) {
+        isDragging = false;
+        contentEl.style.transition = "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)";
+
+        // รูดลงเกิน 80px ให้ปิดหน้าต่างทันที
+        if (deltaY > 80) {
+          if (typeof triggerHaptic === "function") triggerHaptic("light");
+          window.closeLightboxModal(true);
+        } else {
+          contentEl.style.transform = "translateY(0)";
+        }
+      }
+      startX = 0;
+      startY = 0;
+      currentX = 0;
+      currentY = 0;
+      isHorizontalGesture = false;
+    };
+
+    contentEl.addEventListener("touchstart", onTouchStart, { passive: true });
+    contentEl.addEventListener("touchmove", onTouchMove, { passive: false });
+    contentEl.addEventListener("touchend", onTouchEnd, { passive: true });
+    contentEl.addEventListener("touchcancel", onTouchEnd, { passive: true });
+  }
+  
   function hideGlobalLoader() {
     const loader = document.getElementById("global-loader-overlay");
     if (loader) loader.style.display = "none";
   }
 
-  
   async function handleUrlRouting(isInitial = false) {
     let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
@@ -1767,12 +2002,13 @@ async function getSupabaseClient() {
       });
     }
 
-    // 🟢 ระบบดักจับการกดปุ่มตัวกรองแคปซูล
     document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       pill.addEventListener("click", function (e) {
         e.preventDefault();
+        triggerHaptic("light"); // 👈 เติมบรรทัดนี้: สั่นคลิกเบาๆ 12ms
         document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
         this.classList.add("active");
+ 
         
         const selectedTag = this.getAttribute("data-tag") || "all";
         appState.activePillTag = selectedTag;
@@ -1897,24 +2133,30 @@ async function getSupabaseClient() {
     }
 
     window.trackLineClick = function(profileId) {
-      try {
-        const idNum = parseInt(profileId, 10);
-        if (isNaN(idNum)) return;
+  try {
+    const idNum = parseInt(profileId, 10);
+    if (isNaN(idNum)) return;
 
-        fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
-          method: "POST",
-          headers: {
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ profile_id_to_update: idNum }),
-          keepalive: true
-        }).catch(() => {});
-      } catch (_) {}
-    };
+    // 🛡️ ป้องกันยิงซ้ำ: ตรวจสอบว่าใน Session นี้เคยกดไปแล้วหรือยัง
+    const sessionKey = `tracked_line_${idNum}`;
+    if (sessionStorage.getItem(sessionKey)) return;
+    sessionStorage.setItem(sessionKey, "true");
+
+    fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
+      method: "POST",
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ profile_id_to_update: idNum }),
+      keepalive: true
+    }).catch(() => {});
+  } catch (_) {}
+};
 
     window.handleLineBooking = function(profileId, lineUrl) {
+      triggerHaptic("success"); // 👈 เติมบรรทัดนี้: สั่นจังหวะ Success ยืนยันการกดจอง
       window.trackLineClick(profileId);
     };
 
@@ -2079,19 +2321,169 @@ async function getSupabaseClient() {
       `;
     };
 
-    // 🟢 ชุดที่ 1: ชุดหลักสำหรับการคลิกดูข้อมูล และให้ Googlebot สแกน (SEO Friendly)
+  // 🟢 ชุดที่ 1: ชุดหลักสำหรับการคลิกดูข้อมูล และให้ Googlebot สแกน (SEO Friendly)
     const primaryHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, false)).join("");
     
     // 🟢 ชุดที่ 2: ชุดโคลนสำหรับทำ CSS Infinite Loop (ซ่อนจาก Screen Reader ไม่ให้อ่านซ้ำ)
     const cloneHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, true)).join("");
 
-    trackEl.innerHTML = primaryHtml + cloneHtml;
+   trackEl.innerHTML = primaryHtml + cloneHtml;
   }
 
-  // เริ่มต้นการทำงานของระบบ
+  // ==========================================================================
+  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (พร้อมกล่องแจ้งเตือนสถานะ สำเร็จ/ล้มเหลว)
+  // ==========================================================================
+  function showAdminStatusModal(status, title, message) {
+    let modal = document.getElementById("admin-status-hud");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "admin-status-hud";
+      modal.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        background: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-radius: 24px;
+        padding: 24px 28px;
+        z-index: 999999;
+        color: #FFFFFF;
+        text-align: center;
+        width: 90%;
+        max-width: 380px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        pointer-events: none;
+        box-sizing: border-box;
+      `;
+      document.body.appendChild(modal);
+    }
+
+    let iconHtml = "";
+    let borderStyle = "";
+
+    if (status === "loading") {
+      iconHtml = `<div style="font-size: 38px; margin-bottom: 12px; animation: spin 1s linear infinite; display: inline-block;">⚡</div>`;
+      borderStyle = "1.5px solid rgba(124, 58, 237, 0.6)";
+    } else if (status === "success") {
+      iconHtml = `<div style="font-size: 42px; margin-bottom: 12px; color: #00E676; text-shadow: 0 0 20px #00E676;">✓</div>`;
+      borderStyle = "2px solid #00E676";
+      if (typeof triggerHaptic === "function") triggerHaptic("success");
+    } else if (status === "error") {
+      iconHtml = `<div style="font-size: 42px; margin-bottom: 12px; color: #FF1493; text-shadow: 0 0 20px #FF1493;">✕</div>`;
+      borderStyle = "2px solid #FF1493";
+      if (typeof triggerHaptic === "function") triggerHaptic("medium");
+    }
+
+    modal.style.border = borderStyle;
+    modal.innerHTML = `
+      ${iconHtml}
+      <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 900;">${title}</h3>
+      <p style="margin: 0; font-size: 12.5px; color: #CBD5E1; line-height: 1.6;">${message}</p>
+      ${status === "error" ? `
+        <button type="button" onclick="document.getElementById('admin-status-hud').style.opacity='0'; document.getElementById('admin-status-hud').style.pointerEvents='none';" 
+          style="margin-top: 16px; background: rgba(255,255,255,0.15); border: none; color: #FFFFFF; padding: 8px 24px; border-radius: 100px; font-weight: 800; font-size: 12px; cursor: pointer;">
+          ปิดหน้าต่าง
+        </button>` : ""}
+    `;
+
+    modal.style.opacity = "1";
+    modal.style.pointerEvents = "auto";
+    modal.style.transform = "translate(-50%, -50%) scale(1)";
+  }
+
+  function initStealthAdminPurge() {
+    const starElement = document.querySelector(".brand-logo-text .star, .brand-logo-text");
+    if (!starElement) return;
+
+    let tapCount = 0;
+    let lastTapTime = 0;
+    const ADMIN_SECRET = "fmh_super_admin_2026";
+    const ADMIN_PIN = "8888";
+
+    starElement.style.cursor = "pointer";
+
+    starElement.addEventListener("click", () => {
+      const now = Date.now();
+      if (now - lastTapTime < 500) {
+        tapCount++;
+      } else {
+        tapCount = 1;
+      }
+      lastTapTime = now;
+
+      if (tapCount >= 5) {
+        tapCount = 0;
+        if (typeof triggerHaptic === "function") triggerHaptic("medium");
+
+        const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nกรุณาใส่รหัสผ่านเพื่อล้างแคชและดึงข้อมูลสดล่าสุด:");
+        
+        if (inputPin === ADMIN_PIN) {
+          showAdminStatusModal(
+            "loading", 
+            "กำลังล้างแคชระดับ Edge CDN...", 
+            "ระบบกำลังติดต่อ Netlify และ Supabase เพื่อเคลียร์หน่วยความจำทั่วโลก กรุณารอสักครู่..."
+          );
+
+          fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
+            method: "GET",
+            headers: { "x-purge-secret": ADMIN_SECRET }
+          })
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+              throw new Error(data.error || `HTTP Status ${res.status}`);
+            }
+            return data;
+          })
+          .then((data) => {
+            if (window.sessionStorage) sessionStorage.clear();
+            if (window.localStorage) localStorage.removeItem("cachedProfiles_v3_2026");
+
+            showAdminStatusModal(
+              "success", 
+              "ล้างแคชสำเร็จ 100%!", 
+              `เวอร์ชันใหม่: <strong>${data.version || "Updated"}</strong><br>ดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ...`
+            );
+
+            setTimeout(() => {
+              window.location.href = window.location.pathname + "?refresh=" + ADMIN_SECRET + "&t=" + Date.now();
+            }, 1200);
+          })
+          .catch((err) => {
+            showAdminStatusModal(
+              "error", 
+              "เกิดข้อผิดพลาดในการล้างแคช!", 
+              `สาเหตุ: <span style="color: #FF85C0;">${err.message}</span><br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือรหัสผ่านระบบ`
+            );
+          });
+
+        } else if (inputPin !== null) {
+          showAdminStatusModal(
+            "error", 
+            "รหัสผ่านไม่ถูกต้อง!", 
+            "คุณไม่มีสิทธิ์ในการสั่งล้างแคชระบบ (Access Denied)"
+          );
+        }
+      }
+    });
+  }
+
+  // ==========================================================================
+  // 🟢 เริ่มต้นการทำงานของระบบ (พร้อมปุ่มลับแอดมิน)
+  // ==========================================================================
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initApplication);
+    document.addEventListener("DOMContentLoaded", () => {
+      initApplication();
+      initLightboxSwipeDown();
+      initStealthAdminPurge();
+    });
   } else {
     initApplication();
+    initLightboxSwipeDown();
+    initStealthAdminPurge();
   }
 })();

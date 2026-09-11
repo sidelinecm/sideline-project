@@ -3,23 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <base href="/" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  
+  <!-- 📱 1. NATIVE APP VIEWPORT & SYSTEM INTEGRATION (รวมสมบูรณ์ในบรรทัดเดียว ไม่ซ้ำซ้อน) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FirstModelHub">
 
-  <!-- 🟢 1. Page Title: ความยาวพอดี ไม่ซ้ำซ้อน ไม่โดน Google ตัดทิ้ง (Snippet ~550px) -->
+  <!-- 🟢 2. Page Title: ความยาวพอดี ไม่ซ้ำซ้อน ไม่โดน Google ตัดทิ้ง (Snippet ~550px) -->
   <title>สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน ไม่มัดจำ | FirstModelHub</title>
 
-  <!-- 🟢 2. Meta Description: แก้คำผิด (พื้นที่) เว้นวรรคสวยงาม ความยาว 140-155 ตัวอักษร -->
+  <!-- 🟢 3. Meta Description: แก้คำผิด เว้นวรรคสวยงาม ความยาว 140-155 ตัวอักษร -->
   <meta name="description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์และเด็กเอ็นสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำ ครอบคลุมพื้นที่{{PROVINCE_ZONES}}" />
 
-  <!-- 🟢 3. Meta Keywords: จัดกลุ่ม Dynamic ตรงจังหวัด ไม่ใส่จังหวัดอื่นปนข้ามหน้า -->
+  <!-- 🟢 4. Meta Keywords: จัดกลุ่ม Dynamic ตรงจังหวัด ไม่ใส่จังหวัดอื่นปนข้ามหน้า -->
   <meta name="keywords" content="สาวรับงาน{{PROVINCE_NAME}}, ไซด์ไลน์{{PROVINCE_NAME}}, รับงาน{{PROVINCE_NAME}}, เด็กเอ็น{{PROVINCE_NAME}}, เพื่อนเที่ยว{{PROVINCE_NAME}}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน" />
 
-  <!-- 🟢 4. Robots Tag: เปิด Indexing และเปิดสิทธิ์การแสดงผลภาพขนาดใหญ่ใน Google Discover สมบูรณ์แบบ -->
+  <!-- 🟢 5. Robots Tag: เปิด Indexing และเปิดสิทธิ์การแสดงผลภาพขนาดใหญ่ใน Google Discover สมบูรณ์แบบ -->
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
-  <!-- 🟢 5. Canonical Link: ป้องกัน Duplicate Content ได้ถูกต้อง 100% -->
+  <!-- 🟢 6. Canonical Link: ป้องกัน Duplicate Content ได้ถูกต้อง 100% -->
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
 
   <!-- 🌐 MULTILINGUAL SEO (เชื่อมต่อภาษาอัตโนมัติ) -->
@@ -72,7 +78,8 @@
 
   <link rel="modulepreload" href="/main.js?v=9999">
 
-  <!-- Schema.org Dynamic Template (รอ SSR เข้ามาแทนที่ตัวเต็ม) -->
+  
+  
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -573,9 +580,14 @@
 
 
 
-<!-- 🟢 โครงสร้าง Lightbox สมบูรณ์แบบ 100% (ของเดิมเป๊ะ + ต่อเติมด้านล่างครบชุด) -->
+<!-- 🟢 โครงสร้าง Lightbox สมบูรณ์แบบ 100% (Native App Touch & Scroll Ready) -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none; pointer-events: none;" aria-hidden="true">
   <div id="lightbox-content-wrapper-el">
+    
+    <!-- 📱 1. ขีดดึงลากสไตล์ Native App (ใช้นิ้วปัดรูดลงเพื่อปิดได้ทันที) -->
+    <div class="sheet-drag-pill-bar" id="lightbox-drag-bar" aria-hidden="true"></div>
+
+    <!-- 🧭 2. แถบแบรนด์มุมบนและปุ่มปิด -->
     <div class="lightbox-top-brand">
       <span class="brand-logo-text" style="font-size: 13px !important;">
         FirstModel<span class="hub-text-pink">Hub</span><span class="star" style="font-size: 11px;" aria-hidden="true">🌟</span>
@@ -586,17 +598,23 @@
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
 
-    <div class="lightbox-scroll-body" id="lightboxScrollBody">
+    <!-- 📜 3. พื้นที่เลื่อนดูเนื้อหา (Touch Momentum Smooth Scroll) -->
+    <div class="lightbox-scroll-body" id="lightboxScrollBody" style="-webkit-overflow-scrolling: touch;">
       <div class="lightbox-grid-layout">
+        
+        <!-- คอลัมน์รูปภาพ -->
         <div class="lightbox-image-column">
           <div class="lightbox-hero-container">
-            <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3C/svg%3E" alt="รูปโปรไฟล์ตัวจริงตรงปก" width="400" height="500">
+            <!-- 🟢 สัดส่วน 400x560 ป้องกันหน้าจอดึ๋ง (Zero CLS) -->
+            <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5.6'%3E%3C/svg%3E" alt="รูปโปรไฟล์ตัวจริงตรงปก" width="400" height="560">
           </div>
           <div id="lightboxThumbnailStrip"></div>
         </div>
 
+        <!-- คอลัมน์รายละเอียด -->
         <div class="lightbox-details">
-          <!-- 🟢 ส่วนเดิม: ชื่อ และ สถานะรับงาน -->
+          
+          <!-- ชื่อ และ สถานะรับงาน -->
           <header style="display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
               <h3 id="lightbox-profile-name-main" style="font-size: 22px; font-weight: 900; margin: 0; line-height: 1.2;"></h3>
@@ -604,24 +622,24 @@
             </div>
           </header>
           
-          <!-- 🟢 ส่วนเดิม: คำคม/สโลแกน และ แท็กสไตล์ -->
+          <!-- คำคม/สโลแกน และ แท็กสไตล์ -->
           <div id="lightboxQuote" class="lightbox-quote-card" style="display: none;"></div>
           <div id="lightboxTags" class="lightbox-tags-row"></div>
           
-          <!-- 🟢 ส่วนเดิม: กล่องสเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน (#F0ECF8) -->
+          <!-- กล่องสเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน (#F0ECF8) -->
           <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 4px;">
             <div id="lightboxDetailsCompact"></div>
           </div>
 
-          <!-- 🟢 ส่วนเดิม: คำบรรยายโปรไฟล์ -->
+          <!-- คำบรรยายโปรไฟล์ -->
           <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 4px;">
             <div id="lightboxDescriptionContent" style="font-size: 11.5px; color: var(--text-sub); line-height: 1.5; white-space: pre-wrap;"></div>
           </div>
 
-          <!-- 🟢 ส่วนเดิม: ปุ่มแอดไลน์จองคิวหลัก -->
+          <!-- ปุ่มแอดไลน์จองคิวหลัก -->
           <div id="line-btn-sticky-wrapper" style="margin-top: 10px; width: 100%;"></div>
 
-          <!-- 🟣 NEW: ส่วนต่อเติมด้านล่าง (ถอดแบบสีและสัดส่วนจากเว็บจริง 100%) -->
+          <!-- ส่วนต่อเติมเนื้อหาด้านล่าง -->
           <div id="lightboxExtendedSections" style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 16px;">
             
             <!-- 💰 1. อัตราค่าบริการ (เรทมาตรฐาน) -->
@@ -649,7 +667,7 @@
               <div id="lightboxRelatedMoreLink" style="text-align: center;"></div>
             </section>
 
-            <!-- 🛡️ 5. แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย (ตามหน้าจริง 100%) -->
+            <!-- 🛡️ 5. แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย -->
             <section id="lightboxSafetySection" style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
               <h4 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; text-align: center; margin: 0 0 8px 0;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h4>
               <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 13px; font-size: 11px; color: #64748B; line-height: 1.65;">

@@ -2669,3 +2669,113 @@ nav.floating-app-dock a.dock-item.dock-item-line i,
 .review-verified-badge i {
   color: #059669 !important; /* สีไอคอนติ๊กถูกเข้มขึ้น */
 }
+
+/* ขีดจับลากปัดปิด (Swipe Drag Handle) */
+.sheet-drag-pill-bar {
+  width: 46px;
+  height: 5px;
+  background: rgba(20, 15, 34, 0.25);
+  border-radius: 100px;
+  margin: 10px auto 8px auto;
+  cursor: grab;
+  touch-action: none;
+  position: relative;
+}
+/* เพิ่มขอบเขตสัมผัสรอบขีดลากอีก 15px ให้แตะติดง่ายแม้แตะไม่ตรงเป๊ะ */
+.sheet-drag-pill-bar::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: -20px;
+  right: -20px;
+}
+
+/* 🟢 จุดไข่ปลาบอกตำแหน่งรูปภาพ (แบบเดียวกับ IG / Tinder) */
+.lightbox-dots-wrapper {
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  gap: 6px !important;
+  z-index: 20 !important;
+  background: rgba(10, 5, 22, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  padding: 4px 8px !important;
+  border-radius: 100px !important;
+  pointer-events: none !important;
+}
+
+.gallery-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.2s ease !important;
+}
+
+.gallery-dot.active {
+  width: 16px !important;
+  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ==============================================================================
+  📲 NATIVE APP EXPERIENCE (Safe Area Insets + 60fps Spring + Tactile Feedback)
+   ============================================================================== */
+
+/* 1. ขอบจอมือถือ iPhone / Android ไม่ทับ Home Bar */
+.floating-app-dock {
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease !important;
+}
+
+/* 2. แอนิเมชันสปริงเปิดหน้าต่างโปรไฟล์ 60 FPS นุ่มนวลระดับ Native App */
+#lightbox {
+  transition: opacity 0.25s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+#lightbox-content-wrapper-el {
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.32s ease !important;
+  will-change: transform, opacity;
+}
+
+/* 3. สัมผัสปุ่มกดติดมือนุ่มนวล (Active Tactile Scale Feedback) */
+.filter-pill-tab:active,
+.dock-item:active,
+.profile-card-new:active,
+.vip-card-item:active,
+.btn-concierge-line:active,
+.sidebar-line-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.08s ease !important;
+}
+
+/* 4. ล็อกไม่ให้จอพื้นหลังเด้งหลุดตอนเปิดอ่านโปรไฟล์ */
+body.lightbox-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* 🟢 ปลดล็อกแถบ Stories ให้ใช้นิ้วปัดซ้าย-ขวาดูได้อิสระ ไม่ติดค้าง */
+.stories-scroll-container {
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.stories-scroll-container::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* แตะโดนแล้วหยุดวิ่งทันที เพื่อให้ใช้นิ้วปัดดูสตอรี่ได้สะดวก */
+.stories-scroll-container:active .stories-track-inner,
+.stories-track-inner:active {
+  animation-play-state: paused !important;
+}
+
+/* 🟢 แอนิเมชันไอคอน ⚡ หมุนติ้วสำหรับกล่องสถานะแอดมิน */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
