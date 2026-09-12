@@ -509,9 +509,12 @@ async function getSupabaseClient() {
   if (typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const transform = height 
-    ? `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face` 
-    : `f_auto,q_auto:good,w_${width},c_scale`;
+  const isThumb = width <= 150;
+
+  // 🟢 ล็อกเหลือ 2 ไซส์มาตรฐาน และใช้ q_auto:eco
+  const transform = isThumb 
+    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
@@ -544,17 +547,20 @@ async function getSupabaseClient() {
     ].filter(Boolean);
 
     let images = [...new Set(combinedPhotos)].map(img => {
+      let srcUrl = DEFAULT_FALLBACK_IMG;
+      let fullSrcUrl = DEFAULT_FALLBACK_IMG;
+
       if (typeof img === "object" && img !== null) {
-        const srcUrl = img.src || img.url || img.imagePath || img.image_url || DEFAULT_FALLBACK_IMG;
-        const fullSrcUrl = img.fullSrc || img.fullUrl || srcUrl;
-        return {
-          src: optimizeImg(srcUrl, 400, 560),
-          fullSrc: optimizeImg(fullSrcUrl, 1000, null)
-        };
+        srcUrl = img.src || img.url || img.imagePath || img.image_url || DEFAULT_FALLBACK_IMG;
+        fullSrcUrl = img.fullSrc || img.fullUrl || srcUrl;
+      } else if (typeof img === "string" && img.trim()) {
+        srcUrl = img.trim();
+        fullSrcUrl = img.trim();
       }
+
       return {
-        src: optimizeImg(img, 400, 560),
-        fullSrc: optimizeImg(img, 1000, null)
+        src: optimizeImg(srcUrl, 400, 560),
+        fullSrc: optimizeImg(fullSrcUrl, 1000, null)
       };
     });
 
