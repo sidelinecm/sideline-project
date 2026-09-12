@@ -196,9 +196,11 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
+  
+  // 🟢 ปรับ q_auto:eco และล็อก 2 ไซส์
   const transform = isThumb 
     ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
-    : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
@@ -873,7 +875,7 @@ const metaDescription = isNational
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
       const slug = encodeURIComponent(p.slug || p.id);
-      const img = optimizeImg(p.imagePath || p.image_url || "", 350, 490);
+      const img = optimizeImg(p.imagePath || p.image_url || "", 400, 560);
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
       
       return `

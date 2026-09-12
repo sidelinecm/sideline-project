@@ -122,13 +122,18 @@ function extractCleanNumber(rate) {
   return num;
 }
 
+// 🟢 1. ล็อกเหลือ 2 ขนาดตายตัว + ใช้ q_auto:eco เพื่อประหยัดโควตาสูงสุด
 function optimizeImg(imagePath, width = 400, height = 560) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
-  const transform = isThumb ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" : `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face`;
+
+  // บังคับใช้แค่ 2 ขนาดนี้เท่านั้น ไม่ให้สร้างขนาดอื่น (600, 800, 533) ให้เปลืองเครดิต
+  const transform = isThumb 
+    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
@@ -147,12 +152,9 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
+// 🟢 2. ปิดการสร้าง srcset ซ้ำซ้อน (คืนค่าว่าง ไม่ให้โหลดรูป 600w, 800w มาสูบแบนด์วิดท์)
 function generateSrcSet(imagePath) {
-  if (!imagePath || typeof imagePath !== "string") return "";
-  return [400, 600, 800].map(w => {
-    const h = Math.round(w * (800 / 600));
-    return `${optimizeImg(imagePath, w, h)} ${w}w`;
-  }).join(", ");
+  return "";
 }
 
 // 🟢 อัปเกรดเป็น Dynamic Persona Engine (5 สไตล์คาแรคเตอร์ + สุ่มโครงสร้างประโยคไม่ซ้ำกันกว่า 200 แบบ)
