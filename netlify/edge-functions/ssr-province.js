@@ -714,7 +714,21 @@ const metaDescription = isNational
       });
     }
 
-    if (profilesList.length > 0) { const displayProfiles = profilesList.slice(0, 12); schemaGraph.push({ "@type": "ItemList", "@id": `${canonicalUrl}#itemlist`, "numberOfItems": displayProfiles.length, // 👈 ปรับเป็น 12 เท่ากับ Array จริง Google ผ่านฉลุย "itemListElement": displayProfiles.map((p, idx) => ({ "@type": "ListItem", "position": idx + 1, "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`, "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}` })) }); }
+   // 🟢 2. เติม ItemList Schema
+    if (profilesList.length > 0) {
+      const displayProfiles = profilesList.slice(0, 12);
+      schemaGraph.push({
+        "@type": "ItemList",
+        "@id": `${canonicalUrl}#itemlist`,
+        "numberOfItems": displayProfiles.length,
+        "itemListElement": displayProfiles.map((p, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
+          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
+        }))
+      });
+    }
 
     // 🟢 3. เติม FAQPage Schema อัตโนมัติ (ดึงจาก seoData.faqs ตรงกับบนหน้าเว็บ 100%)
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
