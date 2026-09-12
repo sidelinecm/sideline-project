@@ -1524,8 +1524,8 @@ async function getSupabaseClient() {
     if (descContainer) descContainer.style.display = "block";
 
     // 7. ปุ่มแอดไลน์จองคิวหลัก
-    const rawLine = String(profile.lineId || profile.line_id || "ksLUWB89Y_").trim();
-    let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
+    const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
+    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
       lineUrl = rawLine;
     } else {
