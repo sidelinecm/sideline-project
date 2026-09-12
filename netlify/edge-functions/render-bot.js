@@ -128,9 +128,7 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
-  const transform = isThumb 
-    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
-    : "f_auto,q_auto:good,w_400,h_560,c_fill,g_face";
+  const transform = isThumb ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" : `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face`;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
@@ -326,12 +324,16 @@ const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNam
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 // 🟢 Meta Title และ Description สไตล์ High-End Lifestyle Companion เพื่อเพิ่ม CTR และเลี่ยงการโดน SafeSearch ตัด
 const pageTitle = `${displayName} เพื่อนเที่ยวฟิวแฟน${provinceNameThai} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน`;
-const metaDescription = `ทำความรู้จักกับ ${displayName} เพื่อนเที่ยวและผู้ดูแลสไตล์ฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีมัดจำ`;
+const metaDescription = `${displayName} เพื่อนเที่ยวฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
 
-   const schemaGraph = {
+    // 🟢 แปลงส่วนสูงและน้ำหนักเป็นตัวเลขจำนวนเต็มที่ปลอดภัย 100% (Fail-safe parsing)
+    const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
+    const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
+
+    const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
         {
@@ -363,8 +365,17 @@ const metaDescription = `ทำความรู้จักกับ ${display
             "caption": `${stripHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`
           },
           "url": canonicalUrl,
-          "height": `${String(height).replace(/\D/g, "")} cm`,
-          "weight": `${String(weight).replace(/\D/g, "")} kg`,
+          // 🟢 มาตรฐาน W3C / UN/CEFACT (CMT = Centimeter, KGM = Kilogram)
+          "height": {
+            "@type": "QuantitativeValue",
+            "value": cleanHeightNum,
+            "unitCode": "CMT"
+          },
+          "weight": {
+            "@type": "QuantitativeValue",
+            "value": cleanWeightNum,
+            "unitCode": "KGM"
+          },
           "knowsAbout": [
             "Girlfriend Experience (GFE)",
             "Personal Lifestyle Companion",

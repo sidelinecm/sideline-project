@@ -714,20 +714,7 @@ const metaDescription = isNational
       });
     }
 
-    // 🟢 2. เติม ItemList จริง (แก้ปัญหา Dangling Pointer #itemlist 100%)
-    if (profilesList.length > 0) {
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonicalUrl}#itemlist`,
-        "numberOfItems": profilesList.length,
-        "itemListElement": profilesList.slice(0, 12).map((p, idx) => ({
-          "@type": "ListItem",
-          "position": idx + 1,
-          "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
-          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-        }))
-      });
-    }
+    if (profilesList.length > 0) { const displayProfiles = profilesList.slice(0, 12); schemaGraph.push({ "@type": "ItemList", "@id": `${canonicalUrl}#itemlist`, "numberOfItems": displayProfiles.length, // 👈 ปรับเป็น 12 เท่ากับ Array จริง Google ผ่านฉลุย "itemListElement": displayProfiles.map((p, idx) => ({ "@type": "ListItem", "position": idx + 1, "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`, "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}` })) }); }
 
     // 🟢 3. เติม FAQPage Schema อัตโนมัติ (ดึงจาก seoData.faqs ตรงกับบนหน้าเว็บ 100%)
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
@@ -901,11 +888,7 @@ const metaDescription = isNational
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-    if (isNational) {
-      finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`);
-    } else {
-      finalHtml = finalHtml.replace(/<section id="featured-profiles"[^>]*>/i, `<section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading" style="display: none;">`);
-    }
+   if (isNational) { finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); } else { finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); }
 
     let displayAreaHtml = "";
     if (isNational) {
