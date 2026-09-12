@@ -305,7 +305,7 @@ export default async (req, context) => {
     const heroSrcSet = generateSrcSet(rawImage);
 
     const rawLineInput = (profile.line_id || profile.lineId || "").trim();
-    let lineId = "https://line.me/ti/p/ksLUWB89Y_";
+    let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
     if (matchUrl) {
       lineId = matchUrl[0];

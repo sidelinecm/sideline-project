@@ -33,7 +33,7 @@ get PURGE_SECRET() {
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
   DEFAULT_TELEPHONE: "+66926997044",
   SOCIAL_LINKS: [
-    "https://line.me/ti/p/ksLUWB89Y_",
+    "https://line.me/ti/p/u8Bz9HsaY8",
     "https://tiktok.com/@sidelinecm",
     "https://twitter.com/sidelinechiangmai",
     "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
@@ -995,13 +995,13 @@ const metaDescription = isNational
       const cleanPKey = pKey.replace(/[-_]/g, "");
       const realProvinceThai = PROVINCE_SEO_DATA[cleanPKey]?.name || PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || "เชียงใหม่";
 
-      let cleanLine = (p.lineId || p.line_id || p.line || "ksLUWB89Y_").toString().trim();
+      let cleanLine = (p.lineId || p.line_id || p.line || "u8Bz9HsaY8").toString().trim();
       const matchUrl = cleanLine.match(/(https?:\/\/[^\s]+)/i);
       if (matchUrl) {
         cleanLine = matchUrl[0];
       } else {
         const cleanHandle = cleanLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-        cleanLine = cleanHandle ? `https://line.me/ti/p/${cleanHandle}` : "https://line.me/ti/p/ksLUWB89Y_";
+        cleanLine = cleanHandle ? `https://line.me/ti/p/${cleanHandle}` : "https://line.me/ti/p/u8Bz9HsaY8";
       }
 
       const rawRateStr = (p.rate || p.price || "").toString().trim();
