@@ -196,29 +196,20 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
-  
-  // 🟢 ปรับ q_auto:eco และล็อก 2 ไซส์
-  const transform = isThumb 
-    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face"
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+  const targetW = isThumb ? 120 : 400;
+  const targetH = isThumb ? 120 : 560;
 
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIdx = cleanPath.indexOf("/upload/");
-    if (uploadIdx !== -1) {
-      const base = cleanPath.substring(0, uploadIdx + 8);
-      let rest = cleanPath.substring(uploadIdx + 8);
-      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${transform}/${rest}`;
-    }
-    return cleanPath;
+  // 1. หา URL รูปต้นฉบับใน Cloudinary
+  let rawUrl = cleanPath;
+  if (!cleanPath.startsWith("http")) {
+    rawUrl = `https://res.cloudinary.com/dyynjlbuj/image/upload/${cleanPath.replace(/^\/+/, "")}`;
+  } else if (cleanPath.includes("/upload/")) {
+    // ตัดขนาดเดิมออกเพื่อดึงไฟล์ต้นฉบับแท้ ๆ
+    rawUrl = cleanPath.replace(/\/upload\/(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "/upload/");
   }
 
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
-
-  let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  // 2. ส่งผ่าน wsrv.nl (Cloudflare) ฟรี 100% เซฟโควตา Cloudinary ตลอดชีพ
+  return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&w=${targetW}&h=${targetH}&fit=cover&a=top&output=webp&q=80`;
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
