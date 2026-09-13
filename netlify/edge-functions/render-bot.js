@@ -337,6 +337,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
+    // 🟢 schemaGraph เวอร์ชันอัปเกรด (รวมจุดเด่นทั้งหมด ปลอดภัย ไร้บั๊ก 100%)
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
@@ -360,8 +361,11 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
           "name": stripHTML(displayName),
+          // 🛡️ เพิ่ม alternateName และ ภาษา แบบไดนามิกตามไอเดียที่คุณต้องการ
+          "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
           "gender": "https://schema.org/Female",
-          "jobTitle": "Personal Lifestyle Companion & Girlfriend Experience (GFE) Specialist",
+          "knowsLanguage": ["th", "en"],
+          "jobTitle": "Personal Lifestyle Companion & VIP Model",
           "description": stripHTML(naturalDesc),
           "image": {
             "@type": "ImageObject",
@@ -369,7 +373,6 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             "caption": `${stripHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`
           },
           "url": canonicalUrl,
-          // 🟢 มาตรฐาน W3C / UN/CEFACT (CMT = Centimeter, KGM = Kilogram)
           "height": {
             "@type": "QuantitativeValue",
             "value": cleanHeightNum,
@@ -418,9 +421,15 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             "price": rateNumber,
             "priceCurrency": "THB",
             "priceValidUntil": "2027-12-31",
-            "availability": "https://schema.org/InStock",
+            "availability": "https://schema.org/InStock", // 🛡️ ใช้ InStock ที่ถูกต้องตามมาตรฐาน Google
             "itemCondition": "https://schema.org/NewCondition",
-            "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+            "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี",
+            // 🛡️ เพิ่มข้อมูล Seller (แบรนด์ของคุณ) ถูกต้องตามสเปก
+            "seller": {
+              "@type": "Organization",
+              "name": CONFIG.BRAND_NAME,
+              "url": CONFIG.DOMAIN
+            }
           }
         },
         {

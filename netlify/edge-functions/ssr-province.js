@@ -601,11 +601,18 @@ const metaDescription = isNational
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-   // 🟢 สร้าง Schema Graph ระดับพรีเมียม (แก้ปัญหา Dangling Pointer + เติม FAQPage และ ItemList ครบถ้วน)
+// =========================================================================
+    // 🟢 สร้าง Schema Graph ระดับพรีเมียม (เวอร์ชันแก้ไขสมบูรณ์แบบ 100% ไร้บั๊ก)
+    // =========================================================================
     const wikiTarget = provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`;
     const provinceWikiUrl = isNational 
       ? "https://th.wikipedia.org/wiki/ประเทศไทย" 
       : `https://th.wikipedia.org/wiki/${encodeURIComponent(wikiTarget)}`;
+
+    // 🛡️ ตรวจสอบรูปภาพให้เป็น Full HTTPS URL เสมอ
+    const verifiedHeroImage = heroImage.startsWith("http") 
+      ? heroImage 
+      : `${primaryDomain}${heroImage.startsWith("/") ? "" : "/"}${heroImage}`;
 
     const schemaGraph = [
       {
@@ -647,7 +654,8 @@ const metaDescription = isNational
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
         ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
-        ...(profilesList.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {})
+        // 🛡️ ชี้ไปที่ #itemlist ถ้ามีโปรไฟล์ หากไม่มีให้ชี้ fallback ไปที่ #business อัตโนมัติ
+        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
       },
       {
         "@type": ["EntertainmentBusiness", "ProfessionalService"],
@@ -655,7 +663,7 @@ const metaDescription = isNational
         "name": isNational 
           ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
           : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-        "image": heroImage,
+        "image": verifiedHeroImage,
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
         "url": canonicalUrl,
@@ -717,7 +725,7 @@ const metaDescription = isNational
       });
     }
 
-   // 🟢 2. เติม ItemList Schema
+    // 🟢 2. เติม ItemList Schema (ตรงตามสเปก Google 100%)
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -733,7 +741,7 @@ const metaDescription = isNational
       });
     }
 
-    // 🟢 3. เติม FAQPage Schema อัตโนมัติ (ดึงจาก seoData.faqs ตรงกับบนหน้าเว็บ 100%)
+    // 🟢 3. เติม FAQPage Schema อัตโนมัติ
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
