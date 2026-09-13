@@ -2781,270 +2781,233 @@ body.lightbox-open {
 }
 
 /* ==============================================================================
-   💎 MASTER ULTRA-SHARP & 3D DEPTH ENGINE
-   (เร่งรูปคมชัดระดับ Retina • ขอบกระจกสะท้อนแสง • การ์ดลอยเด่น 3 มิติ)
+   👑 FULL-BLEED LUXURY HERO + CRYSTAL GLASS COATING & LIGHT SWEEP
+   (รูปใหญ่เต็มตา + แสงวิ่งเคลือบแก้ว 3D + ชื่อติดขอบล่างจอพอดีเป๊ะ)
    ============================================================================== */
 
-/* ------------------------------------------------------------------------------
-   1. เร่งความคมชัดของรูปภาพทั้งเว็บ (RETINA SHARPNESS & VIBRANCY BOOST)
-   ------------------------------------------------------------------------------ */
-.profile-card-img,
-.vip-card-item img,
-#lightboxHeroImage {
-  /* บังคับเบราว์เซอร์เรนเดอร์ภาพแบบคมชัดสูงสุด ไม่เบลอ */
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  /* เร่งมิติแสงเงา ผิวขาวอมชมพูสดใส ลอยเด่นออกจากฉากหลัง */
-  filter: contrast(1.06) saturate(1.10) brightness(1.02) !important;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease !important;
-}
-
-/* ------------------------------------------------------------------------------
-   2. การ์ดโปรไฟล์ลอย 3 มิติ (3D FLOATING GLASS CARDS) - สัดส่วน 3:4
-   ------------------------------------------------------------------------------ */
-.profile-card-new,
-.vip-card-item {
-  aspect-ratio: 3 / 4.2 !important;
-  border-radius: 20px !important;
+/* 1. กล่องรูปภาพ: ใหญ่เต็มจอ 100% ไร้กรอบขาว ปลายโค้งมนหรูหรา */
+.lightbox-hero-container {
+  position: relative !important;
+  width: 100% !important;
+  margin: 0 !important; /* ชิดขอบบนสุดทันที รูปใหญ่เต็มจอ */
+  height: 64dvh !important; /* 👈 ความสูง 64% ของหน้าจอ เพื่อให้ชื่อน้องอยู่ติดขอบล่างพอดีเป๊ะ */
+  min-height: 430px !important;
+  max-height: 580px !important;
+  background: #0B0716 !important;
+  border-radius: 0 0 30px 30px !important;
   overflow: hidden !important;
-  background-color: #FFFFFF !important;
-  /* เส้นขอบแก้วบางเฉียบ 1px สะท้อนแสงไฟ (ไม่ใช่กรอบหนาเตอะ) */
-  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
-  outline: 1px solid rgba(251, 113, 133, 0.25) !important;
-  /* 🟢 อัดเงาลอย 3 ชั้น: เงาสีโรสโกลด์ฟุ้งรอบตัว + เงาลึกคมกริบ */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  /* เงาออร่าลอยเด่น 3 มิติ */
   box-shadow: 
-    0 20px 40px -10px rgba(225, 29, 72, 0.18),
-    0 10px 20px -5px rgba(124, 58, 237, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.04) !important;
-  transform: translateZ(0) !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease !important;
+    0 20px 50px -10px rgba(15, 23, 42, 0.4),
+    0 10px 25px -5px rgba(225, 29, 72, 0.25) !important;
 }
 
-/* จังหวะที่แตะหรือชี้เมาส์: การ์ดลอยพุ่งขึ้นมาหานิ้ว */
-.profile-card-new:hover,
-.profile-card-new:active,
-.vip-card-item:hover {
-  transform: translateY(-6px) scale(1.02) translateZ(0) !important;
-  box-shadow: 
-    0 28px 55px -10px rgba(225, 29, 72, 0.32),
-    0 14px 28px -4px rgba(124, 58, 237, 0.18) !important;
-  outline-color: #E11D48 !important;
+/* 2. ตัวรูปภาพ: สวย คมชัด ผิวผ่องอมชมพูระดับ Retina */
+#lightboxHeroImage {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 0 0 30px 30px !important;
+  border: none !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  filter: contrast(1.05) saturate(1.08) brightness(1.02) !important;
 }
 
-/* ✨ แสงประกายไฟวิ่งพาดเฉียงผ่านรูปภาพ (Specular Reflection Sweep) */
-.profile-card-new::after,
-.vip-card-item::after {
+/* ------------------------------------------------------------------------------
+   ✨ 3. เอฟเฟกต์แสงวิ่งพาดผ่านแบบเคลือบแก้ว (SPECULAR GLASS SHIMMER SWEEP)
+   ------------------------------------------------------------------------------ */
+.lightbox-hero-container::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -140% !important;
+  width: 65% !important;
+  height: 100% !important;
+  /* ลำแสงขาวประกายคริสตัล วิ่งเฉียง 25 องศา */
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.05) 75%,
+    transparent 100%
+  ) !important;
+  transform: skewX(-25deg) !important;
+  z-index: 8 !important;
+  pointer-events: none !important;
+  animation: crystalGlassSweep 3.5s infinite cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* แอนิเมชันแสงวิ่ง: พุ่งผ่านอย่างนุ่มนวล แล้วพักจังหวะ */
+@keyframes crystalGlassSweep {
+  0% { left: -140%; opacity: 0; }
+  10% { opacity: 1; }
+  42% { left: 160%; opacity: 0.85; }
+  43%, 100% { left: 160%; opacity: 0; }
+}
+
+/* ==============================================================================
+   👑 ULTRA-MAX VIP HERO (รูปใหญ่ยักษ์ 78% + แสงวิ่งเคลือบแก้ว + ชื่อติดขอบล่างจอ)
+   ============================================================================== */
+
+/* 1. ขยายรูปให้ใหญ่ยักษ์ 78% ของหน้าจอ (ใหญ่เด่นเต็มตาสะใจ 100%) */
+.lightbox-hero-container {
+  position: relative !important;
+  width: 100% !important;
+  margin: 0 !important;
+  height: 77dvh !important; /* 👈 ดันความสูงขึ้นเป็น 77% ของจอ รูปจะใหญ่มาก */
+  min-height: 520px !important;
+  background: #0B0716 !important;
+  border-radius: 0 0 32px 32px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.45) !important;
+}
+
+/* 2. ตัวรูปภาพ: เต็มจอ คมชัดระดับ Retina */
+#lightboxHeroImage {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 0 0 32px 32px !important;
+  border: none !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  filter: contrast(1.05) saturate(1.08) brightness(1.02) !important;
+}
+
+/* ------------------------------------------------------------------------------
+   ✨ 3. ลำแสงวิ่งพาดผ่านแบบเคลือบแก้ว (CRYSTAL GLASS SHIMMER SWEEP ชัดเจน 100%)
+   ------------------------------------------------------------------------------ */
+.lightbox-hero-container::before {
   content: "" !important;
   position: absolute !important;
   top: 0 !important;
   left: -150% !important;
   width: 70% !important;
   height: 100% !important;
+  /* ลำแสงขาวเงินประกายแวววาว คมชัดเห็นได้ด้วยตาเปล่า */
   background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.45) 50%,
-    transparent 100%
+    115deg,
+    transparent 15%,
+    rgba(255, 255, 255, 0.15) 35%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0.15) 65%,
+    transparent 85%
   ) !important;
   transform: skewX(-25deg) !important;
-  z-index: 6 !important;
+  z-index: 10 !important;
   pointer-events: none !important;
-  transition: left 0.85s ease !important;
+  animation: crystalGlassSweep 3.2s infinite cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-.profile-card-new:hover::after,
-.vip-card-item:hover::after {
-  left: 170% !important;
-}
-
-/* แถบกระจกรมดำใต้รูป: โปร่งแสงพอดีให้อ่านชื่อง่าย แต่รูปยังสว่าง 85% */
-.profile-card-gradient-overlay,
-.vip-card-overlay {
-  background: linear-gradient(
-    to top, 
-    rgba(15, 23, 42, 0.85) 0%, 
-    rgba(15, 23, 42, 0.35) 26%, 
-    transparent 60%
-  ) !important;
-  z-index: 5 !important;
-}
-
-/* ป้ายราคา White-Gold Pill ในการ์ด: คมชัด สวยแพง */
-.profile-card-price {
-  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
-  color: #92400E !important;
-  border: 1px solid #F59E0B !important;
-  border-radius: 8px !important;
-  font-weight: 900 !important;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25) !important;
-  text-shadow: none !important;
+@keyframes crystalGlassSweep {
+  0% { left: -150%; opacity: 0; }
+  10% { opacity: 1; }
+  45% { left: 160%; opacity: 0.9; }
+  46%, 100% { left: 160%; opacity: 0; }
 }
 
 /* ------------------------------------------------------------------------------
-   3. รื้อกล่องบวมด้านบนทิ้ง ดันรูปขึ้นมาเป็นพระเอก (HERO RE-ENGINEERING)
+   💎 4. เลเยอร์เคลือบแก้วคริสตัลเงาแวววาว (GLASS COATING)
    ------------------------------------------------------------------------------ */
-/* ปลดกรอบสี่เหลี่ยมสีเหลืองหนาเตอะทิ้ง ให้ฉากหลังกลืนเนียนตา */
-.hero-section,
-.hero-section.fmh-hero-surface {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 8px 10px 4px 10px !important;
-  margin: 0 auto 6px auto !important;
-  gap: 6px !important;
-}
-
-/* ซ่อนคำบรรยายยาวพรืดที่ดันรูปตกขอบจอ */
-.hero-description-inset,
-.hero-safety-pill {
-  display: none !important;
-}
-
-/* หัวข้อคมชัด กะทัดรัด */
-.h1-line-1 {
-  font-size: clamp(17px, 5vw, 22px) !important;
-  font-weight: 900 !important;
-  color: #0F172A !important;
-}
-
-.h1-line-2 {
-  font-size: clamp(15px, 4.5vw, 19px) !important;
-  font-weight: 900 !important;
-  background: linear-gradient(135deg, #1E1B4B 0%, #D946EF 50%, #E11D48 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-/* กล่องสถิติ 3 ช่อง: ยุบให้เป็นแผ่นแคปซูลกระจกแก้วมินิมอล ไม่เกะกะ */
-.hero-stats-pills-row {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(251, 113, 133, 0.25) !important;
-  border-radius: 100px !important;
-  padding: 4px 12px !important;
-  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.08) !important;
-  max-width: 380px !important;
-  gap: 4px !important;
-  margin-top: 2px !important;
-}
-
-.stat-pill-item {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 2px 4px !important;
-  flex-direction: row !important;
-  gap: 4px !important;
-}
-
-.stat-pill-item i {
-  display: none !important;
-}
-
-.stat-pill-item strong.stat-number {
-  font-size: 13.5px !important;
-  color: #E11D48 !important;
-}
-
-.stat-pill-item span.stat-label {
-  font-size: 9.5px !important;
-  color: #475569 !important;
-}
-
-/* ดึงแถบรูปน้อง HOT ขึ้นมาประชิดทันที */
-.hot-swiper-section {
-  margin-top: 8px !important;
-}
-
-/* ------------------------------------------------------------------------------
-   4. หน้าต่างโปรไฟล์ขนาดใหญ่ (MODAL LUXURY OVERHAUL) - แก้ปัญหาแผ่นพับตัวหนังสือ
-   ------------------------------------------------------------------------------ */
-#lightbox-content-wrapper-el {
-  background: #FFFFFF !important;
-  border-radius: 28px 28px 0 0 !important;
-  box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.25) !important;
-}
-
-/* รูปใหญ่ใน Modal: โค้งมน ลอยเด่น */
-#lightboxHeroImage {
-  border-radius: 20px !important;
-  border: 2px solid #FFFFFF !important;
-  box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.25) !important;
-}
-
-/* กล่องเรทราคา 3 ช่อง: ทำเป็นมินิการ์ดแก้วสีขาวคลีน */
-#lightboxRatesSection {
-  background: #FFF9FA !important;
-  border: 1.5px solid rgba(251, 113, 133, 0.25) !important;
-  border-radius: 18px !important;
-  padding: 12px !important;
-  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.05) !important;
-}
-
-#lightboxRatesGrid > div {
-  background: #FFFFFF !important;
-  border: 1px solid rgba(251, 113, 133, 0.2) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
-}
-
-/* กล่อง FAQ: สไตล์ Accordion หรู คมชัด สบายตา ไม่ถมสีชมพูทึบ */
-#lightboxFaqList > div {
-  background: #F8FAFC !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-radius: 14px !important;
-  padding: 12px 14px !important;
-}
-
-#lightboxFaqList h5 {
-  color: #0F172A !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  margin-bottom: 4px !important;
-}
-
-#lightboxFaqList p {
-  color: #475569 !important;
-  font-size: 11.5px !important;
-  line-height: 1.6 !important;
-}
-
-/* ล้างกรอบสี่เหลี่ยมสีชมพูหนาในกล่องสเปกออก */
-.spec-box, 
-.bento-stat-tile {
-  background: #F8FAFC !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-radius: 14px !important;
-}
-
-/* ------------------------------------------------------------------------------
-   5. ปุ่มจองคิว LINE: แสงไฟวิ่งผ่านตลอดเวลา (INFINITE SHIMMER LIGHT BEAM)
-   ------------------------------------------------------------------------------ */
-.sidebar-line-btn,
-.lightbox-line-cta,
-.btn-concierge-line {
-  position: relative !important;
-  overflow: hidden !important;
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35) !important;
-}
-
-.sidebar-line-btn::before,
-.lightbox-line-cta::before,
-.btn-concierge-line::before {
+.lightbox-hero-container::after {
   content: "" !important;
   position: absolute !important;
-  top: 0 !important;
-  left: -120% !important;
-  width: 50% !important;
-  height: 100% !important;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent) !important;
-  transform: skewX(-25deg) !important;
-  animation: btnShimmerSweep 2.8s infinite ease-in-out !important;
+  inset: 0 !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.22) 0%,
+    transparent 15%,
+    transparent 70%,
+    rgba(15, 23, 42, 0.6) 100%
+  ) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(0, 0, 0, 0.4) !important;
   pointer-events: none !important;
+  z-index: 6 !important;
 }
 
-@keyframes btnShimmerSweep {
-  0% { left: -120%; }
-  35%, 100% { left: 160%; }
+/* 5. ปรับให้แถบรูปย่อ 4 รูป ลอยอยู่บนขอบล่างของรูปภาพ (ไม่กินที่แนวตั้ง) */
+#lightboxThumbnailStrip {
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 20 !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.lightbox-thumb-item {
+  width: 42px !important;
+  height: 52px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.lightbox-thumb-item.active {
+  border: 2px solid #FF1493 !important;
+  transform: scale(1.08) !important;
+}
+
+/* 6. แถบชื่อน้อง: วางประชิดขอบล่างจอพอดีเป๊ะ */
+.lightbox-details {
+  padding: 14px 16px 40px 16px !important;
+}
+
+.lightbox-details header {
+  margin-bottom: 24px !important; /* เว้นระยะห่าง เพื่อดันให้กล่องสเปกด้านล่างหลุดลงไปใต้จอ */
+}
+
+#lightbox-profile-name-main {
+  font-size: 24px !important;
+}
+
+/* 7. ปุ่มปิดและโลโก้ลอยตัวบนรูปภาพ */
+.lightbox-close-circle-btn {
+  top: 14px !important;
+  right: 14px !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #FFFFFF !important;
+  z-index: 85 !important;
+}
+
+.lightbox-top-brand {
+  top: 14px !important;
+  left: 14px !important;
+  z-index: 85 !important;
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(14px) !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.sheet-drag-pill-bar {
+  top: 6px !important;
+  width: 44px !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  z-index: 90 !important;
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
 }

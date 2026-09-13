@@ -505,18 +505,21 @@ async function getSupabaseClient() {
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
+  const isFull = width >= 800; // 👈 1. ตรวจจับรูปใหญ่ใน Lightbox Modal
 
-  // ล็อกเหลือแค่ 2 ไซส์มาตรฐาน และบีบอัดระดับ eco ประหยัดโควตาสูงสุด
-  const transform = isThumb 
-    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+  // 🟢 ปรับคุณภาพ 3 ระดับ: เล็ก (120), การ์ดหน้าแรก (400x560), รูปใหญ่ใน Modal (800x1120 คมชัดระดับ HD แท้)
+  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+  if (isThumb) {
+    transform = "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face";
+  } else if (isFull) {
+    transform = "f_auto,q_auto:good,w_800,h_1120,c_fill,g_face"; // 👈 คมชัดระดับ Retina ไม่เบลอ ไม่แตก
+  }
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์ขนาดเก่าออกทั้งหมด แล้วใส่ขนาดที่ฟิกไว้เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
       return `${base}${transform}/${rest}`;
     }
@@ -1741,58 +1744,108 @@ async function getSupabaseClient() {
     });
   };
 
-  // 🟢 ปิดสไลด์ลงนุ่มๆ + ปลดล็อกพื้นหลัง
+  // ==============================================================================
+  // 🟢 ฟังก์ชันปิดหน้าต่างโปรไฟล์ LIGHTBOX (เวอร์ชันสมบูรณ์แบบสูงสุด 100% ไร้รอยต่อ)
+  // ==============================================================================
   window.closeLightboxModal = function (updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
-    if (lightboxEl) {
-      if (contentWrapperEl) {
-        contentWrapperEl.style.transform = "translateY(40px) scale(0.97)";
-        contentWrapperEl.style.opacity = "0";
-      }
-      lightboxEl.style.opacity = "0";
-      
-      setTimeout(() => {
-        lightboxEl.style.display = "none";
-        lightboxEl.classList.remove("active");
-        lightboxEl.style.pointerEvents = "none";
-        lightboxEl.setAttribute("aria-hidden", "true");
-        document.body.classList.remove("lightbox-open");
-      }, 240);
+    if (!lightboxEl) return;
 
-      if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
-        const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
-        const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+    // 🛡️ 1. ป้องกันการกดปิดซ้ำซ้อนขณะกำลังเล่นแอนิเมชัน (Debounce Guard)
+    if (lightboxEl.dataset.isClosing === "true") return;
+    lightboxEl.dataset.isClosing = "true";
 
-        if (slug && slug !== "national" && slug !== "all") {
-          history.pushState(null, "", `/location/${slug}`);
-          if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
-
-          // 🟢 เพิ่มตรงนี้: คืนค่า Title และ Canonical กลับเป็นหน้าจังหวัด
-          const provName = appState.provincesMap.get(slug) || "เชียงใหม่";
-          document.title = isEN 
-            ? `${provName} Escorts & Companions | FirstModelHub` 
-            : `เพื่อนเที่ยว${provName} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
-
-          if (canonicalLink) {
-            canonicalLink.href = `https://firstmodelhub.com/location/${slug}`;
-          }
-        } else {
-          history.pushState(null, "", isEN ? "/index-en" : "/");
-          if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-
-          // 🟢 เพิ่มตรงนี้: คืนค่า Title และ Canonical กลับเป็นหน้าหลัก
-          document.title = isEN 
-            ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-            : "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
-
-          if (canonicalLink) {
-            canonicalLink.href = "https://firstmodelhub.com/";
-          }
-        }
-      }
-      appState.currentProfileSlug = null;
+    // 🛡️ 2. แอนิเมชันสไลด์ลงนุ่มนวล 60 FPS
+    if (contentWrapperEl) {
+      contentWrapperEl.style.transition = "transform 0.24s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease";
+      contentWrapperEl.style.transform = "translateY(40px) scale(0.97)";
+      contentWrapperEl.style.opacity = "0";
     }
+    lightboxEl.style.transition = "opacity 0.24s ease";
+    lightboxEl.style.opacity = "0";
+
+    // 🛡️ 3. ปลดล็อกการเลื่อนหน้าเว็บทันที
+    document.body.classList.remove("lightbox-open");
+    document.body.style.overflow = "";
+
+    // 🛡️ 4. ซ่อนองค์ประกอบเมื่อแอนิเมชันจบ พร้อมรีเซ็ต Scroll
+    setTimeout(() => {
+      lightboxEl.style.display = "none";
+      lightboxEl.classList.remove("active");
+      lightboxEl.style.pointerEvents = "none";
+      lightboxEl.setAttribute("aria-hidden", "true");
+      lightboxEl.dataset.isClosing = "false";
+
+      const scrollBody = document.getElementById("lightboxScrollBody");
+      if (scrollBody) scrollBody.scrollTop = 0;
+    }, 240);
+
+    // 🛡️ 5. จัดการ URL และคืนค่า SEO Meta Tags ทั้งหมดให้ตรงกับหน้าเดิม 100%
+    if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
+      const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
+      const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+      const defaultHeroImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined") ? DEFAULT_FALLBACK_IMG : "https://firstmodelhub.com/images/firstmodelhub.webp";
+
+      let targetUrl = "";
+      let targetTitle = "";
+      let targetDesc = "";
+
+      if (slug && slug !== "national" && slug !== "all") {
+        targetUrl = `/location/${slug}`;
+        const provName = appState.provincesMap.get(slug) || "เชียงใหม่";
+
+        targetTitle = isEN 
+          ? `${provName} Escorts & Companions | FirstModelHub` 
+          : `เพื่อนเที่ยว${provName} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
+
+        targetDesc = isEN
+          ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
+          : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provName} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+
+        if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
+      } else {
+        targetUrl = isEN ? "/index-en" : "/";
+        
+        targetTitle = isEN 
+          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+          : "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
+
+        targetDesc = isEN
+          ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
+          : "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า";
+
+        if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+      }
+
+      // ⚡ สำคัญ: ใช้ replaceState แทน pushState เพื่อแก้ปัญหาปุ่ม Back วนลูป 100%
+      history.replaceState(null, "", targetUrl);
+
+      // 🟢 คืนค่า Title
+      document.title = targetTitle;
+
+      // 🟢 คืนค่า Canonical Link
+      const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "" : targetUrl}`;
+      if (canonicalLink) canonicalLink.href = fullCanonical;
+
+      // 🟢 คืนค่า Meta Tags (Description และ OpenGraph) ป้องกันรูปและข้อมูลน้องค้าง
+      const metaDescEl = document.querySelector('meta[name="description"]');
+      if (metaDescEl) metaDescEl.setAttribute("content", targetDesc);
+
+      const ogTitleEl = document.querySelector('meta[property="og:title"]');
+      if (ogTitleEl) ogTitleEl.setAttribute("content", targetTitle);
+
+      const ogDescEl = document.querySelector('meta[property="og:description"]');
+      if (ogDescEl) ogDescEl.setAttribute("content", targetDesc);
+
+      const ogUrlEl = document.querySelector('meta[property="og:url"]');
+      if (ogUrlEl) ogUrlEl.setAttribute("content", fullCanonical);
+
+      const ogImgEl = document.querySelector('meta[property="og:image"]');
+      if (ogImgEl) ogImgEl.setAttribute("content", defaultHeroImg);
+    }
+
+    appState.currentProfileSlug = null;
   };
 
   // 🟢 ระบบ Swipe-to-Dismiss อัจฉริยะ (แยกแกน X กับแกน Y ชัดเจน ไม่ตีกับการปัดเปลี่ยนรูป)
