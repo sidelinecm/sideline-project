@@ -128,22 +128,33 @@ function optimizeImg(imagePath, width = 400, height = 560) {
 
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
-  const targetW = isThumb ? 120 : 400;
-  const targetH = isThumb ? 120 : 560;
 
-  // 1. หา URL รูปต้นฉบับใน Cloudinary
-  let rawUrl = cleanPath;
-  if (!cleanPath.startsWith("http")) {
-    rawUrl = `https://res.cloudinary.com/dyynjlbuj/image/upload/${cleanPath.replace(/^\/+/, "")}`;
-  } else if (cleanPath.includes("/upload/")) {
-    // ตัดขนาดเดิมออกเพื่อดึงไฟล์ต้นฉบับแท้ ๆ
-    rawUrl = cleanPath.replace(/\/upload\/(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "/upload/");
+  // ล็อกเหลือแค่ 2 ไซส์มาตรฐาน และบีบอัดระดับ eco ประหยัดโควตาสูงสุด
+  const transform = isThumb 
+    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const base = cleanPath.substring(0, uploadIdx + 8);
+      let rest = cleanPath.substring(uploadIdx + 8);
+      // ล้างพารามิเตอร์ขนาดเก่าออกทั้งหมด แล้วใส่ขนาดที่ฟิกไว้เข้าไปแทน
+      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      return `${base}${transform}/${rest}`;
+    }
+    return cleanPath;
   }
 
-  // 2. ส่งผ่าน wsrv.nl (Cloudflare) ฟรี 100% เซฟโควตา Cloudinary ตลอดชีพ
-  return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&w=${targetW}&h=${targetH}&fit=cover&a=top&output=webp&q=80`;
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
+  }
+
+  let formatted = cleanPath.replace(/^\/+/, "");
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
-// 🟢 อัปเกรดเป็น Dynamic Persona Engine (5 สไตล์คาแรคเตอร์ + สุ่มโครงสร้างประโยคไม่ซ้ำกันกว่า 200 แบบ)
+
+
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
   const customBio = p.description && p.description.trim().length > 10 
     ? ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"` 
