@@ -3011,3 +3011,37 @@ body.lightbox-open {
   transform: translateX(-50%) !important;
   margin: 0 !important;
 }
+
+.lightbox-image-column {
+  position: relative !important;
+}
+
+.lightbox-hero-container {
+  height: 75dvh !important;
+  min-height: 500px !important;
+  border-radius: 0 0 32px 32px !important;
+}
+
+/* บังคับแถบ 4 รูป ให้ลอยทับอยู่บนรูปภาพด้านล่าง พื้นหลังใส ไม่กินพื้นที่แนวตั้ง */
+#lightboxThumbnailStrip {
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 25 !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.lightbox-thumb-item {
+  width: 44px !important;
+  height: 54px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden !important;
+}

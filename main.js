@@ -567,9 +567,24 @@ async function getSupabaseClient() {
       images.push({ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG });
     }
 
-    let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "chiangmai").toString().toLowerCase().trim();
-    if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
+    let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
+    
+    // ตรวจจับจังหวัดจากข้อความ ป้องกันตกไปอยู่เชียงใหม่ซ้ำ
+    const fullText = `${raw.location || ''} ${raw.provinceThai || ''} ${raw.description || ''} ${raw.name || ''}`.toLowerCase();
+    if (fullText.includes("ขอนแก่น") || fullText.includes("กังสดาล") || fullText.includes("มข")) pKey = "khonkaen";
+    else if (fullText.includes("กรุงเทพ") || fullText.includes("กทม") || fullText.includes("สุขุมวิท") || fullText.includes("รัชดา")) pKey = "bangkok";
+    else if (fullText.includes("ชลบุรี") || fullText.includes("พัทยา") || fullText.includes("บางแสน")) pKey = "chonburi";
+    else if (fullText.includes("ภูเก็ต") || fullText.includes("ป่าตอง")) pKey = "phuket";
+    else if (fullText.includes("เชียงราย") || fullText.includes("บ้านดู่")) pKey = "chiangrai";
+    else if (fullText.includes("ลำปาง")) pKey = "lampang";
+    else if (fullText.includes("ลำพูน")) pKey = "lamphun";
+    else if (fullText.includes("พิษณุโลก") || fullText.includes("มน.")) pKey = "phitsanulok";
+    else if (fullText.includes("อุดร")) pKey = "udonthani";
+    else if (fullText.includes("เชียงใหม่") || fullText.includes("นิมมาน") || fullText.includes("เจ็ดยอด")) pKey = "chiangmai";
+    else if (!pKey || pKey === "no_province") pKey = "chiangmai";
 
+    if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
+    if (pKey === "khon-kaen") pKey = "khonkaen";
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
     
     // 🟢 แก้ไข: ใช้ parseRateToNumber ป้องกันบั๊กราคา 15.-
@@ -677,13 +692,24 @@ async function getSupabaseClient() {
     const vipSwiperEl = document.getElementById("vip-swiper-container");
     if (!vipSwiperEl || vipSwiperEl.children.length > 0) return;
     
-    let hotProfiles = appState.allProfiles.filter(p => {
+    // 🟢 ดึงเฉพาะคนสไตล์ฟิวแฟน
+    let hotCandidate = appState.allProfiles.filter(p => {
       const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
       return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
     });
 
-    hotProfiles = hotProfiles.length === 0 ? appState.allProfiles.slice(0, 10) : hotProfiles.slice(0, 10);
+    if (hotCandidate.length === 0) hotCandidate = appState.allProfiles;
 
+    // 🛡️ กรองตัดคนซ้ำทิ้งเด็ดขาด (ชื่อเดียวกัน หรือรูปเดียวกัน จะโผล่ได้แค่รอบเดียว)
+    const seenHotNames = new Set();
+    const hotProfiles = [];
+    for (const p of hotCandidate) {
+      const cleanName = (p.displayName || p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+      if (seenHotNames.has(cleanName)) continue; // ถ้าชื่อซ้ำข้ามทันที
+      seenHotNames.add(cleanName);
+      hotProfiles.push(p);
+      if (hotProfiles.length >= 10) break;
+    }
     vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
       const rankBadge = `#${idx + 1} HOT`;
       const pKey = (p.provinceKey || "national").toLowerCase();
@@ -2336,11 +2362,19 @@ async function getSupabaseClient() {
           });
         }
 
-        // 2. ⚡ ถ้ามีข้อมูลโปรไฟล์จาก SSR ให้ใช้ทันที (จบการทำงาน 0-Query ไม่ยิง Database ซ้ำ)
-        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
-          appState.allProfiles = window.profilesData.map(normalizeProfile).filter(Boolean);
+       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+          const seenImgs = new Set();
+          const cleanProfiles = [];
+          for (const raw of window.profilesData) {
+            const img = (raw.imagePath || raw.image_url || "").trim().toLowerCase();
+            let imgKey = img ? img.split("?")[0].split("/").pop().replace(/\.(webp|jpg|jpeg|png|avif)$/i, "") : "";
+            if (imgKey && seenImgs.has(imgKey)) continue; // ข้ามรูปซ้ำ
+            if (imgKey) seenImgs.add(imgKey);
+            cleanProfiles.push(raw);
+          }
+          appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
-          return true; // 🟢 ดึงข้อมูลเสร็จสิ้นทันที
+          return true;
         }
 
         // 3. Fallback: กรณีเปิดหน้าเว็บที่ไม่มี SSR จริงๆ ค่อยขอข้อมูลจาก Supabase
@@ -2363,7 +2397,16 @@ async function getSupabaseClient() {
         }
 
         if (profilesRes.data && profilesRes.data.length > 0) {
-          appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
+          // 🛡️ กรองตัดแถวที่ชื่อน้องซ้ำกันทิ้งตั้งแต่ต้นทาง
+          const seenNames = new Set();
+          const cleanList = profilesRes.data.filter(p => {
+            const cName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+            if (!cName || seenNames.has(cName)) return false;
+            seenNames.add(cName);
+            return true;
+          });
+
+          appState.allProfiles = cleanList.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
         }
