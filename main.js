@@ -1343,13 +1343,20 @@ async function getSupabaseClient() {
     }, { passive: true });
   }
 
+  // ==============================================================================
+  // 🟢 ฟังก์ชันเปิดหน้าต่างโปรไฟล์ LIGHTBOX (ฉบับสมบูรณ์: ซิงค์ SEO + Native UX)
+  // ==============================================================================
   window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (!lightboxEl) return;
 
-    // 🔒 ประกาศตัวแปรหลักทั้งหมดที่บนสุด (ป้องกัน ReferenceError 100%)
+    // 🔒 1. ประกาศตัวแปรหลักและ Fallback ป้องกัน ReferenceError 100%
+    const fallbackImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined") 
+      ? DEFAULT_FALLBACK_IMG 
+      : "https://firstmodelhub.com/images/firstmodelhub.webp";
+
     const isEn = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
     const cleanName = (profile.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "").trim();
     const displayName = isEn ? cleanName : `น้อง${cleanName}`;
@@ -1357,11 +1364,45 @@ async function getSupabaseClient() {
     const pProvText = pProvinceThai; 
     const pLocation = profile.location || pProvinceThai;
     const pLocText = pLocation;     
+    const primaryZone = pLocation.replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "").split(/[,/]|และใกล้/)[0].trim() || pProvText;
+    const profileSlug = encodeURIComponent(profile.slug || profile.id);
+    const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    // 1. ตรวจสอบสถานะรับงาน
+    // 🟢 2. ซิงค์ SEO HEAD (แก้ปัญหา Title/Meta/Canonical ค้างหน้าเดิม)
+    const dynamicTitle = isEn
+      ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
+      : `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
+    document.title = dynamicTitle;
+
+    const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      canonicalLink.href = canonicalProfileUrl;
+    }
+
+    const dynamicDesc = isEn
+      ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
+      : `${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${pLocText} จ.${pProvText} สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} การันตีตัวจริง 100% ปลอดภัยนัดพบจ่ายหน้างาน ไร้มัดจำ`;
+
+    const metaDescEl = document.querySelector('meta[name="description"]');
+    if (metaDescEl) metaDescEl.setAttribute("content", dynamicDesc);
+
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.setAttribute("content", dynamicTitle);
+
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.setAttribute("content", dynamicDesc);
+
+    const ogUrlEl = document.querySelector('meta[property="og:url"]');
+    if (ogUrlEl) ogUrlEl.setAttribute("content", canonicalProfileUrl);
+
+    const heroImgUrl = (profile.images && profile.images[0] && (profile.images[0].fullSrc || profile.images[0].src)) || profile.imagePath || fallbackImg;
+    const ogImgEl = document.querySelector('meta[property="og:image"]');
+    if (ogImgEl) ogImgEl.setAttribute("content", heroImgUrl);
+
+    // 🟢 3. ตรวจสอบสถานะรับงาน
     const isAvail = profile.isAvailable !== undefined
-      ? profile.isAvailable
-      : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
+      ? Boolean(profile.isAvailable)
+      : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(profile.availability || "").toLowerCase().includes(s));
     
     const availStatus = isEn 
       ? (isAvail ? "Available Now" : "Inquire Schedule") 
@@ -1369,7 +1410,7 @@ async function getSupabaseClient() {
       
     const statusColor = isAvail ? "#059669" : "#E11D48";
 
-    // 2. ชื่อ และ ป้ายสถานะ
+    // 🟢 4. ชื่อ และ ป้ายสถานะ
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
@@ -1388,24 +1429,24 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 3. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots)
+    // 🟢 5. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots Swipe)
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
-      : [{ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG }];
+      : [{ src: fallbackImg, fullSrc: fallbackImg }];
 
     currentActivePhotoList = images;
     currentActivePhotoIdx = 0;
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
-      heroImg.src = images[0]?.fullSrc || images[0]?.src || DEFAULT_FALLBACK_IMG;
+      heroImg.src = images[0]?.fullSrc || images[0]?.src || fallbackImg;
       heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
       heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
       heroImg.style.transform = "scale(1)";
       heroImg.style.opacity = "1";
     }
 
-    // สร้างจุดไข่ปลา (Dots Indicator) เหนือรูปภาพแบบ IG/Tinder
+    // สร้างจุดไข่ปลา (Dots Indicator) เหนือรูปภาพ
     const heroContainer = document.querySelector(".lightbox-hero-container");
     let dotsContainer = document.getElementById("lightbox-dots-indicator");
     if (heroContainer) {
@@ -1425,20 +1466,23 @@ async function getSupabaseClient() {
       }
     }
 
+    // แถบรูปย่อ Thumbnails ด้านล่าง
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
       if (images.length > 1) {
         thumbStrip.style.display = "flex";
         thumbStrip.innerHTML = images.map((img, idx) => `
           <div class="lightbox-thumb-item ${idx === 0 ? "active" : ""}" data-img-idx="${idx}" style="cursor: pointer;">
-            <img src="${img.src || DEFAULT_FALLBACK_IMG}" alt="${displayName} รูปที่ ${idx + 1}" loading="lazy">
+            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${idx + 1}" loading="lazy">
           </div>
         `).join("");
 
         thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
           item.addEventListener("click", () => {
             const idx = parseInt(item.getAttribute("data-img-idx"), 10);
-            updateLightboxPhoto(idx);
+            if (typeof updateLightboxPhoto === "function") {
+              updateLightboxPhoto(idx);
+            }
           });
         });
       } else {
@@ -1447,7 +1491,7 @@ async function getSupabaseClient() {
       }
     }
 
-    // 4. คำคม & แท็ก
+    // 🟢 6. คำคม & แท็ก
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) {
       quoteEl.textContent = profile.quote || profile.slogan || (isEn ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
@@ -1465,11 +1509,11 @@ async function getSupabaseClient() {
       });
     }
 
-    // 5. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน
+    // 🟢 7. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน
     const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
     const safeStats = profile.safeStats || profile.stats || "ไม่ระบุ";
     const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "ไม่ระบุ");
-    const displayPrice = profile.displayPrice || (profile.rate ? `${parseInt(profile.rate).toLocaleString()}.-` : "1,500.-");
+    const displayPrice = profile.displayPrice || (profile.rate ? `${parseInt(profile.rate, 10).toLocaleString()}.-` : "1,500.-");
 
     const labelAge = isEn ? "Age" : "อายุ";
     const labelStats = isEn ? "Stats" : "สัดส่วน";
@@ -1508,18 +1552,19 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 6. คำบรรยายรายละเอียด (ป้องกัน XSS 100%)
+    // 🟢 8. คำบรรยายรายละเอียด
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
       const defaultDesc = `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
       const rawDesc = (profile.description && profile.description.trim()) ? profile.description : defaultDesc;
-      descContent.innerHTML = escapeHTML(rawDesc).replace(/\n/g, "<br>");
+      const safeText = (typeof escapeHTML === "function") ? escapeHTML(rawDesc) : rawDesc;
+      descContent.innerHTML = safeText.replace(/\n/g, "<br>");
       descContent.style.color = "#4A4458";
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 7. ปุ่มแอดไลน์จองคิวหลัก
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก
     const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
     let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
@@ -1540,10 +1585,10 @@ async function getSupabaseClient() {
       `;
     }
 
-    const parseFn = window.parseRateToNumber || parseRateToNumber;
+    const parseFn = window.parseRateToNumber || (typeof parseRateToNumber === "function" ? parseRateToNumber : ((r) => 1500));
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
 
-    // 💰 8.1 ตารางเรทราคา 3 ช่อง
+    // 💰 10. ตารางเรทราคา 3 ช่อง
     const ratesGrid = document.getElementById("lightboxRatesGrid");
     if (ratesGrid) {
       ratesGrid.innerHTML = `
@@ -1562,7 +1607,7 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 💬 8.2 FAQ คำถามพบบ่อย 3 ข้อ
+    // 💬 11. FAQ คำถามพบบ่อย 3 ข้อ
     const faqTitle = document.getElementById("lightboxFaqTitle");
     if (faqTitle) faqTitle.textContent = isEn ? `Frequently Asked Questions about ${displayName}` : `คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
     const faqList = document.getElementById("lightboxFaqList");
@@ -1587,13 +1632,19 @@ async function getSupabaseClient() {
       `;
     }
 
-    // ⭐ 8.3 รีวิวจากลูกค้าจริง
+    // ⭐ 12. รีวิวจากลูกค้าจริง
     const reviewsList = document.getElementById("lightboxReviewsList");
     if (reviewsList) {
+      const defaultReviews = [
+        { name: "พี่บอล", text: "ฟิวแฟนของแท้เลยครับ น้องเทคแคร์ดีมาก ขี้อ้อน น่ารัก ตรงตามรูปในโปรไฟล์ทุกอย่าง" },
+        { name: "พี่เมฆ", text: "น่ารักและเป็นกันเองมากครับ น้องคุยสนุก ไม่มีเกร็งเลย เหมือนได้ไปเดทกับแฟนจริงๆ" },
+        { name: "พี่นัท", text: "จ่ายเงินหน้างานตรงกับน้อง มั่นใจในความปลอดภัยได้เต็มร้อย บริการด้วยความจริงใจมากครับ" }
+      ];
+      const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : defaultReviews;
+      const poolLen = pool.length;
       const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
       const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const pool = REVIEW_POOL;
-      const poolLen = pool.length;
+      
       const selectedReviews = [
         pool[hash % poolLen],
         pool[(hash + 2) % poolLen],
@@ -1610,14 +1661,16 @@ async function getSupabaseClient() {
       `).join("");
     }
 
-    // 🎀 8.4 น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
+    // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
     const relatedTitle = document.getElementById("lightboxRelatedTitle");
     if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
     
     const relatedGrid = document.getElementById("lightboxRelatedGrid");
     const relatedMore = document.getElementById("lightboxRelatedMoreLink");
     if (relatedGrid) {
-      const allList = (typeof appState !== "undefined" && appState.allProfiles) ? appState.allProfiles : (window.profilesData || []);
+      const allList = (typeof appState !== "undefined" && appState.allProfiles && appState.allProfiles.length > 0) 
+        ? appState.allProfiles 
+        : (window.profilesData || []);
       const pKey = (profile.provinceKey || "chiangmai").toLowerCase();
 
       let candidates = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
@@ -1632,8 +1685,8 @@ async function getSupabaseClient() {
 
       if (relatedList.length > 0) {
         relatedGrid.innerHTML = relatedList.map(rm => {
-          const rmName = rm.displayName || formatDisplayName(rm.name);
-          const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || DEFAULT_FALLBACK_IMG);
+          const rmName = rm.displayName || ((typeof formatDisplayName === "function") ? formatDisplayName(rm.name) : rm.name);
+          const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || fallbackImg);
           return `
             <div class="lightbox-related-item" data-profile-slug="${rm.slug || rm.id}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s;">
               <img src="${rmImg}" alt="${rmName} สาวรับงาน${pProvText}" loading="lazy" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
@@ -1668,7 +1721,7 @@ async function getSupabaseClient() {
       `;
     }
 
-    // 🟢 เปิดเด้งสปริง 60 FPS + ล็อกพื้นหลังไม่ให้เลื่อนตาม
+    // 🟢 14. สั่น Haptic + เด้งสปริง 60 FPS + ล็อกพื้นหลังไม่ให้เลื่อนตาม
     if (typeof triggerHaptic === "function") triggerHaptic("medium");
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";
@@ -1709,12 +1762,33 @@ async function getSupabaseClient() {
 
       if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
+        const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+
         if (slug && slug !== "national" && slug !== "all") {
           history.pushState(null, "", `/location/${slug}`);
           if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
+
+          // 🟢 เพิ่มตรงนี้: คืนค่า Title และ Canonical กลับเป็นหน้าจังหวัด
+          const provName = appState.provincesMap.get(slug) || "เชียงใหม่";
+          document.title = isEN 
+            ? `${provName} Escorts & Companions | FirstModelHub` 
+            : `เพื่อนเที่ยว${provName} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
+
+          if (canonicalLink) {
+            canonicalLink.href = `https://firstmodelhub.com/location/${slug}`;
+          }
         } else {
           history.pushState(null, "", isEN ? "/index-en" : "/");
           if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+
+          // 🟢 เพิ่มตรงนี้: คืนค่า Title และ Canonical กลับเป็นหน้าหลัก
+          document.title = isEN 
+            ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+            : "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
+
+          if (canonicalLink) {
+            canonicalLink.href = "https://firstmodelhub.com/";
+          }
         }
       }
       appState.currentProfileSlug = null;
