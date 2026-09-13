@@ -504,9 +504,9 @@ export default async (req, context) => {
       return await context.next();
     }
 
-   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
     
-    // 🟢 เติม "/sideline" เข้าไปตรงนี้ เพื่อให้ข้ามไปทำงานที่ไฟล์ render-bot.js
+    // 🟢 ข้าม Path เหล่านี้ไปทำงานที่ render-bot.js หรือ Static
     if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
       return await context.next();
     }
@@ -553,7 +553,7 @@ export default async (req, context) => {
     let provinceKeyVariants = [provinceSlug, cleanProvinceSlug, provinceSlug.replace(/-/g, "_"), provinceSlug.replace(/_/g, "-")];
     provinceKeyVariants = [...new Set(provinceKeyVariants.filter(Boolean))];
 
-    // 🛡️ 1. ฟังก์ชันตรวจจับจังหวัดที่ถูกต้องจากเนื้อหาจริง (แก้ปัญหาน้องหลุดไปเชียงใหม่)
+    // 🛡️ 1. ฟังก์ชันตรวจจับจังหวัดที่ถูกต้องจากเนื้อหาจริง (ป้องกันน้องหลุดไปเชียงใหม่)
     function detectAccurateProvince(p) {
       const textToSearch = [
         p.location || "",
@@ -594,7 +594,7 @@ export default async (req, context) => {
       return "chiangmai";
     }
 
-    // 🛡️ 2. ดึงข้อมูลโปรไฟล์ทั้งหมดขึ้นมาคลีนใน Memory (ดึงครบ 100% ไม่หลุดแม้บันทึกผิด)
+    // 🛡️ 2. ดึงข้อมูลโปรไฟล์ทั้งหมดขึ้นมาคลีนใน Memory
     const profilesQuery = supabase
       .from("profiles")
       .select("*")
@@ -610,16 +610,20 @@ export default async (req, context) => {
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
     ]);
 
+    const provinceData = provinceDataRes.data;
+    if (!provinceData && !isNational) {
+      return new Response("404 - ไม่พบข้อมูลพื้นที่จังหวัดที่ต้องการ", { status: 404 });
+    }
+
     const rawProfiles = profilesRes.data || [];
     const seenImageKeys = new Set();
     const seenNameKeys = new Set();
     const deduplicatedProfiles = [];
 
-    // 🛡️ 3. ตัดโปรไฟล์ซ้ำทิ้ง + แก้ไขจังหวัดให้ถูกต้อง
+    // 🛡️ 3. กรองรูปภาพซ้ำ และชื่อซ้ำทิ้ง 100%
     for (const p of rawProfiles) {
       if (!p) continue;
       
-      // ดึง Signature ของรูปภาพ (ชื่อไฟล์ท้ายสุด)
       const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
       let imgSig = "";
       if (rawImg) {
@@ -627,18 +631,15 @@ export default async (req, context) => {
         imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
       }
 
-      // ดึงชื่อน้อง
       const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
       const nameSig = `${cleanName}_${p.age || ""}_${p.rate || ""}`;
 
-      // ถ้าพบว่า "รูปซ้ำ" หรือ "ชื่อ+เรทราคาซ้ำ" ให้ข้ามทันที
       if (imgSig && seenImageKeys.has(imgSig)) continue;
       if (cleanName && seenNameKeys.has(nameSig)) continue;
 
       if (imgSig) seenImageKeys.add(imgSig);
       if (cleanName) seenNameKeys.add(nameSig);
 
-      // บังคับจังหวัดที่ถูกต้อง
       const realProvince = detectAccurateProvince(p);
       p.provinceKey = realProvince;
       p.province_slug = realProvince;
@@ -646,7 +647,7 @@ export default async (req, context) => {
       deduplicatedProfiles.push(p);
     }
 
-    // 🛡️ 4. กรองเฉพาะจังหวัดที่กำลังเปิดดู (ถ้าไม่ใช่หน้าทั่วไทย)
+    // 🛡️ 4. คัดเลือกเฉพาะจังหวัดที่กำลังเปิดดู
     let profilesList = deduplicatedProfiles;
     if (!isNational && provinceSlug !== "national") {
       profilesList = deduplicatedProfiles.filter(p => {
@@ -656,36 +657,19 @@ export default async (req, context) => {
     }
 
     const totalCount = profilesList.length;
-
-    const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
-      isNational
-        ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
-        : supabase.from("provinces").select("id, nameThai, key").in("key", provinceKeyVariants).limit(1).maybeSingle(),
-      profilesQuery,
-      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-    ]);
-
-    const provinceData = provinceDataRes.data;
-    if (!provinceData && !isNational) {
-      return new Response("404 - ไม่พบข้อมูลพื้นที่จังหวัดที่ต้องการ", { status: 404 });
-    }
-
-    const profilesList = profilesRes.data || [];
-    const totalCount = profilesRes.count !== null && profilesRes.count !== undefined ? profilesRes.count : profilesList.length;
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     const canonicalUrl = isNational ? `${primaryDomain}/` : `${primaryDomain}/location/${provinceSlug}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    // 🟢 B: ปรับ Meta Title และ Description ให้พรีเมียม ปลอดภัย CTR สูง
-const metaTitle = isNational 
-  ? "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
-  : `เพื่อนเที่ยว${provinceNameThai} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
+    const metaTitle = isNational 
+      ? "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
+      : `เพื่อนเที่ยว${provinceNameThai} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
 
-const metaDescription = isNational
-  ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
-  : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+    const metaDescription = isNational
+      ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
+      : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
 
 
     const cleanMetaDesc = stripHTML(metaDescription);
