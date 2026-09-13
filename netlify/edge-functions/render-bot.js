@@ -122,24 +122,20 @@ function extractCleanNumber(rate) {
   return num;
 }
 
+// ✅ แก้ไขฟังก์ชัน optimizeImg ใน render-bot.js ให้ยืดหยุ่นตามพารามิเตอร์ที่ส่งเข้ามา:
 function optimizeImg(imagePath, width = 400, height = 560) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const isThumb = width <= 150;
-
-  // ล็อกเหลือแค่ 2 ไซส์มาตรฐาน และบีบอัดระดับ eco ประหยัดโควตาสูงสุด
-  const transform = isThumb 
-    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+  const hParam = height ? `,h_${height}` : "";
+  const transform = `f_auto,q_auto:eco,w_${width}${hParam},c_fill,g_face`;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์ขนาดเก่าออกทั้งหมด แล้วใส่ขนาดที่ฟิกไว้เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
       return `${base}${transform}/${rest}`;
     }
@@ -154,6 +150,15 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
+// 🟢 เพิ่มฟังก์ชันนี้เข้าไปใน render-bot.js
+function generateSrcSet(imagePath) {
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.includes("res.cloudinary.com")) {
+    return "";
+  }
+  const img400 = optimizeImg(imagePath, 400, 560);
+  const img600 = optimizeImg(imagePath, 600, 800);
+  return `${img400} 400w, ${img600} 600w`;
+}
 
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
   const customBio = p.description && p.description.trim().length > 10 
@@ -298,7 +303,7 @@ export default async (req, context) => {
     
     const rawImage = profile.imagePath || profile.image_url || "";
     const heroImageLarge = optimizeImg(rawImage, 600, 800);
-    const heroImageSmall = optimizeImg(rawImage, 400, 533);
+    const heroImageSmall = optimizeImg(rawImage, 400, 560);
     const heroSrcSet = generateSrcSet(rawImage);
 
     const rawLineInput = (profile.line_id || profile.lineId || "").trim();
