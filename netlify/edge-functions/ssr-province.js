@@ -553,16 +553,109 @@ export default async (req, context) => {
     let provinceKeyVariants = [provinceSlug, cleanProvinceSlug, provinceSlug.replace(/-/g, "_"), provinceSlug.replace(/_/g, "-")];
     provinceKeyVariants = [...new Set(provinceKeyVariants.filter(Boolean))];
 
-    let profilesQuery = supabase
+    // 🛡️ 1. ฟังก์ชันตรวจจับจังหวัดที่ถูกต้องจากเนื้อหาจริง (แก้ปัญหาน้องหลุดไปเชียงใหม่)
+    function detectAccurateProvince(p) {
+      const textToSearch = [
+        p.location || "",
+        p.provinceThai || "",
+        p.province_thai || "",
+        p.provinceName || "",
+        p.description || "",
+        p.name || "",
+        p.quote || "",
+        p.slogan || ""
+      ].join(" ").toLowerCase();
+
+      const RULES = [
+        { key: "khonkaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง"] },
+        { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม"] },
+        { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
+        { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล"] },
+        { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา"] },
+        { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง"] },
+        { key: "lamphun", keywords: ["ลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"] },
+        { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] },
+        { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "หนองประจักษ์", "บ้านจาน", "โพศรี"] },
+        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่ริม", "หางดง"] }
+      ];
+
+      for (const rule of RULES) {
+        if (rule.keywords.some(kw => textToSearch.includes(kw))) {
+          return rule.key;
+        }
+      }
+
+      const orig = (p.provinceKey || p.province_slug || "").toString().toLowerCase().trim();
+      if (orig && orig !== "no_province") {
+        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
+        if (orig === "khon-kaen") return "khonkaen";
+        return orig;
+      }
+      return "chiangmai";
+    }
+
+    // 🛡️ 2. ดึงข้อมูลโปรไฟล์ทั้งหมดขึ้นมาคลีนใน Memory (ดึงครบ 100% ไม่หลุดแม้บันทึกผิด)
+    const profilesQuery = supabase
       .from("profiles")
-      .select("*", { count: "exact" })
+      .select("*")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("created_at", { ascending: false });
 
-    if (!isNational && provinceSlug !== "national") {
-      profilesQuery = profilesQuery.in("provinceKey", provinceKeyVariants);
+    const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
+      isNational
+        ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
+        : supabase.from("provinces").select("id, nameThai, key").in("key", provinceKeyVariants).limit(1).maybeSingle(),
+      profilesQuery,
+      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+    ]);
+
+    const rawProfiles = profilesRes.data || [];
+    const seenImageKeys = new Set();
+    const seenNameKeys = new Set();
+    const deduplicatedProfiles = [];
+
+    // 🛡️ 3. ตัดโปรไฟล์ซ้ำทิ้ง + แก้ไขจังหวัดให้ถูกต้อง
+    for (const p of rawProfiles) {
+      if (!p) continue;
+      
+      // ดึง Signature ของรูปภาพ (ชื่อไฟล์ท้ายสุด)
+      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+      let imgSig = "";
+      if (rawImg) {
+        const parts = rawImg.split("?")[0].split("/");
+        imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
+      }
+
+      // ดึงชื่อน้อง
+      const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
+      const nameSig = `${cleanName}_${p.age || ""}_${p.rate || ""}`;
+
+      // ถ้าพบว่า "รูปซ้ำ" หรือ "ชื่อ+เรทราคาซ้ำ" ให้ข้ามทันที
+      if (imgSig && seenImageKeys.has(imgSig)) continue;
+      if (cleanName && seenNameKeys.has(nameSig)) continue;
+
+      if (imgSig) seenImageKeys.add(imgSig);
+      if (cleanName) seenNameKeys.add(nameSig);
+
+      // บังคับจังหวัดที่ถูกต้อง
+      const realProvince = detectAccurateProvince(p);
+      p.provinceKey = realProvince;
+      p.province_slug = realProvince;
+
+      deduplicatedProfiles.push(p);
     }
+
+    // 🛡️ 4. กรองเฉพาะจังหวัดที่กำลังเปิดดู (ถ้าไม่ใช่หน้าทั่วไทย)
+    let profilesList = deduplicatedProfiles;
+    if (!isNational && provinceSlug !== "national") {
+      profilesList = deduplicatedProfiles.filter(p => {
+        const pKey = (p.provinceKey || "").toLowerCase();
+        return provinceKeyVariants.includes(pKey);
+      });
+    }
+
+    const totalCount = profilesList.length;
 
     const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
       isNational
