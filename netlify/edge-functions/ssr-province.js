@@ -84,7 +84,7 @@ const PROVINCE_SEO_DATA = {
       { q: "พักอยู่วิลล่าส่วนตัวแถวบางเทา กะหลิม หรือเชิงทะเล น้องเดินทางไปได้ไหม?", a: "เดินทางไปดูแลได้ทั่วทั้งเกาะภูเก็ตครับ นัดหมายระบุพิกัดที่พักให้น้องเดินทางไปพบได้อย่างเป็นส่วนตัวและปลอดภัยครับ" }
     ]
   },
-  khonkaen: {
+  khon-kaen: {
     name: "ขอนแก่น",
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
@@ -147,7 +147,7 @@ const PROVINCE_SEO_DATA = {
 
 // 🟢 เชื่อมโยง Alias อัตโนมัติในโค้ด (ไม่ต้องก๊อปปี้ข้อมูลซ้ำ)
 PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA.chiangmai;
-PROVINCE_SEO_DATA["khon-kaen"] = PROVINCE_SEO_DATA.khonkaen;
+PROVINCE_SEO_DATA["khon-kaen"] = PROVINCE_SEO_DATA.khon-kaen;
 
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -251,7 +251,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
       intro: `ยกระดับวันหยุดบนเกาะภูเก็ตด้วยเพื่อนเที่ยวระดับพรีเมียม สื่อสารคล่องแคล่ว บุคลิกสง่างาม พร้อมเป็นเพื่อนร่วมทริป ดินเนอร์ชมพระอาทิตย์ตก นั่งเรือยอร์ช หรือดูแลอย่างอบอุ่นในพูลวิลล่าส่วนตัว`,
       convenience: `บริการทั่วทั้งเกาะภูเก็ต${zoneText} เข้าพบที่รีสอร์ตหรือวิลล่าส่วนตัวตามเวลานัดหมายอย่างตรงเวลา`
     },
-    khonkaen: {
+    khon-kaen: {
       headline: `เพื่อนเที่ยวฟิวแฟน ขอนแก่น คัดสรรโปรไฟล์ตรงปก 100%`,
       intro: `ผ่อนคลายในเมืองศูนย์กลางภาคอีสานกับน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ขี้อ้อน เทคแคร์ดี เอาใจใส่ดุจคนรู้ใจ ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว`,
       convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยและโรงแรมใจกลางขอนแก่น${zoneText} เดินทางสะดวก รวดเร็วทันใจ`
@@ -567,7 +567,7 @@ export default async (req, context) => {
       ].join(" ").toLowerCase();
 
       const RULES = [
-        { key: "khonkaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง"] },
+        { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง"] },
         { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม"] },
         { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
         { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล"] },
@@ -588,7 +588,7 @@ export default async (req, context) => {
       const orig = (p.provinceKey || p.province_slug || "").toString().toLowerCase().trim();
       if (orig && orig !== "no_province") {
         if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-        if (orig === "khon-kaen") return "khonkaen";
+        if (orig === "khon-kaen") return "khon-kaen";
         return orig;
       }
       return "chiangmai";
@@ -898,14 +898,18 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
-    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
+    // 🟢 แทนที่ og:image เดิม แล้วพ่วง og:image:secure_url ต่อท้ายทันที
+finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, 
+  `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">`
+);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
-    finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
+    // 🟢 ครอบคลุมทั้งกรณีมีตัวเลข, อิโมจิ หรือเว้นวรรค
+finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRAPH)/i, hreflangBlock);
 
    const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
 

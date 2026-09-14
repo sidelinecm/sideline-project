@@ -283,13 +283,14 @@ export default async (req, context) => {
     let relatedProfiles = [];
     const provinceKey = profile.provinceKey || profile.province_key || "chiangmai";
     if (provinceKey) {
-      const { data: related } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("provinceKey", provinceKey)
-        .eq("active", true)
-        .neq("id", profile.id)
-        .limit(6);
+     // 🟢 รองรับทั้ง province_key, provinceKey และ province_slug
+const { data: related } = await supabase
+  .from("profiles")
+  .select("*")
+  .or(`provinceKey.eq.${provinceKey},province_key.eq.${provinceKey},province_slug.eq.${provinceKey}`)
+  .eq("active", true)
+  .neq("id", profile.id)
+  .limit(6);
       relatedProfiles = related || [];
     }
 
@@ -549,11 +550,27 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
 <body style="background-color: #F8F6FC; color: #140F22; font-family: 'Prompt', sans-serif;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); backdrop-filter: blur(10px);">
-            <div class="header-logo-container">
-                <a href="/" aria-label="ไปที่หน้าแรก ${CONFIG.BRAND_NAME}" style="text-decoration: none;">
-                    <span class="brand-logo-text" style="font-size: 16px; font-weight: 900; color: #140F22;">FirstModel<span style="color: #7C3AED;">Hub</span>🌟</span>
-                </a>
-            </div>
+          <div class="header-logo-container">
+    <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก" style="text-decoration: none;">
+        <span class="luxe-star-crest" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"/>
+                <defs>
+                    <linearGradient id="fmh-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FFF0B3"/>
+                        <stop offset="50%" stop-color="#F59E0B"/>
+                        <stop offset="100%" stop-color="#D97706"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </span>
+        <span class="luxe-brand-text">
+            <span class="txt-first">First</span><span class="txt-model">Model</span>
+        </span>
+        <span class="luxe-hub-badge">HUB</span>
+    </a>
+</div>
+            
             <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;"><i class="fas fa-arrow-left"></i> ย้อนกลับ</a>
         </header>
 
@@ -707,6 +724,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
+    <script type="module" src="/main.js?v=v_${Date.now()}"></script>
 </body>
 </html>`;
 
