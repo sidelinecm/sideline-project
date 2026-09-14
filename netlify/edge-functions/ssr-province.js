@@ -1,12 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-// 🟢 B จุดที่ 1: ส่วนหัวไฟล์ (แทนที่บรรทัดที่ 3 เดิม)
 const PAGE_CACHE = new Map();
-const MAX_PAGE_CACHE_ENTRIES = 60; // 👈 จำกัดสูงสุด 60 หน้า ป้องกัน RAM เต็ม
+const MAX_PAGE_CACHE_ENTRIES = 60;
 let GLOBAL_VERSION = `v_${Date.now()}`;
 let TEMPLATE_HTML_CACHE = null;
 
-// 🟢 ฟังก์ชันบันทึกแคชแบบปลอดภัย ถ้ารายการเกินเพดาน จะลบของเก่าสุดทิ้งอัตโนมัติ
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
     const oldestKey = PAGE_CACHE.keys().next().value;
@@ -14,6 +12,7 @@ function setSafePageCache(key, data) {
   }
   PAGE_CACHE.set(key, data);
 }
+
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
 
 const CONFIG = {
@@ -23,7 +22,7 @@ const CONFIG = {
   get SUPABASE_KEY() {
     return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
-get PURGE_SECRET() {
+  get PURGE_SECRET() {
     return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
@@ -84,7 +83,7 @@ const PROVINCE_SEO_DATA = {
       { q: "พักอยู่วิลล่าส่วนตัวแถวบางเทา กะหลิม หรือเชิงทะเล น้องเดินทางไปได้ไหม?", a: "เดินทางไปดูแลได้ทั่วทั้งเกาะภูเก็ตครับ นัดหมายระบุพิกัดที่พักให้น้องเดินทางไปพบได้อย่างเป็นส่วนตัวและปลอดภัยครับ" }
     ]
   },
-  khon-kaen: {
+  "khon-kaen": {
     name: "ขอนแก่น",
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
@@ -145,9 +144,9 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
-// 🟢 เชื่อมโยง Alias อัตโนมัติในโค้ด (ไม่ต้องก๊อปปี้ข้อมูลซ้ำ)
-PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA.chiangmai;
-PROVINCE_SEO_DATA["khon-kaen"] = PROVINCE_SEO_DATA.khon-kaen;
+// 🟢 แก้ไขการเชื่อมโยง Alias ให้ถูกต้อง (แก้ Bug Syntax Error)
+PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA["chiangmai"];
+PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -197,7 +196,6 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   const cleanPath = imagePath.trim();
   const isThumb = width <= 150;
 
-  // ล็อกเหลือแค่ 2 ไซส์มาตรฐาน และบีบอัดระดับ eco ประหยัดโควตาสูงสุด
   const transform = isThumb 
     ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
     : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
@@ -207,7 +205,6 @@ function optimizeImg(imagePath, width = 400, height = 560) {
     if (uploadIdx !== -1) {
       const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์ขนาดเก่าออกทั้งหมด แล้วใส่ขนาดที่ฟิกไว้เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
       return `${base}${transform}/${rest}`;
     }
@@ -229,7 +226,6 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   const zoneLinks = cleanZones.slice(0, 5).map(z => `<a href="${locationUrl}" class="kw-zone">${escapeHTML(sanitizeThaiText(z))}</a>`);
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
-  // ข้อมูลบริบทเฉพาะของแต่ละหัวเมืองใหญ่ (Local Context)
   const LOCAL_CONTEXT = {
     chiangmai: {
       headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
@@ -286,7 +282,6 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   `;
 }
 
-// 🟢 แปลงชื่อโซนในข้อความเป็น Internal Link อัตโนมัติ (SEO Friendly)
 function smartLinkify(htmlText, maxLinks = 3, zones = [], provinceSlug = "chiangmai") {
   if (!htmlText || typeof htmlText !== "string") return "";
   if (!zones || zones.length === 0 || maxLinks <= 0) return htmlText;
@@ -372,7 +367,6 @@ function formatLuxuryRate(rate) {
   return String(num);
 }
 
-// 🟢 แก้ไข Syntax Error: ลบฟังก์ชันที่เขียนค้างทิ้งไป และเก็บอันที่ถูกต้องไว้
 function generateNaturalAlt(cleanName, provinceName, loc, index) {
   const patterns = [
     `น้อง${cleanName} สาวสวยเพื่อนเที่ยว${provinceName} โซน${loc}`,
@@ -416,7 +410,6 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
-       <!-- 🟢 เพิ่ม height="560" แล้วเพื่อแก้ปัญหา CLS -->
        <img src="${cardImg}" 
               alt="${generateNaturalAlt(cleanName, provinceName, loc, index)}"
               width="400"
@@ -506,7 +499,6 @@ export default async (req, context) => {
 
     const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
     
-    // 🟢 ข้าม Path เหล่านี้ไปทำงานที่ render-bot.js หรือ Static
     if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
       return await context.next();
     }
@@ -553,7 +545,6 @@ export default async (req, context) => {
     let provinceKeyVariants = [provinceSlug, cleanProvinceSlug, provinceSlug.replace(/-/g, "_"), provinceSlug.replace(/_/g, "-")];
     provinceKeyVariants = [...new Set(provinceKeyVariants.filter(Boolean))];
 
-    // 🛡️ 1. ฟังก์ชันตรวจจับจังหวัดที่ถูกต้องจากเนื้อหาจริง (ป้องกันน้องหลุดไปเชียงใหม่)
     function detectAccurateProvince(p) {
       const textToSearch = [
         p.location || "",
@@ -588,13 +579,12 @@ export default async (req, context) => {
       const orig = (p.provinceKey || p.province_slug || "").toString().toLowerCase().trim();
       if (orig && orig !== "no_province") {
         if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-        if (orig === "khon-kaen") return "khon-kaen";
+        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
         return orig;
       }
       return "chiangmai";
     }
 
-    // 🛡️ 2. ดึงข้อมูลโปรไฟล์ทั้งหมดขึ้นมาคลีนใน Memory
     const profilesQuery = supabase
       .from("profiles")
       .select("*")
@@ -620,7 +610,6 @@ export default async (req, context) => {
     const seenNameKeys = new Set();
     const deduplicatedProfiles = [];
 
-    // 🛡️ 3. กรองรูปภาพซ้ำ และชื่อซ้ำทิ้ง 100%
     for (const p of rawProfiles) {
       if (!p) continue;
       
@@ -647,7 +636,6 @@ export default async (req, context) => {
       deduplicatedProfiles.push(p);
     }
 
-    // 🛡️ 4. คัดเลือกเฉพาะจังหวัดที่กำลังเปิดดู
     let profilesList = deduplicatedProfiles;
     if (!isNational && provinceSlug !== "national") {
       profilesList = deduplicatedProfiles.filter(p => {
@@ -671,22 +659,17 @@ export default async (req, context) => {
       ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
       : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
 
-
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
     const mapQuery = isNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${provinceNameThai}`);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-// =========================================================================
-    // 🟢 สร้าง Schema Graph ระดับพรีเมียม (เวอร์ชันแก้ไขสมบูรณ์แบบ 100% ไร้บั๊ก)
-    // =========================================================================
     const wikiTarget = provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`;
     const provinceWikiUrl = isNational 
       ? "https://th.wikipedia.org/wiki/ประเทศไทย" 
       : `https://th.wikipedia.org/wiki/${encodeURIComponent(wikiTarget)}`;
 
-    // 🛡️ ตรวจสอบรูปภาพให้เป็น Full HTTPS URL เสมอ
     const verifiedHeroImage = heroImage.startsWith("http") 
       ? heroImage 
       : `${primaryDomain}${heroImage.startsWith("/") ? "" : "/"}${heroImage}`;
@@ -731,7 +714,6 @@ export default async (req, context) => {
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
         ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
-        // 🛡️ ชี้ไปที่ #itemlist ถ้ามีโปรไฟล์ หากไม่มีให้ชี้ fallback ไปที่ #business อัตโนมัติ
         "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
       },
       {
@@ -780,7 +762,6 @@ export default async (req, context) => {
       }
     ];
 
-    // 🟢 1. เติม Breadcrumb สำหรับหน้ารายจังหวัด
     if (!isNational) {
       schemaGraph.push({
         "@type": "BreadcrumbList",
@@ -802,7 +783,6 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 2. เติม ItemList Schema (ตรงตามสเปก Google 100%)
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -818,7 +798,6 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 3. เติม FAQPage Schema อัตโนมัติ
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -897,21 +876,23 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
-    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
-    // 🟢 แทนที่ og:image เดิม แล้วพ่วง og:image:secure_url ต่อท้ายทันที
-finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, 
-  `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">`
-);
+    
+    // 🟢 แก้ไขการแทนที่ og:image และ OpenGraph ให้สะอาดสมบูรณ์ในจุดเดียว
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>/i, 
+      `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">`
+    );
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
+    // 🟢 แก้ไขการแทนที่ HREFLANG แบบสะอาด ปลอดภัย แม่นยำ 100% (แก้ปัญหาตามรูปภาพที่ส่งมา)
     const hreflangBlock = isNational
-      ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
-      : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
+      ? `<link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />`
+      : `<link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />`;
 
-    // 🟢 ครอบคลุมทั้งกรณีมีตัวเลข, อิโมจิ หรือเว้นวรรค
-finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRAPH)/i, hreflangBlock);
+    // ล้างแท็ก alternate hreflang เก่าออกทั้งหมด แล้ววางชุดใหม่ที่ถูกต้องเข้าไป
+    finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
+    finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-   const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
+    const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
@@ -994,7 +975,11 @@ finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRA
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-   if (isNational) { finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); } else { finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); }
+    if (isNational) { 
+      finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); 
+    } else { 
+      finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); 
+    }
 
     let displayAreaHtml = "";
     if (isNational) {
@@ -1122,7 +1107,7 @@ finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRA
         rate: safeRate,
         availability: p.availability || "รับงาน",
         lastUpdated: p.lastUpdated || p.created_at || null,
-        isfeatured: p.isfeatured === true || p.isFeatured === true,
+        isfeatured: p.isfeatured === true || p.isFeatured=== true,
         verified: p.verified === true || p.isVerified === true,
         hasVideo: p.hasVideo === true || p.has_video === true,
         description: sanitizeThaiText(p.description || ""),
@@ -1160,7 +1145,7 @@ finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRA
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
     finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
-   const responseHeaders = {
+    const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
       "Netlify-CDN-Cache-Control": "public, s-maxage=31536000, stale-while-revalidate=86400",
@@ -1171,8 +1156,8 @@ finalHtml = finalHtml.replace(/<!--.*?MULTILINGUAL SEO[\s\S]*?(?=<!--.*?OPEN GRA
       "Referrer-Policy": "strict-origin-when-cross-origin"
     };
 
-setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
-return new Response(finalHtml, { headers: responseHeaders });
+    setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
+    return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);
