@@ -976,26 +976,27 @@ async function getSupabaseClient() {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-    const heroH1 = document.getElementById("hero-h1");
-    if (heroH1) {
-      if (isEN) {
-        const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
-        heroH1.innerHTML = `
-          <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
-          <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
-        `;
-      } else {
-        const line1 = isAllOrNational 
-          ? "สาวรับงาน ไซด์ไลน์ทั่วไทย" 
-          : `สาวรับงาน${escapeHTML(targetName)} ไซด์ไลน์${escapeHTML(targetName)}`;
-        const line2 = "& ฟิวแฟน ตรงปก 100%";
+   // ✅ โค้ดแก้ไขใน main.js ให้ตรงกับ SSR
+const heroH1 = document.getElementById("hero-h1");
+if (heroH1) {
+  if (isEN) {
+    const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
+    heroH1.innerHTML = `
+      <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
+      <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
+    `;
+  } else {
+    const line1 = isAllOrNational 
+      ? "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย" 
+      : `เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(targetName)}`;
+    const line2 = "สาวสวยสไตล์ฟิวแฟน ตรงปก 100%";
 
-        heroH1.innerHTML = `
-          <span class="h1-line-1">${line1}</span>
-          <span class="h1-line-2">${line2}</span>
-        `;
-      }
-    }
+    heroH1.innerHTML = `
+      <span class="h1-line-1">${line1}</span>
+      <span class="h1-line-2">${line2}</span>
+    `;
+  }
+}
 
     const featuredH2 = document.getElementById("featured-heading");
     if (featuredH2) {
@@ -2343,18 +2344,69 @@ async function getSupabaseClient() {
       }, { passive: true });
     })();
 
-   // ==========================================================================
-    // 🟢 ระบบดึงข้อมูล: ดึงจาก SSR ทันที (0-Query) ประหยัดโควตา Supabase 100%
+  // ==========================================================================
+    // 🟢 ระบบดึงข้อมูล: ดักกรองชื่อว่าง + ตัดรูปซ้ำ + กันข้อมูลขยะ 100%
     // ==========================================================================
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
 
+      // 🛡️ ฟังก์ชันคัดกรองข้อมูลให้สะอาดสมบูรณ์แบบ
+      function filterValidProfiles(list) {
+        if (!list || !Array.isArray(list)) return [];
+        const seenIds = new Set();
+        const seenNames = new Set();
+        const seenImgs = new Set();
+        const validProfiles = [];
+
+        for (const raw of list) {
+          if (!raw) continue;
+
+          // 1. กรองทิ้งทันที ถ้าไม่มีชื่อ หรือเป็นชื่อว่าง/ขยะ
+          const rawName = (raw.name || "").trim();
+          const cleanName = rawName.toLowerCase().replace(/^(น้อง|สาว|พี่)\s*/gi, "");
+          if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") {
+            continue; // 👈 ข้ามการ์ดที่ไม่มีชื่อ ไม่ให้หลุดไปหน้าเว็บ
+          }
+
+          // 2. กรอง ID ซ้ำ
+          if (raw.id && seenIds.has(String(raw.id))) continue;
+
+          // 3. กรองชื่อซ้ำในจังหวัดเดียวกัน
+          const pKey = (raw.provinceKey || raw.province_slug || "").toLowerCase();
+          const nameSig = `${cleanName}_${pKey}`;
+          if (seenNames.has(nameSig)) continue;
+
+          // 4. กรองรูปภาพซ้ำ (รวมถึงรูป Placeholder / Fallback)
+          const rawImg = (raw.imagePath || raw.image_url || raw.imageUrl || "").trim().toLowerCase();
+          let imgSig = "";
+          if (rawImg) {
+            const parts = rawImg.split("?")[0].split("/");
+            imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
+          }
+
+          // ถ้าไม่มีรูป หรือรูปนี้เคยแสดงไปแล้ว ให้ข้ามทันที
+          if (imgSig && seenImgs.has(imgSig)) continue;
+
+          if (raw.id) seenIds.add(String(raw.id));
+          seenNames.add(nameSig);
+          if (imgSig) seenImgs.add(imgSig);
+
+          validProfiles.push(raw);
+        }
+
+        return validProfiles;
+      }
+
       try {
-        // 1. ดึงรายชื่อจังหวัดจาก SSR (ถ้ามี)
-        if (window.provincesData && Array.isArray(window.provincesData)) {
+        // 1. ดึงรายชื่อจังหวัด
+        const provSource = (window.provincesData && Array.isArray(window.provincesData)) 
+          ? window.provincesData 
+          : (await (await getSupabaseClient())?.from("provinces").select("*"))?.data;
+
+        if (provSource && Array.isArray(provSource)) {
           appState.provincesMap.clear();
-          window.provincesData.forEach(p => {
+          provSource.forEach(p => {
             const nameThai = p.nameThai || p.name_thai || p.name;
             let k = (p.key || p.slug || p.id || "").toString().toLowerCase();
             if (k === "chiang_mai" || k === "chiang-mai") k = "chiangmai";
@@ -2362,54 +2414,32 @@ async function getSupabaseClient() {
           });
         }
 
-       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
-          const seenImgs = new Set();
-          const cleanProfiles = [];
-          for (const raw of window.profilesData) {
-            const img = (raw.imagePath || raw.image_url || "").trim().toLowerCase();
-            let imgKey = img ? img.split("?")[0].split("/").pop().replace(/\.(webp|jpg|jpeg|png|avif)$/i, "") : "";
-            if (imgKey && seenImgs.has(imgKey)) continue; // ข้ามรูปซ้ำ
-            if (imgKey) seenImgs.add(imgKey);
-            cleanProfiles.push(raw);
-          }
+        // 2. กรณีมีข้อมูลจาก SSR (window.profilesData)
+        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+          const cleanProfiles = filterValidProfiles(window.profilesData);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
         }
 
-        // 3. Fallback: กรณีเปิดหน้าเว็บที่ไม่มี SSR จริงๆ ค่อยขอข้อมูลจาก Supabase
+        // 3. Fallback: ดึงสดจาก Supabase (ถ้าไม่มี SSR)
         const client = await getSupabaseClient();
         if (!client) throw new Error("Supabase client not initialized");
 
-        const [provincesRes, profilesRes] = await Promise.all([
-          client.from("provinces").select("*"),
-          client.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false })
-        ]);
+        const { data: rawDbProfiles } = await client
+          .from("profiles")
+          .select("*")
+          .eq("active", true)
+          .order("isfeatured", { ascending: false })
+          .order("created_at", { ascending: false });
 
-        if (provincesRes.data) {
-          appState.provincesMap.clear();
-          provincesRes.data.forEach(p => {
-            const nameThai = p.nameThai || p.name;
-            let k = (p.key || p.slug || p.id || "").toString().toLowerCase();
-            if (k === "chiang_mai" || k === "chiang-mai") k = "chiangmai";
-            if (k && nameThai) appState.provincesMap.set(k, nameThai);
-          });
-        }
-
-        if (profilesRes.data && profilesRes.data.length > 0) {
-          // 🛡️ กรองตัดแถวที่ชื่อน้องซ้ำกันทิ้งตั้งแต่ต้นทาง
-          const seenNames = new Set();
-          const cleanList = profilesRes.data.filter(p => {
-            const cName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-            if (!cName || seenNames.has(cName)) return false;
-            seenNames.add(cName);
-            return true;
-          });
-
-          appState.allProfiles = cleanList.map(normalizeProfile).filter(Boolean);
+        if (rawDbProfiles && rawDbProfiles.length > 0) {
+          const cleanProfiles = filterValidProfiles(rawDbProfiles);
+          appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
         }
+
         return false;
       } catch (fetchErr) {
         console.error("Data Fetch Error:", fetchErr);
