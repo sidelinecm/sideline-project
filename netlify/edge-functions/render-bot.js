@@ -74,7 +74,19 @@ function sanitizeThaiText(text) {
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-    .replace(/(?<!#[0-9a-fA-F]{0,6})\b(69|➏➒)\b|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/ของแก่น/g, "ขอนแก่น")
+    .replace(/ฟื้นที่/g, "พื้นที่")
+    .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
+    .replace(/เอาวจเก่ง/g, "เอาใจเก่ง")
+    .replace(/ฟิวแฟว/g, "ฟิวแฟน")
+    .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
+    .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
+    // 🟢 แก้ไข: ลบ \b ออก และกรองคำล่อแหลมให้ครบถ้วนแบบเดียวกับ ssr-province.js
+    .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
+    .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
+    .replace(/ฟรีถุงยาง!/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -302,10 +314,13 @@ const { data: related } = await supabase
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
     
-    const rawImage = profile.imagePath || profile.image_url || "";
-    const heroImageLarge = optimizeImg(rawImage, 600, 800);
-    const heroImageSmall = optimizeImg(rawImage, 400, 560);
-    const heroSrcSet = generateSrcSet(rawImage);
+   // ใน render-bot.js ให้เพิ่มการแปลงรูปภาพสำหรับ Open Graph โดยเฉพาะ:
+const rawImage = profile.imagePath || profile.image_url || "";
+const heroImageLarge = optimizeImg(rawImage, 600, 800);
+const heroImageSmall = optimizeImg(rawImage, 400, 560);
+// 🟢 เพิ่มภาพขนาด 1.91:1 สำหรับ Facebook / LINE / X
+const ogImageSocial = optimizeImg(rawImage, 1200, 630);
+const heroSrcSet = generateSrcSet(rawImage);
 
     const rawLineInput = (profile.line_id || profile.lineId || "").trim();
     let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
@@ -495,6 +510,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
 <html lang="th" class="light-theme">
 <head>
     <meta charset="utf-8">
+    <base href="/" /> <!-- 🟢 เพิ่มเพื่อป้องกัน Relative Path หลุด -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#F6F3FA">
     <meta name="color-scheme" content="light">
@@ -514,16 +530,18 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
     <meta property="og:title" content="${escapeHTML(pageTitle)}">
     <meta property="og:description" content="${escapeHTML(metaDescription)}">
     <meta property="og:url" content="${canonicalUrl}">
-    <meta property="og:image" content="${heroImageLarge}">
-    <meta property="og:image:secure_url" content="${heroImageLarge}">
-    <meta property="og:image:width" content="600">
-    <meta property="og:image:height" content="800">
+    
+    <!-- 🟢 ใช้รูปภาพ 1200x630 สำหรับการแชร์โซเชียล ไม่ให้หน้าโดนตัด -->
+    <meta property="og:image" content="${ogImageSocial}">
+    <meta property="og:image:secure_url" content="${ogImageSocial}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
-    <meta name="twitter:image" content="${heroImageLarge}">
+    <meta name="twitter:image" content="${ogImageSocial}">
     <meta name="twitter:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
     <link rel="shortcut icon" href="/images/favicon.ico">
@@ -724,7 +742,8 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
-    <script type="module" src="/main.js?v=v_${Date.now()}"></script>
+   
+<script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 </body>
 </html>`;
 

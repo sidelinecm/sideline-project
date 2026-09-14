@@ -148,6 +148,7 @@ const PROVINCE_SEO_DATA = {
 PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA["chiangmai"];
 PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 
+// ค้นหาฟังก์ชัน sanitizeThaiText ใน ssr-province.js แล้วแทนที่ด้วยชุดนี้:
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -163,7 +164,8 @@ function sanitizeThaiText(text) {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    .replace(/(?<!#[0-9a-fA-F]{0,6})\b(69|➏➒)\b|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    // 🟢 แก้ไข: นำ \b ออก และเพิ่มคำศัพท์ล่อแหลมเพื่อป้องกัน SafeSearch แบน
+    .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
@@ -674,6 +676,26 @@ export default async (req, context) => {
       ? heroImage 
       : `${primaryDomain}${heroImage.startsWith("/") ? "" : "/"}${heroImage}`;
 
+    // 🟢 1. เตรียม Breadcrumb รายการ (มีให้ครบทั้งหน้าแรกและหน้ารายจังหวัด ป้องกัน Broken Node #breadcrumb)
+    const breadcrumbItems = [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "หน้าแรก",
+        "item": `${primaryDomain}/`
+      }
+    ];
+
+    if (!isNational) {
+      breadcrumbItems.push({
+        "@type": "ListItem",
+        "position": 2,
+        "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+        "item": canonicalUrl
+      });
+    }
+
+    // 🟢 2. โครงสร้าง Schema Graph หลัก (แก้ปัญหา &amp;, เพิ่มขนาด Logo, ผูกความสัมพันธ์ถูกต้อง 100%)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -685,6 +707,8 @@ export default async (req, context) => {
           "@type": "ImageObject",
           "@id": `${primaryDomain}/#logo`,
           "url": `${primaryDomain}/images/firstmodelhub.webp`,
+          "width": 512,
+          "height": 512,
           "caption": CONFIG.BRAND_NAME
         },
         "description": cleanMetaDesc,
@@ -707,13 +731,13 @@ export default async (req, context) => {
       {
         "@type": "CollectionPage",
         "@id": `${canonicalUrl}#webpage`,
-        "name": escapeHTML(metaTitle),
+        "name": stripHTML(metaTitle), // 🟢 ใช้ stripHTML เพื่อไม่ให้มี &amp; หลุดไปในผลค้นหา Google
         "description": cleanMetaDesc,
         "url": canonicalUrl,
         "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
-        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } }),
+        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }, // 🟢 ชี้ไปที่ #breadcrumb ได้อย่างปลอดภัยตลอดเวลา
         "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
       },
       {
@@ -762,27 +786,14 @@ export default async (req, context) => {
       }
     ];
 
-    if (!isNational) {
-      schemaGraph.push({
-        "@type": "BreadcrumbList",
-        "@id": `${canonicalUrl}#breadcrumb`,
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "หน้าแรก",
-            "item": primaryDomain
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
-            "item": canonicalUrl
-          }
-        ]
-      });
-    }
+    // 🟢 3. บันทึก BreadcrumbList ลง Graph เสมอ (แก้ไขปัญหา Unresolved Node ในหน้าแรกถาวร)
+    schemaGraph.push({
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      "itemListElement": breadcrumbItems
+    });
 
+    // 🟢 4. บันทึก ItemList พร้อมรูปภาพน้องๆ (ตรงเกณฑ์ Google Carousel Rich Results)
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -793,11 +804,13 @@ export default async (req, context) => {
           "@type": "ListItem",
           "position": idx + 1,
           "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
+          "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
           "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
         }))
       });
     }
 
+    // 🟢 5. บันทึก FAQPage หากมีข้อมูล
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
