@@ -1400,15 +1400,13 @@ if (heroH1) {
     }, { passive: true });
   }
 
-// ==============================================================================
-  // 💎 LUXURY LIGHTBOX MODAL (เวอร์ชันใหม่ คมชัดระดับ Retina + ปุ่มกระชับมืออาชีพ)
-  // ==============================================================================
-  window.openLightboxModal = function (profile) {
+window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (!lightboxEl) return;
 
+    // 🔒 1. ประกาศตัวแปรหลักและ Fallback ป้องกัน ReferenceError 100%
     const fallbackImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined") 
       ? DEFAULT_FALLBACK_IMG 
       : "https://firstmodelhub.com/images/firstmodelhub.webp";
@@ -1417,46 +1415,75 @@ if (heroH1) {
     const cleanName = (profile.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "").trim();
     const displayName = isEn ? cleanName : `น้อง${cleanName}`;
     const pProvinceThai = profile.provinceThai || profile.provinceNameThai || "เชียงใหม่";
+    const pProvText = pProvinceThai; 
     const pLocation = profile.location || pProvinceThai;
-    const primaryZone = pLocation.replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "").split(/[,/]|และใกล้/)[0].trim() || pProvinceThai;
+    const pLocText = pLocation;     
+    const primaryZone = pLocation.replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "").split(/[,/]|และใกล้/)[0].trim() || pProvText;
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    // 🟢 1. SEO & Meta
+    // 🟢 2. ซิงค์ SEO HEAD (แก้ปัญหา Title/Meta/Canonical ค้างหน้าเดิม)
     const dynamicTitle = isEn
-      ? `${displayName} - VIP Companion in ${pProvinceThai} | FirstModelHub`
-      : `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvinceThai} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
+      ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
+      : `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
     document.title = dynamicTitle;
 
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
-    if (canonicalLink) canonicalLink.href = canonicalProfileUrl;
+    if (canonicalLink) {
+      canonicalLink.href = canonicalProfileUrl;
+    }
 
+    const dynamicDesc = isEn
+      ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
+      : `${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${pLocText} จ.${pProvText} สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} การันตีตัวจริง 100% ปลอดภัยนัดพบจ่ายหน้างาน ไร้มัดจำ`;
+
+    const metaDescEl = document.querySelector('meta[name="description"]');
+    if (metaDescEl) metaDescEl.setAttribute("content", dynamicDesc);
+
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.setAttribute("content", dynamicTitle);
+
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.setAttribute("content", dynamicDesc);
+
+    const ogUrlEl = document.querySelector('meta[property="og:url"]');
+    if (ogUrlEl) ogUrlEl.setAttribute("content", canonicalProfileUrl);
+
+    const heroImgUrl = (profile.images && profile.images[0] && (profile.images[0].fullSrc || profile.images[0].src)) || profile.imagePath || fallbackImg;
+    const ogImgEl = document.querySelector('meta[property="og:image"]');
+    if (ogImgEl) ogImgEl.setAttribute("content", heroImgUrl);
+
+    // 🟢 3. ตรวจสอบสถานะรับงาน
     const isAvail = profile.isAvailable !== undefined
       ? Boolean(profile.isAvailable)
       : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(profile.availability || "").toLowerCase().includes(s));
     
-    const availStatus = isAvail ? "รับงาน" : "สอบถามคิว";
+    const availStatus = isEn 
+      ? (isAvail ? "Available Now" : "Inquire Schedule") 
+      : (profile.availability || (isAvail ? "พร้อมรับงาน" : "สอบถามคิว"));
+      
+    const statusColor = isAvail ? "#059669" : "#E11D48";
 
-    // 🟢 2. ชื่อ และ ป้ายสถานะ
+    // 🟢 4. ชื่อ และ ป้ายสถานะ
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
-        <span class="lb-main-title">${displayName}</span>
-        ${profile.isVerified ? '<span class="lb-verified-badge"><i class="fas fa-check-circle"></i> ตรงปก 100%</span>' : ""}
+        <span style="font-size: clamp(20px, 5vw, 24px) !important; font-weight: 900 !important; background: linear-gradient(135deg, #140F22 0%, #E11D48 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;">${displayName}</span>
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #059669; margin-left: 6px; font-size: 16px;" title="Verified Profile"></i>' : ""}
       `;
     }
 
     const availBadgeWrapper = document.getElementById("lightbox-availability-badge-wrapper");
     if (availBadgeWrapper) {
       availBadgeWrapper.innerHTML = `
-        <div class="lb-status-pill ${isAvail ? "online" : "busy"}">
-            <span class="lb-pulse-dot"></span>
-            <span>${availStatus}</span>
-        </div>
+        <span style="background: #F0ECF8; border: 1px solid rgba(0,0,0,0.06); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor};"></span>
+            <span style="color: ${statusColor}; font-size: 11px; font-weight: 800;">${availStatus}</span>
+        </span>
       `;
     }
 
-    // 🟢 3. รูปภาพใหญ่
+    // 🟢 5. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots Swipe)
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: fallbackImg, fullSrc: fallbackImg }];
@@ -1468,9 +1495,12 @@ if (heroH1) {
     if (heroImg) {
       heroImg.src = images[0]?.fullSrc || images[0]?.src || fallbackImg;
       heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
+      heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+      heroImg.style.transform = "scale(1)";
       heroImg.style.opacity = "1";
     }
 
+    // สร้างจุดไข่ปลา (Dots Indicator) เหนือรูปภาพ
     const heroContainer = document.querySelector(".lightbox-hero-container");
     let dotsContainer = document.getElementById("lightbox-dots-indicator");
     if (heroContainer) {
@@ -1490,200 +1520,215 @@ if (heroH1) {
       }
     }
 
-    // 🟢 4. คำคม
+    // แถบรูปย่อ Thumbnails ด้านล่าง
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+    if (thumbStrip) {
+      if (images.length > 1) {
+        thumbStrip.style.display = "flex";
+        thumbStrip.innerHTML = images.map((img, idx) => `
+          <div class="lightbox-thumb-item ${idx === 0 ? "active" : ""}" data-img-idx="${idx}" style="cursor: pointer;">
+            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${idx + 1}" loading="lazy">
+          </div>
+        `).join("");
+
+        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
+          item.addEventListener("click", () => {
+            const idx = parseInt(item.getAttribute("data-img-idx"), 10);
+            if (typeof updateLightboxPhoto === "function") {
+              updateLightboxPhoto(idx);
+            }
+          });
+        });
+      } else {
+        thumbStrip.style.display = "none";
+        thumbStrip.innerHTML = "";
+      }
+    }
+
+    // 🟢 6. คำคม & แท็ก
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) {
-      quoteEl.innerHTML = `
-        <div class="lb-quote-box">
-          <i class="fas fa-heart lb-quote-icon"></i>
-          <span>${profile.quote || profile.slogan || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ไม่เร่งเวลา"}</span>
-        </div>
-      `;
+      quoteEl.textContent = profile.quote || profile.slogan || (isEn ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
       quoteEl.style.display = "block";
     }
 
-    // 🟢 5. แท็กสไตล์ Jewelry Pill
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
       tagsEl.innerHTML = "";
-      const rawTagsList = Array.isArray(profile.styleTags) ? profile.styleTags : [];
-      rawTagsList.forEach(tag => {
-        const cleanTag = tag.replace(/^#/, "").trim();
-        if (!cleanTag) return;
+      (Array.isArray(profile.styleTags) ? profile.styleTags : []).forEach(tag => {
         const pill = document.createElement("span");
-        pill.className = "lb-tag-jewel";
-        pill.textContent = `#${cleanTag}`;
+        pill.className = "lightbox-tag-pill";
+        pill.textContent = tag.startsWith("#") ? tag : `#${tag}`;
         tagsEl.appendChild(pill);
       });
     }
 
-    // 🟢 6. สเปก 3 ช่อง (Bento) + แถบราคา
-    const rawAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "22 ปี");
-    const rawStats = profile.safeStats || profile.stats || "มาตรฐาน";
-    const rawHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "162 cm");
+    // 🟢 7. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน
+    const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
+    const safeStats = profile.safeStats || profile.stats || "ไม่ระบุ";
+    const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "ไม่ระบุ");
     const displayPrice = profile.displayPrice || (profile.rate ? `${parseInt(profile.rate, 10).toLocaleString()}.-` : "1,500.-");
+
+    const labelAge = isEn ? "Age" : "อายุ";
+    const labelStats = isEn ? "Stats" : "สัดส่วน";
+    const labelHeight = isEn ? "Height" : "ส่วนสูง";
+    const labelPrice = isEn ? "Rate" : "ค่าขนม";
+    const labelLocation = isEn ? "Location" : "พิกัดงาน";
 
     const detailsCompactEl = document.getElementById("lightboxDetailsCompact");
     if (detailsCompactEl) {
       detailsCompactEl.innerHTML = `
-        <div class="lb-bento-grid">
-            <div class="lb-bento-card">
-                <span class="lb-bento-label">อายุ</span>
-                <strong class="lb-bento-val">${rawAge}</strong>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelAge}</div>
+                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeAge}</div>
             </div>
-            <div class="lb-bento-card highlight">
-                <span class="lb-bento-label">สัดส่วน</span>
-                <strong class="lb-bento-val">${rawStats}</strong>
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelStats}</div>
+                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeStats}</div>
             </div>
-            <div class="lb-bento-card">
-                <span class="lb-bento-label">ส่วนสูง</span>
-                <strong class="lb-bento-val">${rawHeight}</strong>
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelHeight}</div>
+                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeHeight}</div>
             </div>
         </div>
 
-        <div class="lb-ticket-strip">
-            <div class="lb-ticket-item">
-                <span class="lb-ticket-label"><i class="fas fa-tag"></i> ค่าดูแลเริ่มต้น</span>
-                <span class="lb-ticket-price">${displayPrice}</span>
+        <div style="background: #F0ECF8; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #4A4458; font-size: 12px; font-weight: 700;"><i class="fas fa-tag" style="color:#7C3AED; margin-right:4px;"></i> ${labelPrice}</span>
+                <span style="color: #059669; font-weight: 900; font-size: 15px;">${displayPrice}</span>
             </div>
-            <div class="lb-ticket-divider"></div>
-            <div class="lb-ticket-item">
-                <span class="lb-ticket-label"><i class="fas fa-map-marker-alt"></i> พิกัดสแตนด์บาย</span>
-                <span class="lb-ticket-location">${pLocation}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 6px;">
+                <span style="color: #4A4458; font-size: 12px; font-weight: 700;"><i class="fas fa-map-marker-alt" style="color:#7C3AED; margin-right:4px;"></i> ${labelLocation}</span>
+                <span style="color: #140F22; font-weight: 800; font-size: 12.5px;">${pLocation}</span>
             </div>
         </div>
       `;
     }
 
-    // 🟢 7. กล่องข้อความดูแล (ปรับให้กระชับ ไม่โหวงเหวง)
+    // 🟢 8. คำบรรยายรายละเอียด
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
-      const defaultDesc = `พร้อมดูแลเพื่อนเที่ยวสไตล์ฟิวแฟน สุภาพ เรียบร้อย เอาใจเก่ง ตรงปก 100% สอบถามคิวงานได้เลยค่ะ`;
+      const defaultDesc = `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
       const rawDesc = (profile.description && profile.description.trim()) ? profile.description : defaultDesc;
       const safeText = (typeof escapeHTML === "function") ? escapeHTML(rawDesc) : rawDesc;
-      
-      descContent.innerHTML = `
-        <div class="lb-bio-compact">
-          <div class="lb-bio-title"><i class="fas fa-comment-dots"></i> ข้อความจากน้อง</div>
-          <div class="lb-bio-text">${safeText.replace(/\n/g, "<br>")}</div>
-        </div>
-      `;
+      descContent.innerHTML = safeText.replace(/\n/g, "<br>");
+      descContent.style.color = "#4A4458";
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 🟢 8. ปุ่มแอดไลน์ขนาดกระชับ (Modern Sleek Pill - ไม่ใหญ่เทอะทะ)
-    const rawLine = String(profile.lineId || profile.line_id || profile.line || "u8Bz9HsaY8").trim();
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก
+    const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
     let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
       lineUrl = rawLine;
-    } else if (rawLine.startsWith("@")) {
-      const cleanOA = rawLine.replace(/[^a-zA-Z0-9_\-\.@]/g, "").trim();
-      lineUrl = `https://line.me/R/ti/p/${cleanOA}`;
     } else {
-      const cleanHandle = rawLine.replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-      lineUrl = cleanHandle ? `https://line.me/ti/p/~${cleanHandle}` : "https://line.me/ti/p/u8Bz9HsaY8";
+      const cleanHandle = rawLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
+      if (cleanHandle) lineUrl = `https://line.me/ti/p/${cleanHandle}`;
     }
 
     const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
     if (lineWrapper) {
+      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
       lineWrapper.innerHTML = `
-        <div class="lb-cta-container">
-          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lb-compact-line-btn" onclick="window.handleLineBooking('${profile.id}', '${lineUrl}')">
-              <i class="fab fa-line lb-btn-line-icon"></i>
-              <span>ทักไลน์จองคิว ${displayName}</span>
-              <i class="fas fa-arrow-right lb-btn-arrow"></i>
-          </a>
-          <span class="lb-cta-subtext"><i class="fas fa-shield-alt"></i> เจอตัวจริงตรวจสอบความตรงปกก่อนชำระเงิน • ไม่มีมัดจำ</span>
-        </div>
+        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);">
+            <i class="fab fa-line" style="font-size: 20px;"></i>
+            <span>${lineBtnText}</span>
+        </a>
       `;
     }
 
     const parseFn = window.parseRateToNumber || (typeof parseRateToNumber === "function" ? parseRateToNumber : ((r) => 1500));
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
 
-    // 🟢 9. ตารางเรทราคา 3 กล่องคมชัด
+    // 💰 10. ตารางเรทราคา 3 ช่อง
     const ratesGrid = document.getElementById("lightboxRatesGrid");
     if (ratesGrid) {
       ratesGrid.innerHTML = `
-        <div class="lb-rate-box">
-          <div class="lb-rate-duration">1 ชั่วโมง</div>
-          <div class="lb-rate-tag">ชั่วคราว</div>
-          <strong class="lb-rate-num">${rateNum.toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rateNum.toLocaleString()}.-</strong>
         </div>
-        <div class="lb-rate-box">
-          <div class="lb-rate-duration">2 ชั่วโมง</div>
-          <div class="lb-rate-tag">ฟิวแฟน</div>
-          <strong class="lb-rate-num">${Math.floor(rateNum * 1.8).toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชม.</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 1.8).toLocaleString()}.-</strong>
         </div>
-        <div class="lb-rate-box vip-best">
-          <span class="lb-best-badge">ยอดนิยม</span>
-          <div class="lb-rate-duration">ค้างคืน</div>
-          <div class="lb-rate-tag">Overnight</div>
-          <strong class="lb-rate-num">${Math.floor(rateNum * 4.5).toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 4.5).toLocaleString()}.-</strong>
         </div>
       `;
     }
 
-    // 🟢 10. คำถามพบบ่อย (FAQ)
+    // 💬 11. FAQ คำถามพบบ่อย 3 ข้อ
     const faqTitle = document.getElementById("lightboxFaqTitle");
-    if (faqTitle) faqTitle.innerHTML = `<i class="fas fa-question-circle" style="color: #7C3AED;"></i> คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
-    
+    if (faqTitle) faqTitle.textContent = isEn ? `Frequently Asked Questions about ${displayName}` : `คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
     const faqList = document.getElementById("lightboxFaqList");
     if (faqList) {
       const ageNum = profile.safeAge && profile.safeAge !== "-" ? profile.safeAge : "22";
       const heightNum = profile.height && String(profile.height).trim() !== "-" ? String(profile.height).replace(/\D/g, "") : "162";
+      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
 
       faqList.innerHTML = `
-        <div class="lb-faq-card">
-          <div class="lb-faq-q"><span class="q-badge">Q</span> ${displayName} สัดส่วนและพิกัดบริการ?</div>
-          <div class="lb-faq-a">อายุ ${ageNum} ปี สัดส่วน ${rawStats} สูง ${heightNum} ซม. สแตนด์บายดูแลในพื้นที่ <strong>${pLocation}</strong> ตรงปก 100% ค่ะ</div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: ${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${displayName} อายุ ${ageNum} ปี สัดส่วน ${safeStats} ส่วนสูง ${heightNum} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${pLocText} ในจังหวัด${pProvText} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
         </div>
-        <div class="lb-faq-card">
-          <div class="lb-faq-q"><span class="q-badge">Q</span> เงื่อนไขการจ่ายเงินและมัดจำ?</div>
-          <div class="lb-faq-a">เรทเริ่มต้น <strong>${rateNum.toLocaleString()}.-</strong> นัดพบเจอน้องหน้างานแล้วจึงชำระเงิน <strong>ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี</strong></div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">อัตราค่าบริการเริ่มต้น ${rateNum.toLocaleString()}.- นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
+        </div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">สามารถกดปุ่ม '${lineBtnText}' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
         </div>
       `;
     }
 
-    // 🟢 11. รีวิว
+    // ⭐ 12. รีวิวจากลูกค้าจริง
     const reviewsList = document.getElementById("lightboxReviewsList");
     if (reviewsList) {
       const defaultReviews = [
         { name: "พี่บอล", text: "ฟิวแฟนของแท้เลยครับ น้องเทคแคร์ดีมาก ขี้อ้อน น่ารัก ตรงตามรูปในโปรไฟล์ทุกอย่าง" },
-        { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" }
+        { name: "พี่เมฆ", text: "น่ารักและเป็นกันเองมากครับ น้องคุยสนุก ไม่มีเกร็งเลย เหมือนได้ไปเดทกับแฟนจริงๆ" },
+        { name: "พี่นัท", text: "จ่ายเงินหน้างานตรงกับน้อง มั่นใจในความปลอดภัยได้เต็มร้อย บริการด้วยความจริงใจมากครับ" }
       ];
       const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : defaultReviews;
       const poolLen = pool.length;
       const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
       const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
       
-      const selectedReviews = [pool[hash % poolLen], pool[(hash + 2) % poolLen]];
+      const selectedReviews = [
+        pool[hash % poolLen],
+        pool[(hash + 2) % poolLen],
+        pool[(hash + 4) % poolLen]
+      ];
       reviewsList.innerHTML = selectedReviews.map(r => `
-        <div class="lb-review-card">
-          <div class="lb-review-top">
-            <strong class="lb-reviewer-name">${r.name}</strong>
-            <span class="lb-review-stars">★★★★★</span>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">${r.name}</strong>
+            <span style="color: #D97706; font-size: 10.5px;">⭐⭐⭐⭐⭐</span>
           </div>
-          <p class="lb-review-msg">"${r.text}"</p>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">"${r.text}"</p>
         </div>
       `).join("");
     }
 
-    // 🟢 12. น้องๆ แนะนำเพิ่มเติม
-    const allList = (typeof appState !== "undefined" && appState.allProfiles && appState.allProfiles.length > 0) 
-      ? appState.allProfiles 
-      : (window.profilesData || []);
-
+    // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
     const relatedTitle = document.getElementById("lightboxRelatedTitle");
-    if (relatedTitle) relatedTitle.innerHTML = `<i class="fas fa-user-friends" style="color: #7C3AED;"></i> น้องๆ แนะนำในโซน${pProvinceThai}`;
+    if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
     
     const relatedGrid = document.getElementById("lightboxRelatedGrid");
     const relatedMore = document.getElementById("lightboxRelatedMoreLink");
     if (relatedGrid) {
+      const allList = (typeof appState !== "undefined" && appState.allProfiles && appState.allProfiles.length > 0) 
+        ? appState.allProfiles 
+        : (window.profilesData || []);
       const pKey = (profile.provinceKey || "chiangmai").toLowerCase();
 
       let candidates = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
+
       if (candidates.length < 3) {
         const otherProvinces = allList.filter(m => String(m.id) !== String(profile.id) && !candidates.some(c => String(c.id) === String(m.id)));
         candidates = [...candidates, ...otherProvinces];
@@ -1697,40 +1742,40 @@ if (heroH1) {
           const rmName = rm.displayName || ((typeof formatDisplayName === "function") ? formatDisplayName(rm.name) : rm.name);
           const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || fallbackImg);
           return `
-            <div class="lb-related-card" data-profile-slug="${rm.slug || rm.id}">
-              <div class="lb-related-img-wrap">
-                <img src="${rmImg}" alt="${rmName}" loading="lazy">
-              </div>
-              <div class="lb-related-name">${rmName}</div>
+            <div class="lightbox-related-item" data-profile-slug="${rm.slug || rm.id}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s;">
+              <img src="${rmImg}" alt="${rmName} สาวรับงาน${pProvText}" loading="lazy" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
+              <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rmName}</div>
             </div>
           `;
         }).join("");
 
-        relatedGrid.querySelectorAll(".lb-related-card").forEach(card => {
+        relatedGrid.querySelectorAll(".lightbox-related-item").forEach(card => {
           card.addEventListener("click", function(e) {
             e.preventDefault();
             const targetSlug = this.getAttribute("data-profile-slug");
             const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
             if (targetProfile) {
               history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-              const scrollBody = document.getElementById("lightboxScrollBody");
+              const scrollBody = document.getElementById("lightboxScrollBody") || document.querySelector(".lightbox-scroll-body");
               if (scrollBody) scrollBody.scrollTop = 0;
               window.openLightboxModal(targetProfile);
             }
           });
         });
+      } else {
+        relatedGrid.innerHTML = '<div style="grid-column: span 3; font-size: 11px; color: #827894; text-align: center;">ไม่มีโปรไฟล์แนะนำเพิ่มเติมในขณะนี้</div>';
       }
     }
 
     if (relatedMore) {
       relatedMore.innerHTML = `
-        <a href="/location/${profile.provinceKey || "chiangmai"}" class="lb-view-all-btn">
-          ดูน้องๆ ทั้งหมดในโซนนี้ <i class="fas fa-arrow-right"></i>
+        <a href="/location/${profile.provinceKey || "chiangmai"}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
+          ${isEn ? "View all models in this area →" : `ดูน้องๆ รับงานโซน${pProvText} ทั้งหมด →`}
         </a>
       `;
     }
 
-    // 🟢 13. แสดงผล Modal
+    // 🟢 14. สั่น Haptic + เด้งสปริง 60 FPS + ล็อกพื้นหลังไม่ให้เลื่อนตาม
     if (typeof triggerHaptic === "function") triggerHaptic("medium");
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";

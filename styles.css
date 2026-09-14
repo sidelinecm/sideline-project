@@ -3243,3 +3243,194 @@ body.lightbox-open {
   text-decoration: none !important;
   margin-top: 8px !important;
 }
+
+/* ==============================================================================
+   💎 FIX LIGHTBOX OVERLAP & INSTAGRAM DOTS (แก้ทุกจุดตามภาพ)
+   ============================================================================== */
+
+/* ------------------------------------------------------------------------------
+   1. แก้จุดไข่ปลาแคปซูลกระจกฝ้าสไตล์ Instagram ให้สว่าง คมชัด ไม่บังรูป
+   ------------------------------------------------------------------------------ */
+#lightboxThumbnailStrip {
+  display: none !important;
+}
+
+.lightbox-dots-wrapper,
+#lightbox-dots-indicator {
+  position: absolute !important;
+  bottom: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  z-index: 35 !important;
+  background: rgba(15, 10, 26, 0.6) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  padding: 5px 12px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  pointer-events: auto !important;
+}
+
+.gallery-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1) !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+}
+
+.gallery-dot.active {
+  width: 18px !important;
+  border-radius: 100px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ------------------------------------------------------------------------------
+   2. แก้ปุ่มโลโก้ และปุ่มปิด (X) ให้ตรึงอยู่บนรูปภาพ ไม่ลอยลงมาทับเนื้อหาด้านล่าง
+   ------------------------------------------------------------------------------ */
+.lightbox-top-brand {
+  position: absolute !important;
+  top: 14px !important;
+  left: 14px !important;
+  z-index: 90 !important;
+  background: rgba(15, 10, 26, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.lightbox-close-circle-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  z-index: 90 !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: rgba(15, 10, 26, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  color: #FFFFFF !important;
+}
+
+/* ------------------------------------------------------------------------------
+   3. แก้กล่องคำคม ไม่ให้มีกรอบสีแดงซ้อนกัน 2 ชั้น
+   ------------------------------------------------------------------------------ */
+#lightboxQuote {
+  background: #FAF8FE !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  border-left: 4px solid #E11D48 !important;
+  border-radius: 4px 14px 14px 4px !important;
+  padding: 10px 14px !important;
+  margin: 4px 0 !important;
+}
+
+.lb-quote-box {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* ------------------------------------------------------------------------------
+   4. ปรับปุ่มแอดไลน์จองคิว ให้ยาวเต็มจอ สีเขียวสดใส คมชัด ไม่โดนบัง
+   ------------------------------------------------------------------------------ */
+.lb-cta-container {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 12px 0 !important;
+}
+
+.lb-compact-line-btn,
+.lightbox-line-cta {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 48px !important;
+  background: linear-gradient(135deg, #06C755 0%, #00B900 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 100px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(6, 199, 85, 0.35) !important;
+}
+
+.lb-cta-subtext {
+  font-size: 11px !important;
+  color: #64748B !important;
+  font-weight: 600 !important;
+}
+
+/* ------------------------------------------------------------------------------
+   5. ซ่อนป้าย "ยอดนิยม" ที่บังคำว่า "ค้างคืน" + จัดตารางเรท 3 ช่องให้สะอาด
+   ------------------------------------------------------------------------------ */
+.lb-best-badge {
+  display: none !important; /* ซ่อนป้ายที่บังตัวหนังสือ */
+}
+
+#lightboxRatesGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+}
+
+.lb-rate-box,
+.lb-rate-v1-box {
+  background: #FAF8FE !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.16) !important;
+  border-radius: 16px !important;
+  padding: 12px 6px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.lb-rate-box.vip-best {
+  background: #FAF8FE !important;
+  border-color: rgba(124, 58, 237, 0.16) !important;
+}
+
+.lb-rate-duration,
+.lb-rate-v1-title {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0F172A !important;
+}
+
+.lb-rate-tag {
+  display: none !important;
+}
+
+.lb-rate-num,
+.lb-rate-v1-price {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #059669 !important;
+}
