@@ -1960,25 +1960,33 @@ if (heroH1) {
     if (loader) loader.style.display = "none";
   }
 
-  async function handleUrlRouting(isInitial = false) {
-    let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  // ใน main.js ภายในฟังก์ชัน handleUrlRouting หรือ initApplication:
+async function handleUrlRouting(isInitial = false) {
+  let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
-    // 1. ตรวจสอบ Sideline Lightbox Route
-    const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
-    if (sidelineMatch) {
-      let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
-      appState.currentProfileSlug = slugVal;
+  // 🟢 ตรวจสอบว่าหน้าเว็บปัจจุบันเป็นหน้า Standalone Profile ที่เรนเดอร์มาจาก render-bot.js หรือไม่
+  const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+  if (isStandaloneProfile) {
+    // ถ้าเป็นหน้าโปรไฟล์เดี่ยวแล้ว ให้หยุดทำงานส่วน SPA Routing ทันที ไม่ต้องเปิด Lightbox ซ้อน
+    return;
+  }
 
-      let foundProfile = appState.allProfiles.find(p => 
-        String(p.slug || "").toLowerCase() === slugVal.toLowerCase() || 
-        String(p.id) === slugVal
-      );
+  // 1. ตรวจสอบ Sideline Lightbox Route สำหรับหน้าหลัก
+  const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
+  if (sidelineMatch) {
+    let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
+    appState.currentProfileSlug = slugVal;
 
-      if (foundProfile) {
-        window.openLightboxModal(foundProfile);
-      }
-      return;
+    let foundProfile = appState.allProfiles.find(p => 
+      String(p.slug || "").toLowerCase() === slugVal.toLowerCase() || 
+      String(p.id) === slugVal
+    );
+
+    if (foundProfile) {
+      window.openLightboxModal(foundProfile);
     }
+    return;
+  }
 
     // 2. ข้ามการ Re-render ซ้ำซ้อน หากหน้าเว็บมี SSR Render มาแล้ว
     const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
@@ -2022,6 +2030,14 @@ if (heroH1) {
   }
 
   async function initApplication() {
+    // 🟢 1. ตรวจสอบทันที: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่สร้างจาก render-bot.js)
+    // ให้หยุดทำงานทันที ไม่ต้องไปดึง Database Supabase 100+ คน และไม่ต้องเปิด Lightbox ซ้อน
+    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+    if (isStandaloneProfile) {
+        hideGlobalLoader();
+        return; // ⛔ ออกจากการทำงานทันที ประหยัดเน็ต ประหยัด RAM 100%
+    }
+
     domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
     domCache.noResultsMessage = document.getElementById("no-results-message");
