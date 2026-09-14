@@ -1156,7 +1156,8 @@ export default async (req, context) => {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
-    finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
+finalHtml = finalHtml.replace(/\/styles\.css\?v=\d+/g, `/styles.css?v=${GLOBAL_VERSION}`);
+finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
