@@ -1686,15 +1686,11 @@ window.openLightboxModal = function (profile) {
       `;
     }
 
+    // ✅ แก้เป็น
     // ⭐ 12. รีวิวจากลูกค้าจริง
     const reviewsList = document.getElementById("lightboxReviewsList");
     if (reviewsList) {
-      const defaultReviews = [
-        { name: "พี่บอล", text: "ฟิวแฟนของแท้เลยครับ น้องเทคแคร์ดีมาก ขี้อ้อน น่ารัก ตรงตามรูปในโปรไฟล์ทุกอย่าง" },
-        { name: "พี่เมฆ", text: "น่ารักและเป็นกันเองมากครับ น้องคุยสนุก ไม่มีเกร็งเลย เหมือนได้ไปเดทกับแฟนจริงๆ" },
-        { name: "พี่นัท", text: "จ่ายเงินหน้างานตรงกับน้อง มั่นใจในความปลอดภัยได้เต็มร้อย บริการด้วยความจริงใจมากครับ" }
-      ];
-      const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : defaultReviews;
+      const pool = REVIEW_POOL;
       const poolLen = pool.length;
       const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
       const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -2330,28 +2326,22 @@ async function handleUrlRouting(isInitial = false) {
       };
     }
 
-    window.trackLineClick = function(profileId) {
-  try {
-    const idNum = parseInt(profileId, 10);
-    if (isNaN(idNum)) return;
+    // ✅ แก้เป็น
+    window.trackLineClick = async function(profileId) {
+      try {
+        const idNum = parseInt(profileId, 10);
+        if (isNaN(idNum)) return;
 
-    // 🛡️ ป้องกันยิงซ้ำ: ตรวจสอบว่าใน Session นี้เคยกดไปแล้วหรือยัง
-    const sessionKey = `tracked_line_${idNum}`;
-    if (sessionStorage.getItem(sessionKey)) return;
-    sessionStorage.setItem(sessionKey, "true");
+        const sessionKey = `tracked_line_${idNum}`;
+        if (sessionStorage.getItem(sessionKey)) return;
+        sessionStorage.setItem(sessionKey, "true");
 
-    fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
-      method: "POST",
-      headers: {
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ profile_id_to_update: idNum }),
-      keepalive: true
-    }).catch(() => {});
-  } catch (_) {}
-};
+        const client = await getSupabaseClient();
+        if (client) {
+          client.rpc("increment_likes", { profile_id_to_update: idNum }).catch(() => {});
+        }
+      } catch (_) {}
+    };
 
     window.handleLineBooking = function(profileId, lineUrl) {
       triggerHaptic("success"); // 👈 เติมบรรทัดนี้: สั่นจังหวะ Success ยืนยันการกดจอง
