@@ -888,6 +888,7 @@ export default async (req, context) => {
 
     const exactCount = String(totalCount);
 
+   // 🟢 1. อัปเดต Title & Descriptions
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -895,6 +896,14 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
+    // 🟢 2. อัปเดต Meta Keywords รายจังหวัด (SEO Local Ranking)
+    const dynamicKeywords = isNational
+      ? "สาวรับงานทั่วไทย, ไซด์ไลน์ทั่วไทย, รับงานทั่วไทย, เด็กเอ็นทั่วไทย, เพื่อนเที่ยวทั่วไทย, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน"
+      : `เพื่อนเที่ยว${provinceNameThai}, ไซด์ไลน์${provinceNameThai}, สาวรับงาน${provinceNameThai}, เด็กเอ็น${provinceNameThai}, ${cleanZonesList.slice(0, 4).join(", ")}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน`;
+
+    finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="keywords" content="${escapeHTML(dynamicKeywords)}" />`);
+
+    // 🟢 3. อัปเดต Canonical & OpenGraph URLs
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
@@ -907,17 +916,23 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
 
-   const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
-
+    // 🟢 4. อัปเดตหัวข้อ H1 & H2
+    const ssrH1Html = isNational ? `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>` : `<span class="h1-line-1">เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวสวยสไตล์ฟิวแฟน ตรงปก 100%</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
+    // 🟢 5. อัปเดตตัวเลขและข้อความป้ายสถิติ 3 ช่อง (แก้ปัญหาข้อความขัดแย้ง)
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
-    finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
-
+    
+    const provCountHtml = isNational
+      ? `<strong class="stat-number" id="live-province-count">${totalProvincesFromDb}</strong><span class="stat-label">ทุกๆ จังหวัดทั่วประเทศ</span>`
+      : `<strong class="stat-number" id="live-province-count">${cleanZonesList.length || 1}</strong><span class="stat-label">โซนยอดนิยมทั่ว${escapeHTML(provinceNameThai)}</span>`;
+    
+    finalHtml = finalHtml.replace(/<div class="stat-pill-item">\s*<i class="fas fa-map-marked-alt stat-icon-gold"><\/i>[\s\S]*?<\/div>\s*<\/div>/i, `<div class="stat-pill-item"><i class="fas fa-map-marked-alt stat-icon-gold"></i><div class="stat-text-group">${provCountHtml}</div></div>`);
+    
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p, idx, isClone = false) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
@@ -990,10 +1005,15 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-   if (isNational) { finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); } else { finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); }
+   if (isNational) { 
+     finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); 
+   } else { 
+     // ซ่อนไว้แทนการลบทิ้ง เพื่อให้ SPA Client สลับกลับมาเปิดได้ 
+     finalHtml = finalHtml.replace(/<section id="featured-profiles"[^>]*>/i, `<section id="featured-profiles" class="clean-section-wrapper hidden" aria-labelledby="featured-heading">`);
+   } // 👈 เติมปีกกาปิดตรงนี้เรียบร้อย (ระบบจะไม่ Crash)
 
-    let displayAreaHtml = "";
-    if (isNational) {
+   let displayAreaHtml = "";
+   if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
         const key = (p.provinceKey || p.province_slug || "no_province").toString().toLowerCase();
         acc[key] = acc[key] || [];
