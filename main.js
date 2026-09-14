@@ -456,6 +456,8 @@ async function getSupabaseClient() {
     }
   }
   window.triggerHaptic = triggerHaptic;
+  
+  
 
   function sanitizeThaiText(text) {
     if (!text || typeof text !== "string") return "";
@@ -851,7 +853,7 @@ async function getSupabaseClient() {
         });
       }
 
-      const isAllOrNational = activeProvince === "all" || activeProvince === "national";
+     const isAllOrNational = activeProvince === "all" || activeProvince === "national";
       const resolvedSlug = isAllOrNational ? "national" : activeProvince;
       const provinceDisplayName = isEN 
         ? (PROVINCE_EN_MAP[resolvedSlug] || "Thailand") 
@@ -864,6 +866,31 @@ async function getSupabaseClient() {
     } catch (err) {
       console.error("Filter error:", err);
     }
+  }
+
+  // 🟢 ดักจับคลิกโลโก้: กดแล้วรีเฟรชหน้าแรก หรือกลับหน้าแรกทันที 100% (ทำงานทุกอุปกรณ์)
+  if (!window.__logoClickRegistered) {
+    window.__logoClickRegistered = true;
+    document.addEventListener('click', (e) => {
+      const logoEl = e.target.closest('.brand-luxe-logo');
+      if (!logoEl) return;
+
+      if (typeof triggerHaptic === 'function') triggerHaptic('light');
+
+      if (typeof window.closeLightboxModal === 'function') {
+        window.closeLightboxModal(false);
+      }
+
+      const isHome = (window.location.pathname === '/' || window.location.pathname === '') && !window.location.search;
+      if (isHome) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.location.reload(); // บังคับรีเฟรชหน้าเว็บทันที
+      } else {
+        e.preventDefault();
+        window.location.href = '/'; // พากลับหน้าแรก
+      }
+    }, { capture: true });
   }
 
   async function renderDisplayArea(profiles, isFilteredOrLocationView) {
