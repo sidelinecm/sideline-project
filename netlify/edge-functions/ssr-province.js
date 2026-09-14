@@ -191,24 +191,22 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
+// ✅ แก้เป็น
 function optimizeImg(imagePath, width = 400, height = 560) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const isThumb = width <= 150;
-
-  const transform = isThumb 
-    ? "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
+  const hParam = height ? `,h_${height}` : "";
+  const transform = `f_auto,q_auto:eco,w_${width}${hParam},c_fill,g_face`;
+  const targetBase = CONFIG.CLOUDINARY_BASE_URL; // รวมศูนย์เข้าบัญชีหลัก dyynjlbuj ทั้งหมด
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
-      const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${transform}/${rest}`;
+      return `${targetBase}${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -218,7 +216,7 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  return `${targetBase}${transform}/${formatted}`;
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
@@ -1080,6 +1078,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
+    // ✅ แก้เป็น
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1101,6 +1100,7 @@ export default async (req, context) => {
       if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
       const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean) : [];
 
+      // 🟢 ตัด description และ galleryPaths ออกเพื่อความเบาขั้นสุดของหน้าเว็บ
       return {
         id: p.id,
         slug: p.slug || String(p.id),
@@ -1115,17 +1115,15 @@ export default async (req, context) => {
         hips: p.hips || "",
         cup_size: p.cup_size || "",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
-        galleryPaths: p.galleryPaths || p.gallery_paths || [],
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
         rate: safeRate,
         availability: p.availability || "รับงาน",
         lastUpdated: p.lastUpdated || p.created_at || null,
-        isfeatured: p.isfeatured === true || p.isFeatured=== true,
+        isfeatured: p.isfeatured === true || p.isFeatured === true,
         verified: p.verified === true || p.isVerified === true,
         hasVideo: p.hasVideo === true || p.has_video === true,
-        description: sanitizeThaiText(p.description || ""),
         lineId: cleanLine,
         quote: sanitizeThaiText(p.quote || p.slogan || ""),
         styleTags: safeStyleTags

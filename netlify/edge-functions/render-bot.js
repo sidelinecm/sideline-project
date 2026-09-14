@@ -571,16 +571,17 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
           <div class="header-logo-container">
     <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก" style="text-decoration: none;">
         <span class="luxe-star-crest" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"/>
-                <defs>
-                    <linearGradient id="fmh-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#FFF0B3"/>
-                        <stop offset="50%" stop-color="#F59E0B"/>
-                        <stop offset="100%" stop-color="#D97706"/>
-                    </linearGradient>
-                </defs>
-            </svg>
+           <!-- ✅ แก้เป็น -->
+<svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+  <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
+  <defs>
+    <linearGradient id="fmh-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF0B3"></stop>
+      <stop offset="50%" stop-color="#F59E0B"></stop>
+      <stop offset="100%" stop-color="#D97706"></stop>
+    </linearGradient>
+  </defs>
+</svg>
         </span>
         <span class="luxe-brand-text">
             <span class="txt-first">First</span><span class="txt-model">Model</span>
