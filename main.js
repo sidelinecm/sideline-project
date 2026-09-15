@@ -1013,9 +1013,9 @@ if (heroH1) {
       <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
     `;
   } else {
-    const line1 = isAllOrNational 
-      ? "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย" 
-      : `เพื่อนเที่ยว & ไซด์ไลน์${escapeHTML(targetName)}`;
+   const line1 = isAllOrNational 
+  ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
+  : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
     const line2 = "สาวสวยสไตล์ฟิวแฟน ตรงปก 100%";
 
     heroH1.innerHTML = `

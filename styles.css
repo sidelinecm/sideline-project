@@ -2263,7 +2263,16 @@ footer.fmh-footer .brand-logo-text,
   line-height: 1.55 !important;
 }
 
-
+.lightbox-tags-row { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
+.lightbox-tag-pill {
+  background: var(--violet-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--violet-royal) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 3.5px 10px !important;
+  border-radius: 100px !important;
+}
 
 .lightbox-tags-row { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
 .lightbox-tag-pill {
