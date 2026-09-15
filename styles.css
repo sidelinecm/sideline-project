@@ -3649,3 +3649,15 @@ body.lightbox-open {
   position: relative !important;
   z-index: 99 !important;
 }
+/* ป้องกันหน้าต่างหลุดตอนใช้นิ้วปัดดูรูปภาพ */
+.lightbox-hero-container {
+  touch-action: pan-y !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: pointer;
+}
+
+.gallery-dot {
+  padding: 4px; /* ขยายขอบเขตนิ้วสัมผัสให้แตะง่ายขึ้น */
+  background-clip: content-box;
+}

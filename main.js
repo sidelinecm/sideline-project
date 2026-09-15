@@ -542,10 +542,25 @@ async function getSupabaseClient() {
 
     const displayName = formatDisplayName(raw.name || raw.displayName || raw.title || "Model");
     const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
-    const gallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+    
+    // 🖼️ ดึงรูปอัลบั้มทั้งหมด และแปลง JSON String ให้เป็น Array อย่างปลอดภัย
+    let gallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+    if (typeof gallery === "string") {
+      const trimmed = gallery.trim();
+      if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+        try { gallery = JSON.parse(trimmed); } catch (_) { gallery = trimmed.split(",").map(s => s.trim()); }
+      } else if (trimmed) {
+        gallery = trimmed.split(",").map(s => s.trim());
+      } else {
+        gallery = [];
+      }
+    }
+    const galleryArr = Array.isArray(gallery) ? gallery : [];
+
+    // รวมรูปหน้าปก + ทุกรูปในอัลบั้มเข้าด้วยกัน
     const combinedPhotos = [
       mainImg,
-      ...(Array.isArray(gallery) ? gallery : typeof gallery === "string" ? gallery.split(",").map(s => s.trim()) : [])
+      ...galleryArr
     ].filter(Boolean);
 
     let images = [...new Set(combinedPhotos)].map(img => {
@@ -1368,7 +1383,7 @@ if (heroH1) {
     }
   }
 
-  // ระบบตรวจจับการปัดรูปซ้าย-ขวาบนภาพใหญ่
+  // ระบบตรวจจับการปัดรูปซ้าย-ขวา และแตะรูปสไตล์ Instagram
   function initLightboxImageSwipe() {
     const heroContainer = document.querySelector(".lightbox-hero-container");
     if (!heroContainer || heroContainer.dataset.swipeBound === "true") return;
@@ -1378,28 +1393,68 @@ if (heroH1) {
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
+    let isSwiping = false;
 
     heroContainer.addEventListener("touchstart", (e) => {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       touchEndX = touchStartX;
       touchEndY = touchStartY;
+      isSwiping = false;
     }, { passive: true });
 
     heroContainer.addEventListener("touchmove", (e) => {
       touchEndX = e.touches[0].clientX;
       touchEndY = e.touches[0].clientY;
-    }, { passive: true });
-
-    heroContainer.addEventListener("touchend", () => {
       const diffX = touchEndX - touchStartX;
       const diffY = touchEndY - touchStartY;
-      // ปัดแนวนอนชัดเจน (diffX ต้องมากกว่า diffY 1.8 เท่า)
-      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.8) {
-        if (diffX < 0) updateLightboxPhoto(currentActivePhotoIdx + 1);
-        else updateLightboxPhoto(currentActivePhotoIdx - 1);
+      if (Math.abs(diffX) > 15 && Math.abs(diffX) > Math.abs(diffY)) {
+        isSwiping = true;
       }
     }, { passive: true });
+
+    heroContainer.addEventListener("touchend", (e) => {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      // 1. ตรวจจับการปัดนิ้วซ้าย / ขวา (Swipe)
+      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+        if (diffX < 0) {
+          updateLightboxPhoto(currentActivePhotoIdx + 1); // ปัดซ้าย -> รูปถัดไป
+        } else {
+          updateLightboxPhoto(currentActivePhotoIdx - 1); // ปัดขวา -> รูปก่อนหน้า
+        }
+      } 
+      // 2. ตรวจจับการแตะที่รูปสไตล์ Instagram (Tap Left = Prev, Tap Right = Next)
+      else if (!isSwiping && Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
+        if (e.target.closest(".lightbox-dots-wrapper, .lightbox-top-brand, .lightbox-close-circle-btn, .sheet-drag-pill-bar")) {
+          return;
+        }
+        if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
+        const rect = heroContainer.getBoundingClientRect();
+        const tapX = touchEndX - rect.left;
+        if (tapX < rect.width * 0.35) {
+          updateLightboxPhoto(currentActivePhotoIdx - 1);
+        } else {
+          updateLightboxPhoto(currentActivePhotoIdx + 1);
+        }
+      }
+    }, { passive: true });
+
+    // รองรับการคลิกเปลี่ยนรูปบนคอมพิวเตอร์
+    heroContainer.addEventListener("click", (e) => {
+      if (e.target.closest(".lightbox-dots-wrapper, .lightbox-top-brand, .lightbox-close-circle-btn, .sheet-drag-pill-bar")) {
+        return;
+      }
+      if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
+      const rect = heroContainer.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      if (clickX < rect.width * 0.35) {
+        updateLightboxPhoto(currentActivePhotoIdx - 1);
+      } else {
+        updateLightboxPhoto(currentActivePhotoIdx + 1);
+      }
+    });
   }
 
   window.openLightboxModal = function (profile) {
@@ -1485,7 +1540,7 @@ if (heroH1) {
       `;
     }
 
-    // 🟢 5. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots Swipe)
+    // 🟢 5. จัดการรูปภาพใหญ่, Thumbnails และจุดไข่ปลา (Dots Swipe สไตล์ IG)
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: fallbackImg, fullSrc: fallbackImg }];
@@ -1512,36 +1567,24 @@ if (heroH1) {
         dotsContainer.className = "lightbox-dots-wrapper";
         heroContainer.appendChild(dotsContainer);
       }
+
       if (images.length > 1) {
-        dotsContainer.style.display = "flex";
+        dotsContainer.style.setProperty("display", "flex", "important");
         dotsContainer.innerHTML = images.map((_, i) => `
-          <span class="gallery-dot ${i === 0 ? "active" : ""}"></span>
-        `).join("");
-      } else {
-        dotsContainer.style.display = "none";
-      }
-    }
-
-    // แถบรูปย่อ Thumbnails ด้านล่าง
-    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
-    if (thumbStrip) {
-      if (images.length > 1) {
-        thumbStrip.style.display = "flex";
-        thumbStrip.innerHTML = images.map((img, idx) => `
-          <div class="lightbox-thumb-item ${idx === 0 ? "active" : ""}" data-img-idx="${idx}" style="cursor: pointer;">
-            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${idx + 1}" loading="lazy">
-          </div>
+          <span class="gallery-dot ${i === 0 ? "active" : ""}" data-idx="${i}" aria-label="ดูรูปที่ ${i + 1}"></span>
         `).join("");
 
-        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
-          item.addEventListener("click", () => {
-            const idx = parseInt(item.getAttribute("data-img-idx"), 10);
+        // 🟢 กดแตะที่จุดไข่ปลาเพื่อเปลี่ยนรูปได้ทันที
+        dotsContainer.querySelectorAll(".gallery-dot").forEach((dot) => {
+          dot.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(dot.getAttribute("data-idx"), 10);
             updateLightboxPhoto(idx);
           });
         });
       } else {
-        thumbStrip.style.display = "none";
-        thumbStrip.innerHTML = "";
+        // หากมีรูปเดียว ให้ซ่อนแคปซูลจุดไข่ปลาออก
+        dotsContainer.style.setProperty("display", "none", "important");
       }
     }
 
