@@ -191,22 +191,25 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-// ✅ แก้เป็น
-function optimizeImg(imagePath, width = 400, height = 560) {
+function optimizeImg(imagePath, width = 400) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const hParam = height ? `,h_${height}` : "";
-  const transform = `f_auto,q_auto:eco,w_${width}${hParam},c_fill,g_face`;
-  const targetBase = CONFIG.CLOUDINARY_BASE_URL; // รวมศูนย์เข้าบัญชีหลัก dyynjlbuj ทั้งหมด
+  
+  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
+  const isLarge = width >= 700;
+  const transform = isLarge 
+    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       let rest = cleanPath.substring(uploadIdx + 8);
+      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${targetBase}${transform}/${rest}`;
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -216,7 +219,7 @@ function optimizeImg(imagePath, width = 400, height = 560) {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `${targetBase}${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
@@ -477,13 +480,41 @@ export default async (req, context) => {
         PAGE_CACHE.clear();
         TEMPLATE_HTML_CACHE = null;
         GLOBAL_VERSION = `v_${Date.now()}`;
+
+        // ⚡ สั่ง Netlify Global CDN ให้ล้างแคชทิ้งทั่วโลกทันที!
+        let cdnPurged = false;
+        const netlifyToken = Deno.env.get("NETLIFY_AUTH_TOKEN");
+        const netlifySiteId = Deno.env.get("NETLIFY_SITE_ID");
+
+        if (netlifyToken && netlifySiteId) {
+          try {
+            const purgeRes = await fetch(`https://api.netlify.com/api/v1/purge_cache`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${netlifyToken}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ site_id: netlifySiteId })
+            });
+            cdnPurged = purgeRes.ok;
+          } catch (e) {
+            console.warn("Netlify CDN Purge failed:", e);
+          }
+        }
+
         return new Response(JSON.stringify({
           success: true,
-          message: "⚡ All Caches Purged Successfully!",
+          cdnPurged: cdnPurged,
+          message: cdnPurged 
+            ? "⚡ ล้างแคชระดับ Edge และ CDN ทั่วโลกสำเร็จ 100%!" 
+            : "⚡ ล้างแคช Edge สำเร็จ (ยังไม่ได้ผูก Netlify Token)",
           version: GLOBAL_VERSION
         }), {
           status: 200,
-          headers: { "Content-Type": "application/json; charset=utf-8" }
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "no-store, no-cache, must-revalidate"
+          }
         });
       }
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -1157,8 +1188,8 @@ finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=31536000, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
       "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",

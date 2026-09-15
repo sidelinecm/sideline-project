@@ -134,22 +134,25 @@ function extractCleanNumber(rate) {
   return num;
 }
 
-// ✅ แก้ไขฟังก์ชัน optimizeImg ใน render-bot.js ให้ยืดหยุ่นตามพารามิเตอร์ที่ส่งเข้ามา:
-function optimizeImg(imagePath, width = 400, height = 560) {
+function optimizeImg(imagePath, width = 400) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const hParam = height ? `,h_${height}` : "";
-  const transform = `f_auto,q_auto:eco,w_${width}${hParam},c_fill,g_face`;
+  
+  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
+  const isLarge = width >= 700;
+  const transform = isLarge 
+    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
-      const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
+      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${transform}/${rest}`;
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -210,7 +213,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
         ? `พบกับ ${displayName} เพื่อนเที่ยวสายหวานตัวเล็กน่ารัก สดใส สไตล์คุณหนู พิกัดดูแล${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนกะทัดรัด ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) บุคลิกยิ้มแย้ม อัธยาศัยดี เอาใจเก่ง${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
         : v === 1
         ? `สำหรับท่านที่ชื่นชอบสาวไซส์มินิ น่าทะนุถนอม ขอแนะนำ ${displayName} พิกัด${zone} (${provinceName}) วัยใส ${age} ปี รูปร่าง ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ชวนคุยสนุก คลายเหงา ทานข้าว ดูหนัง เป็นกันเองอย่างสุภาพ${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการสาวรับงานใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการเพื่อนเที่ยวฟิวแฟนใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
 
     case "model":
       return v === 0
@@ -237,7 +240,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
       return v === 0
         ? `สัมผัสการดูแลอย่างอบอุ่นสไตล์ Girlfriend Experience (GFE) แท้ๆ กับ ${displayName} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. เทคแคร์เอาใจใส่ดุจแฟนคนพิเศษ สุภาพ อ่อนโยน ไม่เร่งรีบ ให้เกียรติและสร้างความผ่อนคลายสูงสุด${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
         : v === 1
-        ? `แนะนำ ${displayName} สาวรับงานที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        ? `แนะนำ ${displayName} เพื่อนเที่ยวฟิวแฟนที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
         : `หากคุณกำลังมองหาเพื่อนเที่ยวรู้ใจที่ดูแลด้วยความจริงใจ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. สไตล์ฟิวแฟนหวานละมุน อัธยาศัยดี มีความเป็นกันเอง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
   }
 }
@@ -250,13 +253,41 @@ export default async (req, context) => {
     if (secret === CONFIG.PURGE_SECRET) {
       PROFILE_PAGE_CACHE.clear();
       GLOBAL_PROFILE_VERSION = `v_${Date.now()}`;
+
+      // ⚡ สั่ง Netlify Global CDN ให้ล้างแคชทิ้งทั่วโลกทันที!
+      let cdnPurged = false;
+      const netlifyToken = Deno.env.get("NETLIFY_AUTH_TOKEN");
+      const netlifySiteId = Deno.env.get("NETLIFY_SITE_ID");
+
+      if (netlifyToken && netlifySiteId) {
+        try {
+          const purgeRes = await fetch(`https://api.netlify.com/api/v1/purge_cache`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${netlifyToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ site_id: netlifySiteId })
+          });
+          cdnPurged = purgeRes.ok;
+        } catch (e) {
+          console.warn("Netlify CDN Purge failed:", e);
+        }
+      }
+
       return new Response(JSON.stringify({
         success: true,
-        message: "⚡ Profile Cache Purged Successfully!",
+        cdnPurged: cdnPurged,
+        message: cdnPurged 
+          ? "⚡ ล้างแคชโปรไฟล์ระดับ Edge และ CDN ทั่วโลกสำเร็จ 100%!" 
+          : "⚡ ล้างแคชโปรไฟล์ Edge สำเร็จ",
         version: GLOBAL_PROFILE_VERSION
       }), {
         status: 200,
-        headers: { "Content-Type": "application/json; charset=utf-8" }
+        headers: { 
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store, no-cache, must-revalidate"
+        }
       });
     }
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -343,7 +374,7 @@ const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNam
 
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
-    const metaDescription = `${displayName} สาวรับงาน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
+    const metaDescription = `${displayName} เพื่อนเที่ยวฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
@@ -420,7 +451,7 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
             `สาวรับงาน${provinceNameThai}`,
             `ไซด์ไลน์${provinceNameThai}`,
             `เด็กเอ็น${provinceNameThai}`,
-            "สาวรับงาน",
+            "เพื่อนเที่ยวฟิวแฟน",
             "Girlfriend Experience (GFE)",
             "รับงานไม่มัดจำ",
             "จ่ายหน้างานปลอดภัย"
@@ -436,7 +467,7 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
           // 🌟 เปลี่ยนเป็น Product เพื่อให้ Google แสดงผลดาวรีวิวสีส้ม ⭐⭐⭐⭐⭐
           "@type": "Product",
           "@id": `${canonicalUrl}#service`,
-          "name": `บริการสาวรับงานและสาวรับงาน - ${stripHTML(displayName)}`,
+          "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
           "image": heroImageLarge,
           "description": stripHTML(metaDescription),
           "sku": `FMH-${String(rawSlug).toUpperCase()}`,
@@ -578,7 +609,8 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-<link rel="stylesheet" href="/styles.css?v=425">
+<!-- ค้นหาบรรทัดนี้แล้วแก้เป็น: -->
+<link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <noscript>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -620,7 +652,7 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
            <!-- 🟢 แก้ไขให้ตรงกับ Schema -->
-<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
+<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
@@ -632,7 +664,7 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
                        <img src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
+                             class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
                              width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     </div>
@@ -770,10 +802,11 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
 </body>
 </html>`;
 
-   const responseHeaders = {
+  const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=31536000, stale-while-revalidate=86400",
+      // ⚡ ปรับจาก 1 ปี ให้เหลือ 10 นาที เท่ากับ ssr-province.js ป้องกันข้อมูลค้าง
+      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
       "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
