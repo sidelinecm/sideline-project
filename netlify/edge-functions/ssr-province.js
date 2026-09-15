@@ -1105,7 +1105,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    // ✅ แก้เป็น
+   // ✅ ส่ง galleryPaths และ description ให้ครบถ้วนเพื่อให้ Lightbox แสดงผลและปัดรูปได้ครบทุกรูป
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1127,7 +1127,20 @@ export default async (req, context) => {
       if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
       const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean) : [];
 
-      // 🟢 ตัด description และ galleryPaths ออกเพื่อความเบาขั้นสุดของหน้าเว็บ
+      // 🖼️ จัดการแปลง galleryPaths ทุกรูปแบบ (Array, JSON string, comma-separated) ให้เป็น Array
+      let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
+      if (typeof rawGallery === "string") {
+        const trimmed = rawGallery.trim();
+        if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+          try { rawGallery = JSON.parse(trimmed); } catch (_) { rawGallery = trimmed.split(",").map(s => s.trim()); }
+        } else if (trimmed) {
+          rawGallery = trimmed.split(",").map(s => s.trim());
+        } else {
+          rawGallery = [];
+        }
+      }
+      const safeGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
+
       return {
         id: p.id,
         slug: p.slug || String(p.id),
@@ -1142,6 +1155,8 @@ export default async (req, context) => {
         hips: p.hips || "",
         cup_size: p.cup_size || "",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
+        galleryPaths: safeGallery, // 👈 คืนค่ารูปภาพอัลบั้มทั้งหมด!
+        description: sanitizeThaiText(p.description || ""), // 👈 คืนค่าคำบรรยายโปรไฟล์
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
@@ -1156,7 +1171,6 @@ export default async (req, context) => {
         styleTags: safeStyleTags
       };
     })).replace(/</g, "\\u003c");
-
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
