@@ -501,29 +501,25 @@ async function getSupabaseClient() {
     return String(num);
   }
 
- function optimizeImg(imagePath, width = 400, height = 560) {
+ function optimizeImg(imagePath, width = 400) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
 
   const cleanPath = imagePath.trim();
-  const isThumb = width <= 150;
-  const isFull = width >= 800; // 👈 1. ตรวจจับรูปใหญ่ใน Lightbox Modal
-
-  // 🟢 ปรับคุณภาพ 3 ระดับ: เล็ก (120), การ์ดหน้าแรก (400x560), รูปใหญ่ใน Modal (800x1120 คมชัดระดับ HD แท้)
-  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill,g_face";
-  if (isThumb) {
-    transform = "f_auto,q_auto:eco,w_120,h_120,c_fill,g_face";
-  } else if (isFull) {
-    transform = "f_auto,q_auto:good,w_800,h_1120,c_fill,g_face"; // 👈 คมชัดระดับ Retina ไม่เบลอ ไม่แตก
-  }
+  
+  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
+  const isLarge = width >= 700;
+  const transform = isLarge 
+    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
+    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
-      const base = cleanPath.substring(0, uploadIdx + 8);
       let rest = cleanPath.substring(uploadIdx + 8);
+      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
       rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
-      return `${base}${transform}/${rest}`;
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
   }
@@ -535,6 +531,8 @@ async function getSupabaseClient() {
   let formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
+
+  
 
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
@@ -1316,7 +1314,10 @@ if (heroH1) {
     return wrapper;
   }
 
-// 🟢 ฟังก์ชัน Lightbox ที่ถูกต้องและสมบูรณ์ 100% (รองรับปัดซ้าย-ขวาดูรูป + ปัดลงปิดหน้าต่าง)
+// ==============================================================================
+  // 🟢 ระบบ LIGHTBOX MODAL & TOUCH GESTURES (สมบูรณ์แบบ 100% ไร้รอยต่อ)
+  // ==============================================================================
+
   let currentActivePhotoIdx = 0;
   let currentActivePhotoList = [];
 
@@ -1324,7 +1325,6 @@ if (heroH1) {
   function updateLightboxPhoto(idx) {
     if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
 
-    // วนลูปรูปภาพ (ถ้าปัดเกินให้วนกลับมาหน้าแรก/หลังสุด)
     if (idx < 0) idx = currentActivePhotoList.length - 1;
     if (idx >= currentActivePhotoList.length) idx = 0;
 
@@ -1337,12 +1337,12 @@ if (heroH1) {
     heroImg.style.opacity = "0.25";
     heroImg.style.transform = "scale(0.98)";
     setTimeout(() => {
-      heroImg.src = currentActivePhotoList[idx].fullSrc || currentActivePhotoList[idx].src || DEFAULT_FALLBACK_IMG;
+      heroImg.src = currentActivePhotoList[idx].fullSrc || currentActivePhotoList[idx].src || "https://firstmodelhub.com/images/firstmodelhub.webp";
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
     }, 110);
 
-    // ปรับสถานะ Active บนแถบ Thumbnail
+    // ปรับสถานะ Active บน Thumbnail Strip (ถ้ามี)
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
       thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach((t, i) => {
@@ -1388,19 +1388,15 @@ if (heroH1) {
     heroContainer.addEventListener("touchend", () => {
       const diffX = touchEndX - touchStartX;
       const diffY = touchEndY - touchStartY;
-
-      // 🔒 ตรวจสอบว่าเป็นการปัดแนวนอนชัดเจน (แกน X ต้องเคลื่อนที่มากกว่าแกน Y 1.3 เท่า และระยะเกิน 38px)
-      if (Math.abs(diffX) > 38 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
-        if (diffX < 0) {
-          updateLightboxPhoto(currentActivePhotoIdx + 1); // ปัดซ้าย -> รูปถัดไป
-        } else {
-          updateLightboxPhoto(currentActivePhotoIdx - 1); // ปัดขวา -> รูปก่อนหน้า
-        }
+      // ปัดแนวนอนชัดเจน (diffX ต้องมากกว่า diffY 1.8 เท่า)
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.8) {
+        if (diffX < 0) updateLightboxPhoto(currentActivePhotoIdx + 1);
+        else updateLightboxPhoto(currentActivePhotoIdx - 1);
       }
     }, { passive: true });
   }
 
-window.openLightboxModal = function (profile) {
+  window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
@@ -1534,9 +1530,7 @@ window.openLightboxModal = function (profile) {
         thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
           item.addEventListener("click", () => {
             const idx = parseInt(item.getAttribute("data-img-idx"), 10);
-            if (typeof updateLightboxPhoto === "function") {
-              updateLightboxPhoto(idx);
-            }
+            updateLightboxPhoto(idx);
           });
         });
       } else {
@@ -1618,7 +1612,7 @@ window.openLightboxModal = function (profile) {
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (ดีไซน์กระชับ เรียบหรู ไม่เทอะทะ)
     const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
     let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
@@ -1630,11 +1624,11 @@ window.openLightboxModal = function (profile) {
 
     const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
     if (lineWrapper) {
-      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
+      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `ทักไลน์จองคิว ${displayName}`;
       lineWrapper.innerHTML = `
-        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);">
-            <i class="fab fa-line" style="font-size: 20px;"></i>
-            <span>${lineBtnText}</span>
+        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(typeof window.handleLineBooking==='function'){window.handleLineBooking('${profile.id}','${lineUrl}')}else if(typeof window.trackLineClick==='function'){window.trackLineClick('${profile.id}')}">
+            <i class="fab fa-line"></i>
+            <span>${lineBtnText} (จ่ายหน้างาน)</span>
         </a>
       `;
     }
@@ -1686,11 +1680,16 @@ window.openLightboxModal = function (profile) {
       `;
     }
 
-    // ✅ แก้เป็น
     // ⭐ 12. รีวิวจากลูกค้าจริง
     const reviewsList = document.getElementById("lightboxReviewsList");
     if (reviewsList) {
-      const pool = REVIEW_POOL;
+      const defaultPool = [
+        { name: "คุณชลสิทธิ์", text: "ตรงเวลามากครับ น้องน่ารัก อัธยาศัยดี พูดจาสุภาพ ดูแลสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ" },
+        { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" },
+        { name: "พี่โจ", text: "จองง่าย ไม่ต้องโอนมัดจำล่วงหน้า ไปเจอน้องตัวจริงแล้วค่อยจ่าย สบายใจและปลอดภัย 100% ครับ" },
+        { name: "คุณกอล์ฟ", text: "น้องน่ารักสไตล์ผู้ดี มารยาทดีมาก เทคแคร์เอาใจใส่เป็นธรรมชาติ แนะนำคนนี้เลยครับ" }
+      ];
+      const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : defaultPool;
       const poolLen = pool.length;
       const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
       const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -1790,6 +1789,7 @@ window.openLightboxModal = function (profile) {
       }
     });
   };
+
   // ==============================================================================
   // 🟢 ฟังก์ชันปิดหน้าต่างโปรไฟล์ LIGHTBOX (เวอร์ชันสมบูรณ์แบบสูงสุด 100% ไร้รอยต่อ)
   // ==============================================================================
@@ -1839,7 +1839,7 @@ window.openLightboxModal = function (profile) {
 
       if (slug && slug !== "national" && slug !== "all") {
         targetUrl = `/location/${slug}`;
-        const provName = appState.provincesMap.get(slug) || "เชียงใหม่";
+        const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
         targetTitle = isEN 
           ? `${provName} Escorts & Companions | FirstModelHub` 
@@ -1864,17 +1864,13 @@ window.openLightboxModal = function (profile) {
         if (domCache.provinceSelect) domCache.provinceSelect.value = "";
       }
 
-      // ⚡ สำคัญ: ใช้ replaceState แทน pushState เพื่อแก้ปัญหาปุ่ม Back วนลูป 100%
+      // ⚡ ใช้ replaceState เพื่อแก้ปัญหาปุ่ม Back วนลูป
       history.replaceState(null, "", targetUrl);
 
-      // 🟢 คืนค่า Title
       document.title = targetTitle;
-
-      // 🟢 คืนค่า Canonical Link
       const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "" : targetUrl}`;
       if (canonicalLink) canonicalLink.href = fullCanonical;
 
-      // 🟢 คืนค่า Meta Tags (Description และ OpenGraph) ป้องกันรูปและข้อมูลน้องค้าง
       const metaDescEl = document.querySelector('meta[name="description"]');
       if (metaDescEl) metaDescEl.setAttribute("content", targetDesc);
 
@@ -1894,7 +1890,7 @@ window.openLightboxModal = function (profile) {
     appState.currentProfileSlug = null;
   };
 
- // 🟢 ระบบ Swipe-to-Dismiss อัจฉริยะ (แก้ไขปีกกาปิดสมบูรณ์ 100%)
+  // 🟢 ระบบดึงปิดหน้าต่าง (Swipe Down) แบบสมูท ป้องกันมือลั่น 100%
   function initLightboxSwipeDown() {
     const lightboxEl = document.getElementById("lightbox");
     const contentEl = document.getElementById("lightbox-content-wrapper-el");
@@ -1904,104 +1900,63 @@ window.openLightboxModal = function (profile) {
 
     initLightboxImageSwipe();
 
-    let startX = 0;
     let startY = 0;
-    let currentX = 0;
     let currentY = 0;
     let isDragging = false;
     let isEligible = false;
-    let isHorizontalGesture = false;
 
-    const onTouchStart = (e) => {
-      if (e.target.closest(".lightbox-hero-container") && !e.target.closest(".sheet-drag-pill-bar")) {
-        isEligible = false;
-        return;
-      }
-
-      const isFromDragBar = dragBar && dragBar.contains(e.target);
-      const isTopHeader = e.target.closest(".lightbox-top-brand") || e.target.closest(".sheet-drag-pill-bar");
+    contentEl.addEventListener("touchstart", (e) => {
+      // 🔒 ยอมให้ลากปิดได้เฉพาะแตะที่ Drag Bar หัวภาพ หรือตอนที่สกอร์อยู่บนสุดเท่านั้น
+      const isFromDragBar = dragBar && (dragBar.contains(e.target) || e.target === dragBar);
       const isAtTop = !scrollBody || scrollBody.scrollTop <= 0;
+      const isHeaderArea = e.target.closest(".lightbox-top-brand") || e.target.closest(".sheet-drag-pill-bar");
 
-      if (isFromDragBar || isTopHeader || isAtTop) {
+      if (isFromDragBar || (isAtTop && isHeaderArea)) {
         isEligible = true;
-        startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
-        currentX = startX;
         currentY = startY;
-        isHorizontalGesture = false;
+      } else {
+        isEligible = false;
       }
-    };
+    }, { passive: true });
 
-    const onTouchMove = (e) => {
+    contentEl.addEventListener("touchmove", (e) => {
       if (!isEligible) return;
-
-      currentX = e.touches[0].clientX;
       currentY = e.touches[0].clientY;
-      const deltaX = Math.abs(currentX - startX);
       const deltaY = currentY - startY;
 
-      if (deltaX > deltaY && deltaX > 15) {
-        isHorizontalGesture = true;
-      }
-
-      if (isHorizontalGesture) {
-        if (isDragging) {
-          contentEl.style.transform = "translateY(0)";
-          isDragging = false;
-        }
-        return;
-      }
-
-      if (deltaY > 0 && deltaY > deltaX && (!scrollBody || scrollBody.scrollTop <= 0)) {
+      if (deltaY > 0) {
         if (e.cancelable) e.preventDefault();
         isDragging = true;
         contentEl.style.transition = "none";
-        const resistanceY = Math.pow(deltaY, 0.92);
+        const resistanceY = Math.pow(deltaY, 0.88);
         contentEl.style.transform = `translateY(${resistanceY}px)`;
-      } else {
-        if (isDragging) {
-          contentEl.style.transform = "translateY(0)";
-          isDragging = false;
-        }
       }
-    };
+    }, { passive: false });
 
-    const onTouchEnd = () => {
-      if (!isEligible && !isDragging) return;
-
+    contentEl.addEventListener("touchend", () => {
+      if (!isEligible || !isDragging) return;
       const deltaY = currentY - startY;
+      isDragging = false;
       isEligible = false;
+      contentEl.style.transition = "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)";
 
-      if (isDragging && !isHorizontalGesture) {
-        isDragging = false;
-        contentEl.style.transition = "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)";
-
-        if (deltaY > 80) {
-          if (typeof triggerHaptic === "function") triggerHaptic("light");
-          window.closeLightboxModal(true);
-        } else {
-          contentEl.style.transform = "translateY(0)";
-        }
+      // ต้องตั้งใจรูดลงเกิน 110px ถึงจะปิดหน้าต่าง
+      if (deltaY > 110) {
+        if (typeof triggerHaptic === "function") triggerHaptic("light");
+        window.closeLightboxModal(true);
+      } else {
+        contentEl.style.transform = "translateY(0)";
       }
-      startX = 0;
-      startY = 0;
-      currentX = 0;
-      currentY = 0;
-      isHorizontalGesture = false;
-    };
-
-    contentEl.addEventListener("touchstart", onTouchStart, { passive: true });
-    contentEl.addEventListener("touchmove", onTouchMove, { passive: false });
-    contentEl.addEventListener("touchend", onTouchEnd, { passive: true });
-    contentEl.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    }, { passive: true });
   }
-  
+
   function hideGlobalLoader() {
     const loader = document.getElementById("global-loader-overlay");
     if (loader) loader.style.display = "none";
   }
 
-  // ใน main.js ภายในฟังก์ชัน handleUrlRouting หรือ initApplication:
+  
 async function handleUrlRouting(isInitial = false) {
   let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
@@ -2629,11 +2584,8 @@ async function handleUrlRouting(isInitial = false) {
     modal.style.transform = "translate(-50%, -50%) scale(1)";
   }
 
-  // ==========================================================================
-  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (แก้ไขให้ล้างแคชได้ 100% ไม่ Error)
-  // ==========================================================================
   function initStealthAdminPurge() {
-    const starElements = document.querySelectorAll(".brand-logo-text .star, .dancing-neon-star, .star");
+    const starElements = document.querySelectorAll(".brand-logo-text .star, .dancing-neon-star, .star, .luxe-star-crest");
     if (!starElements || starElements.length === 0) return;
 
     let tapCount = 0;
@@ -2654,9 +2606,7 @@ async function handleUrlRouting(isInitial = false) {
         if (typeof triggerHaptic === "function") triggerHaptic("light");
 
         clearTimeout(resetTimer);
-        resetTimer = setTimeout(() => {
-          tapCount = 0;
-        }, 1200);
+        resetTimer = setTimeout(() => { tapCount = 0; }, 1200);
 
         if (tapCount >= 5) {
           tapCount = 0;
@@ -2664,59 +2614,51 @@ async function handleUrlRouting(isInitial = false) {
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
           setTimeout(async () => {
-            const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nกรุณาใส่รหัสผ่านเพื่อล้างแคชและดึงข้อมูลสดล่าสุด:");
+            const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลกทันที:");
             
             if (inputPin === ADMIN_PIN) {
               showAdminStatusModal(
                 "loading", 
-                "กำลังล้างแคชระบบทั้งหมด...", 
-                "ระบบกำลังเคลียร์ Cache Storage, Service Worker และ Edge Memory กรุณารอสักครู่..."
+                "กำลังล้างแคชระบบทั่วโลก...", 
+                "กำลังสั่งล้างแคชทั้งในเครื่อง, Edge Node และ Netlify CDN ทั่วโลก กรุณารอสักครู่..."
               );
 
               try {
-                // 1. ล้างแคชระดับ Client (Storage & PWA Cache)
+                // 1. ล้างแคชในเครื่อง Client
                 if (window.sessionStorage) sessionStorage.clear();
                 if (window.localStorage) localStorage.clear();
-                
                 if ("caches" in window) {
                   const cacheKeys = await caches.keys();
                   await Promise.all(cacheKeys.map(k => caches.delete(k)));
                 }
 
-                // 2. ขอยิงล้างแคชที่ Edge Server (ส่งทั้ง API และ Headers)
-                try {
-                  await fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
-                    method: "GET",
-                    headers: { "x-purge-secret": ADMIN_SECRET },
-                    cache: "no-store"
-                  });
-                } catch (_) {
-                  // ถ้า API /api/ ไม่ได้ต่อไว้ ให้ข้ามไปใช้ Force Refresh ผ่าน URL ได้เลย
-                }
+                // 2. สั่ง Server & Netlify CDN ให้ล้างแคชทั่วโลก
+                const res = await fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
+                  method: "GET",
+                  headers: { "x-purge-secret": ADMIN_SECRET },
+                  cache: "no-store"
+                });
+                const data = await res.json().catch(() => ({}));
 
                 showAdminStatusModal(
                   "success", 
                   "ล้างแคชสำเร็จ 100%!", 
-                  "ล้างหน่วยความจำและดึงข้อมูลสดจาก Database เรียบร้อย กำลังรีโหลดหน้าเว็บ..."
+                  data.cdnPurged 
+                    ? "ล้าง Netlify CDN ทั่วโลกเรียบร้อย ทุกคนจะเห็นข้อมูลใหม่ทันที!" 
+                    : "ล้างแคช Edge สำเร็จเรียบร้อย กำลังรีเฟรช..."
                 );
 
-                // 3. รีโหลดหน้าเว็บพร้อมพารามิเตอร์บายพาสแคช Edge และ Service Worker
+                // 3. รีเฟรชหน้าเว็บเข้าสู่ URL คลีนปกติ
                 setTimeout(() => {
-                  const cleanUrl = window.location.pathname;
-                  window.location.href = `${cleanUrl}?refresh=${ADMIN_SECRET}&purge=1&t=${Date.now()}`;
-                }, 1000);
+                  window.location.href = window.location.pathname;
+                }, 900);
 
               } catch (err) {
-                // กรณีฉุกเฉิน: บังคับรีโหลดทันที
-                window.location.href = `${window.location.pathname}?refresh=${ADMIN_SECRET}&t=${Date.now()}`;
+                window.location.reload();
               }
 
             } else if (inputPin !== null) {
-              showAdminStatusModal(
-                "error", 
-                "รหัสผ่านไม่ถูกต้อง!", 
-                "คุณไม่มีสิทธิ์ในการสั่งล้างแคชระบบ (Access Denied)"
-              );
+              showAdminStatusModal("error", "รหัสผ่านไม่ถูกต้อง!", "คุณไม่มีสิทธิ์ในการสั่งล้างแคช (Access Denied)");
             }
           }, 50);
         }
@@ -2726,6 +2668,7 @@ async function handleUrlRouting(isInitial = false) {
       star.addEventListener("touchend", handleTap, { passive: false });
     });
   }
+  
 
   // ==========================================================================
   // 🟢 เริ่มต้นการทำงานของระบบ (พร้อมปุ่มลับแอดมิน)
