@@ -210,7 +210,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
         ? `พบกับ ${displayName} เพื่อนเที่ยวสายหวานตัวเล็กน่ารัก สดใส สไตล์คุณหนู พิกัดดูแล${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนกะทัดรัด ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) บุคลิกยิ้มแย้ม อัธยาศัยดี เอาใจเก่ง${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
         : v === 1
         ? `สำหรับท่านที่ชื่นชอบสาวไซส์มินิ น่าทะนุถนอม ขอแนะนำ ${displayName} พิกัด${zone} (${provinceName}) วัยใส ${age} ปี รูปร่าง ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ชวนคุยสนุก คลายเหงา ทานข้าว ดูหนัง เป็นกันเองอย่างสุภาพ${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการเพื่อนเที่ยวฟิวแฟนใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการสาวรับงานใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
 
     case "model":
       return v === 0
@@ -237,7 +237,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
       return v === 0
         ? `สัมผัสการดูแลอย่างอบอุ่นสไตล์ Girlfriend Experience (GFE) แท้ๆ กับ ${displayName} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. เทคแคร์เอาใจใส่ดุจแฟนคนพิเศษ สุภาพ อ่อนโยน ไม่เร่งรีบ ให้เกียรติและสร้างความผ่อนคลายสูงสุด${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
         : v === 1
-        ? `แนะนำ ${displayName} เพื่อนเที่ยวฟิวแฟนที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
+        ? `แนะนำ ${displayName} สาวรับงานที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
         : `หากคุณกำลังมองหาเพื่อนเที่ยวรู้ใจที่ดูแลด้วยความจริงใจ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. สไตล์ฟิวแฟนหวานละมุน อัธยาศัยดี มีความเป็นกันเอง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
   }
 }
@@ -342,15 +342,14 @@ const heroSrcSet = generateSrcSet(rawImage);
 const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
-// 🟢 Meta Title และ Description สไตล์ High-End Lifestyle Companion เพื่อเพิ่ม CTR และเลี่ยงการโดน SafeSearch ตัด
 const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
-const metaDescription = `${displayName} เพื่อนเที่ยวฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
+    const metaDescription = `${displayName} สาวรับงาน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
     const now = new Date();
 
-    // 🌟 1. ประกอบ Schema รีวิว 3 รายการพร้อมวันที่เผยแพร่ (ตรงตามเกณฑ์ Google 100%)
+    // 🌟 1. ประกอบ Schema รีวิว 3 รายการพร้อมวันที่ (เพื่อเปิดดาวสีส้ม ⭐⭐⭐⭐⭐ บน Google)
     const reviewsSchema = reviewsList.map((r, i) => ({
       "@type": "Review",
       "author": { 
@@ -358,7 +357,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
         "name": stripHTML(r.name || "คุณลูกค้า") 
       },
       "datePublished": new Date(now.getTime() - (i + 1) * 7 * 86400000).toISOString().split("T")[0],
-      "reviewBody": stripHTML(r.text || "บริการดี สุภาพ ประทับใจตรงปกมากครับ"),
+      "reviewBody": stripHTML(r.text || "บริการดี สุภาพ ตรงปกมากครับ"),
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -371,7 +370,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
-    // 🟢 schemaGraph เวอร์ชันสมบูรณ์แบบ (ดึงดาวส้ม ⭐⭐⭐⭐⭐ + คืนคีย์เวิร์ดเงินล้าน 100%)
+    // 🟢 schemaGraph เวอร์ชันสมบูรณ์แบบ (ดึงดาวส้ม + คืนคีย์เวิร์ดเงินล้าน 100%)
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
@@ -416,12 +415,12 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             "value": cleanWeightNum,
             "unitCode": "KGM"
           },
-          // 🌟 คืนคีย์เวิร์ด "สาวรับงาน", "ไซด์ไลน์", "เด็กเอ็น" กลับเข้ามาใน Entity Person
+          // 🌟 คืนคีย์เวิร์ด "สาวรับงาน", "ไซด์ไลน์", "เด็กเอ็น"
           "knowsAbout": [
             `สาวรับงาน${provinceNameThai}`,
             `ไซด์ไลน์${provinceNameThai}`,
             `เด็กเอ็น${provinceNameThai}`,
-            "เพื่อนเที่ยวฟิวแฟน",
+            "สาวรับงาน",
             "Girlfriend Experience (GFE)",
             "รับงานไม่มัดจำ",
             "จ่ายหน้างานปลอดภัย"
@@ -434,10 +433,10 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
           }
         },
         {
-          // 🌟 เปลี่ยนเป็น Product เพื่อเปิดการแสดงผลดาวสีส้ม ⭐⭐⭐⭐⭐ บน Google Search
+          // 🌟 เปลี่ยนเป็น Product เพื่อให้ Google แสดงผลดาวรีวิวสีส้ม ⭐⭐⭐⭐⭐
           "@type": "Product",
           "@id": `${canonicalUrl}#service`,
-          "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
+          "name": `บริการสาวรับงานและสาวรับงาน - ${stripHTML(displayName)}`,
           "image": heroImageLarge,
           "description": stripHTML(metaDescription),
           "sku": `FMH-${String(rawSlug).toUpperCase()}`,
@@ -445,7 +444,6 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             "@type": "Brand",
             "name": CONFIG.BRAND_NAME
           },
-          // 🌟 ใส่ aggregateRating และ review คืนเข้าไป (ตัวเดิมของคุณหลุดหายไป!)
           "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "5.0",
@@ -484,7 +482,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             {
               "@type": "ListItem",
               "position": 2,
-              // 🌟 คืนคำว่า "สาวรับงาน" ให้ Breadcrumb นำทางของ Google
+              // 🌟 คืนคำว่า "สาวรับงาน" ให้ตรงกับหน้าจอ
               "name": `สาวรับงาน${provinceNameThai}`,
               "item": provinceHubUrl
             },
@@ -622,7 +620,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
            <!-- 🟢 แก้ไขให้ตรงกับ Schema -->
-<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</a></li>
+<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
@@ -634,7 +632,7 @@ const metaDescription = `${displayName} เพื่อนเที่ยวฟ�
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
                        <img src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
+                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
                              width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     </div>

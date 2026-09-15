@@ -228,69 +228,38 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
 
   const LOCAL_CONTEXT = {
     chiangmai: {
-      headline: `ศูนย์รวมสาวรับงานเชียงใหม่ ไซด์ไลน์ และเด็กเอ็นฟิวแฟน อันดับ 1`,
-      intro: `แหล่งรวมโปรไฟล์สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ และเด็กเอ็น (EN VIP) คุณภาพพรีเมียม สไตล์ฟิวแฟน (GFE) แท้ๆ คัดสรรน้องๆ สาวสวยตรงปก 100% น่ารัก อัธยาศัยดี ไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าว ดื่มชิล หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว ปลอดภัยสูงสุดด้วยนโยบายเจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณี`,
-      convenience: `โรงแรม คอนโด และรีสอร์ตในตัวเมืองเชียงใหม่ โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบายและรักษาความลับระดับสูงสุด`
+      headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
+      intro: `สำหรับผู้ที่เดินทางมาพักผ่อน ท่องเที่ยว หรือทำงานในเชียงใหม่ FirstModelHub คัดสรรเพื่อนเที่ยวระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience) ที่เน้นความสุภาพ อัธยาศัยดี และไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว`,
+      convenience: `โรงแรมและรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบายและเป็นส่วนตัวสูงสุด`
     },
     bangkok: {
-      headline: `ศูนย์รวมสาวรับงานกรุงเทพ ไซด์ไลน์ กทม และเด็กเอ็น VIP อันดับ 1`,
-      intro: `สารบัญสาวรับงานกรุงเทพ รับงาน กทม และเพื่อนเที่ยวไซด์ไลน์ระดับท็อป รวมพริตตี้ MC และน้องๆ วัยใสนักศึกษา สไตล์ฟิวแฟน ดูแลดุจคนพิเศษ เหมาะสำหรับผู้บริหาร นักธุรกิจ หรือผู้ที่ต้องการคลายเหงาหลังเลิกงาน การันตีรูปจริงตรงปก ชำระเงินหน้างานเมื่อเจอตัวจริง ปราศจากความเสี่ยงเรื่องมัดจำ 100%`,
-      convenience: `ครอบคลุมโรงแรมหรู คอนโดส่วนตัว และแนวรถไฟฟ้า${zoneText} น้องๆ พร้อมเดินทางไปดูแลถึงที่พัก (Outcall) ได้อย่างสะดวกรวดเร็วตลอด 24 ชม.`
+      headline: `บริการเพื่อนเที่ยวระดับ VIP และผู้ดูแลไลฟ์สไตล์ส่วนบุคคล กรุงเทพฯ`,
+      intro: `ศูนย์รวมเพื่อนเที่ยวมืออาชีพและน้องๆ สไตล์ฟิวแฟนในกรุงเทพฯ ครอบคลุมทั้งสายเรียบร้อยน่ารัก พริตตี้ และสาวสวยบุคลิกดี เหมาะสำหรับนักธุรกิจและผู้ที่ต้องการเพื่อนร่วมโต๊ะอาหาร ออกงานสังคม หรือการพักผ่อนอย่างเป็นส่วนตัวหลังเลิกงาน`,
+      convenience: `ครอบคลุมทั้งแนวรถไฟฟ้า คอนโดมิเนียมหรู และโรงแรมชั้นนำ${zoneText} สามารถระบุพิกัดที่ต้องการให้น้องเดินทางไปดูแล (Outcall) ได้อย่างรวดเร็ว`
     },
     chonburi: {
-      headline: `สาวรับงานพัทยา ไซด์ไลน์บางแสน ชลบุรี เด็กเอ็นฟิวแฟนริมทะเล`,
-      intro: `เติมเต็มทริปพักผ่อนริมทะเลกับสาวรับงานพัทยา ไซด์ไลน์บางแสน และเด็กเอ็นชลบุรี น้องๆ สดใส น่ารัก พร้อมรับงานปาร์ตี้พูลวิลล่า นั่งชิลริมหาด หรือดูแลสไตล์ฟิวแฟนอย่างใกล้ชิด ทั้งแบบชั่วคราว (Short Time) และค้างคืน (Overnight) ปลอดภัยจ่ายหน้างาน ไม่ต้องโอนมัดจำก่อน`,
-      convenience: `รองรับพิกัดที่พักทั่วพัทยา จอมเทียน บางแสน และศรีราชา${zoneText} เดินทางเข้าดูแลถึงโรงแรมและพูลวิลล่าได้อย่างรวดเร็ว ปลอดภัย ไร้กังวล`
+      headline: `เพื่อนเที่ยวพัทยา-ชลบุรี เติมเต็มทริปพักผ่อนริมทะเลอย่างมั่นใจ`,
+      intro: `มาเที่ยวพัทยา บางแสน ให้การพักผ่อนสมบูรณ์แบบยิ่งขึ้นด้วยเพื่อนเที่ยวสายสดใส เป็นกันเอง พร้อมร่วมกิจกรรมริมหาด ปาร์ตี้พูลวิลล่าส่วนตัว หรือดูแลสไตล์ฟิวแฟนแบบใกล้ชิด`,
+      convenience: `รองรับพิกัดที่พักทั่วพัทยา จอมเทียน และบางแสน${zoneText} เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็ว ปลอดภัย ไร้กังวลเรื่องเวลา`
     },
     phuket: {
-      headline: `สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต VIP Companions & Escorts`,
-      intro: `ศูนย์รวมสาวรับงานภูเก็ต ไซด์ไลน์ป่าตอง และเด็กเอ็นวีไอพี (EN VIP) ระดับไฮเอนด์ คัดสรรสาวสวยหุ่นนางแบบ บุคลิกดี พร้อมร่วมทริปดินเนอร์ ล่องเรือยอร์ช ปาร์ตี้วิลล่า หรือดูแลส่วนตัวสไตล์ฟิวแฟน อบอุ่น เป็นกันเอง ยืนยันตัวตนตรงปก 100% จ่ายเงินหน้างาน ไร้มัดจำ`,
-      convenience: `บริการครอบคลุมทั่วเกาะภูเก็ต${zoneText} นัดหมายเข้าดูแลที่โรงแรม รีสอร์ต หรือวิลล่าส่วนตัวอย่างตรงเวลาและเป็นความลับ`
+      headline: `สัมผัสการพักผ่อนระดับไฮเอนด์กับเพื่อนเที่ยว VIP ภูเก็ต`,
+      intro: `ยกระดับวันหยุดบนเกาะภูเก็ตด้วยเพื่อนเที่ยวระดับพรีเมียม สื่อสารคล่องแคล่ว บุคลิกสง่างาม พร้อมเป็นเพื่อนร่วมทริป ดินเนอร์ชมพระอาทิตย์ตก นั่งเรือยอร์ช หรือดูแลอย่างอบอุ่นในพูลวิลล่าส่วนตัว`,
+      convenience: `บริการทั่วทั้งเกาะภูเก็ต${zoneText} เข้าพบที่รีสอร์ตหรือวิลล่าส่วนตัวตามเวลานัดหมายอย่างตรงเวลา`
     },
     "khon-kaen": {
-      headline: `สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น เด็กเอ็นฟิวแฟน (อันดับ 1 อีสาน)`,
-      intro: `รวบรวมสาวรับงานขอนแก่น และไซด์ไลน์ขอนแก่น น้องๆ นักศึกษา วัยใส และสาวสวยตัวท็อปภาคอีสาน ดูแลเทคแคร์น่ารัก อ่อนโยน สไตล์ฟิวแฟนแท้ๆ ไม่เร่งงาน ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว ปลอดภัยเจอตัวจริงก่อนค่อยจ่ายหน้างาน`,
-      convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยขอนแก่นและใจกลางเมือง${zoneText} เดินทางสะดวก รวดเร็วทันใจ พร้อมดูแลถึงที่พัก`
-    },
-    chiangrai: {
-      headline: `สาวรับงานเชียงราย ไซด์ไลน์เชียงราย เด็กเอ็นฟิวแฟนตรงปก`,
-      intro: `ศูนย์รวมสาวรับงานเชียงราย ไซด์ไลน์บ้านดู่ หน้า มฟล. และตัวเมืองเชียงราย คัดสรรสาวสวยวัยใส นักศึกษา สไตล์ฟิวแฟน น่ารัก อัธยาศัยดี พร้อมดูแลคุณถึงที่พักทั้งแบบชั่วคราวและค้างคืน ปลอดภัยจ่ายหน้างาน ไม่มีการโอนเงินจองมัดจำก่อนเด็ดขาด`,
-      convenience: `เดินทางสะดวกสบายครอบคลุมโรงแรมและที่พักชั้นนำ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงห้องพักอย่างรวดเร็ว`
-    },
-    lampang: {
-      headline: `สาวรับงานลำปาง ไซด์ไลน์ลำปาง ฟิวแฟนตรงปก ไม่โอนมัดจำ`,
-      intro: `พบกับสาวรับงานลำปาง และเพื่อนเที่ยวไซด์ไลน์ลำปาง โปรไฟล์คุณภาพสูง ดูแลเอาใจใส่สไตล์ฟิวแฟนดุจคนรู้ใจ สุภาพ เรียบร้อย ไม่เร่งเวลา ปลอดภัยสูงสุดด้วยระบบนัดเจอตัวจริงแล้วค่อยชำระค่าบริการหน้างาน`,
-      convenience: `ครอบคลุมโรงแรมในตัวเมืองลำปางและย่านสำคัญ${zoneText} เดินทางสะดวก มั่นใจในความเป็นส่วนตัว 100%`
-    },
-    lamphun: {
-      headline: `สาวรับงานลำพูน ไซด์ไลน์ลำพูน บริการด่วนถึงที่พัก`,
-      intro: `คลายความเหนื่อยล้าหลังเลิกงานกับสาวรับงานลำพูน และไซด์ไลน์ลำพูน ทั้งโซนนิคมอุตสาหกรรมและตัวเมือง น้องๆ น่ารัก เป็นกันเอง ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น นัดเจอง่าย จ่ายหน้างาน ไม่มัดจำ`,
-      convenience: `สแตนด์บายพร้อมเดินทางถึงโรงแรมและที่พักส่วนตัว${zoneText} ปลอดภัยและรักษาความลับของลูกค้าสูงสุด`
-    },
-    phitsanulok: {
-      headline: `สาวรับงานพิษณุโลก ไซด์ไลน์ เด็กเอ็นรอบ มน. ฟิวแฟนตรงปก`,
-      intro: `รวมสาวรับงานพิษณุโลก และเด็กเอ็น ม.นเรศวร (มน.) วัยใส น่ารัก ชวนคุยสนุก เอาใจเก่ง สไตล์ฟิวแฟน พร้อมเป็นเพื่อนทานข้าว ดูแลคลายเหงา หรือออกงานสังสรรค์ นัดเจอตัวจริงค่อยจ่ายเงิน ไร้ความเสี่ยง`,
-      convenience: `สะดวก รวดเร็ว ครอบคลุมทั้งโซนรอบ มน. ท่าโพธิ์ และโรงแรมในตัวเมือง${zoneText} เดินทางถึงที่พักภายในเวลาอันสั้น`
-    },
-    udonthani: {
-      headline: `สาวรับงานอุดรธานี ไซด์ไลน์อุดร เด็กเอ็นฟิวแฟนตัวท็อป`,
-      intro: `สัมผัสความน่ารักของสาวรับงานอุดรธานี และไซด์ไลน์อุดร ผิวขาว น่ารัก ขี้อ้อน บริการสไตล์ฟิวแฟนอย่างเป็นธรรมชาติ ให้เกียรติลูกค้า ไม่เร่งรีบ ปลอดภัยนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระเงิน`,
-      convenience: `ครอบคลุมโรงแรมใจกลางเมืองอุดรธานี และจุดนัดพบสำคัญ${zoneText} เดินทางสะดวกและมีความเป็นส่วนตัวสูงสุด`
+      headline: `เพื่อนเที่ยวฟิวแฟน ขอนแก่น คัดสรรโปรไฟล์ตรงปก 100%`,
+      intro: `ผ่อนคลายในเมืองศูนย์กลางภาคอีสานกับน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ขี้อ้อน เทคแคร์ดี เอาใจใส่ดุจคนรู้ใจ ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว`,
+      convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยและโรงแรมใจกลางขอนแก่น${zoneText} เดินทางสะดวก รวดเร็วทันใจ`
     }
   };
 
-  // 🟢 ผูก Alias จังหวัดที่สะกดได้หลายแบบ ป้องกันหาไม่เจอ
   LOCAL_CONTEXT.khonkaen = LOCAL_CONTEXT["khon-kaen"];
-  LOCAL_CONTEXT["chiang-mai"] = LOCAL_CONTEXT.chiangmai;
-  LOCAL_CONTEXT["chiang-rai"] = LOCAL_CONTEXT.chiangrai;
-  LOCAL_CONTEXT["udon-thani"] = LOCAL_CONTEXT.udonthani;
-  LOCAL_CONTEXT.udon = LOCAL_CONTEXT.udonthani;
 
-  // 🟢 ค่าเริ่มต้นสำหรับหน้าแรก (ทั่วไทย)
-  const defaultContext = {
-    headline: `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นฟิวแฟน ทั่วไทย อันดับ 1`,
-    intro: `FirstModelHub แพลตฟอร์มศูนย์รวมลงประกาศสาวรับงาน ไซด์ไลน์ เด็กเอ็น (EN VIP) และเพื่อนเที่ยวฟิวแฟน (GFE) อันดับ 1 ครอบคลุมทุกจังหวัดทั่วประเทศไทย คัดสรรโปรไฟล์ตัวจริงตรงปก 100% ดูแลด้วยความจริงใจ สุภาพ ปลอดภัยสูงสุดด้วยนโยบายเจอตัวจริงหน้างานค่อยชำระเงิน ไร้เงื่อนไขการโอนมัดจำล่วงหน้าทุกกรณี`,
-    convenience: `ครอบคลุมโรงแรมและที่พักส่วนตัวทั่วประเทศ${zoneText} นัดหมายเข้าดูแลได้อย่างสะดวก ปลอดภัย และรักษาความลับระดับสูงสุด`
+  const current = LOCAL_CONTEXT[cleanSlug] || LOCAL_CONTEXT[provinceSlug] || {
+    headline: `ศูนย์รวมเพื่อนเที่ยวและผู้ดูแลสไตล์ฟิวแฟน ${provinceName}`,
+    intro: `FirstModelHub คัดสรรเพื่อนเที่ยวคุณภาพที่เน้นความตรงปก 100% ดูแลด้วยความจริงใจ สุภาพ และให้เกียรติผู้ใช้บริการ เพื่อให้ทุกช่วงเวลาการพักผ่อนใน ${provinceName} เป็นไปอย่างผ่อนคลายและประทับใจ`,
+    convenience: `ครอบคลุมโรงแรมและที่พักสำคัญในพื้นที่ ${provinceName}${zoneText} เดินทางนัดพบได้อย่างสะดวกและเป็นส่วนตัว`
   };
 
   return `
@@ -678,7 +647,7 @@ export default async (req, context) => {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-   const metaTitle = isNational 
+    const metaTitle = isNational 
   ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub"
   : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
 
@@ -701,7 +670,7 @@ export default async (req, context) => {
       ? heroImage 
       : `${primaryDomain}${heroImage.startsWith("/") ? "" : "/"}${heroImage}`;
 
-    // 🟢 1. เตรียม Breadcrumb รายการ (คืนคำค้นหาหลัก "สาวรับงาน" ให้ Breadcrumb)
+    // 🟢 1. เตรียม Breadcrumb รายการ (มีให้ครบทั้งหน้าแรกและหน้ารายจังหวัด ป้องกัน Broken Node #breadcrumb)
     const breadcrumbItems = [
       {
         "@type": "ListItem",
@@ -715,12 +684,12 @@ export default async (req, context) => {
       breadcrumbItems.push({
         "@type": "ListItem",
         "position": 2,
-        "name": `สาวรับงาน${provinceNameThai}`, // 🌟 เปลี่ยนจาก "เพื่อนเที่ยวฟิวแฟน" คืนเป็น "สาวรับงาน"
+        "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
         "item": canonicalUrl
       });
     }
 
-    // 🟢 2. โครงสร้าง Schema Graph หลัก (ฉบับกู้อันดับ 1 + ผ่าน Google Rich Results 100%)
+    // 🟢 2. โครงสร้าง Schema Graph หลัก (แก้ปัญหา &amp;, เพิ่มขนาด Logo, ผูกความสัมพันธ์ถูกต้อง 100%)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -751,47 +720,37 @@ export default async (req, context) => {
         "url": primaryDomain,
         "name": CONFIG.BRAND_NAME,
         "publisher": { "@id": `${primaryDomain}/#organization` },
-        "inLanguage": "th-TH",
-        // 🌟 จุดแก้ที่ 1: เพิ่มช่องค้นหาบน Google (Sitelinks Searchbox) ตามที่ตรวจด้านบนสุด
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": `${primaryDomain}/?q={search_term_string}`,
-          "query-input": "required name=search_term_string"
-        }
+        "inLanguage": "th-TH"
       },
       {
         "@type": "CollectionPage",
         "@id": `${canonicalUrl}#webpage`,
-        "name": stripHTML(metaTitle),
+        "name": stripHTML(metaTitle), // 🟢 ใช้ stripHTML เพื่อไม่ให้มี &amp; หลุดไปในผลค้นหา Google
         "description": cleanMetaDesc,
         "url": canonicalUrl,
         "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
-        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }, // 🟢 ชี้ไปที่ #breadcrumb ได้อย่างปลอดภัยตลอดเวลา
         "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
       },
       {
         "@type": ["EntertainmentBusiness", "ProfessionalService"],
         "@id": `${canonicalUrl}#business`,
-        // 🌟 จุดแก้ที่ 2: คืนคีย์เวิร์ดเงินล้าน "สาวรับงาน ไซด์ไลน์ เด็กเอ็น" แทนคำว่า "เพื่อนเที่ยว"
         "name": isNational 
-          ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-          : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} เด็กเอ็น ฟิวแฟน - ${CONFIG.BRAND_NAME}`,
+          ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+          : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
         "image": verifiedHeroImage,
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
         "url": canonicalUrl,
         "description": cleanMetaDesc,
-        // 🌟 จุดแก้ที่ 3: คืนคีย์เวิร์ดใน knowsAbout ให้บอท Google นำไปจัด Index ให้ตรงกับที่คนพิมพ์หา
         "knowsAbout": [
-          `สาวรับงาน${provinceNameThai}`,
-          `ไซด์ไลน์${provinceNameThai}`,
-          `เด็กเอ็น${provinceNameThai}`,
-          "เพื่อนเที่ยวฟิวแฟน",
+          "Personal Lifestyle Companion",
           "Girlfriend Experience (GFE)",
-          "รับงานไม่มัดจำ",
-          "นัดพบจ่ายหน้างานปลอดภัย"
+          `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
+          "บริการเพื่อนทานข้าวและออกงานสังคม",
+          "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
         ],
         "address": {
           "@type": "PostalAddress",
@@ -817,38 +776,18 @@ export default async (req, context) => {
                 "sameAs": provinceWikiUrl
               },
               ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
-            ],
-        // 🌟 จุดแก้ที่ 4: คืนค่าดาวรีวิว (aggregateRating + review) ที่หลุดหายไปในโค้ดเดิมของคุณ!
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "5.0",
-          "reviewCount": activeReviews && activeReviews.length ? String(activeReviews.length) : "2",
-          "bestRating": "5",
-          "worstRating": "1"
-        },
-        "review": (activeReviews || []).map(r => ({
-          "@type": "Review",
-          "author": { "@type": "Person", "name": r.author || "ลูกค้าจริง" },
-          "datePublished": r.datePublished || new Date().toISOString().split("T")[0],
-          "reviewBody": stripHTML(r.text || "บริการดี ตรงปก จ่ายหน้างาน"),
-          "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": String(r.rating || 5),
-            "bestRating": "5",
-            "worstRating": "1"
-          }
-        }))
+            ]
       }
     ];
 
-    // 🟢 3. บันทึก BreadcrumbList ลง Graph เสมอ
+    // 🟢 3. บันทึก BreadcrumbList ลง Graph เสมอ (แก้ไขปัญหา Unresolved Node ในหน้าแรกถาวร)
     schemaGraph.push({
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
       "itemListElement": breadcrumbItems
     });
 
-    // 🟢 4. บันทึก ItemList พร้อมรูปภาพน้องๆ (Google Carousel Rich Results)
+    // 🟢 4. บันทึก ItemList พร้อมรูปภาพน้องๆ (ตรงเกณฑ์ Google Carousel Rich Results)
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -945,10 +884,6 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     
-    // เพิ่มการ Replace แท็ก Twitter ให้ครบ
-finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["'][^>]*>/i, 
-  `<meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${escapeHTML(metaTitle)}">`
-);
     // 🟢 แก้ไขการแทนที่ og:image และ OpenGraph ให้สะอาดสมบูรณ์ในจุดเดียว
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>/i, 
       `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">`
