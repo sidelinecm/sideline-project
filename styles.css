@@ -3638,3 +3638,14 @@ body.lightbox-open {
 .lightbox-line-cta:active {
   transform: scale(0.97) !important;
 }
+/* ⚡ ขยายพื้นที่แตะดวงดาวให้ใหญ่เต็ม 44x44px แตะง่ายบนมือถือ ไม่โดนตัวหนังสือ */
+.luxe-star-crest {
+  padding: 12px 10px !important;
+  margin: -12px -6px !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  display: inline-flex !important;
+  position: relative !important;
+  z-index: 99 !important;
+}

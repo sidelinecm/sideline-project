@@ -441,16 +441,19 @@ async function getSupabaseClient() {
 
   const domCache = {};
   
-  // 🟢 1. NATIVE HAPTIC FEEDBACK (สั่นเบาๆ ตอบสนองนิ้วมือแบบแอปแท้ๆ)
+  // 🟢 NATIVE HAPTIC FEEDBACK (เช็กความพร้อมก่อนสั่น ป้องกันแถบแดงใน Console)
   function triggerHaptic(type = "light") {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       try {
+        // เช็คว่ามือถือพร้อมรับคำสั่งสั่นหรือยัง ถ้ายังไม่พร้อมให้ข้าม ไม่ให้ฟ้อง Error
+        if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+        
         if (type === "light") {
-          navigator.vibrate(12); // สั่นแตะเบาๆ 12ms ตอนกดปุ่ม/ฟิลเตอร์
+          navigator.vibrate(12);
         } else if (type === "medium") {
-          navigator.vibrate(20); // สั่นพอดีๆ ตอนเปิดการ์ดโปรไฟล์
+          navigator.vibrate(20);
         } else if (type === "success") {
-          navigator.vibrate([15, 40, 15]); // สั่นสองจังหวะตอนเปิดอ่านหรือจองคิว
+          navigator.vibrate([15, 40, 15]);
         }
       } catch (_) {}
     }
@@ -2596,8 +2599,10 @@ async function handleUrlRouting(isInitial = false) {
     modal.style.transform = "translate(-50%, -50%) scale(1)";
   }
 
+  // ==========================================================================
+  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (ระบบตัดขาดจากลิงก์ + ป๊อปอัป PIN แบบสมบูรณ์)
+  // ==========================================================================
   function initStealthAdminPurge() {
-    // ดึงดวงดาวทุกจุดในเว็บ พร้อมขยายพื้นที่ให้แตะง่ายบนมือถือ
     const starElements = document.querySelectorAll(".luxe-star-crest, .brand-logo-text .star, .dancing-neon-star, .star");
     if (!starElements || starElements.length === 0) return;
 
@@ -2611,22 +2616,27 @@ async function handleUrlRouting(isInitial = false) {
       star.style.cursor = "pointer";
       star.style.userSelect = "none";
       star.style.webkitUserSelect = "none";
-      star.style.touchAction = "manipulation"; // แตะติดนิ้วทันที ไม่ดีเลย์ 300ms
+      star.style.touchAction = "manipulation";
 
       const handleTap = (e) => {
-        // 🔒 กันอีเวนต์ซ้อนกันระหว่าง Touch กับ Click บนมือถือ
+        // 🔒 สกัดกั้นทุกทาง ไม่ให้ลิงก์ <a> นำทางหรือรีโหลดหน้าเว็บเด็ดขาด!
+        e.preventDefault();
+        e.stopPropagation();
+
         const now = Date.now();
         if (now - lastTapTime < 80) return;
         lastTapTime = now;
 
-        e.preventDefault();
-        e.stopPropagation();
-
         tapCount++;
         if (typeof triggerHaptic === "function") triggerHaptic("light");
 
+        // แอนิเมชันดาวดิ้นตอบสนองนิ้วมือ
+        star.style.transition = "transform 0.15s ease";
+        star.style.transform = "scale(1.4) rotate(20deg)";
+        setTimeout(() => { star.style.transform = ""; }, 150);
+
         clearTimeout(resetTimer);
-        resetTimer = setTimeout(() => { tapCount = 0; }, 1500);
+        resetTimer = setTimeout(() => { tapCount = 0; }, 1800);
 
         // เมื่อแตะครบ 5 ครั้ง
         if (tapCount >= 5) {
@@ -2634,62 +2644,174 @@ async function handleUrlRouting(isInitial = false) {
           clearTimeout(resetTimer);
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
-          // ⚡ เรียก prompt ทันที ห้ามใช้ setTimeout เพื่อไม่ให้ Android Chrome บล็อก
-          const inputPin = window.prompt("🔑 [ADMIN CONTROL HUB]\nใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลกทันที:");
-          
-          if (inputPin === ADMIN_PIN) {
-            showAdminStatusModal(
-              "loading", 
-              "กำลังล้างแคชระบบทั่วโลก...", 
-              "กำลังสั่งล้างแคชทั้งในเครื่อง, Edge Node และ Netlify CDN ทั่วโลก กรุณารอสักครู่..."
-            );
-
-            (async () => {
-              try {
-                // 1. ล้างแคชในเครื่อง Client
-                if (window.sessionStorage) sessionStorage.clear();
-                if (window.localStorage) localStorage.clear();
-                if ("caches" in window) {
-                  const cacheKeys = await caches.keys();
-                  await Promise.all(cacheKeys.map(k => caches.delete(k)));
-                }
-
-                // 2. สั่ง Netlify CDN ให้ล้างแคชทั่วโลก
-                const res = await fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
-                  method: "GET",
-                  headers: { "x-purge-secret": ADMIN_SECRET },
-                  cache: "no-store"
-                });
-                const data = await res.json().catch(() => ({}));
-
-                showAdminStatusModal(
-                  "success", 
-                  "ล้างแคชสำเร็จ 100%!", 
-                  data.cdnPurged 
-                    ? "ล้าง Netlify CDN ทั่วโลกเรียบร้อย ทุกคนจะเห็นข้อมูลใหม่ทันที!" 
-                    : "ล้างแคช Edge สำเร็จเรียบร้อย กำลังรีเฟรช..."
-                );
-
-                setTimeout(() => {
-                  window.location.href = window.location.pathname;
-                }, 900);
-
-              } catch (err) {
-                window.location.reload();
-              }
-            })();
-
-          } else if (inputPin !== null) {
-            showAdminStatusModal("error", "รหัสผ่านไม่ถูกต้อง!", "คุณไม่มีสิทธิ์ในการสั่งล้างแคช (Access Denied)");
-          }
+          // ⚡ เปิดหน้าต่างใส่รหัส PIN สุดหรู (ไม่พึ่ง prompt ของเบราว์เซอร์ ปลอดภัย 100%)
+          openAdminPinDialog(ADMIN_PIN, ADMIN_SECRET);
         }
       };
 
-      // ผูกอีเวนต์ทั้งแตะจอมือถือและคลิกเมาส์
+      // ผูกดักทุกอีเวนต์เพื่อความชัวร์
       star.addEventListener("pointerdown", handleTap, { passive: false });
+      star.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
+      star.addEventListener("touchend", (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
     });
   }
-  
+
+  // 🟢 หน้าต่าง Modal ใส่รหัส PIN สไตล์ Luxury Glassmorphic
+  function openAdminPinDialog(correctPin, secretKey) {
+    let modal = document.getElementById("admin-pin-dialog-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "admin-pin-dialog-modal";
+      modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 6, 20, 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        z-index: 9999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      `;
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div style="
+        background: #140F22;
+        border: 1.5px solid rgba(124, 58, 237, 0.4);
+        border-radius: 26px;
+        padding: 26px 20px;
+        width: 100%;
+        max-width: 320px;
+        text-align: center;
+        box-shadow: 0 25px 70px rgba(0,0,0,0.8);
+        color: #FFFFFF;
+        font-family: 'Prompt', sans-serif;
+      ">
+        <div style="font-size: 34px; margin-bottom: 6px;">🔑</div>
+        <h3 style="font-size: 16px; font-weight: 900; margin: 0 0 4px 0; color: #FFFFFF;">ADMIN CONTROL HUB</h3>
+        <p style="font-size: 11.5px; color: #94A3B8; margin: 0 0 16px 0;">ใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลก</p>
+        
+        <input type="password" id="admin-custom-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" style="
+          width: 100%;
+          height: 48px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1.5px solid rgba(124, 58, 237, 0.5);
+          border-radius: 14px;
+          color: #FFFFFF;
+          font-size: 26px;
+          text-align: center;
+          letter-spacing: 10px;
+          outline: none;
+          margin-bottom: 16px;
+          box-sizing: border-box;
+        ">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" id="admin-pin-cancel-btn" style="
+            height: 44px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #CBD5E1;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+          ">ยกเลิก</button>
+          
+          <button type="button" id="admin-pin-submit-btn" style="
+            height: 44px;
+            background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%);
+            border: none;
+            color: #FFFFFF;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
+          ">ยืนยัน</button>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = "flex";
+    requestAnimationFrame(() => { modal.style.opacity = "1"; });
+
+    const pinInput = document.getElementById("admin-custom-pin-input");
+    const cancelBtn = document.getElementById("admin-pin-cancel-btn");
+    const submitBtn = document.getElementById("admin-pin-submit-btn");
+
+    setTimeout(() => { pinInput?.focus(); }, 120);
+
+    const closeDialog = () => {
+      modal.style.opacity = "0";
+      setTimeout(() => { modal.style.display = "none"; }, 200);
+    };
+
+    cancelBtn.onclick = closeDialog;
+
+   const executePurge = async () => {
+      const val = pinInput.value.trim();
+      if (val === correctPin) {
+        closeDialog();
+        showAdminStatusModal(
+          "loading", 
+          "กำลังล้างแคชระบบ...", 
+          "กำลังสั่งล้างแคชหน่วยความจำ กรุณารอสักครู่..."
+        );
+
+        try {
+          if (window.sessionStorage) sessionStorage.clear();
+          if (window.localStorage) localStorage.clear();
+          if ("caches" in window) {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map(k => caches.delete(k)));
+          }
+
+          // ⚡ ตรวจจับว่าถ้ากำลังรันบน Localhost ไม่ต้องยิง Netlify ให้เออเร่อ
+          const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+          
+          if (!isLocal) {
+            await fetch(`/api/clear-cache?secret=${secretKey}`, {
+              method: "GET",
+              headers: { "x-purge-secret": secretKey },
+              cache: "no-store"
+            });
+          }
+
+          showAdminStatusModal(
+            "success", 
+            "ล้างแคชสำเร็จ 100%!", 
+            isLocal 
+              ? "⚡ [โหมดทดสอบ Localhost] ล้างแคชในเครื่องสำเร็จเรียบร้อย!" 
+              : "⚡ ล้าง Netlify CDN ทั่วโลกเรียบร้อย ทุกคนจะเห็นข้อมูลใหม่ทันที!"
+          );
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+
+        } catch (err) {
+          window.location.reload();
+        }
+      } else {
+        pinInput.value = "";
+        pinInput.style.borderColor = "#FF1493";
+        if (typeof triggerHaptic === "function") triggerHaptic("medium");
+        pinInput.placeholder = "รหัสผิด!";
+      }
+    };
+
+    // 🟢 ท่อนที่ขาดหายไป: ผูกปุ่มกดยืนยัน และผูกปุ่ม Enter บนแป้นพิมพ์
+    submitBtn.onclick = executePurge;
+    pinInput.onkeydown = (e) => {
+      if (e.key === "Enter") executePurge();
+    };
+  } // 🟢 ปิดฟังก์ชัน openAdminPinDialog
 
   // ==========================================================================
   // 🟢 เริ่มต้นการทำงานของระบบ (พร้อมปุ่มลับแอดมิน)
