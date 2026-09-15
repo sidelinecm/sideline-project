@@ -3434,3 +3434,207 @@ body.lightbox-open {
   font-weight: 900 !important;
   color: #059669 !important;
 }
+
+/* ==============================================================================
+   💎 SLEEK COMPACT STICKY LINE CTA (หรูหรา ไม่เทอะทะ ลอยติดล่างจอ)
+   ============================================================================== */
+
+/* แถบกระจกฝ้าลอยติดขอบล่างของหน้าต่าง Lightbox */
+#line-btn-sticky-wrapper {
+  position: sticky !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-top: 1px solid rgba(124, 58, 237, 0.12) !important;
+  z-index: 50 !important;
+  box-shadow: 0 -8px 24px rgba(15, 10, 26, 0.05) !important;
+  margin-top: auto !important;
+}
+
+/* ปุ่มไลน์ทรงแคปซูลแบน กระชับ ไม่หนาเทอะทะ (สูง 44px) */
+.lightbox-line-cta {
+  height: 44px !important;
+  padding: 0 20px !important;
+  background: linear-gradient(135deg, #06C755 0%, #00B900 100%) !important;
+  border-radius: 100px !important;
+  color: #FFFFFF !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.2px !important;
+  box-shadow: 0 4px 16px rgba(6, 199, 85, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+}
+
+.lightbox-line-cta i {
+  font-size: 18px !important;
+}
+
+.lightbox-line-cta:active {
+  transform: scale(0.97) !important;
+  box-shadow: 0 2px 8px rgba(6, 199, 85, 0.2) !important;
+}
+
+/* เพิ่มช่องว่างท้ายเนื้อหาเพื่อไม่ให้ปุ่มไลน์บังข้อความท้ายสุด */
+.lightbox-details {
+  padding-bottom: 76px !important;
+}
+
+/* ==============================================================================
+   👑 REDESIGN: ULTRA-LUXURY LIGHTBOX OVERHAUL (สวย หรู แพง เลิกบ้านนอก)
+   ============================================================================== */
+
+/* 1. ล็อกป้ายแบรนด์และปุ่มปิดให้อยู่ "เฉพาะบนรูปภาพ" ไม่ให้ลอยลงมาทับตัวหนังสือเด็ดขาด */
+.lightbox-top-brand {
+  position: absolute !important;
+  top: 14px !important;
+  left: 14px !important;
+  z-index: 20 !important;
+  background: rgba(15, 10, 26, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.lightbox-close-circle-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  z-index: 20 !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: rgba(15, 10, 26, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+/* 2. ส่วนเนื้อหา: ปรับพื้นหลังขาวบริสุทธิ์และจัดช่องว่างให้โปร่งตา */
+.lightbox-details {
+  background: #FFFFFF !important;
+  padding: 24px 20px 90px 20px !important; /* เว้นที่ด้านล่างให้ปุ่มไลน์ลอย */
+}
+
+/* ชื่อโมเดล: ฟอนต์ตัวใหญ่ คมชัด มีน้ำหนัก สไตล์นิตยสารชั้นนำ */
+#lightbox-profile-name-main span {
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  letter-spacing: -0.5px !important;
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+/* 3. กล่องคำโปรย (Quote): เลิกตีกรอบแดงหนาเตอะ เปลี่ยนเป็นข้อความหรูหรามีระดับ */
+#lightboxQuote, .lightbox-quote-card {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-left: 3.5px solid #7C3AED !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  color: #475569 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  margin: 6px 0 !important;
+}
+
+/* 4. แท็กสไตล์ (Tags): สไตล์มินิมอล ไม่ฉูดฉาด */
+.lightbox-tag-pill {
+  background: #F1F5F9 !important;
+  color: #475569 !important;
+  border: 1px solid #CBD5E1 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+}
+
+/* 5. สเปก 3 ช่อง (Bento Stats): คลีน สะอาด สไตล์สากล */
+.bento-stat-tile {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 14px !important;
+  padding: 12px 6px !important;
+  text-align: center !important;
+}
+
+.bento-stat-tile div:first-child {
+  font-size: 10.5px !important;
+  color: #64748B !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.bento-stat-tile div:last-child {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  margin-top: 2px !important;
+}
+
+/* 6. กล่องราคา & พิกัด: ออกแบบเหมือนตั๋วเครื่องบิน VIP (Ticket Strip) */
+#lightboxDetailsCompact > div:last-child {
+  background: #FFFFFF !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* 7. ปุ่มไลน์ดีไซน์ใหม่ (Emerald Glass Dock): ไม่เป็นก้อนแปร๋น และตัวหนังสือห้ามตกบรรทัด */
+#line-btn-sticky-wrapper {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  z-index: 100 !important;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.lightbox-line-cta {
+  width: 100% !important;
+  max-width: 480px !important;
+  height: 48px !important;
+  margin: 0 auto !important;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 100px !important;
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35) !important;
+  white-space: nowrap !important; /* 🔒 ห้ามตัวหนังสือตกบรรทัดเด็ดขาด */
+}
+
+.lightbox-line-cta i {
+  font-size: 20px !important;
+}
+
+.lightbox-line-cta:active {
+  transform: scale(0.97) !important;
+}

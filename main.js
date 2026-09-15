@@ -866,10 +866,13 @@ async function getSupabaseClient() {
     }
   }
 
-  // 🟢 ดักจับคลิกโลโก้: กดแล้วรีเฟรชหน้าแรก หรือกลับหน้าแรกทันที 100% (ทำงานทุกอุปกรณ์)
+  // 🟢 ดักจับคลิกโลโก้: แต่ถ้าแตะโดน "ดวงดาว" ให้ปล่อยผ่าน ห้ามรีโหลดหน้าเว็บเด็ดขาด!
   if (!window.__logoClickRegistered) {
     window.__logoClickRegistered = true;
     document.addEventListener('click', (e) => {
+      // 🔒 ถ้าคลิกโดนดาว ให้ข้ามทันที เพื่อให้ระบบนับ 5 ครั้งทำงานได้
+      if (e.target.closest('.luxe-star-crest, .star, .dancing-neon-star')) return;
+
       const logoEl = e.target.closest('.brand-luxe-logo');
       if (!logoEl) return;
 
@@ -883,10 +886,10 @@ async function getSupabaseClient() {
       if (isHome) {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        window.location.reload(); // บังคับรีเฟรชหน้าเว็บทันที
+        window.location.reload();
       } else {
         e.preventDefault();
-        window.location.href = '/'; // พากลับหน้าแรก
+        window.location.href = '/';
       }
     }, { capture: true });
   }
@@ -1600,19 +1603,27 @@ if (heroH1) {
       `;
     }
 
-    // 🟢 8. คำบรรยายรายละเอียด
+    // 🟢 8. คำบรรยายรายละเอียด (กรองคำซ้ำและคำเละเทะออก)
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
-      const defaultDesc = `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
-      const rawDesc = (profile.description && profile.description.trim()) ? profile.description : defaultDesc;
-      const safeText = (typeof escapeHTML === "function") ? escapeHTML(rawDesc) : rawDesc;
-      descContent.innerHTML = safeText.replace(/\n/g, "<br>");
-      descContent.style.color = "#4A4458";
+      let rawDesc = (profile.description && profile.description.trim()) ? profile.description : "";
+      
+      // ลบคำซ้ำซ้อนและสัญลักษณ์แปลกๆ ออกให้เนียนตา
+      rawDesc = rawDesc
+        .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*){2,}/g, "บริการดูแลสไตล์ฟิวแฟน ")
+        .replace(/[ฃ͡➴˚˳*]+/g, "")
+        .trim();
+
+      const defaultDesc = `น้อง${cleanName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
+      const finalDesc = rawDesc || defaultDesc;
+
+      descContent.innerHTML = escapeHTML(finalDesc).replace(/\n/g, "<br>");
+      descContent.style.cssText = "font-size: 12.5px; color: #334155; line-height: 1.6; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px;";
     }
     if (descContainer) descContainer.style.display = "block";
-
-    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (ดีไซน์กระชับ เรียบหรู ไม่เทอะทะ)
+    
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (เรียบหรู คมชัด ข้อความไม่ตกบรรทัด)
     const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
     let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
     if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
@@ -1624,11 +1635,12 @@ if (heroH1) {
 
     const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
     if (lineWrapper) {
-      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `ทักไลน์จองคิว ${displayName}`;
+      const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
       lineWrapper.innerHTML = `
         <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(typeof window.handleLineBooking==='function'){window.handleLineBooking('${profile.id}','${lineUrl}')}else if(typeof window.trackLineClick==='function'){window.trackLineClick('${profile.id}')}">
             <i class="fab fa-line"></i>
-            <span>${lineBtnText} (จ่ายหน้างาน)</span>
+            <span>${lineBtnText}</span>
+            <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 700; margin-left: 2px;">จ่ายหน้างาน</span>
         </a>
       `;
     }
@@ -2585,11 +2597,13 @@ async function handleUrlRouting(isInitial = false) {
   }
 
   function initStealthAdminPurge() {
-    const starElements = document.querySelectorAll(".brand-logo-text .star, .dancing-neon-star, .star, .luxe-star-crest");
+    // ดึงดวงดาวทุกจุดในเว็บ พร้อมขยายพื้นที่ให้แตะง่ายบนมือถือ
+    const starElements = document.querySelectorAll(".luxe-star-crest, .brand-logo-text .star, .dancing-neon-star, .star");
     if (!starElements || starElements.length === 0) return;
 
     let tapCount = 0;
     let resetTimer = null;
+    let lastTapTime = 0;
     const ADMIN_SECRET = "fmh_super_admin_2026";
     const ADMIN_PIN = "8888";
 
@@ -2597,8 +2611,14 @@ async function handleUrlRouting(isInitial = false) {
       star.style.cursor = "pointer";
       star.style.userSelect = "none";
       star.style.webkitUserSelect = "none";
+      star.style.touchAction = "manipulation"; // แตะติดนิ้วทันที ไม่ดีเลย์ 300ms
 
       const handleTap = (e) => {
+        // 🔒 กันอีเวนต์ซ้อนกันระหว่าง Touch กับ Click บนมือถือ
+        const now = Date.now();
+        if (now - lastTapTime < 80) return;
+        lastTapTime = now;
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -2606,23 +2626,25 @@ async function handleUrlRouting(isInitial = false) {
         if (typeof triggerHaptic === "function") triggerHaptic("light");
 
         clearTimeout(resetTimer);
-        resetTimer = setTimeout(() => { tapCount = 0; }, 1200);
+        resetTimer = setTimeout(() => { tapCount = 0; }, 1500);
 
+        // เมื่อแตะครบ 5 ครั้ง
         if (tapCount >= 5) {
           tapCount = 0;
           clearTimeout(resetTimer);
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
-          setTimeout(async () => {
-            const inputPin = prompt("🔑 [ADMIN CONTROL HUB]\nใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลกทันที:");
-            
-            if (inputPin === ADMIN_PIN) {
-              showAdminStatusModal(
-                "loading", 
-                "กำลังล้างแคชระบบทั่วโลก...", 
-                "กำลังสั่งล้างแคชทั้งในเครื่อง, Edge Node และ Netlify CDN ทั่วโลก กรุณารอสักครู่..."
-              );
+          // ⚡ เรียก prompt ทันที ห้ามใช้ setTimeout เพื่อไม่ให้ Android Chrome บล็อก
+          const inputPin = window.prompt("🔑 [ADMIN CONTROL HUB]\nใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลกทันที:");
+          
+          if (inputPin === ADMIN_PIN) {
+            showAdminStatusModal(
+              "loading", 
+              "กำลังล้างแคชระบบทั่วโลก...", 
+              "กำลังสั่งล้างแคชทั้งในเครื่อง, Edge Node และ Netlify CDN ทั่วโลก กรุณารอสักครู่..."
+            );
 
+            (async () => {
               try {
                 // 1. ล้างแคชในเครื่อง Client
                 if (window.sessionStorage) sessionStorage.clear();
@@ -2632,7 +2654,7 @@ async function handleUrlRouting(isInitial = false) {
                   await Promise.all(cacheKeys.map(k => caches.delete(k)));
                 }
 
-                // 2. สั่ง Server & Netlify CDN ให้ล้างแคชทั่วโลก
+                // 2. สั่ง Netlify CDN ให้ล้างแคชทั่วโลก
                 const res = await fetch(`/api/clear-cache?secret=${ADMIN_SECRET}`, {
                   method: "GET",
                   headers: { "x-purge-secret": ADMIN_SECRET },
@@ -2648,7 +2670,6 @@ async function handleUrlRouting(isInitial = false) {
                     : "ล้างแคช Edge สำเร็จเรียบร้อย กำลังรีเฟรช..."
                 );
 
-                // 3. รีเฟรชหน้าเว็บเข้าสู่ URL คลีนปกติ
                 setTimeout(() => {
                   window.location.href = window.location.pathname;
                 }, 900);
@@ -2656,16 +2677,16 @@ async function handleUrlRouting(isInitial = false) {
               } catch (err) {
                 window.location.reload();
               }
+            })();
 
-            } else if (inputPin !== null) {
-              showAdminStatusModal("error", "รหัสผ่านไม่ถูกต้อง!", "คุณไม่มีสิทธิ์ในการสั่งล้างแคช (Access Denied)");
-            }
-          }, 50);
+          } else if (inputPin !== null) {
+            showAdminStatusModal("error", "รหัสผ่านไม่ถูกต้อง!", "คุณไม่มีสิทธิ์ในการสั่งล้างแคช (Access Denied)");
+          }
         }
       };
 
-      star.addEventListener("click", handleTap);
-      star.addEventListener("touchend", handleTap, { passive: false });
+      // ผูกอีเวนต์ทั้งแตะจอมือถือและคลิกเมาส์
+      star.addEventListener("pointerdown", handleTap, { passive: false });
     });
   }
   
