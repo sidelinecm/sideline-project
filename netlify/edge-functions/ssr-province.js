@@ -1186,7 +1186,7 @@ const metaTitle = isNational
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration (ใส่หัวขบวนครบ ไม่แหว่ง ไม่พัง)
+   // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration (เพิ่ม galleryPaths และรูปอัลบั้มครบถ้วน)
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1199,22 +1199,39 @@ const metaTitle = isNational
       const rawRateStr = (p.rate || p.price || "").toString().trim();
       const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
 
+      // 🖼️ ดึงรูปภาพอัลบั้มทั้งหมด ไม่ให้หลุดหาย
+      let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
+      if (typeof rawGallery === "string") {
+        try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
+      }
+
+      // 🛡️ กรองเอาเฉพาะ URL ที่มีค่าจริง ตัดค่าว่าง/null ทิ้ง
+      const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
+
       return {
         id: p.id,
         slug: p.slug || String(p.id),
         name: p.name || "น้อง",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
+        galleryPaths: cleanGallery, // 👈 สะอาด 100% ไม่มีค่าว่างหลุดแน่นอน
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
         rate: safeRate,
+        age: p.age || p.profile_age || "",
+        height: p.height || p.profile_height || "",
+        weight: p.weight || p.profile_weight || "",
+        stats: p.stats || p.proportion || "",
+        description: p.description || "",
+        slogan: p.slogan || p.quote || p.tagline || "",
+        quote: p.quote || p.slogan || "",
+        line_id: p.line_id || p.lineId || "",
         availability: p.availability || "รับงาน",
         isfeatured: p.isfeatured === true || p.isFeatured === true,
         verified: p.verified === true || p.isVerified === true,
         styleTags: safeStyleTags
       };
     })).replace(/</g, "\\u003c");
-
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
