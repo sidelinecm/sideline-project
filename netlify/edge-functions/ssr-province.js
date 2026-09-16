@@ -1190,12 +1190,21 @@ const metaTitle = isNational
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    if (popularLocationsFooter) { 
+   if (popularLocationsFooter) { 
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    const rawRateStr = (p.rate || p.price || "").toString().trim();
-      // ✅ เติมบรรทัดนี้ลงไป:
+    // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration (ใส่หัวขบวนครบ ไม่แหว่ง ไม่พัง)
+    const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
+      const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
+      const cleanPKey = pKey.replace(/[-_]/g, "");
+      const realProvinceThai = PROVINCE_SEO_DATA[cleanPKey]?.name || PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || "เชียงใหม่";
+
+      let rawTags = p.style_tags || p.styleTags || p.tags || [];
+      if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
+      const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : [];
+
+      const rawRateStr = (p.rate || p.price || "").toString().trim();
       const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
 
       return {
@@ -1213,12 +1222,13 @@ const metaTitle = isNational
         styleTags: safeStyleTags
       };
     })).replace(/</g, "\\u003c");
-      
-  
+
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
     }));
+    
+    
 
     const ssrDataScript = `
       <script id="ssr-profiles-data">
