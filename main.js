@@ -517,59 +517,41 @@ async function getSupabaseClient() {
     return String(num);
   }
 
- function optimizeImg(imagePath, width = 400, height = null) {
+ function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
     return DEFAULT_FALLBACK_IMG;
   }
 
   const cleanPath = imagePath.trim();
-
-  // 🟢 1. กำหนดรูปแบบการแปลงรูปตามโหมดการใช้งาน
-  let transform = "";
-
-  if (width >= 1000 && height && height < width) {
-    // 🌐 โหมด A: Social Share ริชมิเดีย (Facebook / LINE / X อัตราส่วน 1.91:1 ล็อกโฟกัสใบหน้า)
-    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face`;
-  } else if (width <= 150 && (height === null || height <= 150)) {
-    // 🎀 โหมด B: รูปไอคอน Story วงกลม / Avatar (โฟกัสเฉพาะใบหน้า ขนาดจิ๋ว 3-5KB)
-    const size = Math.max(width, height || width);
-    transform = `f_auto,q_auto:eco,w_${size},h_${size},c_thumb,g_face`;
-  } else if (width >= 1000 && !height) {
-    // 🔍 โหมด C: ดูรูปขยายใหญ่เต็มจอใน Lightbox (คงอัตราส่วนเดิม ไม่ครอปรูป)
-    transform = `f_auto,q_auto:eco,w_${width},c_limit`;
-  } else if (width >= 700) {
-    // 📱 โหมด D: รูปแนวตั้งความละเอียดสูงสำหรับจอ Retina / หน้าโปรไฟล์เดี่ยว (อัตราส่วน 1:1.4)
-    transform = "f_auto,q_auto:eco,w_800,h_1120,c_fill";
-  } else {
-    // ⚡ โหมด E: รูปการ์ดมาตรฐานในหน้าแรก / หน้ารายจังหวัด (อัตราส่วน 1:1.4 โหลดเร็ว ประหยัดแคช)
-    transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  
+  // 🟢 รวมศูนย์การแปลงรูปภาพเหลือเพียง 3 Preset มาตรฐาน
+  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
+  
+  if (mode === "thumb" || mode <= 150) {
+    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
+  } else if (mode === "full" || mode >= 700 || mode === "og") {
+    transform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
   }
 
-  // 🟢 2. จัดการรูปภาพที่อยู่บน CDN Cloudinary
+  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ
   if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIdx = cleanPath.indexOf("/upload/");
-    if (uploadIdx !== -1) {
-      let rest = cleanPath.substring(uploadIdx + 8);
-      
-      // ล้างพารามิเตอร์ Transform เดิมที่ติดมาทิ้งทั้งหมดอย่างปลอดภัย
-      rest = rest.replace(/^(?:[a-z]{1,4}_[^/]+(?:\/|$))+/i, "");
-      
-      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
+    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
+    if (match) {
+      const cloudName = match[1];
+      const imageFile = match[2];
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
     }
     return cleanPath;
   }
 
-  // 🟢 3. กรณีเป็นลิงก์ภายนอกอื่นๆ ที่ไม่ใช่ Cloudinary ให้ส่งคืนค่าเดิม
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
 
-  // 🟢 4. กรณีเป็น Relative Path ส่งเข้า Cloudinary ของระบบ
   let formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
-
   
 
   function normalizeProfile(raw) {
