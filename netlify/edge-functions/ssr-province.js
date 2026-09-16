@@ -151,10 +151,9 @@ PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 🟢 ล้างรหัส Surrogate คู่เสีย และสัญลักษณ์ Replacement Character ทิ้ง 100%
+    // 🟢 ล้างรหัส Surrogate คู่เสีย และ Unicode Replacement Character (ใช้ \uFFFD ที่ถูกต้อง)
     .replace(/[\uD800-\uDFFF]/g, "")
     .replace(/\uFFFD/g, "")
-    .replace(//g, "")
     // ดักจับคำสะกดผิด
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
