@@ -151,29 +151,32 @@ PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 🟢 ล้างรหัส Surrogate คู่เสีย และ Unicode Replacement Character (ใช้ \uFFFD ที่ถูกต้อง)
+    // 1. ล้างรหัส Unicode เสียและตัวอักษรตกแต่งวัยรุ่นทั้งหมด
     .replace(/[\uD800-\uDFFF]/g, "")
     .replace(/\uFFFD/g, "")
-    // ดักจับคำสะกดผิด
+    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺.]+/g, " ")
+    
+    // 2. ล้างคำสะกดผิดยอดฮิต
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-    .replace(/พาพับ/g, "พายัพ")
-    .replace(/ของแก่น/g, "ขอนแก่น")
-    .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
-    .replace(/เอาวจเก่ง/g, "เอาใจเก่ง")
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    // กรองคำเสี่ยงสำหรับ SafeSearch
-    .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋\s*ทำ\s*\+?\s*500|จู๋ทำ|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
-    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+
+    // 3. ตัดคำล่อแหลมทิ้งอย่างนุ่มนวล (ไม่ใช้ String ยาวๆ มายัดซ้ำจนพัง)
     .replace(/ฟรีถุงยาง!?/gi, "")
-    // ล้างขยะ Unicode
-    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི]+/g, "")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
+    .replace(/ฟรีแตกบนตัว!?/gi, "")
+    .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "ฟิวแฟน")
+    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
+    
+    // 4. ล้างเศษเครื่องหมายตกค้าง (- * ! /) ที่ลอยอยู่หลังคำที่ถูกตัด
+    .replace(/([!*~_·\-\/])\s*\1+/g, "")
+    .replace(/\s*([!*~_·\-\/])\s*(?=[!*~_·\-\/])/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -253,13 +256,21 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
   const locationUrl = !isNation ? `/location/${provinceSlug}` : "/";
 
-  const zoneLinks = cleanZones.slice(0, 5).map(z => {
-    const cleanZ = sanitizeThaiText(z);
-    const targetHref = isNation && PROV_SLUG_MAP[cleanZ] 
-      ? `/location/${PROV_SLUG_MAP[cleanZ]}` 
-      : locationUrl;
-    return `<a href="${targetHref}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
-  });
+  // 🟢 ค้นหาท่อนนี้ใน getDynamicIntro (ssr-province.js):
+const zoneLinks = cleanZones.slice(0, 5).map(z => {
+  const cleanZ = sanitizeThaiText(z);
+  
+  // ✅ ปรับเงื่อนไขตรงนี้: ถ้าย่านคือนิมมาน ให้ยิงไปที่ /nimman ทันทีเพื่อทำ Silo
+  let targetHref = isNation && PROV_SLUG_MAP[cleanZ] 
+    ? `/location/${PROV_SLUG_MAP[cleanZ]}` 
+    : locationUrl;
+
+  if (cleanZ.includes("นิมมาน")) {
+    targetHref = "/nimman";
+  }
+
+  return `<a href="${targetHref}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
+});
 
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
