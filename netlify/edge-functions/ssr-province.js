@@ -1194,19 +1194,10 @@ const metaTitle = isNational
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration (หั่นให้เล็กลง 70%)
-    const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
-      const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
-      const cleanPKey = pKey.replace(/[-_]/g, "");
-      const realProvinceThai = PROVINCE_SEO_DATA[cleanPKey]?.name || PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || "เชียงใหม่";
+    const rawRateStr = (p.rate || p.price || "").toString().trim();
+      // ✅ เติมบรรทัดนี้ลงไป:
+      const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
 
-      let rawTags = p.style_tags || p.styleTags || p.tags || [];
-      if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
-      const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : []; // เก็บแค่ 3 แท็กพอ
-
-      const rawRateStr = (p.rate || p.price || "").toString().trim();
-
-      // 🟢 ส่งไปเฉพาะข้อมูลที่จำเป็นสำหรับสร้าง Card และ Filter (ลบ Description และ Gallery ออก)
       return {
         id: p.id,
         slug: p.slug || String(p.id),
@@ -1221,8 +1212,9 @@ const metaTitle = isNational
         verified: p.verified === true || p.isVerified === true,
         styleTags: safeStyleTags
       };
-      
     })).replace(/</g, "\\u003c");
+      
+  
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
