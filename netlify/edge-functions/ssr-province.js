@@ -151,10 +151,11 @@ PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 🟢 ล้างรหัส Broken Unicode ทิ้งทันที ไม่ให้หลุดเป็นเครื่องหมายตกใจหรือ %
-    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
-    .replace(/\uDCAF/gi, "")
-    // 1. ดักจับสระซ้ำ และคำสะกดผิดทั่วไป
+    // 🟢 ล้างรหัส Surrogate คู่เสีย และสัญลักษณ์ Replacement Character ทิ้ง 100%
+    .replace(/[\uD800-\uDFFF]/g, "")
+    .replace(/\uFFFD/g, "")
+    .replace(//g, "")
+    // ดักจับคำสะกดผิด
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
@@ -167,13 +168,11 @@ function sanitizeThaiText(text) {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    
-    // 🟢 2. ดักจับคำล่อแหลม พร้อมช่องว่าง (\s*) เพื่อป้องกัน SafeSearch แบนเด็ดขาด
+    // กรองคำเสี่ยงสำหรับ SafeSearch
     .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋\s*ทำ\s*\+?\s*500|จู๋ทำ|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!?/gi, "")
-    
-    // 🟢 3. ล้างสัญลักษณ์ขยะ Unicode แฟนซี และตัวอักษรพิเศษที่ไม่ใช่ข้อความ
+    // ล้างขยะ Unicode
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི]+/g, "")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/\s+/g, " ")
@@ -198,36 +197,30 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-function optimizeImg(imagePath, width = 400, height = null) {
+function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
     return DEFAULT_FALLBACK_IMG;
   }
 
   const cleanPath = imagePath.trim();
-  let transform = "";
-
-  if (width >= 1000 && height && height < width) {
-    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face`;
-  } else if (width <= 150 && (height === null || height <= 150)) {
-    const size = Math.max(width, height || width);
-    transform = `f_auto,q_auto:eco,w_${size},h_${size},c_thumb,g_face`;
-  } else if (height) {
-    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill`;
-  } else if (width >= 1000) {
-    transform = `f_auto,q_auto:eco,w_${width},c_limit`;
-  } else if (width >= 700) {
-    transform = "f_auto,q_auto:eco,w_800,h_1120,c_fill";
-  } else {
-    transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  
+  // 🟢 รวมศูนย์การแปลงรูปภาพเหลือเพียง 3 Preset มาตรฐาน
+  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
+  
+  if (mode === "thumb" || mode <= 150) {
+    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
+  } else if (mode === "full" || mode >= 700 || mode === "og") {
+    transform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
   }
 
+  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ
   if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIdx = cleanPath.indexOf("/upload/");
-    if (uploadIdx !== -1) {
-      let rest = cleanPath.substring(uploadIdx + 8);
-      rest = rest.replace(/^(?:[a-z]{1,4}_[^/]+(?:\/|$))+/i, "");
-      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
+    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
+    if (match) {
+      const cloudName = match[1];
+      const imageFile = match[2];
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
     }
     return cleanPath;
   }
