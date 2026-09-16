@@ -465,9 +465,11 @@ async function getSupabaseClient() {
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 🟢 เติมบรรทัดนี้: ล้างรหัส Broken Unicode Surrogate ทิ้งทันที ไม่ให้หลุดเป็นเครื่องหมายตกใจ
-    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
-    .replace(/\uDCAF/gi, "")
+    // 🟢 ล้างรหัส Surrogate คู่เสีย และ Unicode Replacement Character (ใช้ \uFFFD ที่ถูกต้อง)
+    .replace(/[\uD800-\uDFFF]/g, "")
+    .replace(/\uFFFD/g, "")
+    // ดักจับคำสะกดผิด
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -479,13 +481,11 @@ async function getSupabaseClient() {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    
-    // 🟢 2. ดักจับคำล่อแหลม พร้อมช่องว่าง (\s*) เพื่อป้องกัน SafeSearch แบนเด็ดขาด
+    // กรองคำเสี่ยงสำหรับ SafeSearch
     .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋\s*ทำ\s*\+?\s*500|จู๋ทำ|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!?/gi, "")
-    
-    // 🟢 3. ล้างสัญลักษณ์ขยะ Unicode แฟนซี และตัวอักษรพิเศษที่ไม่ใช่ข้อความ
+    // ล้างขยะ Unicode
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི]+/g, "")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/\s+/g, " ")
