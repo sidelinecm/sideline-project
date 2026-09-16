@@ -148,10 +148,10 @@ const PROVINCE_SEO_DATA = {
 PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA["chiangmai"];
 PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 
-// ค้นหาฟังก์ชัน sanitizeThaiText ใน ssr-province.js แล้วแทนที่ด้วยชุดนี้:
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // 1. ดักจับสระซ้ำ และคำสะกดผิดทั่วไป
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
@@ -164,11 +164,15 @@ function sanitizeThaiText(text) {
     .replace(/ฟิวแฟว/g, "ฟิวแฟน")
     .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    // 🟢 แก้ไข: นำ \b ออก และเพิ่มคำศัพท์ล่อแหลมเพื่อป้องกัน SafeSearch แบน
-    .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    
+    // 🟢 2. ดักจับคำล่อแหลม พร้อมช่องว่าง (\s*) เพื่อป้องกัน SafeSearch แบนเด็ดขาด
+    .replace(/(69|➏➒|อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋\s*ทำ\s*\+?\s*500|จู๋ทำ|เอาร่องนม|ดูดสด|อาบน้ำ\s*จูบ)/gi, "บริการดูแลสไตล์ฟิวแฟน")
+    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    .replace(/ฟรีถุงยาง!?/gi, "")
+    
+    // 🟢 3. ล้างสัญลักษณ์ขยะ Unicode แฟนซี และตัวอักษรพิเศษที่ไม่ใช่ข้อความ
+    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི]+/g, "")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
-    .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
-    .replace(/ฟรีถุงยาง!/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -191,24 +195,35 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-function optimizeImg(imagePath, width = 400) {
+function optimizeImg(imagePath, width = 400, height = null) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
   const cleanPath = imagePath.trim();
-  
-  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
-  const isLarge = width >= 700;
-  const transform = isLarge 
-    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  let transform = "";
+
+  if (width >= 1000 && height && height < width) {
+    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face`;
+  } else if (width <= 150 && (height === null || height <= 150)) {
+    const size = Math.max(width, height || width);
+    transform = `f_auto,q_auto:eco,w_${size},h_${size},c_thumb,g_face`;
+  } else if (height) {
+    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill`;
+  } else if (width >= 1000) {
+    transform = `f_auto,q_auto:eco,w_${width},c_limit`;
+  } else if (width >= 700) {
+    transform = "f_auto,q_auto:eco,w_800,h_1120,c_fill";
+  } else {
+    transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  }
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
-      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      rest = rest.replace(/^(?:[a-z]{1,4}_[^/]+(?:\/|$))+/i, "");
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
@@ -950,6 +965,12 @@ export default async (req, context) => {
 
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
+
+    // 🟢 วางท่อนนี้ลงไป: สั่งเปิดแสดง Breadcrumb UI บนหน้าจอเมื่อเป็นหน้ารายจังหวัด (เพื่อให้ตรงกับ Schema 100%)
+    if (!isNational) {
+      finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
+      finalHtml = finalHtml.replace('<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;"></span>', `<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</span>`);
+    }
 
     // 🟢 8. ตัวเลขอัปเดตสดแบบเรียลไทม์
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
