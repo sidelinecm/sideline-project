@@ -504,33 +504,55 @@ async function getSupabaseClient() {
     return String(num);
   }
 
- function optimizeImg(imagePath, width = 400) {
+ function optimizeImg(imagePath, width = 400, height = null) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
   const cleanPath = imagePath.trim();
-  
-  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
-  const isLarge = width >= 700;
-  const transform = isLarge 
-    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
+  // 🟢 1. กำหนดรูปแบบการแปลงรูปตามโหมดการใช้งาน
+  let transform = "";
+
+  if (width >= 1000 && height && height < width) {
+    // 🌐 โหมด A: Social Share ริชมิเดีย (Facebook / LINE / X อัตราส่วน 1.91:1 ล็อกโฟกัสใบหน้า)
+    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face`;
+  } else if (width <= 150 && (height === null || height <= 150)) {
+    // 🎀 โหมด B: รูปไอคอน Story วงกลม / Avatar (โฟกัสเฉพาะใบหน้า ขนาดจิ๋ว 3-5KB)
+    const size = Math.max(width, height || width);
+    transform = `f_auto,q_auto:eco,w_${size},h_${size},c_thumb,g_face`;
+  } else if (width >= 1000 && !height) {
+    // 🔍 โหมด C: ดูรูปขยายใหญ่เต็มจอใน Lightbox (คงอัตราส่วนเดิม ไม่ครอปรูป)
+    transform = `f_auto,q_auto:eco,w_${width},c_limit`;
+  } else if (width >= 700) {
+    // 📱 โหมด D: รูปแนวตั้งความละเอียดสูงสำหรับจอ Retina / หน้าโปรไฟล์เดี่ยว (อัตราส่วน 1:1.4)
+    transform = "f_auto,q_auto:eco,w_800,h_1120,c_fill";
+  } else {
+    // ⚡ โหมด E: รูปการ์ดมาตรฐานในหน้าแรก / หน้ารายจังหวัด (อัตราส่วน 1:1.4 โหลดเร็ว ประหยัดแคช)
+    transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  }
+
+  // 🟢 2. จัดการรูปภาพที่อยู่บน CDN Cloudinary
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
-      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      
+      // ล้างพารามิเตอร์ Transform เดิมที่ติดมาทิ้งทั้งหมดอย่างปลอดภัย
+      rest = rest.replace(/^(?:[a-z]{1,4}_[^/]+(?:\/|$))+/i, "");
+      
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
   }
 
+  // 🟢 3. กรณีเป็นลิงก์ภายนอกอื่นๆ ที่ไม่ใช่ Cloudinary ให้ส่งคืนค่าเดิม
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
 
+  // 🟢 4. กรณีเป็น Relative Path ส่งเข้า Cloudinary ของระบบ
   let formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
