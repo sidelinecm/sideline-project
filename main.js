@@ -465,8 +465,9 @@ async function getSupabaseClient() {
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ดักจับสระซ้ำ และคำสะกดผิดทั่วไป
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    // 🟢 เติมบรรทัดนี้: ล้างรหัส Broken Unicode Surrogate ทิ้งทันที ไม่ให้หลุดเป็นเครื่องหมายตกใจ
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
+    .replace(/\uDCAF/gi, "")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -1069,8 +1070,8 @@ if (heroH1) {
    const line1 = isAllOrNational 
   ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
   : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
-    const line2 = "สาวสวยสไตล์ฟิวแฟน ตรงปก 100%";
-
+    // ใหม่ (ถ้าเป็นหน้าแรกให้ใช้คำว่าเด็กเอ็น ถ้าเป็นหน้ารายจังหวัดให้ใช้สาวรับงาน ตรงกับ SSR 100%)
+const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" : "สาวรับงาน ฟิวแฟนตรงปก 100%";
     heroH1.innerHTML = `
       <span class="h1-line-1">${line1}</span>
       <span class="h1-line-2">${line2}</span>
@@ -1933,9 +1934,10 @@ if (heroH1) {
         targetUrl = `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        targetTitle = isEN 
-          ? `${provName} Escorts & Companions | FirstModelHub` 
-          : `เพื่อนเที่ยว${provName} ไซด์ไลน์ สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
+        // ✅ ของใหม่: คืน Title ตัวแชมป์กลับมาเสมอ
+targetTitle = isEN 
+  ? `${provName} Escorts & Companions | FirstModelHub` 
+  : `ไซด์ไลน์${provName} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
 
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
