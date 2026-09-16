@@ -905,49 +905,68 @@ export default async (req, context) => {
 
     const exactCount = String(totalCount);
 
+    // 🟢 1. จัดการ Title & Description
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
+
+    // 🟢 2. สลับ Meta Keywords ตามจังหวัดแบบ Dynamic (แก้บั๊กค้างคำว่า "ทั่วไทย")
+    const metaKeywords = isNational
+      ? "สาวรับงานทั่วไทย, ไซด์ไลน์ทั่วไทย, รับงานทั่วไทย, เด็กเอ็นทั่วไทย, เพื่อนเที่ยวทั่วไทย, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน"
+      : `สาวรับงาน${provinceNameThai}, ไซด์ไลน์${provinceNameThai}, รับงาน${provinceNameThai}, เด็กเอ็น${provinceNameThai}, เพื่อนเที่ยว${provinceNameThai}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน`;
+    finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="keywords" content="${escapeHTML(metaKeywords)}" />`);
+
+    // 🟢 3. Open Graph & Twitter Card Titles / Descriptions
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
+    // 🟢 4. Canonical & OG URL
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     
-    // 🟢 แก้ไขการแทนที่ og:image และ OpenGraph ให้สะอาดสมบูรณ์ในจุดเดียว
-    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>/i, 
-      `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">`
-    );
+    // 🟢 5. แทนที่ชุด Open Graph Image ทั้งแผง (แก้ปัญหาแท็กซ้ำซ้อน 2 ชุดเบ็ดเสร็จ)
+    const cleanOgImageBlock = `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n  <meta property="og:image:alt" content="${escapeHTML(CONFIG.BRAND_NAME)} ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน${escapeHTML(provinceNameThai)}">`;
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:alt["'][^>]*>/i, cleanOgImageBlock);
+    if (!finalHtml.includes(`content="${heroImage}"`)) {
+      finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:height["'][^>]*>/i, cleanOgImageBlock);
+    }
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 แก้ไขการแทนที่ HREFLANG แบบสะอาด ปลอดภัย แม่นยำ 100% (แก้ปัญหาตามรูปภาพที่ส่งมา)
+    // 🟢 6. Hreflang Tags สะอาด ถูกต้องตามมาตรฐานสากล
     const hreflangBlock = isNational
       ? `<link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />`
       : `<link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />`;
 
-    // ล้างแท็ก alternate hreflang เก่าออกทั้งหมด แล้ววางชุดใหม่ที่ถูกต้องเข้าไป
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-   const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
-  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวรับงาน ฟิวแฟนตรงปก 100%</span>`;
+    // 🟢 7. หัวข้อ H1 & H2 ประจำหน้า
+    const ssrH1Html = isNational 
+      ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
+      : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวรับงาน ฟิวแฟนตรงปก 100%</span>`;
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
+    // 🟢 8. ตัวเลขอัปเดตสดแบบเรียลไทม์
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
 
+    // 🟢 9. Stories Bar (บีบอัดรูปเป็น 120x120px โฟกัสใบหน้าจริง ไม่โหลดรูปใหญ่ 400px ให้เปลืองเน็ต)
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p, idx, isClone = false) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(p.slug || p.id);
-      const sImg = optimizeImg(p.imagePath || p.image_url || "", 120, 120);
+      
+      let sImg = optimizeImg(p.imagePath || p.image_url || "", 400);
+      if (sImg.includes("res.cloudinary.com/dyynjlbuj/image/upload/")) {
+        sImg = sImg.replace(/\/upload\/[^/]+\//, "/upload/f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face/");
+      }
+
       const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
       return `
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
@@ -970,9 +989,11 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
     }
 
+    // 🟢 10. ฝัง Schema JSON-LD Graph ที่สมบูรณ์แบบ
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
+    // 🟢 11. SEO Drawer, FAQs, Reviews
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
 
     if (faqsHtml) {
@@ -982,6 +1003,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
+    // 🟢 12. HOT Profiles Swiper Section
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -1021,6 +1043,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); 
     }
 
+    // 🟢 13. Display Area (แยกหน้าแรกแสดงแยกจังหวัด / หน้ารายจังหวัดแสดงคนในจังหวัดนั้น)
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -1095,6 +1118,7 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
+    // 🟢 14. Select Box และ Footer Links
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -1105,7 +1129,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-   // ✅ ส่ง galleryPaths และ description ให้ครบถ้วนเพื่อให้ Lightbox แสดงผลและปัดรูปได้ครบทุกรูป
+    // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1127,7 +1151,6 @@ export default async (req, context) => {
       if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
       const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean) : [];
 
-      // 🖼️ จัดการแปลง galleryPaths ทุกรูปแบบ (Array, JSON string, comma-separated) ให้เป็น Array
       let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
       if (typeof rawGallery === "string") {
         const trimmed = rawGallery.trim();
@@ -1155,8 +1178,8 @@ export default async (req, context) => {
         hips: p.hips || "",
         cup_size: p.cup_size || "",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
-        galleryPaths: safeGallery, // 👈 คืนค่ารูปภาพอัลบั้มทั้งหมด!
-        description: sanitizeThaiText(p.description || ""), // 👈 คืนค่าคำบรรยายโปรไฟล์
+        galleryPaths: safeGallery,
+        description: sanitizeThaiText(p.description || ""),
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
@@ -1171,6 +1194,7 @@ export default async (req, context) => {
         styleTags: safeStyleTags
       };
     })).replace(/</g, "\\u003c");
+
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
@@ -1187,6 +1211,7 @@ export default async (req, context) => {
 
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
+    // 🟢 16. ทำความสะอาด Placeholders
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
@@ -1195,10 +1220,11 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
-
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
-finalHtml = finalHtml.replace(/\/styles\.css\?v=\d+/g, `/styles.css?v=${GLOBAL_VERSION}`);
-finalHtml = finalHtml.replace(/\/main\.js\?v=\d+/g, `/main.js?v=${GLOBAL_VERSION}`);
+
+    // 🟢 17. แก้ไข Regex Versioning ให้ดักจับครอบคลุมทั้งตัวเลขและ v_ (แก้ปัญหาแคชค้าง)
+    finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
+    finalHtml = finalHtml.replace(/\/main\.js\?v=[^"'\s>]+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",

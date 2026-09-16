@@ -134,24 +134,44 @@ function extractCleanNumber(rate) {
   return num;
 }
 
-function optimizeImg(imagePath, width = 400) {
+function optimizeImg(imagePath, width = 400, height = null) {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
   const cleanPath = imagePath.trim();
-  
-  // ⚡ บังคับล็อกเหลือแค่ 2 ไซส์มาตรฐาน เพื่อไม่ให้ Cloudinary แปลงซ้ำซ้อน
-  const isLarge = width >= 700;
-  const transform = isLarge 
-    ? "f_auto,q_auto:eco,w_800,h_1120,c_fill" 
-    : "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
+  // 🟢 1. กำหนดรูปแบบการแปลงรูปตามโหมดการใช้งาน
+  let transform = "";
+
+  if (width >= 1000 && height && height < width) {
+    // 🌐 โหมด Social Share ริชมิเดีย (1200x630 ล็อกโฟกัสใบหน้า)
+    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face`;
+  } else if (width <= 150 && (height === null || height <= 150)) {
+    // 🎀 โหมด Story วงกลม / Avatar (ขนาดจิ๋ว 3-5KB)
+    const size = Math.max(width, height || width);
+    transform = `f_auto,q_auto:eco,w_${size},h_${size},c_thumb,g_face`;
+  } else if (height) {
+    // 🖼️ โหมดกำหนดขนาดเฉพาะเจาะจง (เช่น 600x800 หรือ 300x400)
+    transform = `f_auto,q_auto:eco,w_${width},h_${height},c_fill`;
+  } else if (width >= 1000) {
+    // 🔍 โหมดดูรูปขยายใหญ่ (คงอัตราส่วนเดิม)
+    transform = `f_auto,q_auto:eco,w_${width},c_limit`;
+  } else if (width >= 700) {
+    // 📱 โหมด Retina / รูปแนวตั้ง HD
+    transform = "f_auto,q_auto:eco,w_800,h_1120,c_fill";
+  } else {
+    // ⚡ โหมดการ์ดมาตรฐาน 400x560
+    transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  }
+
+  // 🟢 2. จัดการรูปภาพบน CDN Cloudinary
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
       let rest = cleanPath.substring(uploadIdx + 8);
-      // ล้างพารามิเตอร์เก่าทิ้ง แล้วใส่พารามิเตอร์ประหยัดเนื้อที่เข้าไปแทน
-      rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+      rest = rest.replace(/^(?:[a-z]{1,4}_[^/]+(?:\/|$))+/i, "");
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${rest}`;
     }
     return cleanPath;
@@ -620,6 +640,21 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
 </head>
 
 <body style="background-color: #F8F6FC; color: #140F22; font-family: 'Prompt', sans-serif;">
+    <!-- 📱 FLOATING APP DOCK สำหรับหน้าโปรไฟล์เดี่ยว -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-user-friends"></i>
+    <span>รวมน้องๆ</span>
+  </a>
+  <a href="${lineId}" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="ติดต่อจองคิวผ่านไลน์">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); backdrop-filter: blur(10px);">
           <div class="header-logo-container">
@@ -652,7 +687,7 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
            <!-- 🟢 แก้ไขให้ตรงกับ Schema -->
-<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</a></li>
+<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
