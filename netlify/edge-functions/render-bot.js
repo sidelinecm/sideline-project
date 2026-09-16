@@ -429,25 +429,20 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
-    // 🟢 schemaGraph เวอร์ชันสมบูรณ์แบบ (ดึงดาวส้ม + คืนคีย์เวิร์ดเงินล้าน 100%)
+    // 🌟 1. ลบ reviewsSchema ทิ้งไปเลย ไม่ต้องใช้แล้ว
+
+    // 🟢 2. schemaGraph เวอร์ชันปลอดภัย 100% (เปลี่ยน Product เป็น Service / ลบดาวรีวิวปลอมออก)
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "ItemPage",
+          "@type": "WebPage",
           "@id": `${canonicalUrl}#webpage`,
           "url": canonicalUrl,
           "name": stripHTML(pageTitle),
           "description": stripHTML(metaDescription),
           "inLanguage": "th-TH",
-          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-          "mainEntity": { "@id": `${canonicalUrl}#service` },
-          "primaryImageOfPage": {
-            "@type": "ImageObject",
-            "@id": `${canonicalUrl}#primaryimage`,
-            "url": heroImageLarge,
-            "caption": `${stripHTML(displayName)} สาวรับงาน${provinceNameThai} ตัวจริงตรงปก 100%`
-          }
+          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
         },
         {
           "@type": "Person",
@@ -455,13 +450,11 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
           "name": stripHTML(displayName),
           "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
           "gender": "https://schema.org/Female",
-          "knowsLanguage": ["th", "en"],
           "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
           "description": stripHTML(naturalDesc),
           "image": {
             "@type": "ImageObject",
-            "url": heroImageLarge,
-            "caption": `${stripHTML(displayName)} สาวรับงาน${provinceNameThai} ฟิวแฟนตรงปก`
+            "url": heroImageLarge
           },
           "url": canonicalUrl,
           "height": {
@@ -474,15 +467,11 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
             "value": cleanWeightNum,
             "unitCode": "KGM"
           },
-          // 🌟 คืนคีย์เวิร์ด "สาวรับงาน", "ไซด์ไลน์", "เด็กเอ็น"
           "knowsAbout": [
             `สาวรับงาน${provinceNameThai}`,
             `ไซด์ไลน์${provinceNameThai}`,
             `เด็กเอ็น${provinceNameThai}`,
-            "เพื่อนเที่ยวฟิวแฟน",
-            "Girlfriend Experience (GFE)",
-            "รับงานไม่มัดจำ",
-            "จ่ายหน้างานปลอดภัย"
+            "เพื่อนเที่ยวฟิวแฟน"
           ],
           "address": {
             "@type": "PostalAddress",
@@ -492,96 +481,29 @@ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai}
           }
         },
         {
-          // 🌟 เปลี่ยนเป็น Product เพื่อให้ Google แสดงผลดาวรีวิวสีส้ม ⭐⭐⭐⭐⭐
-          "@type": "Product",
+          "@type": "Service",
           "@id": `${canonicalUrl}#service`,
           "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
-          "image": heroImageLarge,
-          "description": stripHTML(metaDescription),
-          "sku": `FMH-${String(rawSlug).toUpperCase()}`,
-          "brand": {
-            "@type": "Brand",
-            "name": CONFIG.BRAND_NAME
+          "provider": { "@id": `${canonicalUrl}#person` },
+          "areaServed": {
+            "@type": "City",
+            "name": profile.location || provinceNameThai
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": reviewsList.length.toString(),
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": reviewsSchema,
           "offers": {
             "@type": "Offer",
-            "@id": `${canonicalUrl}#offer`,
             "url": canonicalUrl,
             "price": rateNumber,
             "priceCurrency": "THB",
-            "priceValidUntil": "2027-12-31",
-            "availability": "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition",
-            "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี",
-            "seller": {
-              "@type": "Organization",
-              "name": CONFIG.BRAND_NAME,
-              "url": CONFIG.DOMAIN
-            }
+            "description": "นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างาน ไม่มีมัดจำล่วงหน้า"
           }
         },
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "หน้าแรก",
-              "item": CONFIG.DOMAIN
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              // 🌟 คืนคำว่า "สาวรับงาน" ให้ตรงกับหน้าจอ
-              "name": `สาวรับงาน${provinceNameThai}`,
-              "item": provinceHubUrl
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": stripHTML(displayName),
-              "item": canonicalUrl
-            }
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "@id": `${canonicalUrl}#faq`,
-          "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": `${stripHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `${stripHTML(displayName)} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${stripHTML(displayName)} เป็นอย่างไร?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${stripHTML(displayName)} ได้ทางใด?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
-              }
-            }
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
+            { "@type": "ListItem", "position": 3, "name": stripHTML(displayName), "item": canonicalUrl }
           ]
         }
       ]
