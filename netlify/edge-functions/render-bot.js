@@ -70,6 +70,9 @@ const PROVINCE_NAME_MAP = {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // 🟢 ล้างรหัส Broken Unicode ทิ้งทันที ไม่ให้หลุดเป็นเครื่องหมายตกใจหรือ %
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
+    .replace(/\uDCAF/gi, "")
     // 1. ดักจับสระซ้ำ และคำสะกดผิดทั่วไป
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")

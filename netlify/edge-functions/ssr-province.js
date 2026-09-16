@@ -151,6 +151,9 @@ PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // 🟢 ล้างรหัส Broken Unicode ทิ้งทันที ไม่ให้หลุดเป็นเครื่องหมายตกใจหรือ %
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
+    .replace(/\uDCAF/gi, "")
     // 1. ดักจับสระซ้ำ และคำสะกดผิดทั่วไป
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
@@ -240,8 +243,32 @@ function optimizeImg(imagePath, width = 400, height = null) {
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   const cleanSlug = (provinceSlug || "chiangmai").toLowerCase().replace(/[-_]/g, "");
   let cleanZones = zones && Array.isArray(zones) ? zones.filter(z => z && z !== "ทั้งหมด") : [];
-  const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
-  const zoneLinks = cleanZones.slice(0, 5).map(z => `<a href="${locationUrl}" class="kw-zone">${escapeHTML(sanitizeThaiText(z))}</a>`);
+
+  const PROV_SLUG_MAP = {
+    "กรุงเทพฯ": "bangkok",
+    "เชียงใหม่": "chiangmai",
+    "ชลบุรี": "chonburi",
+    "พัทยา": "chonburi",
+    "ภูเก็ต": "phuket",
+    "ขอนแก่น": "khon-kaen",
+    "เชียงราย": "chiangrai",
+    "ลำปาง": "lampang",
+    "ลำพูน": "lamphun",
+    "พิษณุโลก": "phitsanulok",
+    "อุดรธานี": "udonthani"
+  };
+
+  const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
+  const locationUrl = !isNation ? `/location/${provinceSlug}` : "/";
+
+  const zoneLinks = cleanZones.slice(0, 5).map(z => {
+    const cleanZ = sanitizeThaiText(z);
+    const targetHref = isNation && PROV_SLUG_MAP[cleanZ] 
+      ? `/location/${PROV_SLUG_MAP[cleanZ]}` 
+      : locationUrl;
+    return `<a href="${targetHref}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
+  });
+
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
   const LOCAL_CONTEXT = {
@@ -306,7 +333,15 @@ function smartLinkify(htmlText, maxLinks = 3, zones = [], provinceSlug = "chiang
   if (!htmlText || typeof htmlText !== "string") return "";
   if (!zones || zones.length === 0 || maxLinks <= 0) return htmlText;
 
-  const targetUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
+  const PROV_SLUG_MAP = {
+    "กรุงเทพฯ": "bangkok", "เชียงใหม่": "chiangmai", "ชลบุรี": "chonburi",
+    "พัทยา": "chonburi", "ภูเก็ต": "phuket", "ขอนแก่น": "khon-kaen",
+    "เชียงราย": "chiangrai", "ลำปาง": "lampang", "ลำพูน": "lamphun",
+    "พิษณุโลก": "phitsanulok", "อุดรธานี": "udonthani"
+  };
+
+  const isNation = provinceSlug === "national";
+  const defaultUrl = !isNation ? `/location/${provinceSlug}` : "/";
   let linkedCount = 0;
   let result = htmlText;
 
@@ -316,7 +351,9 @@ function smartLinkify(htmlText, maxLinks = 3, zones = [], provinceSlug = "chiang
     if (linkedCount >= maxLinks) break;
     const regex = new RegExp(`(?<!<[^>]*)${zone}(?![^<]*<\/a>)`, "g");
     if (regex.test(result)) {
-      result = result.replace(regex, `<a href="${targetUrl}" class="kw-zone">${zone}</a>`);
+      const cleanZ = sanitizeThaiText(zone);
+      const targetHref = isNation && PROV_SLUG_MAP[cleanZ] ? `/location/${PROV_SLUG_MAP[cleanZ]}` : defaultUrl;
+      result = result.replace(regex, `<a href="${targetHref}" class="kw-zone">${zone}</a>`);
       linkedCount++;
     }
   }
@@ -693,9 +730,10 @@ export default async (req, context) => {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    const metaTitle = isNational 
-  ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub"
-  : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
+    // ✅ ของใหม่ (ดึงคำว่า "ไซด์ไลน์" ขึ้นตัวที่ 0 และตัดคำขยะวงเล็บออก)
+const metaTitle = isNational 
+  ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
 
     const metaDescription = isNational
       ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
