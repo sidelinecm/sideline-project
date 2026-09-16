@@ -418,12 +418,31 @@ async function getTemplateHtml(url, context) {
 
 function formatLuxuryRate(rate) {
   if (!rate) return "1.5k";
-  const num = parseInt(String(rate).replace(/\D/g, ""), 10);
+  
+  const str = String(rate).trim().toLowerCase();
+
+  // 1. ถ้ามีตัวอักษร k ติดมาอยู่แล้ว (เช่น "1.5k" หรือ "2k") ให้ส่งค่านั้นกลับได้เลย
+  if (str.includes("k")) {
+    const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
+    return isNaN(floatVal) ? "1.5k" : `${floatVal}k`;
+  }
+
+  // 2. ตัดทศนิยมทิ้งก่อนแปลง (ป้องกัน "1500.00" กลายเป็น 150k)
+  const cleanIntStr = str.split(".")[0].replace(/\D/g, "");
+  let num = parseInt(cleanIntStr, 10);
+
   if (isNaN(num) || num <= 0) return "1.5k";
+
+  // 3. ดักจับกรณีพิมพ์เลขย่อ เช่น ใส่ 2 -> 2000, ใส่ 150 -> 1500
+  if (num < 10) num = num * 1000;
+  if (num < 500) num = num * 10;
+
+  // 4. แปลงเป็นรูปแบบ k (เช่น 1500 -> 1.5k, 2000 -> 2k)
   if (num >= 1000) {
     const kVal = num / 1000;
     return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
   }
+
   return String(num);
 }
 
@@ -463,9 +482,15 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#/, ""))}</span>`).join("")
     : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
 
-  let rightBadgeHtml = isPriorityLCP
-    ? `<span class="badge-hot-tag">🔥 HOT</span>`
-    : `<span class="badge-verified-top">✦ ตรงปก</span>`;
+  // 🟢 ปรับเกณฑ์ป้ายให้ตรงกับ main.js 100%: ถ้ามีแท็กฟิวแฟน/ฟิลแฟน/gfe ให้ได้ป้าย 🔥 HOT นอกนั้นได้ ✦ ตรงปก
+  const isFiwFan = Array.isArray(rawTags) && rawTags.some(t => {
+    const cleanTag = String(t).replace(/^#/, "").trim().toLowerCase();
+    return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
+  });
+
+  const rightBadgeHtml = isFiwFan
+    ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
+    : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
 
   return `
     <div class="profile-card-new-container">
@@ -946,8 +971,8 @@ const metaTitle = isNational
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
-    const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
-    const linkedIntro = smartLinkify(introText, 4, seoData.zones, provinceSlug);
+const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
+const linkedIntro = introText;
 
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
