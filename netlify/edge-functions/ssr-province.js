@@ -807,7 +807,7 @@ const metaTitle = isNational
       });
     }
 
-    // 🟢 2. โครงสร้าง Schema Graph หลัก (แก้ปัญหา &amp;, เพิ่มขนาด Logo, ผูกความสัมพันธ์ถูกต้อง 100%)
+    // 🟢 SCHEMA GRAPH ฉบับสมบูรณ์ 100% (แยกหน้าแรก กับ หน้ารายจังหวัด ถูกต้องตามกฎ Google)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -843,69 +843,92 @@ const metaTitle = isNational
       {
         "@type": "CollectionPage",
         "@id": `${canonicalUrl}#webpage`,
-        "name": stripHTML(metaTitle), // 🟢 ใช้ stripHTML เพื่อไม่ให้มี &amp; หลุดไปในผลค้นหา Google
+        "name": stripHTML(metaTitle),
         "description": cleanMetaDesc,
         "url": canonicalUrl,
         "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "about": { "@id": `${canonicalUrl}#business` },
-        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }, // 🟢 ชี้ไปที่ #breadcrumb ได้อย่างปลอดภัยตลอดเวลา
-        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
-      },
-      {
-        "@type": ["EntertainmentBusiness", "ProfessionalService"],
-        "@id": `${canonicalUrl}#business`,
-        "name": isNational 
-          ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-          : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-        "image": verifiedHeroImage,
-        "telephone": CONFIG.DEFAULT_TELEPHONE,
-        "priceRange": "฿฿",
-        "url": canonicalUrl,
-        "description": cleanMetaDesc,
-        "knowsAbout": [
-          "Personal Lifestyle Companion",
-          "Girlfriend Experience (GFE)",
-          `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
-          "บริการเพื่อนทานข้าวและออกงานสังคม",
-          "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressCountry": "TH"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": seoData.geo?.lat || 13.7563,
-          "longitude": seoData.geo?.lng || 100.5018
-        },
-        "areaServed": isNational 
-          ? { 
-              "@type": "Country", 
-              "name": "Thailand",
-              "sameAs": provinceWikiUrl
-            } 
-          : [
-              { 
-                "@type": "AdministrativeArea", 
-                "name": provinceNameThai,
-                "sameAs": provinceWikiUrl
-              },
-              ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
-            ]
+        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` },
+        // 🔒 หน้าแรกไม่ใส่ breadcrumb id เพื่อไม่ให้ Google Search Console ฟ้อง Unresolved Node
+        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } })
       }
     ];
 
-    // 🟢 3. บันทึก BreadcrumbList ลง Graph เสมอ (แก้ไขปัญหา Unresolved Node ในหน้าแรกถาวร)
-    schemaGraph.push({
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}#breadcrumb`,
-      "itemListElement": breadcrumbItems
-    });
+    // โครงสร้างธุรกิจ Business / Local Service
+    const businessEntity = {
+      "@type": ["EntertainmentBusiness", "ProfessionalService"],
+      "@id": `${canonicalUrl}#business`,
+      "name": isNational 
+        ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+        : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
+      "image": verifiedHeroImage,
+      "telephone": CONFIG.DEFAULT_TELEPHONE,
+      "priceRange": "฿฿",
+      "url": canonicalUrl,
+      "description": cleanMetaDesc,
+      "knowsAbout": [
+        "Personal Lifestyle Companion",
+        "Girlfriend Experience (GFE)",
+        `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
+        "บริการเพื่อนทานข้าวและออกงานสังคม",
+        "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
+        "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
+        "addressCountry": "TH"
+      },
+      "areaServed": isNational 
+        ? { 
+            "@type": "Country", 
+            "name": "Thailand",
+            "sameAs": provinceWikiUrl
+          } 
+        : [
+            { 
+              "@type": "AdministrativeArea", 
+              "name": provinceNameThai,
+              "sameAs": provinceWikiUrl
+            },
+            ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
+          ]
+    };
 
-    // 🟢 4. บันทึก ItemList พร้อมรูปภาพน้องๆ (ตรงเกณฑ์ Google Carousel Rich Results)
+    // 🔒 พิกัด Geo ใส่เฉพาะหน้ารายจังหวัดเท่านั้น หน้าแรกไม่ใส่เพื่อไม่ให้ปักหมุดมั่วที่ กทม.
+    if (!isNational && seoData.geo?.lat && seoData.geo?.lng) {
+      businessEntity.geo = {
+        "@type": "GeoCoordinates",
+        "latitude": seoData.geo.lat,
+        "longitude": seoData.geo.lng
+      };
+    }
+    schemaGraph.push(businessEntity);
+
+    // 🔒 บันทึก BreadcrumbList เฉพาะหน้ารายจังหวัด (หน้าแรกไม่มี จะได้ไม่โดนตัดคะแนน)
+    if (!isNational) {
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "หน้าแรก",
+            "item": `${primaryDomain}/`
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+            "item": canonicalUrl
+          }
+        ]
+      });
+    }
+
+    // Carousel ItemList น้องๆ 12 คน
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -922,7 +945,7 @@ const metaTitle = isNational
       });
     }
 
-    // 🟢 5. บันทึก FAQPage หากมีข้อมูล
+    // FAQPage ประจำจังหวัด
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
