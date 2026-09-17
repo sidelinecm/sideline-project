@@ -940,8 +940,10 @@ const metaTitle = isNational
     }
 
     const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
-    const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
-
+    // ✅ ของใหม่: ถ้าไม่มีใครตั้ง isfeatured ให้ดึง 6 คนแรกมาแสดงอัตโนมัติ ไม่ให้การ์ดขาวว่างเปล่า
+const rawFeatured = profilesList.filter(p => p.isfeatured || p.is_featured);
+const featuredProfilesList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : profilesList.slice(0, 6);
+const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, i)).join("");
     const reviewsHtml = (Array.isArray(activeReviews) ? activeReviews : []).map(r => {
       const avatarLetter = r.initial || (r.author ? r.author.replace(/^(คุณ|พี่|น้อง)/, "").trim().charAt(0) : "V");
       const cleanText = stripHTML(r.text || "").replace(/^["']|["']$/g, "");
@@ -1126,16 +1128,25 @@ const linkedIntro = introText;
       `;
     }).join("");
 
-    if (hotSwiperCardsHtml) {
-      finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
-    }
+   if (hotSwiperCardsHtml) {
+  finalHtml = finalHtml.replace(
+    /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, 
+    `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
+  );
+}
 
-    if (isNational) { 
-      finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`); 
-    } else { 
-      finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, ""); 
-    }
-
+if (isNational) { 
+  if (featuredCardsHtml && featuredCardsHtml.trim() !== "") {
+    finalHtml = finalHtml.replace(
+      /<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, 
+      `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml}</div>`
+    ); 
+  } else {
+    finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>\s*/i, "");
+  }
+} else { 
+  finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>\s*/i, ""); 
+}
     // 🟢 13. Display Area (แยกหน้าแรกแสดงแยกจังหวัด / หน้ารายจังหวัดแสดงคนในจังหวัดนั้น)
     let displayAreaHtml = "";
     if (isNational) {
