@@ -4773,21 +4773,20 @@ body.lightbox-open {
   position: relative !important;
 }
 
-/* 🌀 ตัวโหลดหมุนติ้วๆ กลางการ์ด (ทำงานระหว่างที่เน็ตกำลังดึงรูป) */
+/* คืนค่าแสงสะท้อนเพชร และยกเลิกตัวหมุนใน ::before */
 .profile-card-new::before {
   content: "" !important;
   position: absolute !important;
-  top: 40% !important;
-  left: 50% !important;
-  width: 26px !important;
-  height: 26px !important;
-  margin-top: -13px !important;
-  margin-left: -13px !important;
-  border-radius: 50% !important;
-  border: 2.5px solid rgba(124, 58, 237, 0.18) !important;
-  border-top-color: #E11D48 !important; /* หัวหมุนสีชมพูทับทิม */
-  animation: cardLoaderSpin 0.75s linear infinite !important;
-  z-index: 0 !important; /* อยู่ข้างหลังรูป */
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent) !important;
+  transform: skewX(-22deg) !important;
+  z-index: 6 !important;
+  pointer-events: none !important;
+  animation: none !important;
+  border: none !important;
 }
 
 @keyframes cardLoaderSpin {
@@ -4807,63 +4806,38 @@ body.lightbox-open {
 }
 
 /* ==============================================================================
-   🌀 แก้ปัญหา "การ์ดขาวแว๊บ" + แสดงตัวหมุนกลางการ์ดรูปชัดเจน 100%
+   💎 FIX PROFILE CARD IMAGE & REMOVE SPINNERS (เวอร์ชันคลีน 100%)
    ============================================================================== */
 
-/* 1. ตัวการ์ดตอนยังไม่มีรูป: ให้มีแสงชิมเมอร์สีมุกวิ่งรอ ไม่ใช่สีขาวโล่งๆ */
+/* 1. ตัวการ์ด: พื้นหลังสีมุกนุ่มนวลระหว่างรอโหลดรูป */
 .profile-card-new,
 .vip-card-item {
-  background: linear-gradient(105deg, #F1EDF8 0%, #FFFFFF 50%, #F1EDF8 100%) !important;
-  background-size: 200% 100% !important;
-  animation: pearlShimmerSweep 1.6s infinite ease-in-out !important;
+  background-color: #FAF8FE !important;
   position: relative !important;
 }
 
-/* 2. ตัวหมุนติ้วๆ กลางการ์ดรูปทุกใบ (หมุนรอระหว่างเน็ตดึงรูป) */
-.card-loader-spin {
-  position: absolute !important;
-  top: 40% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  z-index: 1 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: none !important;
-}
-
-.spin-ring {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 50% !important;
-  border: 3px solid rgba(124, 58, 237, 0.15) !important;
-  border-top-color: #E11D48 !important; /* หัวหมุนสีชมพูทับทิม */
-  animation: cardSpinReal 0.75s linear infinite !important;
-  display: block !important;
-}
-
-@keyframes cardSpinReal {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 3. ตัวรูปภาพ: ตอนยังโหลดไม่เสร็จให้โปร่งแสงไว้ พอโหลดเสร็จ (.is-ready) ให้เฟดขึ้นมาทับตัวหมุนเนียนๆ */
+/* 2. ตัวรูปภาพ: แสดงผลทันที 100% ไม่ซ่อน และไม่รอ onload */
 .profile-card-img {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  z-index: 2 !important; /* อยู่เหนือตัวหมุน */
-  opacity: 0;
-  transition: opacity 0.35s ease !important;
-}
-
-.profile-card-img.is-ready {
+  object-position: top center !important;
+  z-index: 2 !important;
   opacity: 1 !important;
+  background: transparent !important;
 }
 
-/* 🔒 ล็อกขอบแคปซูล ป้องกันแสงเลเซอร์แลบออกมาเป็นสี่เหลี่ยมบน Android 100% */
+/* 3. ปิดตัวหมุนทุกรูปแบบถาวร ไม่ให้โผล่มากวนสายตา */
+.card-loader-spin,
+.spin-ring {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* 4. คืนค่าเส้นแสงเลเซอร์วิ่งรอบแคปซูล KISS MODEL ให้ทำงานสมบูรณ์ */
 .kiss-laser-badge {
   position: relative !important;
   display: inline-flex !important;
@@ -4872,33 +4846,6 @@ body.lightbox-open {
   overflow: hidden !important;
   background: transparent !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
-  contain: paint !important;      /* 👈 คำสั่งสำคัญ: กักแสงไม่ให้แลบ */
-  isolation: isolate !important;  /* 👈 คำสั่งสำคัญ: แยก Layer ป้องกันบั๊ก GPU */
-}
-
-/* 🌀 คุมตัวหมุนกลางการ์ดรูปภาพ (ทำงานตอนรูปยังดาวน์โหลดไม่เสร็จ) */
-.card-loader-spin {
-  position: absolute !important;
-  top: 40% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  z-index: 1 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: none !important;
-}
-
-.spin-ring {
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 50% !important;
-  border: 2.5px solid rgba(124, 58, 237, 0.18) !important;
-  border-top-color: #FF1493 !important;
-  animation: cardLoaderSpin 0.75s linear infinite !important;
-}
-
-@keyframes cardLoaderSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  contain: paint !important;
+  isolation: isolate !important;
 }

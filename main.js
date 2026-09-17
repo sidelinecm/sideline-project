@@ -942,15 +942,18 @@ async function getSupabaseClient() {
     domCache.fetchErrorMessage?.classList.add("hidden");
 
     if (domCache.featuredSection) {
-      const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/") && (!appState.activePillTag || appState.activePillTag === "all");
-      const featuredList = appState.allProfiles.filter(p => p.isfeatured).slice(0, 8);
-      const hasFeatured = featuredList.length > 0;
-      
-      domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
-      if (isHomeView && hasFeatured && domCache.featuredContainer) {
-        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
-      }
-    }
+  const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/") && (!appState.activePillTag || appState.activePillTag === "all");
+  
+  // 🟢 เติม Fallback: ถ้าไม่มีใครตั้ง isfeatured ให้เอา 6 คนแรกมาแสดง เพื่อความตรงกัน 100% กับ SSR
+  const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
+  const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
+  const hasFeatured = featuredList.length > 0;
+  
+  domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
+  if (isHomeView && hasFeatured && domCache.featuredContainer) {
+    await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+  }
+}
 
     if (!profiles || profiles.length === 0) {
       domCache.profilesDisplayArea.innerHTML = "";
@@ -1202,8 +1205,9 @@ const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ต
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
 
-    const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
-    const imgSrc = optimizeImg(rawImg, 400, 560);
+    // 🟢 1. ดึงรูปภาพที่แปลงแล้วจาก p.images[0]
+    const imgSrc = (p.images && p.images[0] && p.images[0].src) 
+      || optimizeImg(p.imagePath || p.image_url || p.imageUrl || DEFAULT_FALLBACK_IMG, 400, 560);
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1258,25 +1262,21 @@ const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ต
       ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>` 
       : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
 
+    // 🟢 2. ประกาศตัวแปรทั้งสองตัวนี้ เพื่อไม่ให้เกิด ReferenceError
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} สาวรับงาน${p.provinceNameThai || ''} ย่าน${locName} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub`;
 
+    // 🟢 3. ประกอบการ์ด HTML
     article.innerHTML = `
-      <!-- 🌀 ตัวหมุนรอรูปภาพ (ทำงานตอนรูปยังโหลดไม่เสร็จ แก้การ์ดขาวแว๊บ) -->
-      <div class="card-loader-spin" aria-hidden="true">
-        <span class="spin-ring"></span>
-      </div>
-
       <img src="${imgSrc}" 
            alt="${escapeHTML(richAltText)}" 
            width="400" 
            height="560" 
            class="profile-card-img" 
-           loading="${index < 6 ? "eager" : "lazy"}" 
+           loading="${index < 4 ? "eager" : "lazy"}" 
            fetchpriority="${index === 0 ? "high" : "auto"}" 
            decoding="async" 
-           onload="this.classList.add('is-ready')" 
-           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}'; this.classList.add('is-ready');" />
+           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
       <div class="profile-card-gradient-overlay"></div>
 
