@@ -1067,7 +1067,7 @@ const linkedIntro = introText;
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-              <img src="${sImg}" alt="${sName}" loading="${idx < 4 && !isClone ? "eager" : "lazy"}" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+             <img src="${sImg}" alt="${sName}" loading="lazy" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             </div>
             <span class="story-status-dot online" aria-hidden="true"></span>
           </div>
@@ -1308,10 +1308,17 @@ if (isNational) {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
-    // 🟢 17. แก้ไข Regex Versioning ให้ดักจับครอบคลุมทั้งตัวเลขและ v_ (แก้ปัญหาแคชค้าง)
+  
     finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
     finalHtml = finalHtml.replace(/\/main\.js\?v=[^"'\s>]+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
+    
+    if (profilesList.length > 0) {
+      const lcpImgUrl = optimizeImg(profilesList[0].imagePath || profilesList[0].image_url || "", 400, 560);
+      finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="preload" as="image" href="${lcpImgUrl}" fetchpriority="high">\n</head>`);
+    }
+
+  
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
