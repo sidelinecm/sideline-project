@@ -3661,3 +3661,1244 @@ body.lightbox-open {
   padding: 4px; /* ขยายขอบเขตนิ้วสัมผัสให้แตะง่ายขึ้น */
   background-clip: content-box;
 }
+
+
+
+  /* 🛡️ ป้ายความปลอดภัยดีไซน์ใหม่: ทรงแคปซูลโค้งมน มีเงาลอยมรกตหรูหรา */
+  .safety-trust-capsule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border: 1.5px solid #86efac;
+    border-radius: 50px; /* ทรงแคปซูลมนสวย เข้ากับปุ่มด้านล่าง */
+    padding: 6px 14px 6px 8px;
+    margin: 8px 0 12px 0;
+    box-shadow: 
+      0 6px 18px rgba(16, 185, 129, 0.12),
+      inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  }
+
+  .trust-shield-glow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+  }
+
+  .trust-text-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    text-align: left;
+  }
+
+  .trust-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .trust-headline {
+    font-size: 12px;
+    font-weight: 800;
+    color: #065f46;
+    letter-spacing: 0.2px;
+  }
+
+  .trust-pill-tag {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #059669;
+    background: #ffffff;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid #bbf7d0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  }
+
+  .trust-desc-row {
+    font-size: 10px;
+    color: #047857;
+    line-height: 1.2;
+  }
+
+  /* 📊 กล่องสถิติ 3 กล่องดีไซน์ใหม่: สไตล์เดียวกับปุ่มแคปซูลฟิวแฟน */
+  .stats-luxe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .stat-luxe-card {
+    background: #ffffff;
+    border-radius: 20px; /* มุมมนละมุนแบบปุ่มฟิวแฟน */
+    padding: 10px 6px 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border: 1.5px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* ธีมสี ม่วง - เขียว - ทอง พร้อมเงาสะท้อนนุ่มนวล */
+  .card-purple {
+    border-color: #f3e8ff;
+    background: linear-gradient(180deg, #ffffff 40%, #faf5ff 100%);
+    box-shadow: 0 8px 18px rgba(147, 51, 234, 0.09);
+  }
+  .card-purple .stat-icon-chip {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+  .card-purple .stat-val {
+    color: #7e22ce;
+  }
+
+  .card-green {
+    border-color: #dcfce7;
+    background: linear-gradient(180deg, #ffffff 40%, #f0fdf4 100%);
+    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.09);
+  }
+  .card-green .stat-icon-chip {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+  .card-green .stat-val {
+    color: #15803d;
+  }
+
+  .card-gold {
+    border-color: #fef3c7;
+    background: linear-gradient(180deg, #ffffff 40%, #fffbeb 100%);
+    box-shadow: 0 8px 18px rgba(217, 119, 6, 0.09);
+  }
+  .card-gold .stat-icon-chip {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  .card-gold .stat-val {
+    color: #b45309;
+  }
+
+  /* ไอคอนทรงแคปซูลกลม */
+  .stat-icon-chip {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-val {
+    font-size: 1.3rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .stat-caption {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+
+  /* 🌟 ตัวกรอบ Hero: เรียบหรู บาง กระชับ */
+  .celestial-hero-box {
+    position: relative !important;
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    padding: 14px 12px 12px 12px !important;
+    margin: 6px 10px 10px 10px !important;
+    border: 1px solid rgba(124, 58, 237, 0.12) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 🖤 1. KISS MODEL สไตล์กระจกฝ้าดำใส + ขยับลอย + แสงวิ่งวับ */
+  .kiss-badge-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  .kiss-smoked-glass {
+    position: relative;
+    overflow: hidden; /* เพื่อให้แสงวิ่งอยู่ข้างในการ์ด */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 16px;
+    background: rgba(18, 14, 28, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.4),
+      0 0 12px rgba(236, 72, 153, 0.2);
+    animation: badgeFloat 3.5s ease-in-out infinite; /* อนิเมชันลอยตัวขึ้น-ลงชัดเจน */
+  }
+
+  /* ลำแสงวิ่งผ่านกระจก (Glass Shimmer Sweep) */
+  .glass-light-beam {
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.45), 
+      rgba(244, 114, 182, 0.3), 
+      transparent
+    );
+    transform: skewX(-25deg);
+    animation: beamSweep 3.2s infinite ease-in-out;
+    pointer-events: none;
+  }
+
+  .kiss-title-luxe {
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    background: linear-gradient(110deg, #ffffff 0%, #fbcfe8 40%, #fed7aa 70%, #ffffff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textShine 4s linear infinite;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  }
+
+  /* โบว์ขยับดุ๊กดิ๊กชัดเจน */
+  .kiss-bow-animated {
+    font-size: 1rem;
+    color: #f472b6;
+    display: inline-block;
+    animation: bowWiggle 2.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 5px rgba(244, 114, 182, 0.8));
+  }
+  .kiss-bow-animated.bow-r {
+    animation-delay: 1.4s;
+  }
+
+  /* ดาวกะพริบเรืองแสง */
+  .kiss-star-pulse {
+    font-size: 0.9rem;
+    color: #fed7aa;
+    display: inline-block;
+    animation: starBlink 2s infinite alternate;
+  }
+
+  /* 🟢 2. ป้าย VERIFIED */
+  .verified-capsule-luxe {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 3px 10px;
+    border-radius: 50px;
+    margin-bottom: 6px;
+  }
+  .v-badge-tag {
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 20px;
+  }
+  .v-stars-glow { color: #f59e0b; font-size: 10px; letter-spacing: 1px; }
+  .v-text-trust { font-size: 10.5px; font-weight: 700; color: #475569; }
+
+  .hero-headings-block { margin: 4px 0 6px 0 !important; }
+  .hero-subheadline { font-size: 11.5px !important; }
+  .seo-h1-title .h1-line-1 { font-size: 1.35rem !important; }
+  .seo-h1-title .h1-line-2 { font-size: 1.25rem !important; }
+  .hero-description-inset { margin-bottom: 8px !important; }
+  .hero-subtitle-p { font-size: 11px !important; line-height: 1.45 !important; }
+
+  /* 🟢 5. ดีไซน์ใหม่: แถบความปลอดภัย Emerald Trust Shield (ไม่ล้นจอ สวยหรู) */
+  .safety-emerald-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1.5px solid #a7f3d0;
+    border-radius: 16px;
+    padding: 7px 10px;
+    margin: 6px 0 10px 0;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
+  }
+
+  .sec-icon-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+  }
+
+  .sec-info-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 1px;
+    flex: 1;
+  }
+
+  .sec-top-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #065f46;
+  }
+
+  .sec-live-tag {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #059669;
+    background: #ffffff;
+    padding: 1px 7px;
+    border-radius: 20px;
+    border: 1px solid #d1fae5;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pulse-green-dot {
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #10b981;
+  }
+
+  .sec-sub-line {
+    font-size: 10px;
+    color: #047857;
+  }
+
+  /* 🟢 6. ดีไซน์ใหม่: กล่องสถิติ 3 ช่อง Bento Glass Widget สวย คม ลึก */
+  .stats-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    width: 100%;
+  }
+
+  .stat-bento-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 8px 6px 7px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* แถบสีด้านบนการ์ดแต่ละใบ */
+  .stat-bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  /* ธีมสีเฉพาะกล่อง */
+  .bento-purple::before { background: linear-gradient(90deg, #a855f7, #c084fc); }
+  .bento-purple { background: linear-gradient(180deg, #ffffff 60%, #faf5ff 100%); }
+  .bento-purple .stat-icon-wrapper { background: #f3e8ff; color: #9333ea; }
+  .bento-purple .stat-num { color: #6b21a8; }
+
+  .bento-green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+  .bento-green { background: linear-gradient(180deg, #ffffff 60%, #f0fdf4 100%); }
+  .bento-green .stat-icon-wrapper { background: #dcfce7; color: #16a34a; }
+  .bento-green .stat-num { color: #15803d; }
+
+  .bento-gold::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .bento-gold { background: linear-gradient(180deg, #ffffff 60%, #fffbeb 100%); }
+  .bento-gold .stat-icon-wrapper { background: #fef3c7; color: #d97706; }
+  .bento-gold .stat-num { color: #b45309; }
+
+  .stat-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+  }
+
+  .stat-num {
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+  .stat-lbl {
+    font-size: 9px;
+    color: #64748b;
+    margin-top: 1px;
+    white-space: nowrap;
+  }
+
+  /* Keyframes Animation */
+  @keyframes badgeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); } /* ลอยตัวขึ้นชัดเจน */
+  }
+
+  @keyframes beamSweep {
+    0% { left: -120%; }
+    40%, 100% { left: 160%; } /* แสงวิ่งผ่านการ์ดสม่ำเสมอ */
+  }
+
+  @keyframes bowWiggle {
+    0%, 100% { transform: rotate(-8deg) scale(1); }
+    50% { transform: rotate(8deg) scale(1.18); } /* โบว์ขยับดุ๊กดิ๊ก */
+  }
+
+  @keyframes starBlink {
+    0% { opacity: 0.4; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 6px #fed7aa); }
+  }
+
+  @keyframes textShine {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+/* ========================================================
+   💎 1. อัปเกรดกล่องแสดงผลหลัก (HERO CARD PEARL-GLASS)
+======================================================== */
+.celestial-hero-box {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8FD 100%) !important;
+  border-radius: 30px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+  /* เงาแบบมัลติเลเยอร์ นุ่ม หรูหรา ไม่ดำกระด้าง */
+  box-shadow: 
+    0 20px 40px -15px rgba(124, 58, 237, 0.08),
+    0 0 0 1px rgba(124, 58, 237, 0.05),
+    inset 0 1px 2px #FFFFFF !important;
+  padding: 24px 18px 20px 18px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ประกายแสงนวลๆ ด้านบนของการ์ด */
+.celestial-hero-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+}
+
+/* ==============================================================================
+   📖 COMPACT EDITORIAL DIGEST (สไตล์ iOS / Apple Support - คลีน ไม่รก 100%)
+   ============================================================================== */
+.editorial-digest-section {
+  width: 100% !important;
+  max-width: 860px !important;
+  margin: 28px auto 14px auto !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.editorial-digest-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(124, 58, 237, 0.14) !important;
+  border-radius: 20px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 4px 20px rgba(15, 10, 26, 0.04) !important;
+}
+
+.digest-header-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 8px !important;
+  border-bottom: 1px solid rgba(15, 11, 26, 0.06) !important;
+}
+
+.digest-header-badge {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #7C3AED !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.digest-header-link {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  transition: color 0.2s ease !important;
+}
+
+.digest-header-link:hover {
+  color: #7C3AED !important;
+}
+
+.digest-links-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+/* แต่ละแถวบทความ */
+.digest-item-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 12px !important;
+  border-radius: 12px !important;
+  background: #FAF8FE !important;
+  border: 1px solid rgba(124, 58, 237, 0.06) !important;
+  text-decoration: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              background 0.2s ease, 
+              border-color 0.2s ease !important;
+}
+
+.digest-item-row:hover {
+  background: #FFFFFF !important;
+  border-color: rgba(124, 58, 237, 0.25) !important;
+  transform: translateX(3px) !important;
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.06) !important;
+}
+
+/* นิ้วแตะแล้วตอบสนองนุ่มนวลบนมือถือ */
+.digest-item-row:active {
+  transform: scale(0.98) !important;
+  background: #F3E8FF !important;
+}
+
+.digest-item-icon {
+  font-size: 14px !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+}
+
+/* ตัดข้อความให้พอดี 1 บรรทัด ไม่ตกบรรทัด ไม่ล้นจอ */
+.digest-item-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #1E293B !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: -0.2px !important;
+}
+
+.digest-item-arrow {
+  font-size: 10px !important;
+  color: #7C3AED !important;
+  opacity: 0.5 !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+.digest-item-row:hover .digest-item-arrow {
+  opacity: 1 !important;
+  transform: translateX(2px) !important;
+}
+
+/* ==============================================================================
+   💎 3D DEPTH HERO & LIVING KISS MODEL SEAL (แสงวิ่งวน 360° + ข้อความมีมิติ)
+   ============================================================================== */
+
+/* 1. กล่อง Hero แม่: มีแสงมุกและมิติเงา 3D ไม่แบนทื่อ */
+.celestial-hero-box {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8FE 100%) !important;
+  border-radius: 26px !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  /* เงาซ้อน 3 ชั้น: ลอยละมุน มีเส้นแสงไฮไลต์ด้านบน */
+  box-shadow: 
+    0 18px 40px -12px rgba(124, 58, 237, 0.09),
+    0 2px 6px rgba(15, 10, 26, 0.02),
+    inset 0 1px 2px #FFFFFF !important;
+  padding: 16px 14px 16px 14px !important;
+  margin: 6px auto 14px auto !important;
+  max-width: 860px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+  position: relative !important;
+}
+
+/* 2. KISS MODEL: แสงวิ่งวนรอบ 360° มีชีวิตชีวา (แก้บั๊ก Android ด้วย mask ป้องกันแสงแลบ) */
+.hero-brand-seal-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-bottom: 2px !important;
+}
+
+.hero-brand-seal {
+  position: relative !important;
+  display: inline-flex !important;
+  padding: 1.5px !important; /* ความหนาเส้นแสงวิ่งวน */
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  
+  /* 🔒 สูตรเด็ดแก้บั๊ก Android ไม่ให้แสงสี่เหลี่ยมแลบออกมาเด็ดขาด */
+  -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
+  mask-image: radial-gradient(white, black) !important;
+  isolation: isolate !important;
+  transform: translateZ(0) !important;
+  
+  box-shadow: 
+    0 10px 24px -4px rgba(0, 0, 0, 0.3),
+    0 3px 10px rgba(225, 29, 72, 0.25) !important;
+  animation: sealBreathingPulse 3.8s ease-in-out infinite !important;
+}
+
+/* ⚡ เส้นแสงเลเซอร์วิ่งวนรอบแคปซูล 360 องศา */
+.hero-brand-seal .seal-laser-orbit {
+  position: absolute !important;
+  top: -100% !important;
+  left: -100% !important;
+  width: 300% !important;
+  height: 300% !important;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 280deg,
+    rgba(225, 29, 72, 0.8) 315deg,
+    #F59E0B 345deg,
+    #FFFFFF 360deg
+  ) !important;
+  animation: rotateLaserBeam 3s linear infinite !important;
+  pointer-events: none !important;
+  transform-origin: center center !important;
+}
+
+@keyframes rotateLaserBeam {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes sealBreathingPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.02); }
+}
+
+/* เนื้อข้างใน: กระจกฝ้าดำลึก */
+.seal-inner-content {
+  position: relative !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 5px 13px !important;
+  border-radius: 999px !important;
+  background: rgba(14, 10, 22, 0.94) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.seal-sparkle {
+  color: #F59E0B !important;
+  font-size: 11px !important;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9)) !important;
+  animation: starTwinkle 2.2s infinite alternate ease-in-out !important;
+}
+
+@keyframes starTwinkle {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+.seal-name {
+  font-family: 'Prompt', -apple-system, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2.2px !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 50%, #FDE68A 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8)) !important;
+}
+
+.seal-divider {
+  width: 1px !important;
+  height: 11px !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.seal-tag {
+  color: #00E676 !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* 3. HEADINGS: เงา 3D คมกริบ ไม่แบน ไม่แข็ง */
+.hero-headings-block {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.hero-subheadline {
+  font-size: clamp(9.5px, 2.7vw, 11px) !important;
+  font-weight: 800 !important;
+  color: #7C3AED !important;
+  background: rgba(124, 58, 237, 0.06) !important;
+  border: 1px solid rgba(124, 58, 237, 0.14) !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+  display: inline-block !important;
+  margin-bottom: 3px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.04) !important;
+}
+
+.seo-h1-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin: 0 !important;
+  line-height: 1.28 !important;
+}
+
+/* บรรทัดที่ 1: ดำนิลนุ่มลึก มีเงา 3D ยกตัวขึ้น */
+.seo-h1-title .h1-line-1 {
+  font-size: clamp(18px, 5.2vw, 24px) !important;
+  font-weight: 900 !important;
+  color: #0F0B1A !important;
+  white-space: nowrap !important;
+  text-shadow: 
+    0 1px 1px rgba(255, 255, 255, 0.8),
+    0 3px 8px rgba(15, 10, 26, 0.12) !important;
+  letter-spacing: -0.3px !important;
+}
+
+/* บรรทัดที่ 2: ทับทิมประกายม่วง เรืองแสงนีออน 3D */
+.seo-h1-title .h1-line-2 {
+  font-size: clamp(16px, 4.5vw, 21px) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #FF1361 0%, #E11D48 45%, #9333EA 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  white-space: nowrap !important;
+  filter: drop-shadow(0 2px 8px rgba(225, 29, 72, 0.28)) !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* 4. คำบรรยาย: วางบนถาดกระจกเว้า 3D นุ่มตา สวยแพง ไม่กระด้าง */
+.t-chunk {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.hero-description-inset {
+  max-width: 620px !important;
+  margin: 2px auto !important;
+  /* ถาดกระจกเว้าความลึก */
+  background: linear-gradient(180deg, rgba(248, 246, 253, 0.75) 0%, rgba(243, 239, 250, 0.65) 100%) !important;
+  border: 1px solid rgba(124, 58, 237, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 9px 12px !important;
+  box-shadow: 
+    inset 0 1px 2px rgba(15, 10, 26, 0.03),
+    0 1px 0 #FFFFFF !important;
+}
+
+.hero-subtitle-p {
+  font-size: 11px !important;
+  line-height: 1.6 !important;
+  color: #475569 !important;
+  margin: 0 !important;
+}
+
+.hero-subtitle-p strong {
+  color: #0F0B1A !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 5. ชิปแก้วคริสตัลมิติหรูหรา (Tactile Glass Chips) */
+.hero-metric-strip {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+
+.metric-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 5px 13px !important;
+  border-radius: 100px !important;
+  font-size: 10.5px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  /* แสงสะท้อนขอบบนสไตล์แก้วคริสตัล */
+  box-shadow: 
+    0 3px 10px rgba(15, 10, 26, 0.04),
+    inset 0 1px 1px #FFFFFF !important;
+}
+
+.pill-safety {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%) !important;
+  border: 1.2px solid #86EFAC !important;
+  color: #065F46 !important;
+}
+.pill-safety strong {
+  color: #059669 !important;
+  font-weight: 900 !important;
+}
+.icon-emerald {
+  color: #10B981 !important;
+  font-size: 11px !important;
+  filter: drop-shadow(0 1px 2px rgba(16, 185, 129, 0.3)) !important;
+}
+
+.pill-stats {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8FE 100%) !important;
+  border: 1.2px solid rgba(124, 58, 237, 0.16) !important;
+  color: #475569 !important;
+}
+.pill-stats strong {
+  color: #7C3AED !important;
+  font-weight: 900 !important;
+}
+.sep-dot {
+  color: #CBD5E1 !important;
+  font-size: 8px !important;
+}
+.live-dot {
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #10B981 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 6px #10B981 !important;
+  animation: pulseLiveDot 1.8s infinite ease-in-out !important;
+}
+
+@keyframes pulseLiveDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+/* ==============================================================================
+   💎 LUXURY SKELETON SCREEN (PEARL SHIMMER • ZERO CLS)
+   ============================================================================== */
+@keyframes pearlShimmerSweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-vip-card {
+  flex: 0 0 172px !important;
+  width: 172px !important;
+  aspect-ratio: 3 / 4.2 !important;
+  border-radius: 20px !important;
+  background: linear-gradient(105deg, #F3EFF8 0%, #F3EFF8 35%, #FFFFFF 50%, #F3EFF8 65%, #F3EFF8 100%) !important;
+  background-size: 200% 100% !important;
+  animation: pearlShimmerSweep 1.6s infinite ease-in-out !important;
+  border: 1px solid rgba(124, 58, 237, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(15, 10, 26, 0.04) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+@media (min-width: 768px) {
+  .skeleton-vip-card { flex: 0 0 195px !important; width: 195px !important; }
+}
+
+.skeleton-profile-card {
+  aspect-ratio: 3 / 4.2 !important;
+  width: 100% !important;
+  border-radius: 22px !important;
+  background: linear-gradient(105deg, #F1EDF8 0%, #F1EDF8 35%, #FFFFFF 50%, #F1EDF8 65%, #F1EDF8 100%) !important;
+  background-size: 200% 100% !important;
+  animation: pearlShimmerSweep 1.6s infinite ease-in-out !important;
+  border: 1px solid rgba(124, 58, 237, 0.08) !important;
+  box-shadow: 0 6px 18px rgba(15, 10, 26, 0.03) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.sk-badge-top-left {
+  width: 52px !important;
+  height: 16px !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+}
+
+.sk-badge-top-right {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 45px !important;
+  height: 16px !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+}
+
+.sk-bottom-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+}
+
+.sk-pill {
+  width: 48px !important;
+  height: 10px !important;
+  border-radius: 4px !important;
+  background: rgba(124, 58, 237, 0.15) !important;
+}
+
+.sk-name-bar {
+  width: 70% !important;
+  height: 14px !important;
+  border-radius: 6px !important;
+  background: rgba(15, 10, 26, 0.2) !important;
+}
+
+.sk-meta-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.sk-loc-bar {
+  width: 45% !important;
+  height: 10px !important;
+  border-radius: 4px !important;
+  background: rgba(15, 10, 26, 0.12) !important;
+}
+
+.sk-price-bar {
+  width: 38px !important;
+  height: 16px !important;
+  border-radius: 6px !important;
+  background: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* ==============================================================================
+   💫 1. ตัวหมุนบน KISS MODEL (ดาวหมุน 360° + แสงเลเซอร์วิ่งวนรอบแคปซูล)
+   ============================================================================== */
+.kiss-master-brand-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  margin: 4px auto 10px auto !important;
+  width: 100% !important;
+}
+
+.kiss-laser-badge {
+  position: relative !important;
+  display: inline-flex !important;
+  padding: 2px !important; /* ความหนาของเส้นแสงเลเซอร์ */
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* แสงวิ่งวนรอบกรอบแคปซูล 360 องศา */
+.kiss-laser-badge .laser-orbit-glow {
+  position: absolute !important;
+  top: -100% !important;
+  left: -100% !important;
+  width: 300% !important;
+  height: 300% !important;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 280deg,
+    #FF1493 310deg,
+    #F59E0B 340deg,
+    #FFFFFF 360deg
+  ) !important;
+  animation: orbitSpin 2.8s linear infinite !important;
+  pointer-events: none !important;
+  transform-origin: center center !important;
+}
+
+/* 💫 ตัวดาวหมุนติ้วๆ 360 องศาตลอดเวลา เห็นชัดเจนแน่นอน */
+.spinning-star {
+  display: inline-block !important;
+  color: #F59E0B !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  filter: drop-shadow(0 0 6px #F59E0B) !important;
+  animation: realSpin360 2s linear infinite !important;
+}
+
+@keyframes realSpin360 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* พื้นหลังแคปซูลข้างใน */
+.kiss-laser-inner {
+  position: relative !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 5px 14px !important;
+  border-radius: 999px !important;
+  background: #0E0A1A !important;
+  white-space: nowrap !important;
+}
+
+.kiss-txt-main {
+  font-family: 'Prompt', -apple-system, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  color: #FFFFFF !important;
+}
+
+.kiss-pipe-sep {
+  width: 1px !important;
+  height: 11px !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.kiss-verified-pill {
+  background: #00E676 !important;
+  color: #052E16 !important;
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+  padding: 1.5px 6px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.kiss-trust-txt {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #E2E8F0 !important;
+}
+
+/* ==============================================================================
+   🌀 2. แก้ปัญหา "การ์ดขาวแว๊บตอนเลื่อนจอ" (ใส่ตัวหมุนติ้วๆ กลางการ์ดรูปทุกใบ)
+   ============================================================================== */
+
+/* เปลี่ยนพื้นหลังการ์ดไม่ให้เป็นสีขาวโล่งๆ แต่เป็นสีมุกมืดนวลตา */
+.profile-card-new {
+  background: #EAE5F3 !important;
+  position: relative !important;
+}
+
+/* 🌀 ตัวโหลดหมุนติ้วๆ กลางการ์ด (ทำงานระหว่างที่เน็ตกำลังดึงรูป) */
+.profile-card-new::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 40% !important;
+  left: 50% !important;
+  width: 26px !important;
+  height: 26px !important;
+  margin-top: -13px !important;
+  margin-left: -13px !important;
+  border-radius: 50% !important;
+  border: 2.5px solid rgba(124, 58, 237, 0.18) !important;
+  border-top-color: #E11D48 !important; /* หัวหมุนสีชมพูทับทิม */
+  animation: cardLoaderSpin 0.75s linear infinite !important;
+  z-index: 0 !important; /* อยู่ข้างหลังรูป */
+}
+
+@keyframes cardLoaderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* เมื่อรูปน้องโหลดเสร็จ รูปจะโชว์ทับตัวหมุนแบบ 100% ทันที */
+.profile-card-img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 1 !important; /* อยู่ทับตัวหมุน */
+  background: transparent !important;
+}
+
+/* ==============================================================================
+   🌀 แก้ปัญหา "การ์ดขาวแว๊บ" + แสดงตัวหมุนกลางการ์ดรูปชัดเจน 100%
+   ============================================================================== */
+
+/* 1. ตัวการ์ดตอนยังไม่มีรูป: ให้มีแสงชิมเมอร์สีมุกวิ่งรอ ไม่ใช่สีขาวโล่งๆ */
+.profile-card-new,
+.vip-card-item {
+  background: linear-gradient(105deg, #F1EDF8 0%, #FFFFFF 50%, #F1EDF8 100%) !important;
+  background-size: 200% 100% !important;
+  animation: pearlShimmerSweep 1.6s infinite ease-in-out !important;
+  position: relative !important;
+}
+
+/* 2. ตัวหมุนติ้วๆ กลางการ์ดรูปทุกใบ (หมุนรอระหว่างเน็ตดึงรูป) */
+.card-loader-spin {
+  position: absolute !important;
+  top: 40% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+.spin-ring {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  border: 3px solid rgba(124, 58, 237, 0.15) !important;
+  border-top-color: #E11D48 !important; /* หัวหมุนสีชมพูทับทิม */
+  animation: cardSpinReal 0.75s linear infinite !important;
+  display: block !important;
+}
+
+@keyframes cardSpinReal {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 3. ตัวรูปภาพ: ตอนยังโหลดไม่เสร็จให้โปร่งแสงไว้ พอโหลดเสร็จ (.is-ready) ให้เฟดขึ้นมาทับตัวหมุนเนียนๆ */
+.profile-card-img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 2 !important; /* อยู่เหนือตัวหมุน */
+  opacity: 0;
+  transition: opacity 0.35s ease !important;
+}
+
+.profile-card-img.is-ready {
+  opacity: 1 !important;
+}
+
+/* 🔒 ล็อกขอบแคปซูล ป้องกันแสงเลเซอร์แลบออกมาเป็นสี่เหลี่ยมบน Android 100% */
+.kiss-laser-badge {
+  position: relative !important;
+  display: inline-flex !important;
+  padding: 2px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  contain: paint !important;      /* 👈 คำสั่งสำคัญ: กักแสงไม่ให้แลบ */
+  isolation: isolate !important;  /* 👈 คำสั่งสำคัญ: แยก Layer ป้องกันบั๊ก GPU */
+}
+
+/* 🌀 คุมตัวหมุนกลางการ์ดรูปภาพ (ทำงานตอนรูปยังดาวน์โหลดไม่เสร็จ) */
+.card-loader-spin {
+  position: absolute !important;
+  top: 40% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+.spin-ring {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  border: 2.5px solid rgba(124, 58, 237, 0.18) !important;
+  border-top-color: #FF1493 !important;
+  animation: cardLoaderSpin 0.75s linear infinite !important;
+}
+
+@keyframes cardLoaderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

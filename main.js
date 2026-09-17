@@ -727,9 +727,9 @@ async function getSupabaseClient() {
       executeFilterAndRender(false);
     }
 
+    // 🟢 แก้ให้ถูกต้องเป็นแบบนี้ครับ:
     const vipSwiperEl = document.getElementById("vip-swiper-container");
-    if (!vipSwiperEl || vipSwiperEl.children.length > 0) return;
-    
+    if (!vipSwiperEl || vipSwiperEl.querySelector(".vip-card-item")) return;
     // 🟢 ดึงเฉพาะคนสไตล์ฟิวแฟน
     let hotCandidate = appState.allProfiles.filter(p => {
       const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
@@ -1259,20 +1259,24 @@ const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ต
       : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
-    
-    // 🟢 ประกาศตัวแปร richAltText ให้ถูกต้องตรงนี้ (แก้ ReferenceError 100%)
     const richAltText = `${modelName} สาวรับงาน${p.provinceNameThai || ''} ย่าน${locName} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub`;
 
     article.innerHTML = `
+      <!-- 🌀 ตัวหมุนรอรูปภาพ (ทำงานตอนรูปยังโหลดไม่เสร็จ แก้การ์ดขาวแว๊บ) -->
+      <div class="card-loader-spin" aria-hidden="true">
+        <span class="spin-ring"></span>
+      </div>
+
       <img src="${imgSrc}" 
-           alt="${escapeHTML(richAltText)}"
-           width="400"
-           height="560"
-           class="profile-card-img"
-           loading="${index < 4 ? "eager" : "lazy"}"
-           fetchpriority="${index === 0 ? "high" : "auto"}"
-           decoding="async"
-           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
+           alt="${escapeHTML(richAltText)}" 
+           width="400" 
+           height="560" 
+           class="profile-card-img" 
+           loading="${index < 6 ? "eager" : "lazy"}" 
+           fetchpriority="${index === 0 ? "high" : "auto"}" 
+           decoding="async" 
+           onload="this.classList.add('is-ready')" 
+           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}'; this.classList.add('is-ready');" />
            
       <div class="profile-card-gradient-overlay"></div>
 
@@ -2030,10 +2034,11 @@ targetTitle = isEN
     }, { passive: true });
   }
 
-  function hideGlobalLoader() {
-    const loader = document.getElementById("global-loader-overlay");
-    if (loader) loader.style.display = "none";
-  }
+  // เก็บฟังก์ชันเปล่าที่ปลอดภัยไว้ ป้องกันโค้ดจุดอื่นฟ้อง Error
+function hideGlobalLoader() {
+  const loader = document.getElementById("global-loader-overlay");
+  if (loader) loader.style.display = "none";
+}
 
   
 async function handleUrlRouting(isInitial = false) {
