@@ -10,7 +10,7 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 
@@ -18,10 +18,9 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
-
 /* ------------------------------------------------------------------------------
    2. DESIGN TOKENS & COLOR PALETTE
    ------------------------------------------------------------------------------ */
@@ -2274,16 +2273,7 @@ footer.fmh-footer .brand-logo-text,
   border-radius: 100px !important;
 }
 
-.lightbox-tags-row { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
-.lightbox-tag-pill {
-  background: var(--violet-light) !important;
-  border: 1px solid var(--border-glass) !important;
-  color: var(--violet-royal) !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  padding: 3.5px 10px !important;
-  border-radius: 100px !important;
-}
+
 
 .bento-stat-tile {
   background: #FAF8FE !important;

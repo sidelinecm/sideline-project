@@ -2580,9 +2580,9 @@ async function handleUrlRouting(isInitial = false) {
            ${hiddenAttr}>
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-              <img src="${storyImg}" 
+            <img src="${storyImg}" 
                    alt="${escapeHTML(cleanName)}" 
-                   loading="${idx < 4 && !isAriaHidden ? "eager" : "lazy"}" 
+                   loading="lazy" 
                    decoding="async" 
                    width="52" 
                    height="52" 
