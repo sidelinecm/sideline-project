@@ -256,20 +256,20 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
   const locationUrl = !isNation ? `/location/${provinceSlug}` : "/";
 
-  // 🟢 ค้นหาท่อนนี้ใน getDynamicIntro (ssr-province.js):
-const zoneLinks = cleanZones.slice(0, 5).map(z => {
+  const zoneLinks = cleanZones.slice(0, 5).map(z => {
   const cleanZ = sanitizeThaiText(z);
   
-  // ✅ ปรับเงื่อนไขตรงนี้: ถ้าย่านคือนิมมาน ให้ยิงไปที่ /nimman ทันทีเพื่อทำ Silo
-  let targetHref = isNation && PROV_SLUG_MAP[cleanZ] 
-    ? `/location/${PROV_SLUG_MAP[cleanZ]}` 
-    : locationUrl;
-
+  // ถ้าย่านคือนิมมาน ให้ยิงไปที่ /nimman นอกนั้นให้ทำเป็นตัวหนา <strong> ไม่ต้องทำลิงก์วนหน้าเดิม
   if (cleanZ.includes("นิมมาน")) {
-    targetHref = "/nimman";
+    return `<a href="/nimman" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
+  }
+  
+  if (isNation && PROV_SLUG_MAP[cleanZ]) {
+    return `<a href="/location/${PROV_SLUG_MAP[cleanZ]}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
   }
 
-  return `<a href="${targetHref}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
+  // ✅ หน้ารายจังหวัด ให้แสดงเป็นตัวเน้นข้อความ ไม่ใส่แท็ก <a> วนลูป
+  return `<strong>${escapeHTML(cleanZ)}</strong>`;
 });
 
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
@@ -773,7 +773,7 @@ const metaTitle = isNational
       ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
       : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
 
-    const cleanMetaDesc = stripHTML(metaDescription);
+   const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
     const mapQuery = isNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${provinceNameThai}`);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
@@ -802,7 +802,7 @@ const metaTitle = isNational
       breadcrumbItems.push({
         "@type": "ListItem",
         "position": 2,
-        "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+        "name": `ไซด์ไลน์${provinceNameThai}`,
         "item": canonicalUrl
       });
     }
@@ -868,6 +868,8 @@ const metaTitle = isNational
       "url": canonicalUrl,
       "description": cleanMetaDesc,
       "knowsAbout": [
+        isNational ? "ไซด์ไลน์ทั่วไทย" : `ไซด์ไลน์${provinceNameThai}`,
+        isNational ? "สาวรับงานทั่วไทย" : `สาวรับงาน${provinceNameThai}`,
         "Personal Lifestyle Companion",
         "Girlfriend Experience (GFE)",
         `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
@@ -906,7 +908,7 @@ const metaTitle = isNational
     }
     schemaGraph.push(businessEntity);
 
-    // 🔒 บันทึก BreadcrumbList เฉพาะหน้ารายจังหวัด (หน้าแรกไม่มี จะได้ไม่โดนตัดคะแนน)
+    // 🔒 บันทึก BreadcrumbList เฉพาะหน้ารายจังหวัด (แก้เป็น ไซด์ไลน์ ตรงกับ UI 100%)
     if (!isNational) {
       schemaGraph.push({
         "@type": "BreadcrumbList",
@@ -921,7 +923,7 @@ const metaTitle = isNational
           {
             "@type": "ListItem",
             "position": 2,
-            "name": `เพื่อนเที่ยวฟิวแฟน${provinceNameThai}`,
+            "name": `ไซด์ไลน์${provinceNameThai}`,
             "item": canonicalUrl
           }
         ]
@@ -1017,14 +1019,10 @@ const linkedIntro = introText;
 
     const exactCount = String(totalCount);
 
-    // 🟢 1. จัดการ Title & Description
-    finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
-    finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
-
     // 🟢 2. สลับ Meta Keywords ตามจังหวัดแบบ Dynamic (แก้บั๊กค้างคำว่า "ทั่วไทย")
-    const metaKeywords = isNational
-      ? "สาวรับงานทั่วไทย, ไซด์ไลน์ทั่วไทย, รับงานทั่วไทย, เด็กเอ็นทั่วไทย, เพื่อนเที่ยวทั่วไทย, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน"
-      : `สาวรับงาน${provinceNameThai}, ไซด์ไลน์${provinceNameThai}, รับงาน${provinceNameThai}, เด็กเอ็น${provinceNameThai}, เพื่อนเที่ยว${provinceNameThai}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน`;
+const metaKeywords = isNational
+  ? "สาวรับงานทั่วไทย, ไซด์ไลน์ทั่วไทย, รับงานทั่วไทย, เด็กเอ็นทั่วไทย, เพื่อนเที่ยวทั่วไทย, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน"
+  : `สาวรับงาน${provinceNameThai}, ไซด์ไลน์${provinceNameThai}, รับงาน${provinceNameThai}, เด็กเอ็น${provinceNameThai}, เพื่อนเที่ยว${provinceNameThai}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน`;
     finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="keywords" content="${escapeHTML(metaKeywords)}" />`);
 
     // 🟢 3. Open Graph & Twitter Card Titles / Descriptions
@@ -1053,28 +1051,39 @@ const linkedIntro = introText;
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-    // 🟢 7. หัวข้อ H1 & H2 ประจำหน้า
+   // 🟢 7.1 หัวข้อ H1 ประจำหน้า (เอา ไซด์ไลน์ ขึ้นก่อนเสมอ เพื่อดึงคะแนน Ranking อันดับ 1)
     const ssrH1Html = isNational 
-      ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
-      : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวรับงาน ฟิวแฟนตรงปก 100%</span>`;
+      ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
+      : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน</span>\n <span class="h1-line-2">ฟิวแฟน เด็กเอ็น ตรงปก 100%</span>`;
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
+    // 🟢 7.2 กล่อง Hero Description เฉพาะพื้นที่ (ใส่คีย์เวิร์ด ไซด์ไลน์ + โซนยอดนิยม ป้องกันข้อหา Duplicate/Boilerplate Content)
+    const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
+      ? cleanZonesList.slice(0, 4).join(" ") 
+      : "นิมมาน เจ็ดยอด สันติธรรม หลัง มช";
+
+    const dynamicHeroDesc = isNational
+      ? `<p class="hero-subtitle-p"><span class="t-chunk">ศูนย์รวมลงประกาศ</span> <span class="t-chunk"><strong>น้องๆรับงาน</strong>,</span> <span class="t-chunk"><strong>ไซด์ไลน์ทั่วไทย</strong></span> <span class="t-chunk">และเพื่อนเที่ยวสไตล์</span> <span class="t-chunk"><strong>ฟิวแฟน (GFE)</strong></span> <span class="t-chunk">โปรไฟล์จริงตรงปก</span> <span class="t-chunk">นัดพบปลอดภัย</span> <span class="t-chunk">จ่ายเงินหน้างาน</span> <span class="t-chunk"><strong>ไม่โอนมัดจำล่วงหน้าเด็ดขาด</strong></span></p>`
+      : `<p class="hero-subtitle-p"><span class="t-chunk">ศูนย์รวมลงประกาศ</span> <span class="t-chunk"><strong>ไซด์ไลน์${escapeHTML(provinceNameThai)}</strong></span> <span class="t-chunk">และ <strong>สาวรับงาน${escapeHTML(provinceNameThai)}</strong></span> <span class="t-chunk">สไตล์เพื่อนเที่ยว</span> <span class="t-chunk"><strong>ฟิวแฟน (GFE)</strong></span> <span class="t-chunk">โซนยอดนิยม ${escapeHTML(currentZonesText)}</span> <span class="t-chunk">การันตีตัวจริงตรงปก 100%</span> <span class="t-chunk">นัดพบปลอดภัย</span> <span class="t-chunk">จ่ายเงินหน้างาน</span> <span class="t-chunk"><strong>ไม่มีโอนมัดจำล่วงหน้าเด็ดขาด</strong></span></p>`;
+
+    finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
+
+    // 🟢 7.3 หัวข้อ H2 น้องๆ แนะนำ
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
-    // 🟢 วางท่อนนี้ลงไป: สั่งเปิดแสดง Breadcrumb UI บนหน้าจอเมื่อเป็นหน้ารายจังหวัด (เพื่อให้ตรงกับ Schema 100%)
+    // 🟢 7.4 Breadcrumb UI: แก้จาก "เพื่อนเที่ยวฟิวแฟน" เป็น "ไซด์ไลน์" เพื่อเก็บคะแนน Search Intent 100%
     if (!isNational) {
       finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
-      finalHtml = finalHtml.replace('<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;"></span>', `<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)}</span>`);
+      finalHtml = finalHtml.replace('<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;"></span>', `<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`);
     }
 
     // 🟢 8. ตัวเลขอัปเดตสดแบบเรียลไทม์
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
-
-    // 🟢 9. Stories Bar (บีบอัดรูปเป็น 120x120px โฟกัสใบหน้าจริง ไม่โหลดรูปใหญ่ 400px ให้เปลืองเน็ต)
+    
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p, idx, isClone = false) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
