@@ -441,41 +441,19 @@ export default async (req, context) => {
           }
         },
         {
-          "@type": ["Service", "Product"],
+          "@type": "Service",
           "@id": `${canonicalUrl}#service`,
-          "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
-          "image": heroImageLarge,
-          "description": stripHTML(naturalDesc),
+          "name": `บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน - ${stripHTML(displayName)}`,
           "provider": { "@id": `${canonicalUrl}#person` },
           "areaServed": {
             "@type": "City",
             "name": profile.location || provinceNameThai
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": String(reviewsList.length || 3),
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": reviewsList.map(r => ({
-            "@type": "Review",
-            "itemReviewed": {
-              "@type": "Product",
-              "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
-              "image": heroImageLarge
-            },
-            "author": { "@type": "Person", "name": stripHTML(r.name) },
-            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-            "reviewBody": stripHTML(r.text)
-          })),
           "offers": {
             "@type": "Offer",
             "url": canonicalUrl,
             "price": rateNumber,
             "priceCurrency": "THB",
-            "priceValidUntil": "2027-12-31",
-            "availability": "https://schema.org/InStock",
             "description": "นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างาน ไม่มีมัดจำล่วงหน้า"
           }
         },
