@@ -144,7 +144,6 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
-// 🟢 แก้ไขการเชื่อมโยง Alias ให้ถูกต้อง (แก้ Bug Syntax Error)
 PROVINCE_SEO_DATA["chiang-mai"] = PROVINCE_SEO_DATA["chiangmai"];
 PROVINCE_SEO_DATA["khonkaen"] = PROVINCE_SEO_DATA["khon-kaen"];
 
@@ -197,32 +196,27 @@ function stripHTML(str) {
   return String(str).replace(/<[^>]*>?/gm, "").trim();
 }
 
-const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
-
 function optimizeImg(imagePath, mode = "card") {
-  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
+  const DEFAULT_FALLBACK_IMG = CONFIG.DEFAULT_OG_IMAGE;
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
     return DEFAULT_FALLBACK_IMG;
   }
 
   const cleanPath = imagePath.trim();
-  
-  // 🟢 รวมศูนย์การแปลงรูปภาพเหลือเพียง 3 Preset มาตรฐาน
-  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
-  
+  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+
   if (mode === "thumb" || mode <= 150) {
-    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
-  } else if (mode === "full" || mode >= 700 || mode === "og") {
-    transform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
+    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
+  } else if (mode === "og") {
+    transform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto";
+  } else if (mode === "full" || mode >= 700) {
+    transform = "f_auto,q_auto:eco,w_800,c_limit";
   }
 
-  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ
   if (cleanPath.includes("res.cloudinary.com")) {
     const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
     if (match) {
-      const cloudName = match[1];
-      const imageFile = match[2];
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
+      return `https://res.cloudinary.com/${match[1]}/image/upload/${transform}/${match[2]}`;
     }
     return cleanPath;
   }
@@ -231,8 +225,7 @@ function optimizeImg(imagePath, mode = "card") {
     return cleanPath;
   }
 
-  let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${cleanPath.replace(/^\/+/, "")}`;
 }
 
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
