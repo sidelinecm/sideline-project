@@ -383,7 +383,7 @@ export default async (req, context) => {
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
-    const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
+   const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
     const metaDescription = `${displayName} เพื่อนเที่ยวฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
@@ -392,7 +392,6 @@ export default async (req, context) => {
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
-  
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
@@ -442,9 +441,11 @@ export default async (req, context) => {
           }
         },
         {
-          "@type": "Service",
+          "@type": ["Service", "Product"],
           "@id": `${canonicalUrl}#service`,
           "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
+          "image": heroImageLarge,
+          "description": stripHTML(naturalDesc),
           "provider": { "@id": `${canonicalUrl}#person` },
           "areaServed": {
             "@type": "City",
@@ -459,6 +460,11 @@ export default async (req, context) => {
           },
           "review": reviewsList.map(r => ({
             "@type": "Review",
+            "itemReviewed": {
+              "@type": "Product",
+              "name": `บริการสาวรับงานและเพื่อนเที่ยวฟิวแฟน - ${stripHTML(displayName)}`,
+              "image": heroImageLarge
+            },
             "author": { "@type": "Person", "name": stripHTML(r.name) },
             "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
             "reviewBody": stripHTML(r.text)
@@ -468,6 +474,8 @@ export default async (req, context) => {
             "url": canonicalUrl,
             "price": rateNumber,
             "priceCurrency": "THB",
+            "priceValidUntil": "2027-12-31",
+            "availability": "https://schema.org/InStock",
             "description": "นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างาน ไม่มีมัดจำล่วงหน้า"
           }
         },
