@@ -1019,10 +1019,16 @@ const linkedIntro = introText;
 
     const exactCount = String(totalCount);
 
+
+// 🟢 1. จัดการ Title & Description (วางแทรกตรงนี้เลยครับ!)
+    finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
+    finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
+    
     // 🟢 2. สลับ Meta Keywords ตามจังหวัดแบบ Dynamic (แก้บั๊กค้างคำว่า "ทั่วไทย")
 const metaKeywords = isNational
   ? "สาวรับงานทั่วไทย, ไซด์ไลน์ทั่วไทย, รับงานทั่วไทย, เด็กเอ็นทั่วไทย, เพื่อนเที่ยวทั่วไทย, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน"
   : `สาวรับงาน${provinceNameThai}, ไซด์ไลน์${provinceNameThai}, รับงาน${provinceNameThai}, เด็กเอ็น${provinceNameThai}, เพื่อนเที่ยว${provinceNameThai}, ฟิวแฟน, รับงานไม่มัดจำ, จ่ายหน้างาน`;
+  
     finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="keywords" content="${escapeHTML(metaKeywords)}" />`);
 
     // 🟢 3. Open Graph & Twitter Card Titles / Descriptions
