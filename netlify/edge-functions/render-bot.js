@@ -329,28 +329,22 @@ export default async (req, context) => {
     const provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase();
     const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
 
-    // 🟢 ดึงข้อมูลน้องๆ ที่แนะนำในโซนเดียวกัน และปิดบล็อก if อย่างสมบูรณ์
-    if (provinceKey) {
-      const { data: allActive } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("active", true)
-        .neq("id", profile.id)
-        .limit(20);
+   // 🟢 แก้เป็นแบบนี้: ถ้าในจังหวัดมีน้องน้อยกว่า 3 คน ให้ดึงเท่าที่มี ไม่ดึงข้ามจังหวัดมาเปลี่ยนชื่อ Alt มั่ว
+if (provinceKey) {
+  const { data: allActive } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("active", true)
+    .neq("id", profile.id)
+    .limit(30);
 
-      if (allActive && Array.isArray(allActive)) {
-        relatedProfiles = allActive.filter(p => {
-          const pKey = (p.provinceKey || p.province_key || p.province_slug || "").toLowerCase().replace(/[-_]/g, "");
-          return pKey === cleanProvinceKey;
-        }).slice(0, 6);
-
-        if (relatedProfiles.length < 3) {
-          const others = allActive.filter(p => !relatedProfiles.some(r => r.id === p.id));
-          relatedProfiles = [...relatedProfiles, ...others].slice(0, 6);
-        }
-      }
-    }
-
+  if (allActive && Array.isArray(allActive)) {
+    relatedProfiles = allActive.filter(p => {
+      const pKey = (p.provinceKey || p.province_key || p.province_slug || "").toLowerCase().replace(/[-_]/g, "");
+      return pKey === cleanProvinceKey;
+    }).slice(0, 6);
+  }
+}
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
@@ -523,6 +517,7 @@ export default async (req, context) => {
     <meta property="og:type" content="website">
     <meta property="og:title" content="${escapeHTML(pageTitle)}">
     <meta property="og:description" content="${escapeHTML(metaDescription)}">
+    <meta property="og:url" content="${canonicalUrl}">
     
     <meta property="og:image" content="${ogImageSocial}">
     <meta property="og:image:secure_url" content="${ogImageSocial}">
@@ -713,10 +708,9 @@ export default async (req, context) => {
                         ${relatedProfiles.map(p => {
                           const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
                           const relImg = p.imagePath || p.image_url || "";
-                          const actualProv = p.provinceThai || PROVINCE_NAME_MAP[(p.provinceKey || "").toLowerCase()] || provinceNameThai;
                           return `
                             <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                                <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(actualProv)} ไซด์ไลน์${escapeHTML(actualProv)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
+                                <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
                                 <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
                             </a>
                           `;
