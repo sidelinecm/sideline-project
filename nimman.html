@@ -1,226 +1,454 @@
 <!DOCTYPE html>
-<html lang="th" class="light-theme">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#F6F3FA">
-  <meta name="color-scheme" content="light">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KISS MODEL ✦ Celestial Visual Experience</title>
+  <style>
+    :root {
+      /* Palette: Celestial Dream (Default แบบที่ 3) */
+      --bg-gradient: radial-gradient(circle at center, #15112e 0%, #0a0718 60%, #030209 100%);
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.18);
+      --halo-color: radial-gradient(circle, rgba(244, 114, 182, 0.28) 0%, rgba(167, 139, 250, 0.2) 45%, transparent 75%);
+      --text-gradient: linear-gradient(110deg, #ffffff 0%, #fed7aa 25%, #f472b6 50%, #c084fc 75%, #ffffff 100%);
+      --text-glow: drop-shadow(0 0 15px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 35px rgba(244, 114, 182, 0.5));
+      --accent-color: #f472b6;
+      --star-color: #ffffff;
+      --line-color: linear-gradient(90deg, transparent, rgba(244, 114, 182, 0.8), rgba(255, 255, 255, 0.95), rgba(192, 132, 252, 0.8), transparent);
+    }
 
-  <title>เพื่อนเที่ยวนิมมานเชียงใหม่ สาวรับงานนิมมาน ฟิวแฟนตรงปก 100% | First Model Hub</title>
-  <meta name="description" content="ศูนย์รวมผู้ดูแลระดับพรีเมียมและเพื่อนเที่ยวนิมมาน เชียงใหม่ สไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมถนนนิมมานเหมินท์ วันนิมมาน เมญ่า" />
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://firstmodelhub.com/nimman">
+    /* ธีม Cyber Hologram */
+    body.theme-cyber {
+      --bg-gradient: radial-gradient(circle at center, #07172c 0%, #030a17 60%, #01040a 100%);
+      --halo-color: radial-gradient(circle, rgba(0, 242, 254, 0.3) 0%, rgba(255, 0, 128, 0.25) 50%, transparent 75%);
+      --text-gradient: linear-gradient(110deg, #00f2fe 0%, #4facfe 30%, #ff007f 70%, #00f2fe 100%);
+      --text-glow: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)) drop-shadow(0 0 35px rgba(255, 0, 128, 0.6));
+      --accent-color: #00f2fe;
+      --star-color: #ff007f;
+      --line-color: linear-gradient(90deg, transparent, #00f2fe, #fff, #ff007f, transparent);
+    }
 
-  <meta property="og:locale" content="th_TH">
-  <meta property="og:site_name" content="First Model Hub">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="เพื่อนเที่ยวนิมมานเชียงใหม่ สาวรับงานนิมมาน ฟิวแฟนตรงปก 100% | First Model Hub">
-  <meta property="og:description" content="ศูนย์รวมผู้ดูแลระดับพรีเมียมและเพื่อนเที่ยวนิมมาน เชียงใหม่ สไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
-  <meta property="og:url" content="https://firstmodelhub.com/nimman">
-  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
+    /* ธีม Royal Gold */
+    body.theme-gold {
+      --bg-gradient: radial-gradient(circle at center, #241c0e 0%, #120e06 60%, #050401 100%);
+      --halo-color: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, rgba(217, 119, 6, 0.2) 50%, transparent 75%);
+      --text-gradient: linear-gradient(110deg, #fffbeb 0%, #fde68a 25%, #f59e0b 50%, #d97706 75%, #fffbeb 100%);
+      --text-glow: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 35px rgba(217, 119, 6, 0.6));
+      --accent-color: #fbbf24;
+      --star-color: #fef08a;
+      --line-color: linear-gradient(90deg, transparent, #d97706, #fef08a, #fbbf24, transparent);
+    }
 
-  <link rel="shortcut icon" href="/images/favicon.ico">
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
-  
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-gradient);
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      perspective: 1200px;
+      transition: background 0.8s ease;
+    }
+
+    /* พื้นหลัง Canvas ละอองดาว */
+    #space-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* แถบสลับธีม 3 สไตล์ */
+    .theme-controller {
+      position: absolute;
+      top: 25px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 16px;
+      border-radius: 40px;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .theme-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 0.9rem;
+      padding: 8px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-btn:hover, .theme-btn.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    /* การ์ดแก้วและมิติการเอียง (3D Tilt Container) */
+    .card-scene {
+      position: relative;
+      z-index: 1;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    .celestial-card {
+      position: relative;
+      padding: 60px 80px;
+      background: var(--card-bg);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-radius: 36px;
+      border: 1px solid var(--card-border);
+      box-shadow: 
+        0 30px 80px rgba(0, 0, 0, 0.8),
+        inset 0 0 30px rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+      user-select: none;
+    }
+
+    /* แสง Ambient Halo ข้างหลังการ์ด */
+    .ambient-halo {
+      position: absolute;
+      width: 110%;
+      height: 110%;
+      top: -5%;
+      left: -5%;
+      background: var(--halo-color);
+      filter: blur(50px);
+      z-index: -1;
+      border-radius: 50%;
+      animation: pulseHalo 4s ease-in-out infinite alternate;
+      transition: background 0.8s ease;
+    }
+
+    /* แถวข้อความหลัก */
+    .hero-title-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* โบว์ ୨୧ หมุนและลอยดุ๊กดิ๊ก */
+    .bow-icon {
+      font-size: 2.2rem;
+      color: var(--accent-color);
+      display: inline-block;
+      animation: bowSway 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px var(--accent-color));
+      transition: color 0.5s ease;
+    }
+
+    .bow-icon.right {
+      animation-delay: 1.5s;
+    }
+
+    .cluster-sparks {
+      font-size: 1.5rem;
+      color: var(--star-color);
+      animation: sparkleFade 2.2s infinite ease-in-out alternate;
+      filter: drop-shadow(0 0 10px #fff);
+    }
+
+    /* ข้อความหลัก K𝕀𝕊𝕊 𝕄𝕆𝔻𝔼𝕃 */
+    .main-text {
+      font-size: 3.6rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      background: var(--text-gradient);
+      background-size: 250% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: var(--text-glow);
+      animation: shimmerFlow 5s linear infinite;
+      transition: filter 0.5s ease;
+    }
+
+    /* ดาว ✦ ݁˖⋆ */
+    .cosmic-tail {
+      font-size: 2.2rem;
+      color: #fff;
+      display: inline-block;
+      animation: starOrbit 3s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 15px var(--accent-color));
+    }
+
+    /* เส้นแบ่งดวงดาว ───────── ⋆⋅☆⋅⋆ ───────── */
+    .celestial-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .divider-beam {
+      flex: 1;
+      height: 2px;
+      background: var(--line-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .divider-beam::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      animation: beamSweep 3s infinite ease-in-out;
+    }
+
+    .star-emblem {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.3rem;
+      color: var(--star-color);
+    }
+
+    .center-star {
+      font-size: 1.8rem;
+      color: #fff;
+      display: inline-block;
+      animation: spinCenter 8s linear infinite;
+      filter: drop-shadow(0 0 15px var(--accent-color));
+    }
+
+    .sub-tagline {
+      font-size: 0.85rem;
+      letter-spacing: 6px;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    /* Animations Keyframes */
+    @keyframes shimmerFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 250% 50%; }
+    }
+
+    @keyframes bowSway {
+      0%, 100% { transform: translateY(0px) rotate(-8deg) scale(1); }
+      50% { transform: translateY(-8px) rotate(8deg) scale(1.1); }
+    }
+
+    @keyframes starOrbit {
+      0% { transform: scale(0.95) rotate(-5deg); }
+      100% { transform: scale(1.15) rotate(15deg); }
+    }
+
+    @keyframes sparkleFade {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 16px #fff); }
+    }
+
+    @keyframes spinCenter {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseHalo {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      100% { transform: scale(1.15); opacity: 1; }
+    }
+
+    @keyframes beamSweep {
+      0% { left: -100%; }
+      50%, 100% { left: 100%; }
+    }
+
+    @media (max-width: 768px) {
+      .celestial-card { padding: 40px 25px; }
+      .main-text { font-size: 2.1rem; letter-spacing: 2px; }
+      .bow-icon { font-size: 1.6rem; }
+      .cosmic-tail { font-size: 1.6rem; }
+      .theme-controller { top: 15px; }
+    }
+  </style>
 </head>
+<body>
 
-<body class="fmh-app-page">
-
-<!-- 📱 FLOATING APP DOCK -->
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <a href="/" class="dock-item">
-    <i class="fas fa-home"></i>
-    <span>หน้าแรก</span>
-  </a>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-search"></i>
-    <span>ตัวกรอง</span>
-  </a>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-user-friends"></i>
-    <span>รวมน้องๆ</span>
-  </a>
-  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
-    <i class="fab fa-line"></i>
-    <span>จองคิว</span>
-  </a>
-</nav>
-
-<!-- 🧭 HEADER -->
-<header id="page-header" role="banner">
-  <div class="header-logo-container">
-    <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
-      <span class="brand-logo-text">
-        FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-      </span>
-    </a>
+  <!-- แถบเลือกสลับธีม -->
+  <div class="theme-controller">
+    <button class="theme-btn active" onclick="setTheme('celestial', this)">✦ แบบที่ 3 Celestial</button>
+    <button class="theme-btn" onclick="setTheme('cyber', this)">⚡ Cyber Y2K</button>
+    <button class="theme-btn" onclick="setTheme('gold', this)">👑 Royal Gold</button>
   </div>
 
-  <div class="nav-controls">
-    <nav class="desktop-nav" aria-label="เมนูหลักบนคอมพิวเตอร์">
-      <a href="/profiles">รวมโปรไฟล์ VIP</a>
-      <a href="/locations">พื้นที่ให้บริการ</a>
-      <a href="/nimman" style="color: #7C3AED !important; font-weight: 800;">โซนนิมมาน</a>
-      <a href="/blog">บทความ & รีวิว</a>
-      <a href="/faq">คำถามที่พบบ่อย</a>
-      <a href="/about">เกี่ยวกับเรา</a>
-    </nav>
+  <!-- Canvas สำหรับเอฟเฟกต์ดาวตก & ประกายจักรวาล -->
+  <canvas id="space-canvas"></canvas>
 
-    <a href="/index-en" class="lang-micro-toggle" aria-label="Switch to English">
-      <span style="font-size: 13px; line-height: 1;">🇬🇧</span> EN
-    </a>
+  <!-- 3D Floating Scene -->
+  <div class="card-scene" id="cardScene">
+    <div class="ambient-halo"></div>
 
-    <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางสำหรับมือถือ">
-      <i class="fas fa-bars"></i>
-    </button>
-  </div>
-</header>
-
-<!-- 📱 MOBILE SIDEBAR -->
-<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
-  <div class="sidebar-header-div">
-    <span class="sidebar-title">Navigation Hub</span>
-    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  
-  <div class="sidebar-links-wrapper">
-    <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
-    <a href="/profiles"><i class="fas fa-user-check icon-green"></i> น้องๆ VIP แนะนำ</a>
-    <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
-    <a href="/nimman" class="active"><i class="fas fa-gem icon-pink"></i> โซนนิมมาน เชียงใหม่</a>
-    <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
-    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
-    <a href="/faq"><i class="fas fa-question-circle icon-red"></i> คำถามที่พบบ่อย (FAQ)</a>
-    <a href="/privacy-policy"><i class="fas fa-user-lock icon-gray"></i> นโยบายความเป็นส่วนตัว</a>
-    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple"></i> English Version (EN)</a>
-  </div>
-
-  <div class="sidebar-footer-cta">
-    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
-      <i class="fab fa-line"></i> แอดไลน์จองคิว VIP
-    </a>
-  </div>
-</aside>
-
-<div id="sidebar-overlay" class="drawer-backdrop"></div>
-
-<!-- 🌟 MAIN CONTENT -->
-<main id="main-content" tabindex="-1">
-  <div class="container">
-
-    <section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
-      <div class="hero-top-capsule">
-        <span class="capsule-tag">ZONE VIP</span>
-        <span class="capsule-trust">พิกัดย่านนิมมานเหมินท์ เชียงใหม่</span>
+    <div class="celestial-card">
+      <!-- ข้อความแถวบน พร้อมโบว์และกลุ่มดาว -->
+      <div class="hero-title-group">
+        <span class="cluster-sparks">⋆ ˚｡⋆</span>
+        <span class="bow-icon">୨୧</span>
+        
+        <h1 class="main-text">K𝕀𝕊𝕊 𝕄𝕆𝔻𝔼𝕃</h1>
+        
+        <span class="cosmic-tail">✦ ݁˖⋆</span>
+        <span class="bow-icon right">୨୧</span>
+        <span class="cluster-sparks">⋆｡˚ ⋆</span>
       </div>
 
-      <div class="hero-headings-block">
-        <span class="hero-subheadline">✨ เพื่อนเที่ยวนิมมาน • สาวรับงานนิมมาน เชียงใหม่</span>
-        <h1 id="hero-h1" class="seo-h1-title">
-          <span class="h1-line-1">เพื่อนเที่ยวนิมมาน เชียงใหม่</span>
-          <span class="h1-line-2">ฟิวแฟน ตรงปก จ่ายหน้างาน 100%</span>
-        </h1>
-      </div>
-      
-      <div class="hero-safety-pill">
-        <span class="safety-badge-icon"><i class="fas fa-shield-alt"></i> นัดเจอจ่ายหน้างาน</span>
-        <span class="safety-badge-text">ปลอดภัยเจอตัวจริงค่อยจ่าย <strong>ไม่โอนมัดจำ</strong></span>
-      </div>
-      
-      <div class="hero-description-inset">
-        <p class="hero-subtitle-p">
-          สารบัญรวมผู้ดูแลและ <strong>เพื่อนเที่ยวย่านนิมมาน</strong> สไตล์ฟิวแฟนพรีเมียม (GFE) ยืนยันตัวตนจริง <strong>ตรงปก 100%</strong> ครอบคลุมพิกัด <strong>One Nimman, ห้างเมญ่า (MAYA), Think Park และโรงแรมชั้นนำทั่วนิมมานเหมินท์</strong> สะดวกรวดเร็วและเป็นส่วนตัว
-        </p>
+      <!-- เส้นคั่นดวงดาวสุดวิจิตร ───────── ⋆⋅☆⋅⋆ ───────── -->
+      <div class="celestial-divider">
+        <div class="divider-beam"></div>
+        <div class="star-emblem">
+          <span>⋆</span>
+          <span>⋅</span>
+          <span class="center-star">☆</span>
+          <span>⋅</span>
+          <span>⋆</span>
+        </div>
+        <div class="divider-beam"></div>
       </div>
 
-      <div style="display: flex; justify-content: center; margin-top: 14px; width: 100%;">
-        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn" style="max-width: 300px;">
-          <i class="fab fa-line"></i> ทักไลน์เช็กคิวน้องๆ โซนนิมมาน
-        </a>
-      </div>
-    </section>
-
-    <!-- 🗺️ แผนที่พิกัดนิมมาน -->
-    <section id="map-section" style="max-width: 850px; margin: 20px auto 0 auto; border-radius: 18px; overflow: hidden; border: 1px solid var(--border-card); box-shadow: var(--shadow-card-pop);">
-      <figure id="map-container" style="width: 100%; height: 220px; margin: 0;">
-        <iframe
-          id="google-map"
-          src="https://maps.google.com/maps?q=Nimmanhaemin%20Chiang%20Mai&t=&z=14&ie=UTF8&iwloc=&output=embed"
-          title="แผนที่ขอบเขตบริการย่านนิมมานเหมินท์ เชียงใหม่"
-          style="border:0; width:100%; height:100%;"
-          loading="lazy"
-          allowfullscreen
-        ></iframe>
-      </figure>
-    </section>
-
-  </div>
-</main>
-
-<!-- 🦶 FOOTER -->
-<footer role="contentinfo" class="fmh-footer">
-  <div class="container">
-    <div class="footer-top-grid">
-      <div class="footer-brand-col">
-        <span class="brand-logo-text">
-          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-        </span>
-        <p class="footer-brand-desc">
-          <strong>FirstModelHub Nimman</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ในนิมมาน เชียงใหม่ รูปถ่ายตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ
-        </p>
-      </div>
-
-      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
-        <h3 class="footer-heading">เมนูหลัก</h3>
-        <ul class="footer-nav-links">
-          <li><a href="/">หน้าแรก</a></li>
-          <li><a href="/profiles">รวมโปรไฟล์</a></li>
-          <li><a href="/locations">พื้นที่บริการ</a></li>
-          <li><a href="/nimman" style="color: var(--primary-purple);">โซนนิมมาน</a></li>
-          <li><a href="/blog">บทความ</a></li>
-          <li><a href="/faq">คำถามที่พบบ่อย</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <div class="footer-bottom-bar">
-      <p id="footer-copyright">© 2026 FirstModelHub Nimman Chiang Mai. All Rights Reserved.</p>
-      <div class="footer-legal-links">
-        <a href="/privacy-policy">Privacy Policy</a>
-        <a href="/about">Terms & Safe Protocol</a>
-      </div>
+      <div class="sub-tagline">✧ E T H E R E A L &nbsp; E X P E R I E N C E ✧</div>
     </div>
   </div>
-</footer>
 
-<script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const sidebarMenu = document.getElementById('sidebar-menu');
-  const closeMenuBtn = document.getElementById('close-menu-btn');
-  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  <script>
+    // ระบบสลับธีม
+    function setTheme(theme, btn) {
+      document.body.className = '';
+      if (theme !== 'celestial') {
+        document.body.classList.add(`theme-${theme}`);
+      }
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
 
-  function openMenu() {
-    sidebarMenu?.classList.add('active');
-    sidebarOverlay?.classList.add('active');
-  }
-  function closeMenu() {
-    sidebarMenu?.classList.remove('active');
-    sidebarOverlay?.classList.remove('active');
-  }
+    // ระบบ 3D Tilt Card ตามการเคลื่อนที่ของเมาส์
+    const cardScene = document.getElementById('cardScene');
+    document.addEventListener('mousemove', (e) => {
+      const { innerWidth, innerHeight } = window;
+      const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
+      const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
 
-  if (menuToggle) menuToggle.addEventListener('click', openMenu);
-  if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
-  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMenu);
-</script>
+      const rotateX = -y * 14;
+      const rotateY = x * 14;
+
+      cardScene.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    // Reset ตำแหน่งเมื่อเมาส์ออก
+    document.addEventListener('mouseleave', () => {
+      cardScene.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+
+    // Canvas สร้างดวงดาวระยิบระยับ + ฝุ่นละออง + ดาวตก
+    const canvas = document.getElementById('space-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let stars = [];
+    let shootingStars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Star {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.alpha = Math.random();
+        this.speed = Math.random() * 0.02 + 0.005;
+      }
+      update() {
+        this.alpha += this.speed;
+        if (this.alpha > 1 || this.alpha < 0.2) this.speed = -this.speed;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(this.alpha)})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    class ShootingStar {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * (canvas.height * 0.5);
+        this.len = Math.random() * 80 + 40;
+        this.speed = Math.random() * 8 + 6;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.active = false;
+        setTimeout(() => { this.active = true; }, Math.random() * 4000);
+      }
+      update() {
+        if (!this.active) return;
+        this.x -= this.speed;
+        this.y += this.speed * 0.6;
+        if (this.x < -100 || this.y > canvas.height + 100) {
+          this.reset();
+        }
+      }
+      draw() {
+        if (!this.active) return;
+        const grad = ctx.createLinearGradient(this.x, this.y, this.x + this.len, this.y - this.len * 0.6);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = this.size;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.len, this.y - this.len * 0.6);
+        ctx.stroke();
+      }
+    }
+
+    // สร้างดวงดาว 90 ดวง และดาวตก 2 สาย
+    for (let i = 0; i < 90; i++) stars.push(new Star());
+    for (let i = 0; i < 2; i++) shootingStars.push(new ShootingStar());
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(star => { star.update(); star.draw(); });
+      shootingStars.forEach(sStar => { sStar.update(); sStar.draw(); });
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
 </body>
 </html>
