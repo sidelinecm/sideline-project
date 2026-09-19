@@ -1056,10 +1056,10 @@ if (heroH1) {
       <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
     `;
   } else {
-   const line1 = isAllOrNational 
-  ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
-  : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
-    // ใหม่ (ถ้าเป็นหน้าแรกให้ใช้คำว่าเด็กเอ็น ถ้าเป็นหน้ารายจังหวัดให้ใช้สาวรับงาน ตรงกับ SSR 100%)
+   // 🟢 แก้คำว่า "สาวรับงาน • ไซด์ไลน์ทั่วไทย" ให้เป็น:
+const line1 = isAllOrNational 
+  ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
+  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
 const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" : "สาวรับงาน ฟิวแฟนตรงปก 100%";
     heroH1.innerHTML = `
       <span class="h1-line-1">${line1}</span>
