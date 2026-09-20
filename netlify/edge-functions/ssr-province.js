@@ -1115,9 +1115,7 @@ const metaKeywords = isNational
       `;
     };
 
-    const primaryStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
-    const cloneStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
-    const ssrStoriesHtml = primaryStoriesHtml + cloneStoriesHtml;
+    const ssrStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
 
     if (ssrStoriesHtml) {
       finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
@@ -1360,8 +1358,8 @@ if (isNational) {
   
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
       "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",

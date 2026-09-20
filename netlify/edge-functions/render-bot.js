@@ -747,10 +747,10 @@ if (provinceKey) {
 </body>
 </html>`;
 
-    const responseHeaders = {
+   const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
       "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
