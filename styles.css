@@ -2,19 +2,18 @@
 
 
 /* ==========================================================================
-   💎 RESPONSIVE FULLSCREEN LIGHTBOX (ปุ่ม LINE ล็อกติดล่างถาวร + กันบาร์ iOS)
+   💎 MASTER COMPLETE LIGHTBOX, CONTRAST & STORY MARQUEE (เวอร์ชันสมบูรณ์แบบ 100%)
    ========================================================================== */
 
-/* 1. ล็อกหน้าเว็บหลักไม่ให้เลื่อนซ้อน */
+/* 1. ล็อกพื้นหลังไม่ให้เลื่อนซ้อน (❌ เอา touch-action: none ออก เพื่อให้เลื่อนหน้าต่างได้ลื่นไหล) */
 body.lightbox-open {
     overflow: hidden !important;
     position: fixed !important;
     width: 100% !important;
     height: 100% !important;
-    touch-action: none !important;
 }
 
-/* 2. Lightbox เต็มขอบจอทุกทิศทาง */
+/* 2. Lightbox ตัวครอบเต็มขอบจอมือถือ ไร้ขอบดำลอย */
 #lightbox {
     position: fixed !important;
     inset: 0 !important;
@@ -29,6 +28,7 @@ body.lightbox-open {
     background: rgba(15, 10, 25, 0.88) !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
+    touch-action: pan-y !important;
 }
 
 #lightbox.active {
@@ -47,6 +47,7 @@ body.lightbox-open {
     background: #FFFFFF !important;
     border-radius: 0 !important;
     overflow: hidden !important;
+    touch-action: pan-y !important;
 }
 
 @media (min-width: 900px) {
@@ -94,7 +95,7 @@ body.lightbox-open {
     display: none !important; 
 }
 
-/* 5. สัดส่วนรูปภาพ Hero Image (ยาวสวย 68dvh + หัวไม่ขาด) */
+/* 5. สัดส่วนรูปภาพ Hero Image (ยาวสะใจ 68dvh + หัวไม่ขาด + รูดบนรูปก็เลื่อนจอได้) */
 .lightbox-image-column {
     display: block !important;
     width: 100% !important;
@@ -111,6 +112,7 @@ body.lightbox-open {
     max-height: 72dvh !important;
     background: #0B0716 !important;
     overflow: hidden !important;
+    touch-action: pan-y !important; /* 👈 รูดนิ้วบนรูปภาพแล้วจอเลื่อนลงได้ */
 }
 
 #lightboxHeroImage {
@@ -119,6 +121,7 @@ body.lightbox-open {
     height: 100% !important;
     object-fit: cover !important;
     object-position: top center !important; /* โฟกัสหัวและใบหน้าชิดบนเสมอ */
+    touch-action: pan-y !important;
 }
 
 .lightbox-hero-container::before {
@@ -139,17 +142,21 @@ body.lightbox-open {
     z-index: 20 !important;
 }
 
-/* 6. ตัวเลื่อนเนื้อหา (Scroll Body) */
+/* 6. ⭐ ตัวเลื่อนเนื้อหา (Scroll Body ปลดล็อกระบบรูดจอ 100%) */
 #lightboxScrollBody, .lightbox-scroll-body {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
+    flex: 1 1 0% !important;
+    height: 100% !important;
+    min-height: 0 !important;       /* 👈 คำสั่งนี้ช่วยให้สร้าง Scrollbar สำเร็จ */
+    max-height: 100% !important;
+    overflow-y: auto !important;     /* 👈 เลื่อนขึ้น-ลงได้ */
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;  /* 👈 อนุญาตให้สัมผัสเลื่อนแกน Y ได้ */
     display: block !important;
     width: 100% !important;
     background: #FFFFFF !important;
+    position: relative !important;
 }
 
 .lightbox-grid-layout {
@@ -163,23 +170,21 @@ body.lightbox-open {
     flex-direction: column !important;
     gap: 14px !important;
     width: 100% !important;
-    padding: 18px 16px 10px 16px !important;
-    /* ⭐ สำคัญ: เว้นที่ด้านล่างไว้ 110px เพื่อให้เลื่อนดู FAQ จนจบได้โดยไม่โดนปุ่ม LINE บัง */
-    padding-bottom: calc(110px + env(safe-area-inset-bottom, 20px)) !important;
+    padding: 18px 16px calc(110px + env(safe-area-inset-bottom, 20px)) 16px !important;
     background: #FFFFFF !important;
     overflow: visible !important;
+    touch-action: pan-y !important;
 }
 
-/* 7. ⭐ จุดสำคัญ: ล็อกปุ่ม LINE ให้อยู่ติดล่างสุดถาวร (Fixed Bottom Dock) */
+/* 7. ⭐ ปุ่ม LINE ล็อกติดล่างสุดถาวร (Fixed Bottom Dock) */
 #line-btn-sticky-wrapper {
-    position: fixed !important; /* เปลี่ยนเป็น Fixed ตรึงขอบล่างถาวร ไม่เลื่อนตาม */
+    position: fixed !important;
     bottom: 0 !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 100% !important;
     max-width: 100% !important;
-    z-index: 1000 !important; /* ลอยอยู่เหนือเนื้อหาทุกอย่าง */
-    /* เผื่อระยะขีด Home Bar ของ iPhone ด้านล่าง */
+    z-index: 1000 !important;
     padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 16px)) 16px !important;
     background: linear-gradient(to top, rgba(255, 255, 255, 1) 75%, rgba(255, 255, 255, 0.85) 90%, rgba(255, 255, 255, 0)) !important;
     backdrop-filter: blur(8px) !important;
@@ -191,7 +196,7 @@ body.lightbox-open {
 
 @media (min-width: 900px) {
     #line-btn-sticky-wrapper {
-        max-width: 480px !important; /* บนจอคอม ให้กว้างเท่ากล่องการ์ด */
+        max-width: 480px !important;
         border-radius: 0 0 28px 28px !important;
     }
 }
@@ -204,7 +209,7 @@ body.lightbox-open {
     width: 100% !important;
     max-width: 440px !important;
     height: 48px !important;
-    background: #06C755 !important; /* สีเขียวทางการของ LINE Official */
+    background: #06C755 !important; /* สีเขียวทางการ LINE Official แท้ */
     border-radius: 100px !important;
     color: #FFFFFF !important;
     font-size: 15px !important;
@@ -222,7 +227,6 @@ body.lightbox-open {
     transform: scale(0.97) !important;
 }
 
-/* ป้ายคำว่า "จ่ายหน้างาน" ด้านในปุ่ม LINE */
 .lightbox-line-cta span:last-child {
     background: rgba(0, 0, 0, 0.15) !important;
     color: #FFFFFF !important;
@@ -232,7 +236,7 @@ body.lightbox-open {
     border-radius: 100px !important;
 }
 
-/* 8. Bento Grid และกล่องข้อมูล */
+/* 8. Bento Grid และกล่องข้อมูลในหน้าดูโปรไฟล์ */
 #lightboxDetailsCompact .bento-stat-tile,
 #lightboxRatesGrid > div,
 #lightboxFaqList > div, 
@@ -241,6 +245,7 @@ body.lightbox-open {
     border: 1px solid rgba(124, 58, 237, 0.1) !important;
     border-radius: 16px !important;
 }
+
 .lightbox-tag-pill {
     background: rgba(124, 58, 237, 0.08) !important;
     border: 1px solid rgba(124, 58, 237, 0.15) !important;
@@ -253,26 +258,26 @@ body.lightbox-open {
    ♿ FIX ACCESSIBILITY & COLOR CONTRAST (ผ่านเกณฑ์ WCAG 100%)
    ========================================================================== */
 
-/* 1. ป้าย 'แนะนำ' (ปรับตัวหนังสือให้เป็นชมพูทับทิมเข้ม เพื่อตัดกับพื้นหลังสีชมพูอ่อน) */
+/* 1. ป้าย 'แนะนำ' (ชมพูทับทิมเข้ม คอนทราสต์ตัดกับพื้นหลังชัดเจน) */
 .section-tag-mini {
-    color: #881337 !important; /* Rose เข้ม คอนทราสต์สูงเกิน 7:1 (ผ่านระดับ AAA) */
+    color: #881337 !important;
     background: #FFE4E6 !important;
     font-weight: 800 !important;
 }
 
-/* 2. การ์ด 'ฟิวแฟน (GFE)' ปรับหัวข้อและข้อความให้อ่านง่าย */
+/* 2. การ์ด 'ฟิวแฟน (GFE)' */
 div[style*="rgb(255, 240, 242)"] h4,
 div[style*="255, 240, 242"] h4 {
-    color: #9F1239 !important; /* ชมพูเข้ม คมชัด ไม่กลืนไปกับพื้นหลัง */
+    color: #9F1239 !important;
 }
 div[style*="rgb(255, 240, 242)"] {
-    color: #334155 !important; /* สีเนื้อหาคำอธิบายปรับเป็น Slate เข้ม */
+    color: #334155 !important;
 }
 
-/* 3. การ์ด 'วัยใส / นักศึกษา' ปรับหัวข้อสีเขียว */
+/* 3. การ์ด 'วัยใส / นักศึกษา' */
 div[style*="rgb(240, 253, 244)"] h4,
 div[style*="240, 253, 244"] h4 {
-    color: #14532D !important; /* เขียวเข้ม Forest Green คอนทราสต์ตัดชัดเจน */
+    color: #14532D !important;
 }
 div[style*="rgb(240, 253, 244)"] {
     color: #334155 !important;
@@ -284,7 +289,7 @@ div[style*="rgb(240, 253, 244)"] {
 
 .stories-scroll-container {
     width: 100% !important;
-    overflow: hidden !important; /* ซ่อนขอบส่วนเกิน เพื่อให้วิ่งวนลูปเนียนๆ */
+    overflow: hidden !important;
     position: relative !important;
 }
 
@@ -293,18 +298,16 @@ div[style*="rgb(240, 253, 244)"] {
     gap: 14px !important;
     width: max-content !important;
     will-change: transform !important;
-    /* สั่งให้วิ่งด้วยความเร็ว 28 วินาที วิ่งเรื่อยๆ ไม่สะดุด */
     animation: smoothStoryMarquee 28s linear infinite !important;
 }
 
-/* ⭐ สำคัญ: เมื่อเอานิ้วแตะค้าง หรือเอาเมาส์ชี้ ให้สตอรี่ 'หยุดนิ่ง' ชั่วคราว เพื่อให้กดดูโปรไฟล์ได้ง่ายๆ */
+/* แตะหรือชี้เมาส์แล้วหยุดชั่วคราว */
 .stories-scroll-container:hover .stories-track-inner,
 .stories-track-inner:hover,
 .stories-track-inner:active {
     animation-play-state: paused !important;
 }
 
-/* แอนิเมชันเลื่อนไปทางซ้าย 50% แล้ววนลูปใหม่แบบไร้รอยต่อ */
 @keyframes smoothStoryMarquee {
     0% {
         transform: translate3d(0, 0, 0);
