@@ -254,27 +254,35 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   };
 
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
-  const locationUrl = !isNation ? `/location/${provinceSlug}` : "/";
 
-  const zoneLinks = cleanZones.slice(0, 5).map(z => {
-  const cleanZ = sanitizeThaiText(z);
-  
-  // ถ้าย่านคือนิมมาน ให้ยิงไปที่ /nimman นอกนั้นให้ทำเป็นตัวหนา <strong> ไม่ต้องทำลิงก์วนหน้าเดิม
-  if (cleanZ.includes("นิมมาน")) {
-    return `<a href="/nimman" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
-  }
-  
-  if (isNation && PROV_SLUG_MAP[cleanZ]) {
-    return `<a href="/location/${PROV_SLUG_MAP[cleanZ]}" class="kw-zone">${escapeHTML(cleanZ)}</a>`;
-  }
+  // 🟢 แสดงผลโซนให้เด่น สวยงาม และแท็ก HTML สะอาด 100%
+  const zoneLinks = cleanZones.slice(0, 6).map(z => {
+    const cleanZ = sanitizeThaiText(z);
+    if (!cleanZ) return "";
 
-  // ✅ หน้ารายจังหวัด ให้แสดงเป็นตัวเน้นข้อความ ไม่ใส่แท็ก <a> วนลูป
-  return `<strong>${escapeHTML(cleanZ)}</strong>`;
-});
+    // 1. ถ้าย่านเป็น "นิมมาน" -> ให้คลิกไปหน้า /nimman ได้
+    if (cleanZ.includes("นิมมาน")) {
+      return `<a href="/nimman" class="kw-zone" title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
+    }
+
+    // 2. ถ้าเป็นหน้าแรก (ทั่วไทย) -> ให้คลิกไปหน้ารายจังหวัดนั้นๆ ได้
+    if (isNation && PROV_SLUG_MAP[cleanZ]) {
+      return `<a href="/location/${PROV_SLUG_MAP[cleanZ]}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+    }
+
+    // 3. หน้ารายจังหวัด -> แสดงเป็นป้ายไฮไลท์สีชมพูพรีเมียม สวยเด่น ชัดเจน ไม่คลิกวนลูป
+    return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
+  }).filter(Boolean);
 
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
+  // 💎 ฐานข้อมูลเนื้อหา SEO เฉพาะตัว ครบถ้วนทุก 10 จังหวัด + หน้าแรก
   const LOCAL_CONTEXT = {
+    national: {
+      headline: `ศูนย์รวมลงประกาศไซด์ไลน์และสาวรับงานทั่วไทย อันดับ 1`,
+      intro: `FirstModelHub คือแพลตฟอร์มศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน (GFE) ระดับพรีเมียมที่ครอบคลุมมากที่สุดในประเทศไทย คัดสรรโปรไฟล์จริง การันตีตัวจริงตรงปก 100% ดูแลเอาใจใส่ สุภาพ ไม่เร่งเวลา ปลอดภัยด้วยนโยบายนัดพบจ่ายหน้างาน ปราศจากความเสี่ยงจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`,
+      convenience: `ครอบคลุมโรงแรม รีสอร์ต และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} สแตนด์บายพร้อมเดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็วและเป็นส่วนตัวสูงสุด`
+    },
     chiangmai: {
       headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
       intro: `สำหรับผู้ที่เดินทางมาพักผ่อน ท่องเที่ยว หรือทำงานในเชียงใหม่ FirstModelHub คัดสรรเพื่อนเที่ยวระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience) ที่เน้นความสุภาพ อัธยาศัยดี และไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว`,
@@ -295,20 +303,47 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
       intro: `ยกระดับวันหยุดบนเกาะภูเก็ตด้วยเพื่อนเที่ยวระดับพรีเมียม สื่อสารคล่องแคล่ว บุคลิกสง่างาม พร้อมเป็นเพื่อนร่วมทริป ดินเนอร์ชมพระอาทิตย์ตก นั่งเรือยอร์ช หรือดูแลอย่างอบอุ่นในพูลวิลล่าส่วนตัว`,
       convenience: `บริการทั่วทั้งเกาะภูเก็ต${zoneText} เข้าพบที่รีสอร์ตหรือวิลล่าส่วนตัวตามเวลานัดหมายอย่างตรงเวลา`
     },
-    "khon-kaen": {
+    khonkaen: {
       headline: `เพื่อนเที่ยวฟิวแฟน ขอนแก่น คัดสรรโปรไฟล์ตรงปก 100%`,
       intro: `ผ่อนคลายในเมืองศูนย์กลางภาคอีสานกับน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ขี้อ้อน เทคแคร์ดี เอาใจใส่ดุจคนรู้ใจ ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว`,
       convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยและโรงแรมใจกลางขอนแก่น${zoneText} เดินทางสะดวก รวดเร็วทันใจ`
+    },
+    chiangrai: {
+      headline: `เพื่อนเที่ยวเชียงราย สาวสวยฟิวแฟน อบอุ่น ตรงปก ไม่มัดจำ`,
+      intro: `สัมผัสบรรยากาศเมืองเหนือสุดโรแมนติกกับน้องๆ วัยใสน่ารัก นักศึกษา และสาวสวยสไตล์ฟิวแฟนในเชียงราย พร้อมเป็นเพื่อนร่วมทาง ทานอาหาร นั่งคาเฟ่ หรือดูแลผ่อนคลายในที่พักส่วนตัวอย่างสุภาพและให้เกียรติ`,
+      convenience: `ครอบคลุมทั้งโซนมหาวิทยาลัยและโรงแรมชั้นนำ${zoneText} นัดหมายง่าย น้องๆ เดินทางถึงที่พักรวดเร็ว ปลอดภัย ไร้กังวล`
+    },
+    udonthani: {
+      headline: `สาวรับงานและเพื่อนเที่ยวอุดรธานี บริการระดับพรีเมียม ปลอดภัย 100%`,
+      intro: `เปิดประสบการณ์พักผ่อนอย่างอบอุ่นในอุดรธานีกับสาวสวยสไตล์ฟิวแฟน เอาใจเก่ง คุยสนุก ยิ้มแย้มสดใส ให้ความรู้สึกเป็นกันเองเสมือนคนรัก พร้อมสร้างความประทับใจในทุกช่วงเวลา`,
+      convenience: `สแตนด์บายครอบคลุมย่านเศรษฐกิจและโรงแรมใจกลางเมือง${zoneText} นัดพบตัวจริง ตรวจสอบความตรงปกหน้างานแล้วค่อยจ่ายเงิน`
+    },
+    lampang: {
+      headline: `เพื่อนเที่ยวลำปาง สไตล์ฟิวแฟน เรียบร้อย น่ารัก เอาใจเก่ง`,
+      intro: `เติมเต็มช่วงเวลาพักผ่อนในเมืองรถม้ากับน้องๆ สาวสวยบุคลิกดี วัยใส มารยาทเรียบร้อย อัธยาศัยดี พร้อมเป็นเพื่อนคลายเหงา นั่งคุย ทานข้าว หรือพักผ่อนส่วนตัวโดยไม่เร่งรีบ`,
+      convenience: `รองรับโรงแรมและที่พักชั้นนำทั่วเมืองลำปาง${zoneText} นัดหมายสะดวก เป็นส่วนตัว และปลอดภัยสูงสุด`
+    },
+    lamphun: {
+      headline: `เพื่อนเที่ยวลำพูน สาวรับงานฟิวแฟน ดูแลใกล้ชิด เดินทางไว`,
+      intro: `คลายความเหนื่อยล้าในจังหวัดลำพูนด้วยบริการเพื่อนเที่ยวที่เน้นความจริงใจ สุภาพ และตรงปก 100% ตอบโจทย์ทั้งผู้ที่มาทำงานในนิคมอุตสาหกรรมหรือท่องเที่ยวพักผ่อน`,
+      convenience: `ครอบคลุมทั้งโซนนิคมอุตสาหกรรมและตัวเมือง${zoneText} สแตนด์บายพร้อมดูแลถึงที่พักอย่างรวดเร็วและมิดชิด`
+    },
+    phitsanulok: {
+      headline: `เพื่อนเที่ยวพิษณุโลก สเปควัยใส นักศึกษา ฟิวแฟนตรงปก`,
+      intro: `ศูนย์รวมน้องๆ สาวสวยวัยใสในพิษณุโลก บุคลิกน่ารัก ชวนคุยเก่ง เทคแคร์เอาใจใส่เป็นธรรมชาติ ดูแลดุจแฟนคนพิเศษ ให้ความรู้สึกผ่อนคลายและประทับใจในทุกการนัดหมาย`,
+      convenience: `ครอบคลุมโซนรอบมหาวิทยาลัยและโรงแรมใจกลางเมือง${zoneText} นัดหมายง่าย ปลอดภัย จ่ายหน้างาน ไม่ต้องโอนมัดจำ`
     }
   };
 
-  LOCAL_CONTEXT.khonkaen = LOCAL_CONTEXT["khon-kaen"];
+  // แมปคีย์สำรองเพื่อความปลอดภัย 100%
+  LOCAL_CONTEXT["khon-kaen"] = LOCAL_CONTEXT.khonkaen;
+  LOCAL_CONTEXT["chiang-mai"] = LOCAL_CONTEXT.chiangmai;
 
-  const current = LOCAL_CONTEXT[cleanSlug] || LOCAL_CONTEXT[provinceSlug] || {
+  const current = LOCAL_CONTEXT[cleanSlug] || LOCAL_CONTEXT[provinceSlug] || (isNation ? LOCAL_CONTEXT.national : {
     headline: `ศูนย์รวมเพื่อนเที่ยวและผู้ดูแลสไตล์ฟิวแฟน ${provinceName}`,
     intro: `FirstModelHub คัดสรรเพื่อนเที่ยวคุณภาพที่เน้นความตรงปก 100% ดูแลด้วยความจริงใจ สุภาพ และให้เกียรติผู้ใช้บริการ เพื่อให้ทุกช่วงเวลาการพักผ่อนใน ${provinceName} เป็นไปอย่างผ่อนคลายและประทับใจ`,
     convenience: `ครอบคลุมโรงแรมและที่พักสำคัญในพื้นที่ ${provinceName}${zoneText} เดินทางนัดพบได้อย่างสะดวกและเป็นส่วนตัว`
-  };
+  });
 
   return `
     <div style="margin-bottom: 16px;">
@@ -999,8 +1034,7 @@ const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
 
-const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
-const linkedIntro = smartLinkify(introText, 4, seoData.zones, provinceSlug);
+const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
 
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {

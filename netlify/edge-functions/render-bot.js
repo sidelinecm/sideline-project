@@ -548,6 +548,8 @@ if (provinceKey) {
     <noscript>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     </noscript>
+  
+<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 </head>
