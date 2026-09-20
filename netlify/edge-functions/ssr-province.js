@@ -998,8 +998,9 @@ const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
+
 const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
-const linkedIntro = introText;
+const linkedIntro = smartLinkify(introText, 4, seoData.zones, provinceSlug);
 
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
