@@ -792,7 +792,7 @@ export default async (req, context) => {
       });
     }
 
-   const totalCount = profilesList.length;
+    const totalCount = profilesList.length;
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     const canonicalUrl = isNational ? `${primaryDomain}/` : `${primaryDomain}/location/${provinceSlug}`;
@@ -800,14 +800,13 @@ export default async (req, context) => {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
     // ✅ ของใหม่ (ดึงคำว่า "ไซด์ไลน์" ขึ้นตัวที่ 0 และตัดคำขยะวงเล็บออก)
-    const metaTitle = isNational 
-      ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
-      : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
+const metaTitle = isNational 
+  ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
 
-    const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";
     const metaDescription = isNational
-      ? "รวม 150+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
-      : `${countText}เพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+      ? "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า"
+      : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
 
    const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
