@@ -864,13 +864,10 @@ async function getSupabaseClient() {
         });
       }
 
-      if (currentCriteria.avail && currentCriteria.avail !== "all") {
-        results = results.filter(p => p.availability === currentCriteria.avail);
-      }
-
-      if (currentCriteria.featured) {
-        results = results.filter(p => p.isfeatured === true);
-      }
+    
+if (currentCriteria.avail && currentCriteria.avail !== "all") {
+  results = results.filter(p => (p.availability || "").includes(currentCriteria.avail));
+}
 
       if (!currentCriteria.text) {
         results.sort((a, b) => {
