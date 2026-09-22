@@ -595,14 +595,19 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
-
-   if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
+    if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
       return new Response(JSON.stringify({
-        "$schema": "https://json.schemastore.org/ai-catalog.json",
-        "name": CONFIG.BRAND_NAME,
-        "description": "ศูนย์รวมสาวรับงานและเพื่อนเที่ยวฟิวแฟนทั่วไทย",
-        "url": CONFIG.PRIMARY_DOMAIN,
-        "services": []
+        "specVersion": "1.0",
+        "host": {
+          "displayName": "FirstModelHub",
+          "url": "https://firstmodelhub.com"
+        },
+        "entries": [
+          {
+            "type": "documentation",
+            "url": "https://firstmodelhub.com/llms.txt"
+          }
+        ]
       }), {
         status: 200,
         headers: {
@@ -1168,7 +1173,10 @@ const metaKeywords = isNational
       `;
     };
 
-    const ssrStoriesHtml = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
+    // ✅ สร้างทั้งการ์ดจริง และการ์ดโคลน เพื่อให้เลื่อนหมุนวน Infinite Loop ราบรื่น 60 FPS
+const primaryStories = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
+const cloneStories = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
+const ssrStoriesHtml = primaryStories + cloneStories;
 
     if (ssrStoriesHtml) {
       finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${ssrStoriesHtml}</div>`);
