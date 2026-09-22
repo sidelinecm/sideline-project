@@ -595,6 +595,24 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
+
+   if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
+      return new Response(JSON.stringify({
+        "$schema": "https://json.schemastore.org/ai-catalog.json",
+        "name": CONFIG.BRAND_NAME,
+        "description": "ศูนย์รวมสาวรับงานและเพื่อนเที่ยวฟิวแฟนทั่วไทย",
+        "url": CONFIG.PRIMARY_DOMAIN,
+        "services": []
+      }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "public, max-age=86400",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+    }
+    
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
       const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
       if (secret === CONFIG.PURGE_SECRET) {
