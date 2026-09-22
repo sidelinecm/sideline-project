@@ -944,20 +944,20 @@ async function getSupabaseClient() {
   if (domCache.featuredSection) {
     const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/") && (!appState.activePillTag || appState.activePillTag === "all");
     
-    // 🟢 เช็คว่าถ้า SSR ใส่การ์ดมาแล้ว ให้ข้ามเลย ไม่ต้องเรนเดอร์ซ้ำ
     const alreadyHasCards = domCache.featuredContainer && domCache.featuredContainer.children.length > 0;
+    
+    // 🟢 ถ้ามีรูปชุด Featured อยู่แล้ว ให้แสดงไว้ ไม่ต้องสั่ง return เพื่อให้โค้ดทำงานต่อจนสุด
     if (isHomeView && alreadyHasCards && !isFilteredOrLocationView) {
       domCache.featuredSection.classList.remove("hidden");
-      return;
-    }
-
-    const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
-    const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
-    const hasFeatured = featuredList.length > 0;
-    
-    domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
-    if (isHomeView && hasFeatured && domCache.featuredContainer) {
-      await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+    } else {
+      const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
+      const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
+      const hasFeatured = featuredList.length > 0;
+      
+      domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
+      if (isHomeView && hasFeatured && domCache.featuredContainer) {
+        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+      }
     }
   }
     

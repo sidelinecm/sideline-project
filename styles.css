@@ -1558,3 +1558,82 @@ nav.floating-app-dock a.dock-item.dock-item-line {
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
 }
+
+/* ==========================================================================
+   1. แก้ปัญหาคอนทราสต์สีไม่ผ่านเกณฑ์ (Color Contrast WCAG AA)
+   ========================================================================== */
+
+/* ป้ายแคปซูล LIFESTYLE & VIBES */
+.bento-tag-pill[style*="#E11D48"],
+.bento-tag-pill[style*="#e11d48"] {
+  color: #9f1239 !important;
+  background: rgba(159, 18, 57, 0.12) !important;
+  border-color: rgba(159, 18, 57, 0.35) !important;
+}
+
+/* กล่อง ฟิวแฟน (GFE): เปลี่ยนเป็น Rose 800 เข้มคมชัด */
+h4[style*="#E11D48"],
+h4[style*="#e11d48"] {
+  color: #9f1239 !important;
+}
+
+/* กล่อง วัยใส / นักศึกษา: เปลี่ยนเป็น Green 800 */
+h4[style*="#16A34A"],
+h4[style*="#16a34a"] {
+  color: #166534 !important;
+}
+
+/* กล่อง เด็กเอ็นปาร์ตี้ (EN) และ VIP: ปรับโทนเข้มกันเหนียว */
+h4[style*="#2563EB"],
+h4[style*="#2563eb"] {
+  color: #1e40af !important;
+}
+h4[style*="#9333EA"],
+h4[style*="#9333ea"] {
+  color: #6b21a8 !important;
+}
+
+/* ปุ่ม "จองคิว" LINE ด้านล่าง: ปรับพื้นหลังเขียวเข้มขึ้นเพื่อให้อ่านตัวหนังสือขาวได้ชัด */
+.dock-item-line,
+a.dock-item-line {
+  background-color: #047835 !important;
+}
+.dock-item-line span,
+.dock-item-line i {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+
+/* ==========================================================================
+   2. แก้ปัญหารูปกระตุก ค้าง ช็อค และช่องโหว่สีม่วง (Smooth 60 FPS)
+   ========================================================================== */
+
+/* ป้องกันเบราว์เซอร์คำนวณขนาดการ์ดซ้ำไปซ้ำมาระหว่างเลื่อนหน้าจอ */
+.profile-card-new-container,
+.profile-card-new,
+.vip-card-item {
+  contain: layout paint;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ล็อกสัดส่วนรูปภาพให้ตายตัว พร้อมใส่ Shimmer Skeleton ระหว่างรอภาพถอดรหัส */
+.profile-card-img {
+  aspect-ratio: 400 / 560 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  background: #1c152a linear-gradient(110deg, #1c152a 8%, #2d2244 18%, #1c152a 33%) !important;
+  background-size: 200% 100% !important;
+  animation: cardImgShimmer 1.5s linear infinite !important;
+}
+
+@keyframes cardImgShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
