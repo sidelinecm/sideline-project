@@ -595,19 +595,11 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
-    if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
+  
+ if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
       return new Response(JSON.stringify({
         "specVersion": "1.0",
-        "host": {
-          "displayName": "FirstModelHub",
-          "url": "https://firstmodelhub.com"
-        },
-        "entries": [
-          {
-            "type": "documentation",
-            "url": "https://firstmodelhub.com/llms.txt"
-          }
-        ]
+        "entries": []
       }), {
         status: 200,
         headers: {
