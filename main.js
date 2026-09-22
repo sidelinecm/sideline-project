@@ -510,15 +510,23 @@ async function getSupabaseClient() {
   }
 
   function formatLuxuryRate(rate) {
-    if (!rate) return "1.5k";
-    const num = parseInt(String(rate).replace(/\D/g, ""), 10);
-    if (isNaN(num) || num <= 0) return "1.5k";
-    if (num >= 1000) {
-      const kVal = num / 1000;
-      return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
-    }
-    return String(num);
+  if (!rate) return "1.5k";
+  const str = String(rate).trim().toLowerCase();
+  if (str.includes("k")) {
+    const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
+    return isNaN(floatVal) ? "1.5k" : `${floatVal}k`;
   }
+  const cleanIntStr = str.split(".")[0].replace(/\D/g, "");
+  let num = parseInt(cleanIntStr, 10);
+  if (isNaN(num) || num <= 0) return "1.5k";
+  if (num < 10) num = num * 1000;
+  if (num < 500) num = num * 10;
+  if (num >= 1000) {
+    const kVal = num / 1000;
+    return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
+  }
+  return String(num);
+}
 
  function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
@@ -1043,7 +1051,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-   // ✅ โค้ดแก้ไขใน main.js ให้ตรงกับ SSR
+  // ✅ โค้ดแก้ไขใน main.js ให้ตรงกับ SSR
 const heroH1 = document.getElementById("hero-h1");
 if (heroH1) {
   if (isEN) {
@@ -1053,11 +1061,14 @@ if (heroH1) {
       <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
     `;
   } else {
-   // 🟢 แก้คำว่า "สาวรับงาน • ไซด์ไลน์ทั่วไทย" ให้เป็น:
-const line1 = isAllOrNational 
-  ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
-  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
-const line2 = isAllOrNational ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" : "สาวรับงาน ฟิวแฟนตรงปก 100%";
+    const line1 = isAllOrNational 
+      ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
+      : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
+    const line2 = isAllOrNational 
+      ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" 
+      : "ฟิวแฟน เด็กเอ็น ตรงปก 100%";
+    
+    // 👈 เติม 4 บรรทัดนี้ลงไปครับ
     heroH1.innerHTML = `
       <span class="h1-line-1">${line1}</span>
       <span class="h1-line-2">${line2}</span>
@@ -1931,21 +1942,22 @@ targetTitle = isEN
           : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provName} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
-      } else {
-        targetUrl = isEN ? "/index-en" : "/";
-        
-        targetTitle = isEN 
-          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-          : "เพื่อนเที่ยว & ไซด์ไลน์ทั่วไทย สาวสวยฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
+     } else {
+  targetUrl = isEN ? "/index-en" : "/";
+  
+  // 🔒 คืนค่า Title ตัวแชมป์ที่ติดอันดับ 1 ให้ตรงกับ SSR 100%
+  targetTitle = isEN 
+    ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+    : "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
 
-        targetDesc = isEN
-          ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
-          : "ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า";
+  targetDesc = isEN
+    ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
+    : "รวม 150+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า";
 
-        if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-      }
+  if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+}
 
-      // ⚡ ใช้ replaceState เพื่อแก้ปัญหาปุ่ม Back วนลูป
+    
       history.replaceState(null, "", targetUrl);
 
       document.title = targetTitle;
