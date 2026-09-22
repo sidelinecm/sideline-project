@@ -839,24 +839,7 @@ export default async (req, context) => {
       ? heroImage 
       : `${primaryDomain}${heroImage.startsWith("/") ? "" : "/"}${heroImage}`;
 
-    // 🟢 1. เตรียม Breadcrumb รายการ (มีให้ครบทั้งหน้าแรกและหน้ารายจังหวัด ป้องกัน Broken Node #breadcrumb)
-    const breadcrumbItems = [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "หน้าแรก",
-        "item": `${primaryDomain}/`
-      }
-    ];
-
-    if (!isNational) {
-      breadcrumbItems.push({
-        "@type": "ListItem",
-        "position": 2,
-        "name": `ไซด์ไลน์${provinceNameThai}`,
-        "item": canonicalUrl
-      });
-    }
+    
 
     // 🟢 SCHEMA GRAPH ฉบับสมบูรณ์ 100% (แยกหน้าแรก กับ หน้ารายจังหวัด ถูกต้องตามกฎ Google)
     const schemaGraph = [
@@ -1146,10 +1129,7 @@ const metaKeywords = isNational
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(p.slug || p.id);
       
-      let sImg = optimizeImg(p.imagePath || p.image_url || "", 400);
-      if (sImg.includes("res.cloudinary.com/dyynjlbuj/image/upload/")) {
-        sImg = sImg.replace(/\/upload\/[^/]+\//, "/upload/f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face/");
-      }
+     const sImg = optimizeImg(p.imagePath || p.image_url || "", "thumb");
 
       const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
       return `
@@ -1359,9 +1339,9 @@ if (isNational) {
         height: p.height || p.profile_height || "",
         weight: p.weight || p.profile_weight || "",
         stats: p.stats || p.proportion || "",
-        description: p.description || "",
-        slogan: p.slogan || p.quote || p.tagline || "",
-        quote: p.quote || p.slogan || "",
+        description: sanitizeThaiText(p.description || ""), // 🔒 ฟอกคำสแลงล่อแหลมออก สะอาด 100%
+        slogan: sanitizeThaiText(p.slogan || p.quote || p.tagline || ""), // 🔒 ปลอดภัยจาก SafeSearch
+        quote: sanitizeThaiText(p.quote || p.slogan || ""), // 🔒 ปลอดภัยจาก SafeSearch
         line_id: p.line_id || p.lineId || "",
         availability: p.availability || "รับงาน",
         isfeatured: p.isfeatured === true || p.isFeatured === true,
