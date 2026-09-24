@@ -58,20 +58,10 @@ async function getSupabaseClient() {
     chiangmai: "Chiang Mai",
     chiangrai: "Chiang Rai",
     lampang: "Lampang",
-    lamphun: "Lamphun",
-    phitsanulok: "Phitsanulok",
-    bangkok: "Bangkok",
-    chonburi: "Chonburi",
     "khon-kaen": "Khon Kaen",
     khonkaen: "Khon Kaen",
     phuket: "Phuket",
     udonthani: "Udon Thani",
-    "phra-nakhon-si-ayutthaya": "Ayutthaya",
-    ayutthaya: "Ayutthaya",
-    "surat-thani": "Surat Thani",
-    suratthani: "Surat Thani",
-    "ubon-ratchathani": "Ubon Ratchathani",
-    ubon: "Ubon Ratchathani",
     national: "Nationwide (Thailand)"
   };
 
@@ -159,106 +149,6 @@ async function getSupabaseClient() {
         { q: "นัดพบสาวรับงานลำปาง ในตัวเมืองหรือแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมืองลำปาง, ย่านสวนดอก, ถนนรอบเวียง และละแวก ม.ราชภัฏลำปาง เดินทางสะดวกและเป็นส่วนตัวครับ" },
         { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการ" },
         { q: "มีน้องเด็กเอ็น (EN) ไปนั่งทานข้าวเป็นเพื่อนไหม?", a: "มีครับ บริการเพื่อนเที่ยว ทานข้าว ดูหนัง (GFE) เป็นบริการหลักของเรา น้องๆ สุภาพและวางตัวดีมากครับ" }
-      ]
-    },
-
-    lamphun: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ไซด์ไลน์ลำพูน สาวรับงานลำพูน บริการด่วน ไม่มัดจำ</h3>
-          <p style="margin-bottom: 8px;">คลายความเหนื่อยล้าจากการทำงานด้วยบริการ <strong>สาวรับงานลำพูน</strong> และ <strong>เพื่อนเที่ยวลำพูน</strong> ที่ดูแลคุณแบบเหนือระดับ เรามีน้องๆ ครอบคลุมทั้งโซนนิคมอุตสาหกรรมและตัวเมือง</p>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ความลับลูกค้าคือหัวใจสำคัญ</h3>
-          <p>เราเน้นความปลอดภัยและรักษาความลับลูกค้าเป็นที่หนึ่ง ไม่มีการเก็บมัดจำ นัดเจอน้อง ตรวจสอบความตรงปก แล้วจ่ายหน้างานเท่านั้น ให้คุณผ่อนคลายได้อย่างเต็มที่</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถแจ้งพิกัดโรงแรมหรือที่พักให้น้องเดินทางไปหาได้เลยครับ" },
-        { q: "บริการฟิวแฟน (GFE) คืออะไร?", a: "คือบริการดูแลเทคแคร์เสมือนแฟนตัวจริง กอด จูบ ลูบ คลำได้ มีความสุภาพ อ่อนโยน และไม่เร่งเวลาลูกค้าครับ" },
-        { q: "จ่ายเงินช่องทางไหนได้บ้าง?", a: "สามารถชำระด้วยเงินสดหรือโอนเข้าบัญชีน้องได้โดยตรง 'ที่หน้างานเมื่อเจอตัวจริงแล้วเท่านั้น' ครับ" }
-      ]
-    },
-
-    phitsanulok: {
-      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานพิษณุโลก ไซด์ไลน์พรีเมียม สไตล์ฟิวแฟน</h3>
-          <p style="margin-bottom: 8px;">รวมโปรไฟล์ <strong>สาวรับงานพิษณุโลก</strong> และ <strong>เด็กเอ็นพิษณุโลก</strong> คุณภาพเยี่ยม การันตีตรงปก 100% เหมาะสำหรับท่านที่ต้องการความผ่อนคลาย เพื่อนเที่ยว (GFE)</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในพิษณุโลก</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนรอบ มน. (ม.นเรศวร) - ท่าโพธิ์:</strong> พิกัดยอดฮิต รวมน้องนักศึกษา น่ารัก อัธยาศัยดี เอาใจเก่ง</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - เซ็นทรัล - ท็อปแลนด์:</strong> นัดเจอง่าย เดินทางสะดวก เหมาะสำหรับลูกค้าที่พักโรงแรมในเมือง</span></li>
-          </ul>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน., ท่าโพธิ์ และใจกลางเมือง ลูกค้าสามารถทักไลน์นัดหมายแจ้งพิกัดโรงแรมได้เลยครับ" },
-        { q: "บริการตรงปก 100% จริงไหม?", a: "จริงครับ โปรไฟล์ผ่านการตรวจสอบ (Verified) ถ้ารูปไม่ตรงปก ลูกค้ามีสิทธิ์ยกเลิกหน้างานได้ทันทีโดยไม่เสียเงินครับ" },
-        { q: "มีน้องเด็กเอ็น (EN) สายปาร์ตี้ ชงเหล้า ไหม?", a: "มีบริการเด็กเอ็นเตอร์เทน (EN) ไปดูแลชงเหล้าที่ร้านอาหาร ผับ หรือปาร์ตี้ส่วนตัวในบ้านพักครับ" }
-      ]
-    },
-
-    bangkok: {
-      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวม ไซด์ไลน์กรุงเทพ สาวรับงาน กทม. ระดับ VIP</h3>
-          <p style="margin-bottom: 8px;">สัมผัสประสบการณ์ระดับไฮเอนด์กับ <strong>ไซด์ไลน์กรุงเทพ</strong> และ <strong>เด็กเอ็น กทม. (EN VIP)</strong> เราคัดสรรสาวสวย หุ่นนางแบบ พริตตี้MC และนักศึกษา ที่พร้อมมอบบริการสไตล์ฟิวแฟน (GFE) ดูแลอย่างเหนือระดับ ตอบโจทย์นักธุรกิจและผู้ที่ต้องการความผ่อนคลายอย่างเป็นส่วนตัว</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 ครอบคลุมโซนธุรกิจและแหล่งบันเทิง</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>สุขุมวิท - ทองหล่อ - เอกมัย:</strong> แหล่งรวมสาวสวยระดับพรีเมียม สื่อสารภาษาอังกฤษได้ (สายฝอ) รองรับลูกค้าต่างชาติ</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>รัชดา - ห้วยขวาง - ลาดพร้าว:</strong> พิกัดยอดฮิต เดินทางง่าย บริการ Outcall ส่งตรงถึงคอนโดและโรงแรมหรู</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>สาทร - สีลม - บางนา:</strong> ตอบโจทย์หนุ่มออฟฟิศ นักธุรกิจ นัดพบหลังเลิกงาน</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">จ่ายหน้างาน ปลอดภัย 100%</h3>
-          <p>หลีกเลี่ยงมิจฉาชีพในวงการด้วยระบบ ไม่เก็บเงินมัดจำล่วงหน้า นัดหมายและชำระค่าบริการหน้างานเมื่อพบตัวจริง บริการครอบคลุมทั้ง Short Time, Long Time และงานปาร์ตี้ EN</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ ทั้งสุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา นัดพบในโรงแรมหรือคอนโดส่วนตัวได้เลยครับ" },
-        { q: "มีน้องที่พูดภาษาอังกฤษได้ (English Speaking) ไหม?", a: "มีครับ โซนสุขุมวิท ทองหล่อ มีน้องๆ พรีเมียมที่สื่อสารภาษาอังกฤษได้ดีเยี่ยม เหมาะสำหรับดูแลลูกค้าชาวต่างชาติ (Expat/Tourist)" },
-        { q: "มีบริการรับงานนอกสถานที่ (Outcall) หรือไม่?", a: "บริการส่วนใหญ่ของกรุงเทพฯ เป็นรูปแบบ Outcall คือน้องๆ จะเดินทางไปหาลูกค้าที่พิกัดโรงแรมหรือห้องพักของลูกค้าครับ" },
-        { q: "เด็กเอ็น VIP สำหรับดินเนอร์หรู มีบริการไหม?", a: "มีครับ บริการเพื่อนเที่ยวทานข้าว ดินเนอร์ ออกงานสังคม (Companion) น้องๆ โปรไฟล์ระดับพริตตี้ วางตัวดี สวยงามครับ" }
-      ]
-    },
-
-    chonburi: {
-      zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานพัทยา ไซด์ไลน์ชลบุรี ฟิวแฟนริมทะเล</h3>
-          <p style="margin-bottom: 8px;">มาเที่ยวทะเลทั้งที ต้องมีคนรู้ใจคอยดูแล! ค้นหา <strong>สาวรับงานพัทยา</strong>, <strong>ไซด์ไลน์บางแสน</strong> และ <strong>เด็กเอ็นชลบุรี</strong> น้องๆ น่ารัก สดใส พร้อมไปปาร์ตี้พูลวิลล่า นั่งชิลริมหาด หรือดูแลส่วนตัวที่โรงแรมสไตล์ฟิวแฟน (GFE)</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในชลบุรีและพัทยา</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนพัทยา - จอมเทียน:</strong> รวมสาวสวยสายฝอ สายปาร์ตี้ EN VIP รองรับพูลวิลล่าและโรงแรมทั่วพัทยา</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนบางแสน - ศรีราชา:</strong> น้องนักศึกษามหาวิทยาลัย น่ารัก สไตล์เจแปนนิส เอาใจเก่ง</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">รับงานพูลวิลล่า ปาร์ตี้ส่วนตัว ไม่มีมัดจำ</h3>
-          <p>บริการหลากหลาย ทั้งรับงานชั่วคราว (Short Time) หรือเหมาค้างคืน (Overnight) จ่ายหน้างาน 100% ปลอดภัย ไร้กังวลเรื่องโอนเงินก่อน</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนเพื่อความปลอดภัย 100% ครับ" },
-        { q: "รับงานปาร์ตี้ พูลวิลล่า ในพัทยาไหม?", a: "รับครับ มีบริการเด็กเอ็น (EN) สำหรับปาร์ตี้สระว่ายน้ำ พูลวิลล่า ชงเหล้า เอ็นเตอร์เทน สร้างบรรยากาศสนุกสนาน" },
-        { q: "ศรีราชา มีน้องสไตล์ไหนบ้าง?", a: "โซนศรีราชา บางแสน มีน้องๆ สไตล์วัยใส นักศึกษา ผิวขาว น่ารัก เอาใจเก่ง (GFE) สแตนด์บายเยอะมากครับ" },
-        { q: "หาเด็กเอ็นที่สามารถพูดภาษาอังกฤษได้ มีไหม?", a: "โซนพัทยาและจอมเทียน มีน้องๆ พรีเมียมที่สื่อสารภาษาอังกฤษได้ดี พร้อมดูแลลูกค้าชาวต่างชาติครับ" }
       ]
     },
 
@@ -374,11 +264,11 @@ async function getSupabaseClient() {
     },
 
     national: {
-      zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "เชียงราย"],
+      zones: ["ทั้งหมด", "เชียงใหม่", "ขอนแก่น", "เชียงราย", "อุดรธานี", "ลำปาง", "ภูเก็ต"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวมสาวรับงาน ไซด์ไลน์ ทั่วไทย อันดับ 1</h3>
-          <p style="margin-bottom: 8px;">First Model Hub คือแพลตฟอร์มที่รวบรวม <strong>สาวรับงานทั่วไทย</strong>, <strong>ไซด์ไลน์ทั่วไทย</strong> และ <strong>เด็กเอ็น (EN VIP)</strong> ครอบคลุม 77 จังหวัด เราคัดสรรเฉพาะน้องๆ โปรไฟล์พรีเมียม วัยใส นักศึกษา และสาวสวยหุ่นนางแบบ ที่พร้อมให้บริการสไตล์ฟิวแฟน (GFE) ดูแลดุจคนรัก</p>
+          <p style="margin-bottom: 8px;">First Model Hub คือแพลตฟอร์มที่รวบรวม <strong>สาวรับงานทั่วไทย</strong>, <strong>ไซด์ไลน์ทั่วไทย</strong> และ <strong>เด็กเอ็น (EN VIP)</strong> ครอบคลุมพื้นที่บริการยอดนิยม เราคัดสรรเฉพาะน้องๆ โปรไฟล์พรีเมียม วัยใส นักศึกษา และสาวสวยหุ่นนางแบบ ที่พร้อมให้บริการสไตล์ฟิวแฟน (GFE) ดูแลดุจคนรัก</p>
         </div>
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ นโยบายความปลอดภัยสูงสุด (Zero-Deposit)</h3>
@@ -404,7 +294,6 @@ async function getSupabaseClient() {
     }
   };
 
-  
   const REVIEW_POOL = [
     { name: "คุณชลสิทธิ์", text: "ตรงเวลามากครับ น้องน่ารัก อัธยาศัยดี พูดจาสุภาพ ดูแลสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ" },
     { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" },
@@ -425,7 +314,6 @@ async function getSupabaseClient() {
     { name: "คุณเต้", text: "นัดหมายปลอดภัย ไม่มีความเสี่ยงทางการเงิน น้องน่ารัก มารยาทดี สมราคาครับ" },
     { name: "คุณเจ", text: "บริการด้วยความจริงใจ ฟีลแฟนอบอุ่น ดูแลเอาใจใส่เป็นธรรมชาติ ไม่ผิดหวังครับ" }
   ];
-
  
 
   const appState = {
@@ -1950,10 +1838,14 @@ targetTitle = isEN
     ? "Thailand Escorts & VIP Companions | FirstModelHub" 
     : "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
 
+  // 🟢 ดึงตัวเลขจริง ณ วินาทีนั้นแบบ Dynamic 100%
+  const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
+  const liveProvinces = appState.provincesMap?.size || 6;
+
   targetDesc = isEN
     ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
-    : "รวม 150+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุมทุกจังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า";
-
+    : `รวม ${liveCount}+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุม ${liveProvinces} จังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า`;
+ 
   if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 }
 
