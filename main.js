@@ -560,7 +560,9 @@ async function getSupabaseClient() {
 
     const availabilityStatus = raw.availability || raw.status || (isEN ? "Available" : "รับงาน");
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
-    const lineId = (raw.line_id || raw.lineId || raw.line || "").toString().replace(/^@/, "").trim();
+    
+    // 🟢 ดึงค่าไลน์ทุกรูปแบบจากหลังบ้าน (รองรับทั้งลิงก์ https://lin.ee/..., https://line.me/... และ ID ไลน์ปกติ)
+    const rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
 
     return {
       ...raw,
@@ -589,7 +591,8 @@ async function getSupabaseClient() {
       isVerified: raw.verified === true || raw.isVerified === true || raw.is_verified === true,
       hasVideo: raw.has_video === true || raw.hasVideo === true || raw.hasVideoClip === true,
       isfeatured: raw.isfeatured === true || raw.is_featured === true || raw.isFeatured === true,
-      lineId,
+      lineId: rawLineVal,   // 🟢 ส่งค่าไลน์เดิมไป
+      line_id: rawLineVal,  // 🟢 เผื่อไว้ทั้ง 2 ชื่อกันระบบดึงผิดคีย์
       styleTags
     };
   }
@@ -1590,25 +1593,43 @@ if (heroH1) {
     }
     if (descContainer) descContainer.style.display = "block";
     
-    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (เรียบหรู คมชัด ข้อความไม่ตกบรรทัด)
-    const rawLine = String(profile.lineId || profile.line_id || "u8Bz9HsaY8").trim();
-    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
-    if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
-      lineUrl = rawLine;
-    } else {
-      const cleanHandle = rawLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-      if (cleanHandle) lineUrl = `https://line.me/ti/p/${cleanHandle}`;
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (ดึงตามที่น้องเพิ่มมาหลังบ้าน 100%)
+    const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
+    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8"; // Fallback เฉพาะกรณีที่น้องคนนั้นไม่ได้ระบุไลน์มาจริงๆ
+
+    if (rawLine) {
+      if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
+        // ถ้าน้องใส่มาเป็นลิงก์ เช่น https://lin.ee/xxx หรือ https://line.me/ti/p/xxx ให้ใช้ตามนั้นทันที
+        lineUrl = rawLine;
+      } else {
+        // ถ้าน้องใส่มาเป็น Line ID เช่น @som_za หรือ cute123 ให้แปลงเป็นลิงก์แอดไลน์อัตโนมัติ
+        const cleanHandle = rawLine.replace(/^@/, "").trim();
+        if (rawLine.startsWith("@")) {
+          lineUrl = `https://line.me/R/ti/p/${encodeURIComponent("@" + cleanHandle)}`;
+        } else {
+          lineUrl = `https://line.me/ti/p/${encodeURIComponent(cleanHandle)}`;
+        }
+      }
     }
 
     const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
     if (lineWrapper) {
       const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
+
       lineWrapper.innerHTML = `
-        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(typeof window.handleLineBooking==='function'){window.handleLineBooking('${profile.id}','${lineUrl}')}else if(typeof window.trackLineClick==='function'){window.trackLineClick('${profile.id}')}">
-            <i class="fab fa-line"></i>
-            <span>${lineBtnText}</span>
-            <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 700; margin-left: 2px;">จ่ายหน้างาน</span>
-        </a>
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <!-- 1. ปุ่มแอดไลน์หลัก (ยาวเต็มแถวเหมือนเดิม) -->
+          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" style="flex: 1; margin: 0;" onclick="if(typeof window.handleLineBooking==='function'){window.handleLineBooking('${profile.id}','${lineUrl}')}else if(typeof window.trackLineClick==='function'){window.trackLineClick('${profile.id}')}">
+              <i class="fab fa-line"></i>
+              <span>${lineBtnText}</span>
+              <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 7px; border-radius: 100px; font-weight: 700; margin-left: 2px;">จ่ายหน้างาน</span>
+          </a>
+
+          <!-- 🟢 2. ปุ่มไอคอนแชร์มินิมอล (ขนาดกะทัดรัด 48x48px อยู่แถวเดียวกัน ไม่เทอะทะ) -->
+          <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'">
+              <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+          </button>
+        </div>
       `;
     }
 
@@ -2312,6 +2333,28 @@ async function handleUrlRouting(isInitial = false) {
         }
       }, { passive: true });
     })();
+
+
+window.shareProfile = async function (name, profileUrl) {
+  const shareData = {
+    title: `${name} | FirstModelHub`,
+    text: `ดูโปรไฟล์ ${name} เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน ไร้มัดจำ`,
+    url: profileUrl || window.location.href
+  };
+
+  if (typeof triggerHaptic === "function") triggerHaptic("light");
+
+  if (navigator.share) {
+    try { await navigator.share(shareData); } catch (_) {}
+  } else {
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      alert(`คัดลอกลิงก์โปรไฟล์ ${name} เรียบร้อยแล้วค่ะ!`);
+    } catch (_) {
+      prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareData.url);
+    }
+  }
+};
 
   // ==========================================================================
     // 🟢 ระบบดึงข้อมูล: ดักกรองชื่อว่าง + ตัดรูปซ้ำ + กันข้อมูลขยะ 100%
