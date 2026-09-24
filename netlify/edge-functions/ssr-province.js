@@ -1201,29 +1201,38 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-    const serializedProfilesJson = JSON.stringify(profilesList.map(p => ({
-      id: p.id,
-      slug: p.slug || String(p.id),
-      name: p.name || "น้อง",
-      imagePath: p.imagePath || p.image_url || p.imageUrl || "", // 👈 มีส่งไปแค่รูปนี้รูปเดียว (รูปหน้าปก)
-      provinceKey: p.provinceKey || "chiangmai",
-      provinceThai: PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่",
-      location: sanitizeThaiText(p.location || ""),
-      rate: p.rate || "1500",
-      age: p.age || "",
-      height: p.height || "",
-      weight: p.weight || "",
-      stats: p.stats || "",
-      description: sanitizeThaiText(p.description || "").slice(0, 90),
-      slogan: sanitizeThaiText(p.slogan || p.quote || ""),
-      quote: sanitizeThaiText(p.quote || p.slogan || ""),
-      line_id: p.line_id || "",
-      availability: p.availability || "รับงาน",
-      isfeatured: p.isfeatured === true || p.isFeatured === true,
-      verified: p.verified === true || p.isVerified === true,
-      styleTags: Array.isArray(p.styleTags || p.style_tags) ? (p.styleTags || p.style_tags).slice(0, 3) : []
-      // ❌ ไม่มีฟิลด์ galleryPaths (รูปในอัลบั้มที่ 2, 3, 4, 5) ส่งไปด้วยเลยแม้แต่บรรทัดเดียว!
-    }))).replace(/</g, "\\u003c");
+    const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
+      // 🖼️ ดึงรูปอัลบั้มทั้งหมด (รูปที่ 2, 3, 4, 5) ออกมาจากฐานข้อมูล
+      let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
+      if (typeof rawGallery === "string") {
+        try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
+      }
+      const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
+
+      return {
+        id: p.id,
+        slug: p.slug || String(p.id),
+        name: p.name || "น้อง",
+        imagePath: p.imagePath || p.image_url || p.imageUrl || "",
+        galleryPaths: cleanGallery, // 👈 บรรทัดนี้แหละครับที่ขาดไป! ต้องใส่เพื่อให้รูปอัลบั้มส่งไปหน้าเว็บ
+        provinceKey: p.provinceKey || "chiangmai",
+        provinceThai: PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่",
+        location: sanitizeThaiText(p.location || ""),
+        rate: p.rate || "1500",
+        age: p.age || "",
+        height: p.height || "",
+        weight: p.weight || "",
+        stats: p.stats || "",
+        description: sanitizeThaiText(p.description || "").slice(0, 90),
+        slogan: sanitizeThaiText(p.slogan || p.quote || ""),
+        quote: sanitizeThaiText(p.quote || p.slogan || ""),
+        line_id: p.line_id || "",
+        availability: p.availability || "รับงาน",
+        isfeatured: p.isfeatured === true || p.isFeatured === true,
+        verified: p.verified === true || p.isVerified === true,
+        styleTags: Array.isArray(p.styleTags || p.style_tags) ? (p.styleTags || p.style_tags).slice(0, 3) : []
+      };
+    })).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
