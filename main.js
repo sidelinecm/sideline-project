@@ -2578,7 +2578,7 @@ async function handleUrlRouting(isInitial = false) {
         : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(p.availability || "").toLowerCase().includes(s));
       
       const statusClass = isOnline ? "online" : "busy";
-      const hiddenAttr = isAriaHidden ? 'aria-hidden="true" tabindex="-1"' : '';
+      const hiddenAttr = isAriaHidden ? 'aria-hidden="true" tabindex="-1" rel="nofollow"' : '';
 
       return `
         <a href="/sideline/${slug}" 
