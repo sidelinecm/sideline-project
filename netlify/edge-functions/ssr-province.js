@@ -1205,7 +1205,7 @@ export default async (req, context) => {
       id: p.id,
       slug: p.slug || String(p.id),
       name: p.name || "น้อง",
-      imagePath: p.imagePath || p.image_url || p.imageUrl || "",
+      imagePath: p.imagePath || p.image_url || p.imageUrl || "", // 👈 มีส่งไปแค่รูปนี้รูปเดียว (รูปหน้าปก)
       provinceKey: p.provinceKey || "chiangmai",
       provinceThai: PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่",
       location: sanitizeThaiText(p.location || ""),
@@ -1222,6 +1222,7 @@ export default async (req, context) => {
       isfeatured: p.isfeatured === true || p.isFeatured === true,
       verified: p.verified === true || p.isVerified === true,
       styleTags: Array.isArray(p.styleTags || p.style_tags) ? (p.styleTags || p.style_tags).slice(0, 3) : []
+      // ❌ ไม่มีฟิลด์ galleryPaths (รูปในอัลบั้มที่ 2, 3, 4, 5) ส่งไปด้วยเลยแม้แต่บรรทัดเดียว!
     }))).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
