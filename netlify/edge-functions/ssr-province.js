@@ -841,7 +841,7 @@ export default async (req, context) => {
 
     
 
-    // 🟢 SCHEMA GRAPH ฉบับสมบูรณ์ 100% (แยกหน้าแรก กับ หน้ารายจังหวัด ถูกต้องตามกฎ Google)
+    // 🟢 SCHEMA GRAPH สะอาด ถูกต้อง ปลอดภัยจากบทลงโทษร้านค้าปลอม
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -882,67 +882,12 @@ export default async (req, context) => {
         "url": canonicalUrl,
         "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
-        "about": { "@id": `${canonicalUrl}#business` },
-        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` },
-        // 🔒 หน้าแรกไม่ใส่ breadcrumb id เพื่อไม่ให้ Google Search Console ฟ้อง Unresolved Node
+        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
         ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } })
       }
     ];
 
-    // โครงสร้างธุรกิจ Business / Local Service
-    const businessEntity = {
-      "@type": ["EntertainmentBusiness", "ProfessionalService"],
-      "@id": `${canonicalUrl}#business`,
-      "name": isNational 
-        ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-        : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-      "image": verifiedHeroImage,
-      "telephone": CONFIG.DEFAULT_TELEPHONE,
-      "priceRange": "฿฿",
-      "url": canonicalUrl,
-      "description": cleanMetaDesc,
-      "knowsAbout": [
-        isNational ? "ไซด์ไลน์ทั่วไทย" : `ไซด์ไลน์${provinceNameThai}`,
-        isNational ? "สาวรับงานทั่วไทย" : `สาวรับงาน${provinceNameThai}`,
-        "Personal Lifestyle Companion",
-        "Girlfriend Experience (GFE)",
-        `เพื่อนเที่ยวฟิวแฟน ${provinceNameThai}`,
-        "บริการเพื่อนทานข้าวและออกงานสังคม",
-        "นัดพบจ่ายหน้างานปลอดภัยไร้มัดจำ"
-      ],
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
-        "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
-        "addressCountry": "TH"
-      },
-      "areaServed": isNational 
-        ? { 
-            "@type": "Country", 
-            "name": "Thailand",
-            "sameAs": provinceWikiUrl
-          } 
-        : [
-            { 
-              "@type": "AdministrativeArea", 
-              "name": provinceNameThai,
-              "sameAs": provinceWikiUrl
-            },
-            ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
-          ]
-    };
-
-    // 🔒 พิกัด Geo ใส่เฉพาะหน้ารายจังหวัดเท่านั้น หน้าแรกไม่ใส่เพื่อไม่ให้ปักหมุดมั่วที่ กทม.
-    if (!isNational && seoData.geo?.lat && seoData.geo?.lng) {
-      businessEntity.geo = {
-        "@type": "GeoCoordinates",
-        "latitude": seoData.geo.lat,
-        "longitude": seoData.geo.lng
-      };
-    }
-    schemaGraph.push(businessEntity);
-
-    // 🔒 บันทึก BreadcrumbList เฉพาะหน้ารายจังหวัด (แก้เป็น ไซด์ไลน์ ตรงกับ UI 100%)
+    // บันทึก BreadcrumbList เฉพาะหน้ารายจังหวัด
     if (!isNational) {
       schemaGraph.push({
         "@type": "BreadcrumbList",
@@ -964,7 +909,7 @@ export default async (req, context) => {
       });
     }
 
-    // Carousel ItemList น้องๆ 12 คน
+    // Carousel ItemList สำหรับบอต Google
     if (profilesList.length > 0) {
       const displayProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -981,7 +926,7 @@ export default async (req, context) => {
       });
     }
 
-    // FAQPage ประจำจังหวัด
+    // FAQPage แสดงผล Rich Results
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -1035,18 +980,37 @@ const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i
 
 const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
 
-    const popularLocationsFooter = allProvincesRes.data
-      ? allProvincesRes.data.map(p => {
-          const key = (p.key || p.slug || p.id || "").toString().toLowerCase();
-          const name = p.nameThai || p.name;
-          const isActive = key === provinceSlug;
-          let item = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? "var(--primary-purple)" : "var(--text-gray)"}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ""}>ไซด์ไลน์${name}</a></li>`;
-          if (key === "chiangmai") {
-            item += '<li><a href="/nimman" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>';
-          }
-          return item;
-        }).join("")
-      : "";
+    // 🟢 SMART SILO DIRECTORY: จัดกลุ่มตามภาค และเจาะลึกเฉพาะย่านที่มีน้องๆ ตัวจริง
+    const popularLocationsFooter = `
+      <div class="footer-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%;">
+        <div class="directory-region-col">
+          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 6px;">📍 ภาคเหนือ</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
+            <li><a href="/location/chiangmai" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์เชียงใหม่</a></li>
+            <li style="padding-left: 10px;"><a href="/nimman" style="color: #C084FC; text-decoration: none;">• โซนนิมมาน เชียงใหม่</a></li>
+            <li><a href="/location/chiangrai" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์เชียงราย (มฟล./บ้านดู่)</a></li>
+            <li><a href="/location/lampang" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ลำปาง</a></li>
+            <li><a href="/location/lamphun" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ลำพูน (นิคมฯ)</a></li>
+            <li><a href="/location/phitsanulok" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์พิษณุโลก (มน.)</a></li>
+          </ul>
+        </div>
+        <div class="directory-region-col">
+          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 6px;">📍 ภาคกลาง & ตะวันออก</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
+            <li><a href="/location/bangkok" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์กรุงเทพฯ (สุขุมวิท/รัชดา)</a></li>
+            <li><a href="/location/chonburi" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ชลบุรี (พัทยา/บางแสน)</a></li>
+          </ul>
+        </div>
+        <div class="directory-region-col">
+          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 6px;">📍 ภาคอีสาน & ภาคใต้</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
+            <li><a href="/location/khon-kaen" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ขอนแก่น (กังสดาล/มข.)</a></li>
+            <li><a href="/location/udonthani" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์อุดรธานี (UD Town)</a></li>
+            <li><a href="/location/phuket" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ภูเก็ต (ป่าตอง/วิลล่า)</a></li>
+          </ul>
+        </div>
+      </div>
+    `;
 
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
@@ -1131,7 +1095,7 @@ const metaKeywords = isNational
       
      const sImg = optimizeImg(p.imagePath || p.image_url || "", "thumb");
 
-      const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1"' : '';
+      const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1" rel="nofollow"' : '';
       return `
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
           <div class="story-ring-wrap">
@@ -1299,11 +1263,12 @@ if (isNational) {
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-   if (popularLocationsFooter) { 
-      finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
-    }
+  
+if (popularLocationsFooter) { 
+  finalHtml = finalHtml.replace(/<div class="footer-directory-grid"[\s\S]*?<\/div>\s*<\/div>/i, popularLocationsFooter); 
+}
 
-   // 🟢 15. ซีเรียลไลซ์ข้อมูลสำหรับ Client-side Rehydration (เพิ่ม galleryPaths และรูปอัลบั้มครบถ้วน)
+   // 🟢 รีดไขมัน Payload: คัดเฉพาะฟิลด์ที่ช่องค้นหาและตัวกรองจำเป็นต้องใช้
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1316,21 +1281,22 @@ if (isNational) {
       const rawRateStr = (p.rate || p.price || "").toString().trim();
       const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
 
-      // 🖼️ ดึงรูปภาพอัลบั้มทั้งหมด ไม่ให้หลุดหาย
+      
       let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
       if (typeof rawGallery === "string") {
         try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
       }
+      const cleanGallery = (Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : []).slice(0, 3);
 
-      // 🛡️ กรองเอาเฉพาะ URL ที่มีค่าจริง ตัดค่าว่าง/null ทิ้ง
-      const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
+      // ย่อ description ให้เหลือประโยคสั้น (ไม่เกิน 90 ตัวอักษร) เพื่อลดความอ้วนของ DOM
+      const shortDesc = sanitizeThaiText(p.description || "").slice(0, 90);
 
       return {
         id: p.id,
         slug: p.slug || String(p.id),
         name: p.name || "น้อง",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
-        galleryPaths: cleanGallery, // 👈 สะอาด 100% ไม่มีค่าว่างหลุดแน่นอน
+        galleryPaths: cleanGallery,
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
@@ -1339,9 +1305,9 @@ if (isNational) {
         height: p.height || p.profile_height || "",
         weight: p.weight || p.profile_weight || "",
         stats: p.stats || p.proportion || "",
-        description: sanitizeThaiText(p.description || ""), // 🔒 ฟอกคำสแลงล่อแหลมออก สะอาด 100%
-        slogan: sanitizeThaiText(p.slogan || p.quote || p.tagline || ""), // 🔒 ปลอดภัยจาก SafeSearch
-        quote: sanitizeThaiText(p.quote || p.slogan || ""), // 🔒 ปลอดภัยจาก SafeSearch
+        description: shortDesc,
+        slogan: sanitizeThaiText(p.slogan || p.quote || ""),
+        quote: sanitizeThaiText(p.quote || p.slogan || ""),
         line_id: p.line_id || p.lineId || "",
         availability: p.availability || "รับงาน",
         isfeatured: p.isfeatured === true || p.isFeatured === true,
