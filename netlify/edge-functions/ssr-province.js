@@ -1226,7 +1226,8 @@ export default async (req, context) => {
         description: sanitizeThaiText(p.description || "").slice(0, 90),
         slogan: sanitizeThaiText(p.slogan || p.quote || ""),
         quote: sanitizeThaiText(p.quote || p.slogan || ""),
-        line_id: p.line_id || "",
+      
+        line_id: p.line_id || p.line || p.lineId || p.line_url || p.contact_line || "",
         availability: p.availability || "รับงาน",
         isfeatured: p.isfeatured === true || p.isFeatured === true,
         verified: p.verified === true || p.isVerified === true,

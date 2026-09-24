@@ -358,15 +358,26 @@ if (provinceKey) {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-    const rawLineInput = (profile.line_id || profile.lineId || "").trim();
-    let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
-    const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
-    if (matchUrl) {
-      lineId = matchUrl[0];
-    } else if (rawLineInput) {
-      const cleanHandle = rawLineInput.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-      if (cleanHandle) lineId = `https://line.me/ti/p/${cleanHandle}`;
-    }
+    // 🟢 ปรับใหม่: ดักจับคอลัมน์ line และ line_url เพิ่ม + รองรับทั้งลิงก์ lin.ee, line.me และ ID ที่มี @
+const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
+let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
+
+const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
+if (matchUrl) {
+ 
+  lineId = matchUrl[0];
+} else if (rawLineInput) {
+  // ถ้าน้องใส่มาเป็น ID
+  const cleanHandle = rawLineInput.trim();
+  if (cleanHandle.startsWith("@")) {
+    // ถ้ามี @ นำหน้า (LINE Official) ให้สร้างลิงก์แบบ OA
+    lineId = `https://line.me/R/ti/p/${encodeURIComponent(cleanHandle)}`;
+  } else {
+    // ถ้าเป็น ID บุคคลทั่วไป
+    const cleanId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+    if (cleanId) lineId = `https://line.me/ti/p/${cleanId}`;
+  }
+}
 
     const age = profile.age || "22";
     const height = profile.height || "162";
@@ -642,10 +653,16 @@ if (provinceKey) {
                     ${escapeHTML(naturalDesc)}
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <a href="${lineId}" class="sidebar-line-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
+                <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
+                    <!-- 1. ปุ่มแอดไลน์หลัก -->
+                    <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
                     </a>
+
+                    <!-- 🟢 2. ปุ่มไอคอนแชร์กลมมินิมอล -->
+                    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+                    </button>
                 </div>
 
                 <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
