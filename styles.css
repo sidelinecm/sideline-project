@@ -3261,3 +3261,440 @@ footer.fmh-footer,
   background: #EDE9FE !important;
   color: #6D28D9 !important;
 }
+/* ==========================================================================
+   ✨ FIRSTMODELHUB - UNIFIED PRODUCTION STYLES (เอากรอบขาวในการ์ดออก 100%)
+   - ลบกรอบสีขาวด้านในรูปโปรไฟล์ออก คืนค่าข้อความบนรูปให้แสดงตามเดิม
+   - [ข้อ 1] พื้นหลัง Pearlescent Mesh Gradient สว่าง นวลตา (ไม่ใช้สีดำ)
+   - [ข้อ 4] โซนพื้นที่บริการเป็น Interactive Tag Chips
+   - [ข้อ 5] ปุ่ม Filter และ Bottom App Dock
+   - [ส่วนของ LIGHTBOX] ปรับมู้ดพรีเมียมตั้งแต่ส่วนแสดงอายุลงไป
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   [แก้ไขจุดสำคัญ] ลบกรอบขาวด้านในรูปภาพออก คืนค่าข้อความบนรูปตามเดิม 100%
+   -------------------------------------------------------------------------- */
+.profile-card-new .profile-card-info-content,
+.vip-card-item .vip-card-info {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* คืนค่า Gradient เงาดำด้านล่างรูป ให้ตัวหนังสือสีขาวอ่านง่ายตามเดิม */
+.profile-card-gradient-overlay,
+.vip-card-overlay {
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.35) 26%, transparent 60%) !important;
+}
+
+/* คืนค่าสีตัวหนังสือ ชื่อน้อง และพิกัด ให้อ่านชัดเจนบนรูปภาพ */
+.profile-card-new .profile-card-name,
+.vip-card-item .vip-name {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  background: none !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 2px 6px #000000 !important;
+  font-size: 14.5px !important;
+  font-weight: 900 !important;
+}
+
+.profile-card-new .profile-card-location,
+.vip-card-item .vip-location {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.profile-card-new .profile-card-location i {
+  color: #FF85C0 !important;
+}
+
+/* ป้ายอายุ และแท็ก บนรูปภาพ */
+.profile-card-new .profile-card-age-tag {
+  background: rgba(225, 29, 72, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  color: #FFFFFF !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+}
+
+.profile-card-new .card-vibe-pill {
+  background: rgba(15, 10, 26, 0.6) !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.35) !important;
+  color: #FFFFFF !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+}
+
+/* ป้ายราคาเหรียญทอง */
+.profile-card-new .profile-card-price {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+  border: 1px solid #F59E0B !important;
+  color: #92400E !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+}
+
+/* --------------------------------------------------------------------------
+   [ข้อ 1] พื้นหลังหน้าเว็บสว่าง นวลตา มีมิติ (Pearlescent Mesh Gradient)
+   -------------------------------------------------------------------------- */
+body, body.fmh-app-page {
+  background-color: #FAF8FD !important;
+  background-image: 
+    radial-gradient(circle at 8% 12%, rgba(255, 75, 114, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 92% 16%, rgba(124, 58, 237, 0.14) 0%, transparent 42%),
+    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 85% 88%, rgba(255, 20, 147, 0.11) 0%, transparent 45%),
+    radial-gradient(circle at 12% 92%, rgba(124, 58, 237, 0.10) 0%, transparent 45%) !important;
+  background-attachment: fixed !important;
+}
+
+/* กรอบเนื้อหาหลักในหน้าแรก ให้เป็นกระจกขาวนวล ลอยเด่น */
+.hero-section, .celestial-hero-box, .luxury-bento-wrapper,
+#reviews-wrapper-block, #faq-wrapper-block, .editorial-digest-card {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 16px 40px -10px rgba(124, 58, 237, 0.08), 
+              0 6px 16px -4px rgba(225, 29, 72, 0.05),
+              inset 0 1px 2px #FFFFFF !important;
+  border-radius: 24px !important;
+}
+
+/* --------------------------------------------------------------------------
+   [ข้อ 4] โซนพื้นที่บริการ: แปลงจาก Bullet จุดดำ เป็น Interactive Tag Chips
+   -------------------------------------------------------------------------- */
+.footer-locations-block {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.14) !important;
+  border-radius: 26px !important;
+  padding: 24px 18px !important;
+  box-shadow: 0 12px 35px rgba(124, 58, 237, 0.06) !important;
+  margin-top: 24px !important;
+}
+
+.footer-directory-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.directory-region-col {
+  background: #FAF8FE !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  border-radius: 20px !important;
+  padding: 16px 14px !important;
+  box-shadow: inset 0 1px 2px #FFFFFF !important;
+}
+
+.directory-region-col > strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: linear-gradient(135deg, #EDE9FE 0%, #FFE4E6 100%) !important;
+  border: 1px solid rgba(124, 58, 237, 0.2) !important;
+  color: #7C3AED !important;
+  padding: 5px 14px !important;
+  border-radius: 100px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  margin-bottom: 12px !important;
+}
+
+.directory-region-col ul {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+/* ชื่อจังหวัดหลัก */
+.directory-region-col ul li:not([style*="padding-left"]) {
+  width: 100% !important;
+  margin-top: 8px !important;
+  margin-bottom: 4px !important;
+}
+.directory-region-col ul li:not([style*="padding-left"]) a {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.2) !important;
+  color: #0F172A !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.05) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* โซนย่อย (เช่น นิมมาน, เจ็ดยอด, มข.) เป็นแคปซูลชิปกลมรี */
+.directory-region-col ul li[style*="padding-left"] {
+  padding-left: 0 !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+}
+.directory-region-col ul li[style*="padding-left"] a {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(124, 58, 237, 0.16) !important;
+  color: #5B21B6 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  padding: 5px 12px !important;
+  min-height: 32px !important;
+  border-radius: 100px !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 6px rgba(15, 10, 26, 0.03) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.directory-region-col ul li[style*="padding-left"] a:hover,
+.directory-region-col ul li[style*="padding-left"] a:active {
+  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  transform: translateY(-2px) scale(1.04) !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.28) !important;
+}
+
+/* --------------------------------------------------------------------------
+   [ข้อ 5] ปุ่ม Filter และ Bottom App Dock
+   -------------------------------------------------------------------------- */
+.filter-pill-tab {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
+  border-radius: 100px !important;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.06), inset 0 1px 1px #FFFFFF !important;
+}
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 50%, #7C3AED 100%) !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+}
+
+@media (max-width: 768px) {
+  .floating-app-dock {
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 14px 40px rgba(225, 29, 72, 0.15), 0 4px 14px rgba(124, 58, 237, 0.08) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   [ส่วนของ LIGHTBOX] ปรับแต่งเฉพาะเนื้อหาภายในหน้าต่างโปรไฟล์ (ตั้งแต่อายุลงไป)
+   -------------------------------------------------------------------------- */
+#lightboxScrollBody, .lightbox-scroll-body, .lightbox-details {
+  background: #FAF8FD !important;
+}
+
+.lightbox-details {
+  padding: 16px 14px calc(115px + env(safe-area-inset-bottom, 20px)) 14px !important;
+  gap: 14px !important;
+}
+
+/* กล่องแสดง อายุ / สัดส่วน / ส่วนสูง (3 ช่อง) */
+#lightboxDetailsCompact > div:first-child {
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+}
+#lightboxDetailsCompact .bento-stat-tile {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  border-radius: 18px !important;
+  padding: 12px 6px !important;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+}
+#lightboxDetailsCompact .bento-stat-tile div:first-child {
+  color: #7C3AED !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+}
+#lightboxDetailsCompact .bento-stat-tile div:last-child {
+  color: #0F172A !important;
+  font-weight: 900 !important;
+  font-size: 15px !important;
+  margin-top: 3px !important;
+}
+
+/* กล่องค่าขนม และ พิกัดงาน */
+#lightboxDetailsCompact > div:last-child {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.16) !important;
+  border-radius: 18px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.05), inset 0 1px 1px #FFFFFF !important;
+  gap: 10px !important;
+}
+#lightboxDetailsCompact > div:last-child span[style*="#059669"] {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+  border: 1px solid #F59E0B !important;
+  color: #B45309 !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  padding: 3px 10px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15) !important;
+}
+
+/* กล่องคำบรรยาย Description */
+#lightboxDescriptionContainer {
+  margin-top: 6px !important;
+}
+#lightboxDescriptionContent {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  border-left: 5px solid #FF1493 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  color: #1E293B !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.7 !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+}
+
+/* กล่องอัตราค่าบริการ 3 ช่อง */
+#lightboxRatesSection {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.3) !important;
+  border-radius: 20px !important;
+  padding: 16px 14px !important;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.08), inset 0 1px 1px #FFFFFF !important;
+}
+#lightboxRatesSection h4 {
+  background: linear-gradient(135deg, #B45309 0%, #D97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  margin-bottom: 12px !important;
+}
+#lightboxRatesGrid > div {
+  background: linear-gradient(135deg, #FAF8FE 0%, #FFFBEB 100%) !important;
+  border: 1.2px solid rgba(245, 158, 11, 0.22) !important;
+  border-radius: 14px !important;
+  padding: 10px 4px !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.05) !important;
+}
+#lightboxRatesGrid > div strong {
+  color: #059669 !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+}
+
+/* FAQ คำถามพบบ่อย */
+#lightboxFaqSection h4, #lightboxFaqTitle {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  margin: 8px 0 12px 0 !important;
+}
+#lightboxFaqList > div {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.12) !important;
+  border-left: 4.5px solid #7C3AED !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.04) !important;
+}
+#lightboxFaqList h5 {
+  color: #6D28D9 !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+}
+#lightboxFaqList p {
+  color: #334155 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+/* รีวิวจากลูกค้าจริง */
+#lightboxReviewsSection h4 {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  margin: 10px 0 12px 0 !important;
+}
+#lightboxReviewsList > div {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 4px 16px rgba(15, 10, 26, 0.04) !important;
+}
+#lightboxReviewsList strong {
+  color: #0F172A !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+#lightboxReviewsList p {
+  color: #475569 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+/* โซนน้องๆ แนะนำเพิ่มเติม */
+#lightboxRelatedSection h4, #lightboxRelatedTitle {
+  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  margin-bottom: 12px !important;
+}
+.lightbox-related-item {
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.07) !important;
+  background: #FFFFFF !important;
+}
+#lightboxRelatedMoreLink a {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.25) !important;
+  color: #7C3AED !important;
+  padding: 7px 18px !important;
+  border-radius: 100px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06) !important;
+  margin-top: 6px !important;
+  text-decoration: none !important;
+}
+
+/* แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย */
+#lightboxSafetySection h4 {
+  color: #7C3AED !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  margin-bottom: 10px !important;
+}
+#lightboxSafetySection > div {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.3) !important;
+  border-radius: 18px !important;
+  padding: 16px 18px !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.06), inset 0 1px 1px #FFFFFF !important;
+}
+#lightboxSafetySection p {
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  line-height: 1.65 !important;
+}
+#lightboxSafetySection strong {
+  color: #065F46 !important;
+}
