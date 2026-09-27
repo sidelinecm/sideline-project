@@ -45,7 +45,11 @@ const PROVINCE_SEO_DATA = {
   chiangmai: {
     name: "เชียงใหม่",
     geo: { lat: 18.7883, lng: 98.9853 },
-    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
+    zones: [
+      "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "หน้า มช.",
+      "คูเมือง", "ท่าแพ", "ห้วยแก้ว", "รวมโชค", "สันทราย", "แม่โจ้", "พายัพ", 
+      "เซ็นทรัลเฟส", "สนามบินเชียงใหม่", "แม่ริม", "หางดง"
+    ],
     faqs: [
       { q: "นัดพบเพื่อนเที่ยวเชียงใหม่ โซนไหนเดินทางสะดวกและรวดเร็วที่สุด?", a: "ย่านนิมมานเหมินท์ เจ็ดยอด และสันติธรรม เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด สามารถเดินทางไปดูแลที่โรงแรมได้รวดเร็วภายใน 15-25 นาทีครับ" },
       { q: "ต้องการน้องไปนั่งคาเฟ่ ทานข้าว หรือเดินเล่นในเมืองเชียงใหม่ มีบริการไหม?", a: "มีครับ น้องๆ สไตล์ฟิวแฟน (GFE) ยินดีเป็นเพื่อนร่วมทาง ทานอาหาร และท่องเที่ยว คุยสนุก สุภาพ และให้เกียรติลูกค้าครับ" },
@@ -56,7 +60,10 @@ const PROVINCE_SEO_DATA = {
   bangkok: {
     name: "กรุงเทพฯ",
     geo: { lat: 13.7563, lng: 100.5018 },
-    zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
+    zones: [
+      "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", 
+      "สาทร", "สีลม", "บางนา", "รามอินทรา", "พระราม 9", "อารีย์"
+    ],
     faqs: [
       { q: "การเรียกบริการเพื่อนเที่ยวนอกสถานที่ (Outcall) ในกรุงเทพฯ มีขั้นตอนอย่างไร?", a: "ลูกค้าสามารถเลือกโปรไฟล์ แจ้งพิกัดโรงแรมหรือคอนโดส่วนตัวในเขตกรุงเทพฯ เพื่อนัดหมายเวลาที่สะดวก น้องๆ จะเดินทางไปพบตามนัดหมายอย่างตรงเวลาครับ" },
       { q: "มีน้องๆ ที่สามารถสื่อสารภาษาอังกฤษเพื่อดูแลลูกค้าต่างชาติ (Expat/Tourist) ไหม?", a: "มีครับ โดยเฉพาะในโซนสุขุมวิท สาทร และทองหล่อ มีน้องๆ ระดับพรีเมียมที่สื่อสารภาษาอังกฤษได้อย่างคล่องแคล่ว วางตัวดี พร้อมออกงานสังคมครับ" },
@@ -66,7 +73,10 @@ const PROVINCE_SEO_DATA = {
   chonburi: {
     name: "ชลบุรี",
     geo: { lat: 13.3611, lng: 100.9847 },
-    zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
+    zones: [
+      "พัทยา", "พัทยากลาง", "พัทยาใต้", "หาดจอมเทียน", "บางแสน", "ศรีราชา", 
+      "ตัวเมืองชลบุรี", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"
+    ],
     faqs: [
       { q: "ต้องการน้องไปร่วมปาร์ตี้พูลวิลล่าในพัทยา หรือสังสรรค์ริมหาด รับงานไหม?", a: "รับครับ เรามีน้องๆ สายเอ็นเตอร์เทน (EN VIP) สำหรับชงเหล้า พูดคุย สร้างบรรยากาศสนุกสนาน เป็นกันเอง เหมาะกับทริปพูลวิลล่าและงานเลี้ยงส่วนตัวครับ" },
       { q: "น้องๆ โซนบางแสน ศรีราชา และพัทยา มีสไตล์แตกต่างกันอย่างไร?", a: "โซนบางแสนและศรีราชาส่วนใหญ่เป็นสไตล์วัยใส นักศึกษา น่ารัก เอาใจเก่ง ส่วนโซนพัทยาและจอมเทียนจะมีความหลากหลาย ทั้งสาวสวยหุ่นนางแบบและสายฝอครับ" },
@@ -76,7 +86,10 @@ const PROVINCE_SEO_DATA = {
   phuket: {
     name: "ภูเก็ต",
     geo: { lat: 7.8804, lng: 98.3923 },
-    zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์"],
+    zones: [
+      "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", 
+      "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา", "สนามบินภูเก็ต"
+    ],
     faqs: [
       { q: "นัดหมายเพื่อนเที่ยวภูเก็ต ไปร่วมทริปล่องเรือยอร์ช หรือทานดินเนอร์หรู ได้ไหม?", a: "ได้แน่นอนครับ มีน้องๆ โปรไฟล์พรีเมียม บุคลิกภาพดีเยี่ยม พร้อมเป็นเพื่อนร่วมเดินทาง ดินเนอร์ ออกงาน หรือร่วมทริปทะเลอย่างเป็นส่วนตัวครับ" },
       { q: "พักอยู่วิลล่าส่วนตัวแถวบางเทา กะหลิม หรือเชิงทะเล น้องเดินทางไปได้ไหม?", a: "เดินทางไปดูแลได้ทั่วทั้งเกาะภูเก็ตครับ นัดหมายระบุพิกัดที่พักให้น้องเดินทางไปพบได้อย่างเป็นส่วนตัวและปลอดภัยครับ" }
@@ -85,7 +98,10 @@ const PROVINCE_SEO_DATA = {
   "khon-kaen": {
     name: "ขอนแก่น",
     geo: { lat: 16.4322, lng: 102.8236 },
-    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+    zones: [
+      "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "หน้า มข.", "โนนม่วง", 
+      "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "ม.ภาค", "ถนนมิตรภาพ", "ศิลา"
+    ],
     faqs: [
       { q: "นัดหมายเพื่อนเที่ยวขอนแก่น โซนกังสดาล และรอบ มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนมหาวิทยาลัยขอนแก่นและใจกลางเมือง เดินทางรวดเร็ว เป็นกันเอง ดูแลเอาใจใส่สไตล์ฟิวแฟนอย่างอบอุ่นครับ" },
       { q: "มีบริการเพื่อนเที่ยวทานข้าว หรือนั่งชิลร้านอาหารในขอนแก่นไหม?", a: "มีครับ น้องๆ พร้อมไปเป็นเพื่อนทานข้าว ดื่มชงเหล้า หรือนั่งคุยคลายเหงา สร้างความสบายใจ ไม่เร่งรีบ ให้เกียรติลูกค้าครับ" }
@@ -94,7 +110,10 @@ const PROVINCE_SEO_DATA = {
   chiangrai: {
     name: "เชียงราย",
     geo: { lat: 19.9105, lng: 99.8406 },
-    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+    zones: [
+      "ตัวเมืองเชียงราย", "บ้านดู่", "หน้า มฟล.", "ม.แม่ฟ้าหลวง", "หอนาฬิกา", 
+      "ไนท์บาซาร์", "เด่นห้า", "รอบเวียง", "ริมกก", "สนามบินเชียงราย", "แม่สาย"
+    ],
     faqs: [
       { q: "เพื่อนเที่ยวเชียงราย โซนบ้านดู่ และ ม.แม่ฟ้าหลวง นัดหมายอย่างไร?", a: "มีน้องๆ สแตนด์บายแถวหน้า มฟล. และตัวเมืองเชียงราย แจ้งพิกัดโรงแรมหรือที่พัก นัดหมายเวลาที่สะดวก น้องพร้อมเดินทางไปดูแลถึงที่ครับ" }
     ]
@@ -102,7 +121,10 @@ const PROVINCE_SEO_DATA = {
   lampang: {
     name: "ลำปาง",
     geo: { lat: 18.2888, lng: 99.4923 },
-    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
+    zones: [
+      "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", 
+      "เซ็นทรัลลำปาง", "อัศวิน", "กาดกองต้า", "เกาะคา"
+    ],
     faqs: [
       { q: "นัดพบเพื่อนเที่ยวลำปาง ในตัวเมืองหรือโรงแรมแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมือง ย่านสวนดอก และถนนรอบเวียง เดินทางสะดวก ปลอดภัย และเป็นส่วนตัวครับ" }
     ]
@@ -126,7 +148,10 @@ const PROVINCE_SEO_DATA = {
   udonthani: {
     name: "อุดรธานี",
     geo: { lat: 17.4138, lng: 102.7872 },
-    zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
+    zones: [
+      "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", 
+      "โพศรี", "ทุ่งศรีเมือง", "หนองสิม", "ตลาดรังษิณา", "สี่แยกไฮเทค"
+    ],
     faqs: [
       { q: "เพื่อนเที่ยวอุดรธานี นัดพบแถวไหนเดินทางสะดวกที่สุด?", a: "ย่านใจกลางเมือง UD Town เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกที่สุดครับ" }
     ]
@@ -172,7 +197,7 @@ const PROVINCE_SEO_DATA = {
     faqs: [
       { q: "มีน้องๆ สแตนด์บายในเกาะสมุยไหม?", a: "มีบริการเพื่อนเที่ยวทั้งบนฝั่งตัวเมืองสุราษฎร์ฯ และบนเกาะสมุย ดูแลทริปพักผ่อนได้อย่างอบอุ่นเป็นส่วนตัวครับ" }
     ]
-  },
+  }
 };
 
 // 🟢 ผูกชื่อเรียกสำรอง (Alias) ให้ระบบจับคู่เจอ 100% ไม่ว่าจะพิมพ์ชื่อย่อหรือชื่อเต็ม
@@ -700,11 +725,11 @@ export default async (req, context) => {
       ].join(" ").toLowerCase();
 
       const RULES = [
-        { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค"] },
+        { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
         { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"] },
-        { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก"] },
-        { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง", "เกาะคา"] },
-        { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "หนองประจักษ์", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง"] },
+        { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก", "เด่นห้า"] },
+        { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง", "เกาะคา", "อัศวิน", "กาดกองต้า"] },
+        { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "ยูดี", "หนองประจักษ์", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "เซ็นทรัลอุดร", "รังษิณา", "ไฮเทค"] },
         { key: "ayutthaya", keywords: ["อยุธยา", "โรจนะ", "บางปะอิน", "ประตูชัย", "เสนา"] },
         { key: "korat", keywords: ["โคราช", "นครราชสีมา", "มทส", "ปากช่อง", "เขาใหญ่"] },
         { key: "songkhla", keywords: ["หาดใหญ่", "สงขลา", "ม.อ.", "ลีการ์เดนส์", "ด่านนอก"] },
@@ -713,7 +738,7 @@ export default async (req, context) => {
         { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
         { key: "lamphun", keywords: ["ลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"] },
         { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] },
-        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่ริม", "หางดง", "ท่าแพ"] }
+        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] }
       ];
 
       for (const rule of RULES) {
@@ -944,7 +969,6 @@ export default async (req, context) => {
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
 
-    // 🟢 SMART SILO DIRECTORY: ลิงก์เฉพาะ 6 จังหวัดจริงที่มีน้อง 107 คน และโซนยอดนิยม ไร้ลิงก์ 404
     const popularLocationsFooter = `
       <div class="footer-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; width: 100%;">
         <div class="directory-region-col">
@@ -952,31 +976,31 @@ export default async (req, context) => {
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
             <li><a href="/location/chiangmai" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์เชียงใหม่ (55 คน)</a></li>
             <li style="padding-left: 10px;"><a href="/nimman" style="color: #C084FC; text-decoration: none;">• โซนนิมมานเหมินท์</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนเจ็ดยอด - สันติธรรม</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนหลัง มช. - ห้วยแก้ว</a></li>
+            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนเจ็ดยอด - สันติธรรม - ช้างเผือก</a></li>
+            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนหลัง มช. - แม่โจ้ - พายัพ - สันทราย</a></li>
             <li style="margin-top: 6px;"><a href="/location/chiangrai" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์เชียงราย (13 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangrai" style="color: var(--text-muted); text-decoration: none;">• โซนบ้านดู่ - หน้า มฟล.</a></li>
+            <li style="padding-left: 10px;"><a href="/location/chiangrai" style="color: var(--text-muted); text-decoration: none;">• โซนบ้านดู่ - หน้า มฟล. - หอนาฬิกา</a></li>
             <li style="margin-top: 6px;"><a href="/location/lampang" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ลำปาง (8 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/lampang" style="color: var(--text-muted); text-decoration: none;">• โซนในเมือง - สวนดอก - สบตุ๋ย</a></li>
+            <li style="padding-left: 10px;"><a href="/location/lampang" style="color: var(--text-muted); text-decoration: none;">• โซนในเมือง - สวนดอก - สบตุ๋ย - ม.ราชภัฏ</a></li>
           </ul>
         </div>
         <div class="directory-region-col">
           <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">📍 ภาคอีสาน (28 โปรไฟล์)</strong>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
             <li><a href="/location/khon-kaen" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ขอนแก่น (15 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนกังสดาล - หลัง มข.</a></li>
-            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนเซ็นทรัล - บึงแก่นนคร</a></li>
+            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนกังสดาล - หลัง มข. - โนนม่วง</a></li>
+            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนเซ็นทรัล - บึงแก่นนคร - ม.ภาค</a></li>
             <li style="margin-top: 6px;"><a href="/location/udonthani" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์อุดรธานี (13 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซน UD Town - เซ็นทรัลอุดร</a></li>
-            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซนหนองประจักษ์ - โพศรี</a></li>
+            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซน UD Town - เซ็นทรัลอุดร - โพศรี</a></li>
+            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซนหนองประจักษ์ - บ้านจาน - ตลาดรังษิณา</a></li>
           </ul>
         </div>
         <div class="directory-region-col">
           <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">📍 ภาคใต้ (3 โปรไฟล์)</strong>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
             <li><a href="/location/phuket" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ภูเก็ต (3 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนตัวเมืองภูเก็ต</a></li>
-            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนป่าตอง - กะทู้</a></li>
+            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนตัวเมืองภูเก็ต - ป่าตอง - กะทู้</a></li>
+            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนบางเทา - เชิงทะเล - ฉลอง - ราไวย์</a></li>
           </ul>
         </div>
       </div>
