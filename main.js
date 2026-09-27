@@ -67,7 +67,7 @@ async function getSupabaseClient() {
 
   const SEO_PROVINCES_DATA = {
     chiangmai: {
-      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
+      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "หน้า มช.", "คูเมือง", "ท่าแพ", "ห้วยแก้ว", "รวมโชค", "สันทราย", "แม่โจ้", "พายัพ", "เซ็นทรัลเฟส", "แม่ริม", "หางดง"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวมสาวรับงานเชียงใหม่ อันดับ 1 ตรงปก ไม่มัดจำ</h3>
@@ -79,7 +79,7 @@ async function getSupabaseClient() {
           <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
              <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนนิมมานเหมินท์:</strong> แหล่งรวมร้านชิลและโรงแรมหรู น้องๆ พร้อมเดินทางไปหาภายใน 15-30 นาที</span></li>
              <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนเจ็ดยอด - สันติธรรม:</strong> พิกัดฮิตสำหรับน้องๆ นักศึกษา วัยใส ตัวเล็ก สเปคยอดนิยม</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - หลัง มช.:</strong> บริการเพื่อนเที่ยว หาคนกินข้าว คลายเหงาในวันหยุดพักผ่อน</span></li>
+             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - หลัง มช. - แม่โจ้:</strong> บริการเพื่อนเที่ยว หาคนกินข้าว คลายเหงาในวันหยุดพักผ่อน</span></li>
           </ul>
         </div>
         <div>
@@ -98,7 +98,7 @@ async function getSupabaseClient() {
     },
 
     chiangrai: {
-      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "หน้า มฟล.", "หอนาฬิกา", "ไนท์บาซาร์", "เด่นห้า", "รอบเวียง", "ริมกก", "แม่สาย"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานเชียงราย ไซด์ไลน์ตรงปก ไม่โอนมัดจำ</h3>
@@ -126,7 +126,7 @@ async function getSupabaseClient() {
     },
 
     lampang: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
+      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง", "อัศวิน", "กาดกองต้า", "เกาะคา"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ไซด์ไลน์ลำปาง สาวรับงานลำปาง ตัวท็อป ฟิวแฟน</h3>
@@ -153,7 +153,7 @@ async function getSupabaseClient() {
     },
 
     "khon-kaen": {
-      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "หน้า มข.", "โนนม่วง", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "ม.ภาค", "ถนนมิตรภาพ", "ศิลา"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น (อันดับ 1 อีสาน)</h3>
@@ -181,7 +181,7 @@ async function getSupabaseClient() {
     },
 
     khonkaen: {
-      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "หน้า มข.", "โนนม่วง", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "ม.ภาค", "ถนนมิตรภาพ", "ศิลา"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น (อันดับ 1 อีสาน)</h3>
@@ -208,7 +208,7 @@ async function getSupabaseClient() {
     },
 
     phuket: {
-      zones: ["ทั้งหมด", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล"],
+      zones: ["ทั้งหมด", "ป่าตอง", "ตัวเมืองภูเก็ต", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต (VIP Escorts Phuket)</h3>
@@ -236,7 +236,7 @@ async function getSupabaseClient() {
     },
 
     udonthani: {
-      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
+      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "หนองสิม", "ตลาดรังษิณา", "สี่แยกไฮเทค"],
       seoContent: `
         <div style="margin-bottom: 16px;">
           <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานอุดรธานี ไซด์ไลน์อุดร ไม่โอนมัดจำ</h3>
@@ -503,18 +503,18 @@ async function getSupabaseClient() {
 
     let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
     
-    // ตรวจจับจังหวัดจากข้อความ ป้องกันตกไปอยู่เชียงใหม่ซ้ำ
+  
     const fullText = `${raw.location || ''} ${raw.provinceThai || ''} ${raw.description || ''} ${raw.name || ''}`.toLowerCase();
-    if (fullText.includes("ขอนแก่น") || fullText.includes("กังสดาล") || fullText.includes("มข")) pKey = "khonkaen";
-    else if (fullText.includes("กรุงเทพ") || fullText.includes("กทม") || fullText.includes("สุขุมวิท") || fullText.includes("รัชดา")) pKey = "bangkok";
-    else if (fullText.includes("ชลบุรี") || fullText.includes("พัทยา") || fullText.includes("บางแสน")) pKey = "chonburi";
-    else if (fullText.includes("ภูเก็ต") || fullText.includes("ป่าตอง")) pKey = "phuket";
-    else if (fullText.includes("เชียงราย") || fullText.includes("บ้านดู่")) pKey = "chiangrai";
-    else if (fullText.includes("ลำปาง")) pKey = "lampang";
-    else if (fullText.includes("ลำพูน")) pKey = "lamphun";
-    else if (fullText.includes("พิษณุโลก") || fullText.includes("มน.")) pKey = "phitsanulok";
-    else if (fullText.includes("อุดร")) pKey = "udonthani";
-    else if (fullText.includes("เชียงใหม่") || fullText.includes("นิมมาน") || fullText.includes("เจ็ดยอด")) pKey = "chiangmai";
+    if (fullText.includes("ขอนแก่น") || fullText.includes("กังสดาล") || fullText.includes("มข") || fullText.includes("โนนม่วง") || fullText.includes("ม.ภาค") || fullText.includes("ศิลา")) pKey = "khonkaen";
+    else if (fullText.includes("กรุงเทพ") || fullText.includes("กทม") || fullText.includes("สุขุมวิท") || fullText.includes("รัชดา") || fullText.includes("ห้วยขวาง") || fullText.includes("ทองหล่อ") || fullText.includes("ลาดพร้าว")) pKey = "bangkok";
+    else if (fullText.includes("ชลบุรี") || fullText.includes("พัทยา") || fullText.includes("บางแสน") || fullText.includes("ศรีราชา") || fullText.includes("จอมเทียน")) pKey = "chonburi";
+    else if (fullText.includes("ภูเก็ต") || fullText.includes("ป่าตอง") || fullText.includes("กะทู้") || fullText.includes("บางเทา") || fullText.includes("เชิงทะเล") || fullText.includes("ฉลอง") || fullText.includes("ราไวย์")) pKey = "phuket";
+    else if (fullText.includes("เชียงราย") || fullText.includes("บ้านดู่") || fullText.includes("มฟล") || fullText.includes("แม่ฟ้าหลวง") || fullText.includes("หอนาฬิกา") || fullText.includes("แม่สาย")) pKey = "chiangrai";
+    else if (fullText.includes("ลำปาง") || fullText.includes("สวนดอก") || fullText.includes("สบตุ๋ย") || fullText.includes("ม.ราชภัฏลำปาง") || fullText.includes("เซ็นทรัลลำปาง")) pKey = "lampang";
+    else if (fullText.includes("ลำพูน") || fullText.includes("นิคมลำพูน")) pKey = "lamphun";
+    else if (fullText.includes("พิษณุโลก") || fullText.includes("มน.") || fullText.includes("ม.นเรศวร")) pKey = "phitsanulok";
+    else if (fullText.includes("อุดร") || fullText.includes("ud town") || fullText.includes("หนองประจักษ์") || fullText.includes("โพศรี") || fullText.includes("เซ็นทรัลอุดร") || fullText.includes("บ้านจาน")) pKey = "udonthani";
+    else if (fullText.includes("เชียงใหม่") || fullText.includes("นิมมาน") || fullText.includes("เจ็ดยอด") || fullText.includes("สันติธรรม") || fullText.includes("ช้างเผือก") || fullText.includes("หลัง มช") || fullText.includes("แม่โจ้") || fullText.includes("พายัพ") || fullText.includes("สันทราย") || fullText.includes("ท่าแพ") || fullText.includes("แม่ริม") || fullText.includes("หางดง")) pKey = "chiangmai";
     else if (!pKey || pKey === "no_province") pKey = "chiangmai";
 
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
