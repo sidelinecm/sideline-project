@@ -326,9 +326,7 @@ export default async (req, context) => {
     }
 
     let relatedProfiles = [];
-    const provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase();
-    const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
-
+    let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
    // 🟢 แก้เป็นแบบนี้: ถ้าในจังหวัดมีน้องน้อยกว่า 3 คน ให้ดึงเท่าที่มี ไม่ดึงข้ามจังหวัดมาเปลี่ยนชื่อ Alt มั่ว
 if (provinceKey) {
   const { data: allActive } = await supabase
@@ -498,7 +496,7 @@ if (matchUrl) {
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
+          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน / ไซด์ไลน์${provinceNameThai}`, "item": provinceHubUrl },
             { "@type": "ListItem", "position": 3, "name": stripHTML(displayName), "item": canonicalUrl }
           ]
         }
@@ -604,7 +602,7 @@ if (matchUrl) {
           <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
+          <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน / ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
