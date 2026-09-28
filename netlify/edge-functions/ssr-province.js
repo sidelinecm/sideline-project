@@ -889,11 +889,22 @@ export default async (req, context) => {
         "inLanguage": "th-TH",
         "isPartOf": { "@id": `${primaryDomain}/#website` },
         "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
-        ...(isNational ? {} : { "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } })
+        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } // 🟢 เชื่อมโยง Breadcrumb เสมอ
       }
     ];
 
-    if (!isNational) {
+    // 🟢 สร้าง BreadcrumbList แยกให้สมบูรณ์ทั้งหน้าแรก และหน้ารายจังหวัด
+    if (isNational) {
+      // โครงสร้างสำหรับหน้าแรก
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
+        ]
+      });
+    } else {
+      // โครงสร้างสำหรับหน้าจังหวัด
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${canonicalUrl}#breadcrumb`,
@@ -1060,13 +1071,20 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
     const topStoryProfiles = profilesList.slice(0, 10);
-    const renderStoryItem = (p, idx, isClone = false) => {
+    const renderStoryItem = (p, idx) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(p.slug || p.id);
-      const sImg = optimizeImg(p.imagePath || p.image_url || "", "thumb");
-      const hiddenAttr = isClone ? 'aria-hidden="true" tabindex="-1" rel="nofollow"' : '';
+      
+      // 🟢 แก้ปัญหาข้อ 1: ถ้ารูปพังหรือเป็นโลโก้ ให้ใช้ Cloudinary บังคับสัดส่วน 3:4 และเบลอภาพแทน ป้องกัน Layout Shift (CLS)
+      let rawImg = p.imagePath || p.image_url || "";
+      if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
+         // ใช้รูปภาพคนจริงๆ มาทำเป็นภาพเบลอ (Placeholder) สัดส่วนเป๊ะ
+         rawImg = "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+      }
+      const sImg = optimizeImg(rawImg, "thumb");
+
       return `
-        <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="${isClone ? '' : `ดูโปรไฟล์ น้อง${sName}`}" ${hiddenAttr}>
+        <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="ดูโปรไฟล์ น้อง${sName}">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
              <img src="${sImg}" alt="${sName}" loading="lazy" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
@@ -1078,9 +1096,11 @@ export default async (req, context) => {
       `;
     };
 
-    const primaryStories = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, false)).join("");
-    const cloneStories = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx, true)).join("");
-    finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${primaryStories + cloneStories}</div>`);
+    // 🟢 แก้ปัญหาข้อ 3: ลบการ Clone Story ทิ้ง ลดขนาด DOM Size ไม่ให้เว็บหน่วง
+    const primaryStories = topStoryProfiles.map((p, idx) => renderStoryItem(p, idx)).join("");
+    finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${primaryStories}</div>`);
+
+    
 
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);

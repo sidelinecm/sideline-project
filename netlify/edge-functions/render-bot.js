@@ -182,10 +182,21 @@ function generateSrcSet(imagePath) {
 }
 
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  const customBio = p.description && p.description.trim().length > 10 
-    ? ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"` 
-    : "";
+  // 🟢 1. ดักกรอง Description ขยะ/ก็อปปี้วางซ้ำซาก (ป้องกัน Google แบนเพราะ Thin Content)
+  let customBio = "";
+  if (p.description && p.description.trim().length > 10) {
+    const isSpamText = /เรทราคา รายละเอียดค่ะ|1500\/1 ชม\. ไม่รวมห้อง|ฟีลแฟน เอาใจเก่ง ไม่เร่ง ตรงปก|\\ \(\\ \(\„•ㅅ•„\)|╭ \/ づ♡/i.test(p.description);
+    
+    if (!isSpamText) {
+      // ถ้าเป็นข้อความพิมพ์เองปกติ ให้แสดงผลตามนั้น
+      customBio = ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"`;
+    } else {
+      // ถ้าตรวจเจอว่าเป็นสแปมข้อความซ้ำ ให้ใส่ประโยคเสริม SEO แทน
+      customBio = ` การันตีตัวจริงตรงปก 100% ดูแลเอาใจใส่สไตล์ฟิวแฟนในพื้นที่${zone} นัดง่าย ปลอดภัย จ่ายเงินหน้างานค่ะ`; 
+    }
+  }
 
+  // 🟢 2. วิเคราะห์สไตล์ของน้องๆ จาก Tags และ สัดส่วน (คงไว้เหมือนเดิม)
   const rawTags = (Array.isArray(p.styleTags || p.style_tags) 
     ? (p.styleTags || p.style_tags).join(" ") 
     : String(p.styleTags || p.style_tags || "")).toLowerCase();
@@ -204,6 +215,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
     persona = "curvy";
   }
 
+  // 🟢 3. สุ่มประโยคไม่ให้ซ้ำกันด้วยการ Hash ชื่อ (คงไว้เหมือนเดิม)
   const seedStr = String(p.slug || p.id || displayName);
   const hash = seedStr.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const v = hash % 3;
@@ -246,7 +258,11 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
         ? `แนะนำ ${displayName} เพื่อนเที่ยวฟิวแฟนที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
         : `หากคุณกำลังมองหาเพื่อนเที่ยวรู้ใจที่ดูแลด้วยความจริงใจ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. สไตล์ฟิวแฟนหวานละมุน อัธยาศัยดี มีความเป็นกันเอง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
   }
-}
+}          
+
+  
+
+    
 
 export default async (req, context) => {
   const url = new URL(req.url);
