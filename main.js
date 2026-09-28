@@ -1105,9 +1105,14 @@ if (heroH1) {
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
 
-    // 🟢 1. ดึงรูปภาพที่แปลงแล้วจาก p.images[0]
-    const imgSrc = (p.images && p.images[0] && p.images[0].src) 
-      || optimizeImg(p.imagePath || p.image_url || p.imageUrl || DEFAULT_FALLBACK_IMG, 400, 560);
+    // 🟢 แก้ปัญหาข้อ 1: ถ้าระบบจับได้ว่าเป็นโลโก้เว็บ (ทำให้สัดส่วนเพี้ยน) ให้สลับไปใช้ภาพ Placeholder แบบเบลอ 3:4 ทันที
+    let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
+    if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
+        rawPath = "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+    }
+    const imgSrc = (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) 
+      ? p.images[0].src 
+      : optimizeImg(rawPath, 400, 560);
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1573,22 +1578,31 @@ if (heroH1) {
       `;
     }
 
-    // 🟢 8. คำบรรยายรายละเอียด (กรองคำซ้ำและคำเละเทะออก)
+    
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
       let rawDesc = (profile.description && profile.description.trim()) ? profile.description : "";
       
-      // ลบคำซ้ำซ้อนและสัญลักษณ์แปลกๆ ออกให้เนียนตา
-      rawDesc = rawDesc
-        .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*){2,}/g, "บริการดูแลสไตล์ฟิวแฟน ")
-        .replace(/[ฃ͡➴˚˳*]+/g, "")
-        .trim();
+      const spamPatterns = [
+        /เรทราคา รายละเอียดค่ะ/i, /1500\/1 ชม\. ไม่รวมห้อง/i,
+        /ฟีลแฟน เอาใจเก่ง ไม่เร่ง ตรงปก/i, /1,500\/\s*1\s*ชม/i,
+        /\\ \(\\ \(\„•ㅅ•„\)/i, /╭ \/ づ♡/i
+      ];
 
-      const defaultDesc = `น้อง${cleanName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
-      const finalDesc = rawDesc || defaultDesc;
+      const isSpam = spamPatterns.some(pattern => pattern.test(rawDesc));
 
-      descContent.innerHTML = escapeHTML(finalDesc).replace(/\n/g, "<br>");
+      if (isSpam || rawDesc.length < 10) {
+        // หากเจอคำซ้ำ ให้สุ่มคำบรรยายที่มีคุณภาพจากข้อมูลน้องๆ เพื่อให้ SEO มองว่าเป็นเนื้อหาใหม่
+        rawDesc = `น้อง${cleanName} สาวรับงาน${pProvText} พิกัดย่าน${primaryZone} วัย ${profile.safeAge || "22"} ปี สัดส่วน ${profile.safeStats || "36-24-35"} บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พูดเพราะ เอาใจเก่ง ไม่เร่งเวลา รับประกันตัวจริงสวยตรงปก 100% นัดเจออย่างปลอดภัย จ่ายเงินหน้างานไม่มีโอนมัดจำค่ะ`;
+      } else {
+        rawDesc = rawDesc
+          .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*){2,}/g, "บริการดูแลสไตล์ฟิวแฟน ")
+          .replace(/[ฃ͡➴˚˳*]+/g, "")
+          .trim();
+      }
+
+      descContent.innerHTML = escapeHTML(rawDesc).replace(/\n/g, "<br>");
       descContent.style.cssText = "font-size: 12.5px; color: #334155; line-height: 1.6; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px;";
     }
     if (descContainer) descContainer.style.display = "block";
@@ -2539,15 +2553,11 @@ window.shareProfile = async function (name, profileUrl) {
       `;
     };
 
-  // 🟢 ชุดที่ 1: ชุดหลักสำหรับการคลิกดูข้อมูล และให้ Googlebot สแกน (SEO Friendly)
+  // 🟢 แก้ปัญหาข้อ 3: ลดการเรนเดอร์ DOM ซ้ำซ้อน ประหยัด RAM ให้มือถือ
     const primaryHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, false)).join("");
+    trackEl.innerHTML = primaryHtml;
+    }
     
-    // 🟢 ชุดที่ 2: ชุดโคลนสำหรับทำ CSS Infinite Loop (ซ่อนจาก Screen Reader ไม่ให้อ่านซ้ำ)
-    const cloneHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, true)).join("");
-
-   trackEl.innerHTML = primaryHtml + cloneHtml;
-  }
-
   // ==========================================================================
   // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (พร้อมกล่องแจ้งเตือนสถานะ สำเร็จ/ล้มเหลว)
   // ==========================================================================
