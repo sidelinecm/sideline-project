@@ -84,7 +84,9 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") 
+   .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") 
+   .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "ฟิวแฟน ")
     .replace(/(ฟิวแฟน\s*)+/gi, "ฟิวแฟน ")
@@ -403,7 +405,8 @@ if (matchUrl) {
 
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
    const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
-    const metaDescription = `${displayName} เพื่อนเที่ยวฟิวแฟน (GFE) พิกัด ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสุภาพ อบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไร้มัดจำ`;
+   
+const metaDescription = `🟢 สแตนด์บายพร้อมรับงาน! ${displayName} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี สไตล์ฟิวแฟนเอาใจเก่ง ตรงปก 100% นัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);

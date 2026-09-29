@@ -228,7 +228,7 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "ฟิวแฟน")
+   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
@@ -843,9 +843,9 @@ for (const p of rawProfiles) {
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";
 
-    const metaDescription = isNational
-      ? `รวม ${liveTotalProfiles}+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุม ${activeProvincesCount} จังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า`
-      : `${countText}เพื่อนเที่ยวและไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+const metaDescription = isNational
+  ? `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveTotalProfiles}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${activeProvincesCount} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`
+  : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! ${countText}ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -885,20 +885,21 @@ for (const p of rawProfiles) {
         "publisher": { "@id": `${primaryDomain}/#organization` },
         "inLanguage": "th-TH"
       },
-      {
-        "@type": "CollectionPage",
-        "@id": `${canonicalUrl}#webpage`,
-        "name": stripHTML(metaTitle),
-        "description": cleanMetaDesc,
-        "url": canonicalUrl,
-        "inLanguage": "th-TH",
-        "isPartOf": { "@id": `${primaryDomain}/#website` },
-        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
-        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` } // 🟢 เชื่อมโยง Breadcrumb เสมอ
-      }
+{
+  "@type": "CollectionPage",
+  "@id": `${canonicalUrl}#webpage`,
+  "name": stripHTML(metaTitle),
+  "description": cleanMetaDesc,
+  "url": canonicalUrl,
+  "inLanguage": "th-TH",
+  "dateModified": new Date().toISOString(),
+  "isPartOf": { "@id": `${primaryDomain}/#website` },
+  "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
+  "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
+}
     ];
 
-    // 🟢 สร้าง BreadcrumbList แยกให้สมบูรณ์ทั้งหน้าแรก และหน้ารายจังหวัด
+  
     if (isNational) {
       // โครงสร้างสำหรับหน้าแรก
       schemaGraph.push({
