@@ -2370,9 +2370,7 @@ window.shareProfile = async function (name, profileUrl) {
   }
 };
 
-  // ==========================================================================
-    // 🟢 ระบบดึงข้อมูล: ดักกรองชื่อว่าง + ตัดรูปซ้ำ + กันข้อมูลขยะ 100%
-    // ==========================================================================
+  
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
@@ -2392,28 +2390,31 @@ window.shareProfile = async function (name, profileUrl) {
           const rawName = (raw.name || "").trim();
           const cleanName = rawName.toLowerCase().replace(/^(น้อง|สาว|พี่)\s*/gi, "");
           if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") {
-            continue; // 👈 ข้ามการ์ดที่ไม่มีชื่อ ไม่ให้หลุดไปหน้าเว็บ
+            continue;
           }
 
-          // 2. กรอง ID ซ้ำ
+          // 2. 🔒 กรองทิ้งทันที ถ้าไม่มีรูปจริง หรือใช้รูปโลโก้เว็บ
+          const rawImg = (raw.imagePath || raw.image_url || raw.imageUrl || "").trim().toLowerCase();
+          if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
+            continue; // ตัดคนไม่มีรูปทิ้ง
+          }
+
+          // 3. กรอง ID ซ้ำ
           if (raw.id && seenIds.has(String(raw.id))) continue;
 
-          // 3. กรองชื่อซ้ำในจังหวัดเดียวกัน
+          // 4. กรองชื่อซ้ำในจังหวัดเดียวกัน
           const pKey = (raw.provinceKey || raw.province_slug || "").toLowerCase();
           const nameSig = `${cleanName}_${pKey}`;
           if (seenNames.has(nameSig)) continue;
 
-          // 4. กรองรูปภาพซ้ำ (รวมถึงรูป Placeholder / Fallback)
-          const rawImg = (raw.imagePath || raw.image_url || raw.imageUrl || "").trim().toLowerCase();
+          // 5. สร้างลายเซ็นรูปภาพเพื่อเช็ครูปซ้ำ
           let imgSig = "";
-          if (rawImg) {
-            const parts = rawImg.split("?")[0].split("/");
-            imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
-          }
+          const parts = rawImg.split("?")[0].split("/");
+          imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
 
-          // ถ้าไม่มีรูป หรือรูปนี้เคยแสดงไปแล้ว ให้ข้ามทันที
           if (imgSig && seenImgs.has(imgSig)) continue;
 
+          // บันทึกค่ากันซ้ำ
           if (raw.id) seenIds.add(String(raw.id));
           seenNames.add(nameSig);
           if (imgSig) seenImgs.add(imgSig);
@@ -2485,11 +2486,9 @@ window.shareProfile = async function (name, profileUrl) {
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
-  } // 🟢 ปิดฟังก์ชัน initApplication
-
-  // ==========================================================================
-  // 🟢 ฟังก์ชัน Stories: ทำงานสมบูรณ์ 100% (โหลดไว 3KB, เปิด Lightbox ได้ทันที, Zero CLS)
-  // ==========================================================================
+  } 
+  
+  
   function initAgencyStories() {
     const trackEl = document.getElementById("agency-stories-track");
     if (!trackEl) return;
