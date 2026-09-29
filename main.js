@@ -372,7 +372,7 @@ async function getSupabaseClient() {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "ฟิวแฟน")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     
@@ -1855,14 +1855,15 @@ if (heroH1) {
         targetUrl = `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        // ✅ ของใหม่: คืน Title ตัวแชมป์กลับมาเสมอ
+        
 targetTitle = isEN 
   ? `${provName} Escorts & Companions | FirstModelHub` 
   : `ไซด์ไลน์${provName} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
 
-        targetDesc = isEN
-          ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
-          : `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์${provName} สไตล์ฟิวแฟน (GFE) คัดสรรสาวสวยตรงปก 100% ปลอดภัยนัดพบจ่ายหน้างาน ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+        
+targetDesc = isEN
+  ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
+  : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! รวมโปรไฟล์ไซด์ไลน์${provName} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
      } else {
