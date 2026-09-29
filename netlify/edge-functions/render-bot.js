@@ -414,18 +414,20 @@ const metaDescription = `🟢 สแตนด์บายพร้อมรั�
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
-    const schemaGraph = {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebPage",
-          "@id": `${canonicalUrl}#webpage`,
-          "url": canonicalUrl,
-          "name": stripHTML(pageTitle),
-          "description": stripHTML(metaDescription),
-          "inLanguage": "th-TH",
-          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
-        },
+   
+const schemaGraph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#webpage`,
+      "url": canonicalUrl,
+      "name": stripHTML(pageTitle),
+      "description": stripHTML(metaDescription),
+      "inLanguage": "th-TH",
+      "dateModified": new Date().toISOString(), // 👈 เพิ่มบรรทัดนี้ลงไปครับ
+      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
+    },
         {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
