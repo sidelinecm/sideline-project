@@ -790,29 +790,34 @@ export default async (req, context) => {
     const seenNameKeys = new Set();
     const deduplicatedProfiles = [];
 
-    for (const p of rawProfiles) {
-      if (!p) continue;
-      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-      let imgSig = "";
-      if (rawImg) {
-        const parts = rawImg.split("?")[0].split("/");
-        imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
-      }
+    // ✅ แก้ไขใหม่: ต้องมีชื่อจริง และมีรูปคนจริงเท่านั้น
+for (const p of rawProfiles) {
+  if (!p) continue;
 
-      const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
-      const nameSig = `${cleanName}_${p.age || ""}_${p.rate || ""}`;
+  const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
+  if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
 
-      if (imgSig && seenImageKeys.has(imgSig)) continue;
-      if (cleanName && seenNameKeys.has(nameSig)) continue;
+  const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+  // 🔒 ถ้าไม่มีรูป หรือใช้รูปโลโก้เว็บ ตัดทิ้งทันที ห้ามนำมานับ
+  if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
 
-      if (imgSig) seenImageKeys.add(imgSig);
-      if (cleanName) seenNameKeys.add(nameSig);
+  let imgSig = "";
+  const parts = rawImg.split("?")[0].split("/");
+  imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
+  const nameSig = `${cleanName}_${p.age || ""}_${p.rate || ""}`;
 
-      const realProvince = detectAccurateProvince(p);
-      p.provinceKey = realProvince;
-      p.province_slug = realProvince;
-      deduplicatedProfiles.push(p);
-    }
+  if (imgSig && seenImageKeys.has(imgSig)) continue;
+  if (cleanName && seenNameKeys.has(nameSig)) continue;
+
+  seenImageKeys.add(imgSig);
+  seenNameKeys.add(nameSig);
+
+  const realProvince = detectAccurateProvince(p);
+  p.provinceKey = realProvince;
+  p.province_slug = realProvince;
+  deduplicatedProfiles.push(p);
+}
+    
 
     let profilesList = deduplicatedProfiles;
     if (!isNational && provinceSlug !== "national") {
@@ -980,42 +985,96 @@ export default async (req, context) => {
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
 
-    const popularLocationsFooter = `
-      <div class="footer-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; width: 100%;">
-        <div class="directory-region-col">
-          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">📍 ภาคเหนือ (76 โปรไฟล์)</strong>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
-            <li><a href="/location/chiangmai" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์เชียงใหม่ (55 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/nimman" style="color: #C084FC; text-decoration: none;">• โซนนิมมานเหมินท์</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนเจ็ดยอด - สันติธรรม - ช้างเผือก</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangmai" style="color: var(--text-muted); text-decoration: none;">• โซนหลัง มช. - แม่โจ้ - พายัพ - สันทราย</a></li>
-            <li style="margin-top: 6px;"><a href="/location/chiangrai" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์เชียงราย (13 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/chiangrai" style="color: var(--text-muted); text-decoration: none;">• โซนบ้านดู่ - หน้า มฟล. - หอนาฬิกา</a></li>
-            <li style="margin-top: 6px;"><a href="/location/lampang" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ลำปาง (8 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/lampang" style="color: var(--text-muted); text-decoration: none;">• โซนในเมือง - สวนดอก - สบตุ๋ย - ม.ราชภัฏ</a></li>
-          </ul>
-        </div>
-        <div class="directory-region-col">
-          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">📍 ภาคอีสาน (28 โปรไฟล์)</strong>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
-            <li><a href="/location/khon-kaen" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ขอนแก่น (15 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนกังสดาล - หลัง มข. - โนนม่วง</a></li>
-            <li style="padding-left: 10px;"><a href="/location/khon-kaen" style="color: var(--text-muted); text-decoration: none;">• โซนเซ็นทรัล - บึงแก่นนคร - ม.ภาค</a></li>
-            <li style="margin-top: 6px;"><a href="/location/udonthani" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์อุดรธานี (13 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซน UD Town - เซ็นทรัลอุดร - โพศรี</a></li>
-            <li style="padding-left: 10px;"><a href="/location/udonthani" style="color: var(--text-muted); text-decoration: none;">• โซนหนองประจักษ์ - บ้านจาน - ตลาดรังษิณา</a></li>
-          </ul>
-        </div>
-        <div class="directory-region-col">
-          <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">📍 ภาคใต้ (3 โปรไฟล์)</strong>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
-            <li><a href="/location/phuket" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">ไซด์ไลน์ภูเก็ต (3 คน)</a></li>
-            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนตัวเมืองภูเก็ต - ป่าตอง - กะทู้</a></li>
-            <li style="padding-left: 10px;"><a href="/location/phuket" style="color: var(--text-muted); text-decoration: none;">• โซนบางเทา - เชิงทะเล - ฉลอง - ราไวย์</a></li>
-          </ul>
-        </div>
-      </div>
+    // ✅ แก้ไขใหม่: นับจำนวนจริงรายจังหวัด และคำนวณยอดรวมรายภาคแบบ Real-time
+const provinceCounts = deduplicatedProfiles.reduce((acc, p) => {
+  const k = (p.provinceKey || "").toLowerCase();
+  if (k) acc[k] = (acc[k] || 0) + 1;
+  return acc;
+}, {});
+
+const REGION_CONFIG = [
+  {
+    name: "ภาคเหนือ",
+    icon: "📍",
+    provinces: [
+      { key: "chiangmai", name: "ไซด์ไลน์เชียงใหม่", zones: ["โซนนิมมานเหมินท์", "โซนเจ็ดยอด - สันติธรรม - ช้างเผือก", "โซนหลัง มช. - แม่โจ้ - สันทราย"] },
+      { key: "chiangrai", name: "ไซด์ไลน์เชียงราย", zones: ["โซนบ้านดู่ - หน้า มฟล. - หอนาฬิกา"] },
+      { key: "lampang", name: "ไซด์ไลน์ลำปาง", zones: ["โซนในเมือง - สวนดอก - ม.ราชภัฏ"] },
+      { key: "lamphun", name: "ไซด์ไลน์ลำพูน", zones: ["โซนนิคมลำพูน - ตัวเมือง"] },
+      { key: "phitsanulok", name: "ไซด์ไลน์พิษณุโลก", zones: ["โซนรอบ มน. - ตัวเมือง"] }
+    ]
+  },
+  {
+    name: "ภาคอีสาน",
+    icon: "📍",
+    provinces: [
+      { key: "khon-kaen", name: "ไซด์ไลน์ขอนแก่น", zones: ["โซนกังสดาล - หลัง มข. - โนนม่วง", "โซนเซ็นทรัล - บึงแก่นนคร"] },
+      { key: "udonthani", name: "ไซด์ไลน์อุดรธานี", zones: ["โซน UD Town - เซ็นทรัลอุดร", "โซนหนองประจักษ์ - ตลาดรังษิณา"] },
+      { key: "korat", name: "ไซด์ไลน์โคราช", zones: ["โซนในเมือง - เซ็นทรัล - มทส."] }
+    ]
+  },
+  {
+    name: "ภาคกลาง / ตะวันออก",
+    icon: "📍",
+    provinces: [
+      { key: "bangkok", name: "ไซด์ไลน์กรุงเทพฯ", zones: ["โซนสุขุมวิท - รัชดา - ห้วยขวาง", "โซนสาทร - ทองหล่อ - พระราม 9"] },
+      { key: "chonburi", name: "ไซด์ไลน์ชลบุรี-พัทยา", zones: ["โซนพัทยา - จอมเทียน - บางแสน"] },
+      { key: "ayutthaya", name: "ไซด์ไลน์อยุธยา", zones: ["โซนโรจนะ - ตัวเมือง"] }
+    ]
+  },
+  {
+    name: "ภาคใต้",
+    icon: "📍",
+    provinces: [
+      { key: "phuket", name: "ไซด์ไลน์ภูเก็ต", zones: ["โซนตัวเมืองภูเก็ต - ป่าตอง - กะทู้", "โซนบางเทา - เชิงทะเล - ราไวย์"] },
+      { key: "songkhla", name: "ไซด์ไลน์หาดใหญ่", zones: ["โซนตัวเมืองหาดใหญ่ - ม.อ."] },
+      { key: "suratthani", name: "ไซด์ไลน์สุราษฎร์-สมุย", zones: ["โซนตัวเมือง - หาดเฉวง เกาะสมุย"] }
+    ]
+  }
+];
+
+const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
+  // กรองเอาเฉพาะจังหวัดที่มีน้อง > 0 คนจริง
+  const activeProvsInRegion = region.provinces.filter(p => (provinceCounts[p.key] || 0) > 0);
+  if (activeProvsInRegion.length === 0) return ""; // ถ้าไม่มีน้องในภาคนั้นเลย ให้ซ่อนทั้งภาค
+
+  const totalRegionProfiles = activeProvsInRegion.reduce((sum, p) => sum + (provinceCounts[p.key] || 0), 0);
+
+  const provListHtml = activeProvsInRegion.map((p, idx) => {
+    const count = provinceCounts[p.key] || 0;
+    const zonesHtml = p.zones.map(z => `
+      <li style="padding-left: 10px;">
+        <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none;">• ${escapeHTML(z)}</a>
+      </li>
+    `).join("");
+
+    return `
+      <li style="${idx > 0 ? "margin-top: 8px;" : ""}">
+        <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">
+          ${escapeHTML(p.name)} (${count} คน)
+        </a>
+      </li>
+      ${zonesHtml}
     `;
+  }).join("");
+
+  return `
+    <div class="directory-region-col">
+      <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">
+        ${region.icon} ${region.name} (${totalRegionProfiles} โปรไฟล์)
+      </strong>
+      <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.8;">
+        ${provListHtml}
+      </ul>
+    </div>
+  `;
+}).filter(Boolean).join("");
+
+const popularLocationsFooter = `
+  <div class="footer-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; width: 100%;">
+    ${dynamicRegionColsHtml}
+  </div>
+`;
 
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
@@ -1207,31 +1266,29 @@ export default async (req, context) => {
             <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
           </div>
         `;
-      } else {
-        const fallbackCards = deduplicatedProfiles.slice(0, 6).map((p, i) => renderCardHtml(p, false, provinceNameThai, i)).join("");
+    } else {
+        // ✅ ตัด fallbackCards (การดึงรูปข้ามจังหวัด) ทิ้ง 100%
         displayAreaHtml = `
           <div class="section-content-wrapper">
-            <div style="background: linear-gradient(135deg, #FFF1F2 0%, #FAF5FF 100%); border: 1.5px solid #FECDD3; border-radius: 20px; padding: 24px 16px; text-align: center; margin-bottom: 24px;">
-              <span style="font-size: 28px; display: inline-block; margin-bottom: 6px;">⚡</span>
-              <h3 style="font-size: 16px; font-weight: 900; color: #BE123C; margin: 0 0 6px 0;">โซน${escapeHTML(provinceNameThai)} กำลังเปิดรับสมัครน้องๆ และเตรียมลงโปรไฟล์</h3>
-              <p style="font-size: 12px; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">ทางระบบอยู่ระหว่างการตรวจสอบตัวตน (Verified 100%) เพื่อความปลอดภัยและตรงปกสูงสุด<br>สามารถแอดไลน์สอบถามคิวน้องๆ ที่พร้อมเดินทางข้ามโซน หรือลงทะเบียนรับสมัครได้เลยค่ะ</p>
-              <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="btn-concierge-line" style="display: inline-flex; margin: 0 auto;">
-                <i class="fab fa-line"></i> แอดไลน์สอบถามคิวงานโซน${escapeHTML(provinceNameThai)}
-              </a>
+            <div style="background: linear-gradient(135deg, #FFF1F2 0%, #FAF5FF 100%); border: 1.5px solid #FECDD3; border-radius: 20px; padding: 32px 18px; text-align: center; margin: 24px 0;">
+              <span style="font-size: 32px; display: inline-block; margin-bottom: 8px;">⚡</span>
+              <h3 style="font-size: 16px; font-weight: 900; color: #BE123C; margin: 0 0 8px 0;">ขณะนี้ยังไม่มีโปรไฟล์ในโซน${escapeHTML(provinceNameThai)}</h3>
+              <p style="font-size: 12px; color: #475569; margin: 0 0 18px 0; line-height: 1.6;">ทางระบบคัดสรรเฉพาะน้องๆ ที่มีตัวตนจริงและตรงปก 100% เท่านั้น<br>ท่านสามารถแอดไลน์สอบถามคิวน้องๆ โซนใกล้เคียง หรือลงทะเบียนรับสมัครได้เลยค่ะ</p>
+              
+              <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="btn-concierge-line" style="display: inline-flex; margin: 0;">
+                  <i class="fab fa-line"></i> แอดไลน์สอบถามคิวงาน
+                </a>
+                <a href="/" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); border-radius: 100px; color: #7C3AED; font-weight: 800; font-size: 12px; text-decoration: none;">
+                  ดูน้องๆ ทั่วไทยทั้งหมด &rarr;
+                </a>
+              </div>
             </div>
-            <div class="province-header-row">
-                <h2 class="province-clean-title">
-                    <span class="province-pin-icon"><i class="fas fa-star" style="color: #F59E0B;"></i></span>
-                    <span class="province-prefix">น้องๆ ยอดนิยมแนะนำ</span>
-                    <span class="province-name-highlight">(พร้อมเดินทาง)</span>
-                </h2>
-                <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายหน้างาน ไร้มัดจำ</span>
-            </div>
-            <div class="profile-grid profiles-grid-row">${fallbackCards}</div>
           </div>
         `;
       }
     }
+    
 
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
