@@ -1982,14 +1982,13 @@ function hideGlobalLoader() {
 async function handleUrlRouting(isInitial = false) {
   let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
-  // 🟢 ตรวจสอบว่าหน้าเว็บปัจจุบันเป็นหน้า Standalone Profile ที่เรนเดอร์มาจาก render-bot.js หรือไม่
   const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
-  if (isStandaloneProfile) {
-    // ถ้าเป็นหน้าโปรไฟล์เดี่ยวแล้ว ให้หยุดทำงานส่วน SPA Routing ทันที ไม่ต้องเปิด Lightbox ซ้อน
-    return;
-  }
+if (isStandaloneProfile) {
+    hideGlobalLoader();
+    return; // ⛔ ออกจากการทำงานทันที ประหยัดเน็ต ประหยัด RAM 100%
+}
 
-  // 1. ตรวจสอบ Sideline Lightbox Route สำหรับหน้าหลัก
+  
   const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
   if (sidelineMatch) {
     let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
