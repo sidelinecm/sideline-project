@@ -1,51 +1,207 @@
-/sideline/%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-48 301
+# ========================================================
+# 301 Permanent Redirects: Thai URL to Clean Model ID
+# ========================================================
+
+# 1. น้องใบข้าว (ID: 48)
+/sideline/%E0%B9%83%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-48 301
+/sideline/ใบข้าว-ในเมือง /sideline/model-48 301
+
+# 2. น้องโอลีฟ (ID: 43)
 /sideline/%E0%B9%82%E0%B8%AD%E0%B8%A5%E0%B8%B5%E0%B8%9F-%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%AD%E0%B8%B8%E0%B8%94%E0%B8%A3 /sideline/model-43 301
+/sideline/โอลีฟ-ตัวเมืองอุดร /sideline/model-43 301
+
+# 3. น้องพะแพง (ID: 36)
 /sideline/%E0%B8%9E%E0%B8%B0%E0%B9%81%E0%B8%9E%E0%B8%87-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-36 301
+/sideline/พะแพง-นิมมาน /sideline/model-36 301
+
+# 4. น้องจ๊ะจ๋า (ID: 29)
 /sideline/%E0%B8%88%E0%B9%8A%E0%B8%B0%E0%B8%88%E0%B9%8B%E0%B8%B2-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-29 301
+/sideline/จ๊ะจ๋า-ในเมือง /sideline/model-29 301
+
+# 5. น้องข้าวปุ้น นิมมาน (ID: 37)
 /sideline/%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%9B%E0%B8%B8%E0%B9%89%E0%B8%99-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-37 301
+/sideline/ข้าวปุ้น-นิมมาน /sideline/model-37 301
+
+# 6. น้องส้มโอ (ID: 32)
 /sideline/%E0%B8%AA%E0%B9%89%E0%B8%A1%E0%B9%82%E0%B8%AD-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-32 301
+/sideline/ส้มโอ-ในเมือง /sideline/model-32 301
+
+# 7. น้องแบมแบม (ID: 55)
 /sideline/%E0%B9%81%E0%B8%9A%E0%B8%A1%E0%B9%81%E0%B8%9A%E0%B8%A1-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-55 301
+/sideline/แบมแบม-นิมมาน /sideline/model-55 301
+
+# 8. น้องน้ำหวาน อุดร (ID: 64)
 /sideline/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%AB%E0%B8%A7%E0%B8%B2%E0%B8%99-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-64 301
+/sideline/น้ำหวาน-ในเมือง /sideline/model-64 301
+
+# 9. น้องขนม (ID: 21)
 /sideline/%E0%B8%82%E0%B8%99%E0%B8%A1-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-21 301
+/sideline/ขนม-ในเมือง /sideline/model-21 301
+
+# 10. น้องโกโก้ ขอนแก่น (ID: 42)
 /sideline/%E0%B9%82%E0%B8%81%E0%B9%82%E0%B8%81%E0%B9%89-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-42 301
+/sideline/โกโก้-ในเมือง /sideline/model-42 301
+
+# 11. น้องเบบี๋ อุดร (ID: 39)
 /sideline/%E0%B9%80%E0%B8%9A%E0%B8%9A%E0%B8%B5%E0%B9%8B-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-39 301
+/sideline/เบบี๋-ในเมือง /sideline/model-39 301
+
+# 12. น้องของขวัญ เชียงใหม่ (ID: 17)
 /sideline/%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B8%A7%E0%B8%B1%E0%B8%8D-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-17 301
+/sideline/ของขวัญ-นิมมาน /sideline/model-17 301
+
+# 13. น้องเกล (ID: 22)
 /sideline/%E0%B9%80%E0%B8%81%E0%B8%A5-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-22 301
+/sideline/เกล-ในเมือง /sideline/model-22 301
+
+# 14. น้องโกโก้ เชียงใหม่ (ID: 46)
 /sideline/%E0%B9%82%E0%B8%81%E0%B9%82%E0%B8%81%E0%B9%89-%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88 /sideline/model-46 301
+/sideline/โกโก้-เชียงใหม่ /sideline/model-46 301
+
+# 15. น้องอ้ะอาย (ID: 57)
 /sideline/%E0%B8%AD%E0%B9%89%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A2-%E0%B8%AA%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B4%E0%B8%98%E0%B8%A3%E0%B8%A3%E0%B8%A1 /sideline/model-57 301
+/sideline/อ้ะอาย-สันติธรรม /sideline/model-57 301
+
+# 16. น้องกีตาร์ (ID: 18)
 /sideline/%E0%B8%81%E0%B8%B5%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B9%8C-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-18 301
+/sideline/กีตาร์-นิมมาน /sideline/model-18 301
+
+# 17. น้องไตเติ้ล (ID: 10)
 /sideline/%E0%B9%84%E0%B8%95%E0%B9%80%E0%B8%95%E0%B8%B4%E0%B9%89%E0%B8%A5 /sideline/model-10 301
+/sideline/ไตเติ้ล /sideline/model-10 301
+
+# 18. น้องป๊อป (ID: 14)
 /sideline/%E0%B8%9B%E0%B9%8A%E0%B8%AD%E0%B8%9B-%E0%B9%80%E0%B8%88%E0%B9%87%E0%B8%94%E0%B8%A2%E0%B8%AD%E0%B8%94 /sideline/model-14 301
+/sideline/ป๊อป-เจ็ดยอด /sideline/model-14 301
+
+# 19. น้องข้าวปุ้น เชียงราย (ID: 25)
 /sideline/%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%9B%E0%B8%B8%E0%B9%89%E0%B8%99-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-25 301
+/sideline/ข้าวปุ้น-ในเมือง /sideline/model-25 301
+
+# 20. น้องสมายด์ (ID: 74)
 /sideline/%E0%B8%AA%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B8%94%E0%B9%8C-%E0%B8%AA%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B4%E0%B8%98%E0%B8%A3%E0%B8%A3%E0%B8%A1 /sideline/model-74 301
+/sideline/สมายด์-สันติธรรม /sideline/model-74 301
+
+# 21. น้องการ์ตูน เชียงใหม่ (ID: 13)
 /sideline/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%95%E0%B8%B9%E0%B8%99-%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%E0%B9%83%E0%B8%81%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B8%87 /sideline/model-13 301
+/sideline/การ์ตูน-ตัวเมืองเชียงใหม่ใกล้เคียง /sideline/model-13 301
+
+# 22. น้องโรส (ID: 15)
 /sideline/%E0%B9%82%E0%B8%A3%E0%B8%AA-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-15 301
+/sideline/โรส-นิมมาน /sideline/model-15 301
+
+# 23. น้องแตงกวา ลำปาง (ID: 44)
 /sideline/%E0%B9%81%E0%B8%95%E0%B8%87%E0%B8%81%E0%B8%A7%E0%B8%B2-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87 /sideline/model-44 301
+/sideline/แตงกวา-ในเมืองลำปาง /sideline/model-44 301
+
+# 24. น้องไข่เจียว (ID: 49)
 /sideline/%E0%B9%84%E0%B8%82%E0%B9%88%E0%B9%80%E0%B8%88%E0%B8%B5%E0%B8%A2%E0%B8%A7-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-49 301
+/sideline/ไข่เจียว-ในเมือง /sideline/model-49 301
+
+# 25. น้องแตงกวา ขอนแก่น (ID: 66)
 /sideline/%E0%B9%81%E0%B8%95%E0%B8%87%E0%B8%81%E0%B8%A7%E0%B8%B2-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-66 301
+/sideline/แตงกวา-ในเมือง /sideline/model-66 301
+
+# 26. น้องลูกน้ำ เชียงใหม่ (ID: 16)
 /sideline/%E0%B8%A5%E0%B8%B9%E0%B8%81%E0%B8%99%E0%B9%89%E0%B8%B3-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-16 301
+/sideline/ลูกน้ำ-นิมมาน /sideline/model-16 301
+
+# 27. น้องกุ้กไก่ ขอนแก่น (ID: 24)
 /sideline/%E0%B8%81%E0%B8%B8%E0%B9%89%E0%B8%81%E0%B9%84%E0%B8%81%E0%B9%88-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-24 301
+/sideline/กุ้กไก่-ในเมือง /sideline/model-24 301
+
+# 28. น้องข้าวปุ้น อุดร (ID: 19)
 /sideline/%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%9B%E0%B8%B8%E0%B9%89%E0%B8%99-%E0%B9%83%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B9%83%E0%B8%81%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B8%87 /sideline/model-19 301
+/sideline/ข้าวปุ้น-ในตัวเมืองใกล้เคียง /sideline/model-19 301
+
+# 29. น้องข้าวฟ่าง เชียงใหม่ (ID: 35)
 /sideline/%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%9F%E0%B9%88%E0%B8%B2%E0%B8%87-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-35 301
+/sideline/ข้าวฟ่าง-นิมมาน /sideline/model-35 301
+
+# 30. น้องโมจิ ลำปาง (ID: 7)
 /sideline/%E0%B8%99%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A1%E0%B8%88%E0%B8%B4 /sideline/model-7 301
+/sideline/น้องโมจิ /sideline/model-7 301
+
+# 31. น้องของขวัญ ภูเก็ต (ID: 33)
 /sideline/%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B8%A7%E0%B8%B1%E0%B8%8D-%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%A0%E0%B8%B9%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%95 /sideline/model-33 301
+/sideline/ของขวัญ-เมืองภูเก็ต /sideline/model-33 301
+
+# 32. น้องหญิง (ID: 9)
 /sideline/%E0%B8%AB%E0%B8%8D%E0%B8%B4%E0%B8%87 /sideline/model-9 301
+/sideline/หญิง /sideline/model-9 301
+
+# 33. น้องเบบี๋ เชียงใหม่ (ID: 12)
 /sideline/%E0%B9%80%E0%B8%9A%E0%B8%9A%E0%B8%B5%E0%B9%8B-%E0%B9%83%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%E0%B9%83%E0%B8%81%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B8%87 /sideline/model-12 301
+/sideline/เบบี๋-ในตัวเมืองเชียงใหม่ใกล้เคียง /sideline/model-12 301
+
+# 34. น้องขนมจีน (ID: 34)
 /sideline/%E0%B8%82%E0%B8%99%E0%B8%A1%E0%B8%88%E0%B8%B5%E0%B8%99-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-34 301
+/sideline/ขนมจีน-ในเมือง /sideline/model-34 301
+
+# 35. น้องน้ำอิง (ID: 45)
 /sideline/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%AD%E0%B8%B4%E0%B8%87-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87 /sideline/model-45 301
+/sideline/น้ำอิง-ในเมืองลำปาง /sideline/model-45 301
+
+# 36. น้องเดียร์ ขอนแก่น (ID: 50)
 /sideline/%E0%B9%80%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B8%A3%E0%B9%8C-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-50 301
+/sideline/เดียร์-ในเมือง /sideline/model-50 301
+
+# 37. น้องมะนาว เชียงใหม่ (ID: 69)
 /sideline/%E0%B8%A1%E0%B8%B0%E0%B8%99%E0%B8%B2%E0%B8%A7-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-69 301
+/sideline/มะนาว-นิมมาน /sideline/model-69 301
+
+# 38. น้องออย (ID: 6)
 /sideline/%E0%B8%AD%E0%B8%AD%E0%B8%A2 /sideline/model-6 301
+/sideline/ออย /sideline/model-6 301
+
+# 39. น้องออมสิน (ID: 31)
 /sideline/%E0%B8%AD%E0%B8%AD%E0%B8%A1%E0%B8%AA%E0%B8%B4%E0%B8%99-%E0%B9%80%E0%B8%8B%E0%B9%87%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%A5%E0%B8%82%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%88%E0%B8%99 /sideline/model-31 301
+/sideline/ออมสิน-เซ็นทรัลขอนแก่น /sideline/model-31 301
+
+# 40. น้องเปรี้ยว (ID: 27)
 /sideline/%E0%B9%80%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B9%89%E0%B8%A2%E0%B8%A7-%E0%B9%80%E0%B8%8B%E0%B9%87%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%A5%E0%B8%AD%E0%B8%B8%E0%B8%94%E0%B8%A3 /sideline/model-27 301
+/sideline/เปรี้ยว-เซ็นทรัลอุดร /sideline/model-27 301
+
+# 41. น้องกิ๊ฟ (ID: 30)
 /sideline/%E0%B8%81%E0%B8%B4%E0%B9%8A%E0%B8%9F-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-30 301
+/sideline/กิ๊ฟ-ในเมือง /sideline/model-30 301
+
+# 42. น้องฟิล์ม (ID: 28)
 /sideline/%E0%B8%9F%E0%B8%B4%E0%B8%A5%E0%B9%8C%E0%B8%A1-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-28 301
+/sideline/ฟิล์ม-ในเมือง /sideline/model-28 301
+
+# 43. น้องการ์ตูน อุดร (ID: 41)
 /sideline/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%95%E0%B8%B9%E0%B8%99-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-41 301
+/sideline/การ์ตูน-ในเมือง /sideline/model-41 301
+
+# 44. น้องเฟย์ เชียงราย (ID: 47)
 /sideline/%E0%B9%80%E0%B8%9F%E0%B8%A2%E0%B9%8C-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-47 301
+/sideline/เฟย์-ในเมือง /sideline/model-47 301
+
+# 45. น้องโดนัท (ID: 53)
 /sideline/%E0%B9%82%E0%B8%94%E0%B8%99%E0%B8%B1%E0%B8%97-%E0%B8%99%E0%B8%B4%E0%B8%A1%E0%B8%A1%E0%B8%B2%E0%B8%99 /sideline/model-53 301
+/sideline/โดนัท-นิมมาน /sideline/model-53 301
+
+# 46. น้องโมอาร์ (ID: 23)
 /sideline/%E0%B9%82%E0%B8%A1%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B9%8C-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-23 301
+/sideline/โมอาร์-ในเมือง /sideline/model-23 301
+
+# 47. น้องกุ้กไก่ เชียงใหม่ (ID: 38)
 /sideline/%E0%B8%81%E0%B8%B8%E0%B9%89%E0%B8%81%E0%B9%84%E0%B8%81%E0%B9%88-%E0%B8%AA%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B4%E0%B8%98%E0%B8%A3%E0%B8%A3%E0%B8%A1 /sideline/model-38 301
+/sideline/กุ้กไก่-สันติธรรม /sideline/model-38 301
+
+# 48. น้องมะนาว ภูเก็ต (ID: 75)
 /sideline/%E0%B8%A1%E0%B8%B0%E0%B8%99%E0%B8%B2%E0%B8%A7-%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%A0%E0%B8%B9%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%95 /sideline/model-75 301
+/sideline/มะนาว-เมืองภูเก็ต /sideline/model-75 301
+
+# 49. น้องของขวัญ เชียงราย (ID: 26)
 /sideline/%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B8%A7%E0%B8%B1%E0%B8%8D-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-26 301
+/sideline/ของขวัญ-ในเมือง /sideline/model-26 301
+
+# 50. น้องบีบี (ID: 54)
 /sideline/%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%B5-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87 /sideline/model-54 301
+/sideline/บีบี-ในเมือง /sideline/model-54 301
+
+# 51. น้องหวาน (ID: 80)
 /sideline/%E0%B8%AB%E0%B8%A7%E0%B8%B2%E0%B8%99-%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%A0%E0%B8%B9%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%95 /sideline/model-80 301
+/sideline/หวาน-เมืองภูเก็ต /sideline/model-80 301
