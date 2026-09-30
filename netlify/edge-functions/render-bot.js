@@ -464,17 +464,16 @@ const schemaGraph = {
             "addressCountry": "TH"
           }
         },
-        {
+  {
           "@type": "Service",
           "@id": `${canonicalUrl}#service`,
           "name": `บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน - ${stripHTML(displayName)}`,
           "provider": { "@id": `${canonicalUrl}#person` },
           "areaServed": {
-            "@type": "City",
-            "name": profile.location || provinceNameThai
+            "@type": "AdministrativeArea",
+            "name": provinceNameThai
           },
           "offers": {
-            "@type": "Offer",
             "url": canonicalUrl,
             "price": rateNumber,
             "priceCurrency": "THB",
@@ -512,13 +511,12 @@ const schemaGraph = {
             }
           ]
         },
-        {
+    {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน / ไซด์ไลน์${provinceNameThai}`, "item": provinceHubUrl },
-            { "@type": "ListItem", "position": 3, "name": stripHTML(displayName), "item": canonicalUrl }
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${CONFIG.DOMAIN}/` },
+            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน / ไซด์ไลน์${provinceNameThai}`, "item": provinceHubUrl }
           ]
         }
       ]
@@ -685,7 +683,7 @@ const schemaGraph = {
                 </div>
 
                 <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
-                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการ (เรทมาตรฐาน)</h2>
+                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
                         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
                             <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">1 ชม.</div>
@@ -703,7 +701,7 @@ const schemaGraph = {
                 </section>
 
                 <section style="margin-bottom: 1.5rem;">
-                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
+                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
                             <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
@@ -714,14 +712,14 @@ const schemaGraph = {
                             <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
                         </div>
                         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                            <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?</h3>
+                            <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
                             <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
                         </div>
                     </div>
                 </section>
 
                 <section style="margin-bottom: 1.5rem;">
-                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการ</h2>
+                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการจริง - ${escapeHTML(displayName)}</h2>
                     ${reviewsList.map(r => `
                         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; margin-bottom: 8px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -735,7 +733,7 @@ const schemaGraph = {
                 
                 ${relatedProfiles.length > 0 ? `
                 <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
-                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h2>
+                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
                         ${relatedProfiles.map(p => {
                           const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;

@@ -1042,12 +1042,16 @@ const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
   const totalRegionProfiles = activeProvsInRegion.reduce((sum, p) => sum + (provinceCounts[p.key] || 0), 0);
 
   const provListHtml = activeProvsInRegion.map((p, idx) => {
-    const count = provinceCounts[p.key] || 0;
-    const zonesHtml = p.zones.map(z => `
-      <li style="padding-left: 10px;">
-        <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none;">• ${escapeHTML(z)}</a>
-      </li>
-    `).join("");
+  const count = provinceCounts[p.key] || 0;
+    const zonesHtml = p.zones.map(z => {
+      const targetUrl = z.includes("นิมมาน") ? "/nimman" : `/location/${p.key}`;
+      const linkColor = z.includes("นิมมาน") ? "#C084FC" : "var(--text-muted)";
+      return `
+        <li style="padding-left: 10px;">
+          <a href="${targetUrl}" style="color: ${linkColor}; text-decoration: none;">• ${escapeHTML(z)}</a>
+        </li>
+      `;
+    }).join("");
 
     return `
       <li style="${idx > 0 ? "margin-top: 8px;" : ""}">
@@ -1166,8 +1170,18 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
-    if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
+   if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     if (reviewsHtml) finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
+
+    const dynamicReviewHeading = isNational 
+      ? "⭐ รีวิวความประทับใจจากลูกค้าจริงทั่วไทย" 
+      : `⭐ รีวิวเพื่อนเที่ยวและไซด์ไลน์${escapeHTML(provinceNameThai)} จากลูกค้าจริง`;
+    const dynamicFaqHeading = isNational 
+      ? "❓ คำถามที่พบบ่อยเกี่ยวกับการนัดหมายเพื่อนเที่ยวทั่วไทย (FAQ)" 
+      : `❓ คำถามที่พบบ่อยเกี่ยวกับการนัดหมายใน${escapeHTML(provinceNameThai)} (FAQ)`;
+
+    finalHtml = finalHtml.replace(/<h3 class="section-title-mini">⭐ รีวิวความประทับใจจากลูกค้าจริง<\/h3>/i, `<h3 class="section-title-mini">${dynamicReviewHeading}</h3>`);
+    finalHtml = finalHtml.replace(/<h3 class="section-title-mini"[^>]*>❓ คำถามที่พบบ่อย \(FAQ\)<\/h3>/i, `<h3 class="section-title-mini" style="color: var(--violet-main);">${dynamicFaqHeading}</h3>`);
 
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
@@ -1190,8 +1204,17 @@ const popularLocationsFooter = `
       `;
     }).join("");
 
-    if (hotSwiperCardsHtml) {
+   if (hotSwiperCardsHtml) {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
+      
+      // 🟢 เปลี่ยนหัวข้อและ Pill ให้ระบุคีย์เวิร์ด + จังหวัดจริงแบบ Dynamic
+      const hotTitle = isNational 
+        ? "น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยมทั่วไทย" 
+        : `น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยม ${escapeHTML(provinceNameThai)}`;
+      const hotPill = isNational ? "ประจำเดือน #ฟิวแฟน" : `โซนยอดนิยม ${escapeHTML(provinceNameThai)} #ฟิวแฟน`;
+
+      finalHtml = finalHtml.replace(/<h2 id="hot-profiles-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="hot-profiles-heading" class="hot-main-title">${hotTitle}</h2>`);
+      finalHtml = finalHtml.replace(/<span class="hot-monthly-pill">[\s\S]*?<\/span>/i, `<span class="hot-monthly-pill">${hotPill}</span>`);
     }
 
     if (isNational && featuredCardsHtml && featuredCardsHtml.trim() !== "") {
@@ -1300,7 +1323,7 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
     if (popularLocationsFooter) {
-      finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
+   finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
