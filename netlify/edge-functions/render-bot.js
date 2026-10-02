@@ -666,15 +666,19 @@ const schemaGraph = {
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
                         <strong style="color: #140F22; font-weight: 800;">${age} ปี</strong>
                     </div>
-                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
-                        <strong style="color: #7C3AED; font-weight: 800; font-size: 11px;">${escapeHTML(sanitizeThaiText(profile.location || provinceNameThai))}</strong>
+                   
+                      <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
+                            <a href="${provinceHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(provinceNameThai)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                              <span>รับงาน${escapeHTML(provinceNameThai)} (${escapeHTML(primaryZone)})</span>
+                              <i class="fas fa-chevron-right" style="font-size: 9px; opacity: 0.7;"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
-                    ${escapeHTML(naturalDesc)}
-                </div>
+                    <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
+                        ${escapeHTML(naturalDesc)}
+                    </div>
 
                 <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
                     <!-- 1. ปุ่มแอดไลน์หลัก -->
