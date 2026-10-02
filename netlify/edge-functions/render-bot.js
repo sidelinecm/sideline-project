@@ -404,9 +404,9 @@ if (matchUrl) {
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
- const pageTitle = `${displayName} (${escapeHTML(primaryZone)}) ฟิวแฟน${provinceNameThai} มีห้อง ตรงปก 100% จ่ายหน้างาน`;
+ const pageTitle = `${displayName} ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) มีห้อง ตรงปก 100% จ่ายหน้างาน`;
    
-const metaDescription = `🟢 สแตนด์บายพร้อมรับงาน! ${displayName} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี สไตล์ฟิวแฟนเอาใจเก่ง ตรงปก 100% นัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+const metaDescription = `🟢 สแตนด์บายพร้อมรับงาน! ${displayName} ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี มีห้อง ตรงปก 100% จ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
@@ -635,7 +635,7 @@ const schemaGraph = {
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
                        <img src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
+                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
                              width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     </div>

@@ -835,8 +835,8 @@ for (const p of rawProfiles) {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
     const metaTitle = isNational 
-      ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
-      : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
+  ? "ไซด์ไลน์ทั่วไทย สาวรับงานทั่วไทย รับงานฟิวแฟน ตรงปก 100% จ่ายหน้างาน | FirstModelHub"
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} รับงาน${provinceNameThai} ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
 
     // 🟢 นับจำนวนโปรไฟล์และจำนวนจังหวัดจริง ณ วินาทีนั้นแบบ Real-time
     const liveTotalProfiles = deduplicatedProfiles.length;
@@ -1112,9 +1112,9 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-    const ssrH1Html = isNational 
-      ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
-      : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน</span>\n <span class="h1-line-2">ฟิวแฟน เด็กเอ็น ตรงปก 100%</span>`;
+   const ssrH1Html = isNational 
+  ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงานทั่วไทย</span>\n <span class="h1-line-2">รับงาน เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
+  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">รับงาน${escapeHTML(provinceNameThai)} ฟิวแฟน ตรงปก 100% มีห้อง จ่ายหน้างาน</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
@@ -1290,26 +1290,9 @@ const popularLocationsFooter = `
             <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
           </div>
         `;
-    } else {
-        // ✅ ตัด fallbackCards (การดึงรูปข้ามจังหวัด) ทิ้ง 100%
-        displayAreaHtml = `
-          <div class="section-content-wrapper">
-            <div style="background: linear-gradient(135deg, #FFF1F2 0%, #FAF5FF 100%); border: 1.5px solid #FECDD3; border-radius: 20px; padding: 32px 18px; text-align: center; margin: 24px 0;">
-              <span style="font-size: 32px; display: inline-block; margin-bottom: 8px;">⚡</span>
-              <h3 style="font-size: 16px; font-weight: 900; color: #BE123C; margin: 0 0 8px 0;">ขณะนี้ยังไม่มีโปรไฟล์ในโซน${escapeHTML(provinceNameThai)}</h3>
-              <p style="font-size: 12px; color: #475569; margin: 0 0 18px 0; line-height: 1.6;">ทางระบบคัดสรรเฉพาะน้องๆ ที่มีตัวตนจริงและตรงปก 100% เท่านั้น<br>ท่านสามารถแอดไลน์สอบถามคิวน้องๆ โซนใกล้เคียง หรือลงทะเบียนรับสมัครได้เลยค่ะ</p>
-              
-              <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="btn-concierge-line" style="display: inline-flex; margin: 0;">
-                  <i class="fab fa-line"></i> แอดไลน์สอบถามคิวงาน
-                </a>
-                <a href="/" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); border-radius: 100px; color: #7C3AED; font-weight: 800; font-size: 12px; text-decoration: none;">
-                  ดูน้องๆ ทั่วไทยทั้งหมด &rarr;
-                </a>
-              </div>
-            </div>
-          </div>
-        `;
+      } else {
+        // 🔒 ถ้าจังหวัดนั้นไม่มีน้องจริง ให้เด้งกลับหน้าแรกทันที ป้องกัน Google ลงโทษ Soft 404
+        return Response.redirect(`${primaryDomain}/`, 302);
       }
     }
     
