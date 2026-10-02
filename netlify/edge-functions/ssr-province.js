@@ -836,7 +836,7 @@ for (const p of rawProfiles) {
 
     const metaTitle = isNational 
   ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
-  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% | First Model Hub`;
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
   
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
@@ -1113,7 +1113,7 @@ const popularLocationsFooter = `
 
    const ssrH1Html = isNational 
   ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
-  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน</span>\n <span class="h1-line-2">ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน</span>`;
+  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
