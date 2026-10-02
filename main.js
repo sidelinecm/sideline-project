@@ -942,30 +942,29 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-  // ✅ โค้ดแก้ไขใน main.js ให้ตรงกับ SSR
-const heroH1 = document.getElementById("hero-h1");
-if (heroH1) {
-  if (isEN) {
-    const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
-    heroH1.innerHTML = `
-      <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
-      <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
-    `;
-  } else {
-    const line1 = isAllOrNational 
-      ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
-      : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
-    const line2 = isAllOrNational 
-      ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" 
-      : "ฟิวแฟน เด็กเอ็น ตรงปก 100%";
-    
-    // 👈 เติม 4 บรรทัดนี้ลงไปครับ
-    heroH1.innerHTML = `
-      <span class="h1-line-1">${line1}</span>
-      <span class="h1-line-2">${line2}</span>
-    `;
-  }
-}
+    // ✅ ปรับ H1 ให้มีคีย์เวิร์ดครบถ้วน ซิงค์ตรงกับ SSR
+    const heroH1 = document.getElementById("hero-h1");
+    if (heroH1) {
+      if (isEN) {
+        const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
+        heroH1.innerHTML = `
+          <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
+          <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
+        `;
+      } else {
+        const line1 = isAllOrNational 
+          ? "ไซด์ไลน์ทั่วไทย • สาวรับงานทั่วไทย" 
+          : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
+        const line2 = isAllOrNational 
+          ? "รับงาน เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
+          : `รับงาน${escapeHTML(targetName)} ฟิวแฟน ตรงปก 100% มีห้อง จ่ายหน้างาน`;
+
+        heroH1.innerHTML = `
+          <span class="h1-line-1">${line1}</span>
+          <span class="h1-line-2">${line2}</span>
+        `;
+      }
+    }
 
     const featuredH2 = document.getElementById("featured-heading");
     if (featuredH2) {
@@ -1408,10 +1407,9 @@ if (heroH1) {
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    // 🟢 2. ซิงค์ SEO HEAD (แก้ปัญหา Title/Meta/Canonical ค้างหน้าเดิม)
     const dynamicTitle = isEn
-      ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
-      : `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} ย่าน${primaryZone} ตัวจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
+  ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
+  : `${displayName} ไซด์ไลน์${pProvText} สาวรับงาน${pProvText} (${primaryZone}) มีห้อง ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
     document.title = dynamicTitle;
 
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
@@ -1858,7 +1856,7 @@ if (heroH1) {
         
 targetTitle = isEN 
   ? `${provName} Escorts & Companions | FirstModelHub` 
-  : `ไซด์ไลน์${provName} สาวรับงาน ฟิวแฟนตรงปก 100% - First Model Hub`;
+  : `ไซด์ไลน์${provName} สาวรับงาน${provName} รับงาน${provName} ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
 
         
 targetDesc = isEN
