@@ -653,6 +653,7 @@ const schemaGraph = {
                     </div>
                 </header>
 
+                <!-- 🟢 1. ตารางสเปก 4 ช่อง (พร้อม Contextual Link กลับหน้าจังหวัด) -->
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
@@ -666,21 +667,26 @@ const schemaGraph = {
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
                         <strong style="color: #140F22; font-weight: 800;">${age} ปี</strong>
                     </div>
-                   <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
                         <a href="${provinceHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(provinceNameThai)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                           <span>รับงาน${escapeHTML(provinceNameThai)} (${escapeHTML(primaryZone)})</span>
                           <i class="fas fa-chevron-right" style="font-size: 9px; opacity: 0.7;"></i>
                         </a>
                     </div>
+                </div>
 
+                <!-- 🟢 2. กล่องเนื้อหาบรรยาย (แก้ปัญหา Thin Content & สอดคล้องกับ Schema JSON-LD) -->
+                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
+                    ${escapeHTML(naturalDesc)}
+                </div>
+
+                <!-- 🟢 3. ปุ่มติดต่อ LINE CTA + ปุ่มแชร์โปรไฟล์แบบมินิมอล -->
                 <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
-                    <!-- 1. ปุ่มแอดไลน์หลัก -->
                     <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
                     </a>
 
-                    <!-- 🟢 2. ปุ่มไอคอนแชร์กลมมินิมอล -->
                     <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
                         <i class="fas fa-share-alt" style="font-size: 16px;"></i>
                     </button>
