@@ -1393,16 +1393,19 @@ const popularLocationsFooter = `
       finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="preload" as="image" href="${lcpImgUrl}" fetchpriority="high">\n</head>`);
     }
 
-    const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-      "ETag": `"${GLOBAL_VERSION}"`,
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "X-XSS-Protection": "1; mode=block",
-      "Referrer-Policy": "strict-origin-when-cross-origin"
-    };
+    
+const responseHeaders = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  "ETag": `"${GLOBAL_VERSION}"`,
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin"
+};
 
     setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
     return new Response(finalHtml, { headers: responseHeaders });

@@ -779,16 +779,19 @@ const schemaGraph = {
 </body>
 </html>`;
 
-   const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "X-XSS-Protection": "1; mode=block",
-      "Referrer-Policy": "strict-origin-when-cross-origin"
-    };
+  
+const responseHeaders = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin"
+};
 
     setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
     return new Response(htmlResponse, { headers: responseHeaders });
