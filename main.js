@@ -953,8 +953,8 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         `;
      } else {
         const line1 = isAllOrNational 
-          ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
-          : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
+  ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
+  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
         const line2 = isAllOrNational 
           ? "เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
           : "ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน";
@@ -1846,10 +1846,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         targetUrl = `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        // 🟢 สูตร B: ชื่อจังหวัดครั้งเดียว ไม่สแปม
         targetTitle = isEN 
-          ? `${provName} Escorts & Companions | FirstModelHub` 
-          : `ไซด์ไลน์${provName} สาวรับงาน ฟิวแฟนตรงปก 100% | First Model Hub`;
+  ? `${provName} Escorts & Companions | FirstModelHub` 
+  : `ไซด์ไลน์${provName} สาวรับงาน${provName} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
 
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
