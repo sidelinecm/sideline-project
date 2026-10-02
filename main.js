@@ -951,13 +951,13 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
-      } else {
+     } else {
         const line1 = isAllOrNational 
-          ? "ไซด์ไลน์ทั่วไทย • สาวรับงานทั่วไทย" 
-          : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
+          ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
+          : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน`;
         const line2 = isAllOrNational 
-          ? "รับงาน เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
-          : `รับงาน${escapeHTML(targetName)} ฟิวแฟน ตรงปก 100% มีห้อง จ่ายหน้างาน`;
+          ? "เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
+          : "ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
@@ -1409,7 +1409,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
     const dynamicTitle = isEn
   ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
-  : `${displayName} ไซด์ไลน์${pProvText} สาวรับงาน${pProvText} (${primaryZone}) มีห้อง ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
+  : `${displayName} สาวรับงาน${pProvText} ไซด์ไลน์${pProvText} (${primaryZone}) ฟิวแฟน ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
     document.title = dynamicTitle;
 
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
@@ -1802,19 +1802,15 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     });
   };
 
-  // ==============================================================================
-  // 🟢 ฟังก์ชันปิดหน้าต่างโปรไฟล์ LIGHTBOX (เวอร์ชันสมบูรณ์แบบสูงสุด 100% ไร้รอยต่อ)
-  // ==============================================================================
-  window.closeLightboxModal = function (updateHistory = true) {
+  
+ window.closeLightboxModal = function (updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (!lightboxEl) return;
 
-    // 🛡️ 1. ป้องกันการกดปิดซ้ำซ้อนขณะกำลังเล่นแอนิเมชัน (Debounce Guard)
     if (lightboxEl.dataset.isClosing === "true") return;
     lightboxEl.dataset.isClosing = "true";
 
-    // 🛡️ 2. แอนิเมชันสไลด์ลงนุ่มนวล 60 FPS
     if (contentWrapperEl) {
       contentWrapperEl.style.transition = "transform 0.24s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease";
       contentWrapperEl.style.transform = "translateY(40px) scale(0.97)";
@@ -1823,11 +1819,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     lightboxEl.style.transition = "opacity 0.24s ease";
     lightboxEl.style.opacity = "0";
 
-    // 🛡️ 3. ปลดล็อกการเลื่อนหน้าเว็บทันที
     document.body.classList.remove("lightbox-open");
     document.body.style.overflow = "";
 
-    // 🛡️ 4. ซ่อนองค์ประกอบเมื่อแอนิเมชันจบ พร้อมรีเซ็ต Scroll
     setTimeout(() => {
       lightboxEl.style.display = "none";
       lightboxEl.classList.remove("active");
@@ -1839,7 +1833,6 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       if (scrollBody) scrollBody.scrollTop = 0;
     }, 240);
 
-    // 🛡️ 5. จัดการ URL และคืนค่า SEO Meta Tags ทั้งหมดให้ตรงกับหน้าเดิม 100%
     if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
       const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
       const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
@@ -1853,37 +1846,34 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         targetUrl = `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        
-targetTitle = isEN 
-  ? `${provName} Escorts & Companions | FirstModelHub` 
-  : `ไซด์ไลน์${provName} สาวรับงาน${provName} รับงาน${provName} ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
+        // 🟢 สูตร B: ชื่อจังหวัดครั้งเดียว ไม่สแปม
+        targetTitle = isEN 
+          ? `${provName} Escorts & Companions | FirstModelHub` 
+          : `ไซด์ไลน์${provName} สาวรับงาน ฟิวแฟนตรงปก 100% | First Model Hub`;
 
-        
-targetDesc = isEN
-  ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
-  : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! รวมโปรไฟล์ไซด์ไลน์${provName} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
+        targetDesc = isEN
+          ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
+          : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! รวมโปรไฟล์ไซด์ไลน์${provName} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
-     } else {
-  targetUrl = isEN ? "/index-en" : "/";
-  
-  // 🔒 คืนค่า Title ตัวแชมป์ที่ติดอันดับ 1 ให้ตรงกับ SSR 100%
-  targetTitle = isEN 
-    ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-    : "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
+      } else {
+        targetUrl = isEN ? "/index-en" : "/";
+        
+        // 🟢 สูตร B: หน้าแรก คืนค่าตัวแชมป์
+        targetTitle = isEN 
+          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+          : "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
 
-  // 🟢 ดึงตัวเลขจริง ณ วินาทีนั้นแบบ Dynamic 100%
-  const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
-  const liveProvinces = appState.provincesMap?.size || 6;
+        const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
+        const liveProvinces = appState.provincesMap?.size || 6;
 
-  targetDesc = isEN
-    ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
-    : `รวม ${liveCount}+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุม ${liveProvinces} จังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า`;
- 
-  if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-}
+        targetDesc = isEN
+          ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
+          : `รวม ${liveCount}+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุม ${liveProvinces} จังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า`;
+     
+        if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+      }
 
-    
       history.replaceState(null, "", targetUrl);
 
       document.title = targetTitle;
@@ -1909,7 +1899,7 @@ targetDesc = isEN
     appState.currentProfileSlug = null;
   };
 
-  // 🟢 ระบบดึงปิดหน้าต่าง (Swipe Down) แบบสมูท ป้องกันมือลั่น 100%
+  
   function initLightboxSwipeDown() {
     const lightboxEl = document.getElementById("lightbox");
     const contentEl = document.getElementById("lightbox-content-wrapper-el");
