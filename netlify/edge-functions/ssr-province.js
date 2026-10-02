@@ -757,11 +757,11 @@ export default async (req, context) => {
     }
 
     const profilesQuery = supabase
-  .from("profiles")
-  .select("id, slug, name, location, rate, price, age, height, weight, stats, imagePath, image_url, imageUrl, availability, isfeatured, is_featured, verified, is_verified, styleTags, style_tags, description, slogan, quote, line_id, line")
-  .eq("active", true)
-  .order("isfeatured", { ascending: false })
-  .order("created_at", { ascending: false });
+      .from("profiles")
+      .select("*")
+      .eq("active", true)
+      .order("isfeatured", { ascending: false })
+      .order("created_at", { ascending: false });
 
     const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
       isNational
@@ -830,30 +830,21 @@ for (const p of rawProfiles) {
     const totalCount = profilesList.length;
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
-
-    // 🟢 1. แก้ไข Canonical ให้แยกหน้า /profiles เป็นอิสระ ไม่ดึงกลับหน้าแรก
-    let canonicalUrl = `${primaryDomain}/location/${provinceSlug}`;
-    if (url.pathname === "/profiles" || url.pathname.startsWith("/profiles")) {
-      canonicalUrl = `${primaryDomain}/profiles`;
-    } else if (isNational) {
-      canonicalUrl = `${primaryDomain}/`;
-    }
-
+    const canonicalUrl = isNational ? `${primaryDomain}/` : `${primaryDomain}/location/${provinceSlug}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    // 🟢 2. ดันคีย์เวิร์ด "รับงาน..." ที่มีคนค้นหา 6,820 ครั้ง ขึ้นเป็นคำแรก
     const metaTitle = isNational 
-      ? "รับงาน ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
-      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
+  ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
   
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";
 
-    const metaDescription = isNational
-      ? `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveTotalProfiles}+ โปรไฟล์รับงาน ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${activeProvincesCount} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`
-      : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! ${countText}รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
+const metaDescription = isNational
+  ? `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveTotalProfiles}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${activeProvincesCount} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`
+  : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! ${countText}ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -893,20 +884,21 @@ for (const p of rawProfiles) {
         "publisher": { "@id": `${primaryDomain}/#organization` },
         "inLanguage": "th-TH"
       },
-      {
-        "@type": "CollectionPage",
-        "@id": `${canonicalUrl}#webpage`,
-        "name": stripHTML(metaTitle),
-        "description": cleanMetaDesc,
-        "url": canonicalUrl,
-        "inLanguage": "th-TH",
-        "dateModified": new Date().toISOString(),
-        "isPartOf": { "@id": `${primaryDomain}/#website` },
-        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
-        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
-      }
+{
+  "@type": "CollectionPage",
+  "@id": `${canonicalUrl}#webpage`,
+  "name": stripHTML(metaTitle),
+  "description": cleanMetaDesc,
+  "url": canonicalUrl,
+  "inLanguage": "th-TH",
+  "dateModified": new Date().toISOString(),
+  "isPartOf": { "@id": `${primaryDomain}/#website` },
+  "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : undefined,
+  "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
+}
     ];
 
+  
     if (isNational) {
       // โครงสร้างสำหรับหน้าแรก
       schemaGraph.push({
@@ -917,13 +909,13 @@ for (const p of rawProfiles) {
         ]
       });
     } else {
-      // 🟢 3. แก้ Breadcrumb Schema ให้บอท Google จดจำทั้ง 2 คำ
+      // โครงสร้างสำหรับหน้าจังหวัด
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${canonicalUrl}#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` },
-          { "@type": "ListItem", "position": 2, "name": `รับงาน / ไซด์ไลน์${provinceNameThai}`, "item": canonicalUrl }
+          { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceNameThai}`, "item": canonicalUrl }
         ]
       });
     }
