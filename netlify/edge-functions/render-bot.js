@@ -84,7 +84,7 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") 
+   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
    .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") 
    .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
@@ -184,17 +184,24 @@ function generateSrcSet(imagePath) {
 }
 
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  // 🟢 1. ดักกรอง Description ขยะ/ก็อปปี้วางซ้ำซาก (ป้องกัน Google แบนเพราะ Thin Content)
+ 
+  const seedStr = String(p.slug || p.id || displayName);
+const hash = seedStr.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+const v = hash % 3;
+
   let customBio = "";
   if (p.description && p.description.trim().length > 10) {
     const isSpamText = /เรทราคา รายละเอียดค่ะ|1500\/1 ชม\. ไม่รวมห้อง|ฟีลแฟน เอาใจเก่ง ไม่เร่ง ตรงปก|\\ \(\\ \(\„•ㅅ•„\)|╭ \/ づ♡/i.test(p.description);
     
     if (!isSpamText) {
-      // ถ้าเป็นข้อความพิมพ์เองปกติ ให้แสดงผลตามนั้น
       customBio = ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"`;
     } else {
-      // ถ้าตรวจเจอว่าเป็นสแปมข้อความซ้ำ ให้ใส่ประโยคเสริม SEO แทน
-      customBio = ` การันตีตัวจริงตรงปก 100% ดูแลเอาใจใส่สไตล์ฟิวแฟนในพื้นที่${zone} นัดง่าย ปลอดภัย จ่ายเงินหน้างานค่ะ`; 
+      const dynamicBios = [
+        ` สแตนด์บายพร้อมดูแลคุณด้วยความสุภาพ อัธยาศัยดี และเอาใจใส่เป็นธรรมชาติในโซน${zone} นัดพบปลอดภัย จ่ายหน้างาน 100%`,
+        ` พร้อมเป็นเพื่อนร่วมทาง ทานอาหาร นั่งคุยคลายเหงา ดูแลดุจแฟนคนพิเศษในพิกัด${zone} การันตีตัวจริงตรงปก ไร้มัดจำ`,
+        ` บุคลิกน่ารัก ยิ้มแย้ม คุยสนุก สแตนด์บายพร้อมบริการเพื่อนเที่ยวฟิวแฟนในพื้นที่${zone} ดูแลอย่างจริงใจ ไม่เร่งเวลาค่ะ`
+      ];
+      customBio = dynamicBios[v];
     }
   }
 
@@ -217,10 +224,7 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
     persona = "curvy";
   }
 
-  // 🟢 3. สุ่มประโยคไม่ให้ซ้ำกันด้วยการ Hash ชื่อ (คงไว้เหมือนเดิม)
-  const seedStr = String(p.slug || p.id || displayName);
-  const hash = seedStr.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const v = hash % 3;
+  
 
   const safetyNote = "นัดพบเจอตัวจริงตรงปกอย่างปลอดภัย ชำระค่าบริการหน้างานโดยตรง ไร้กังวลเรื่องการโอนมัดจำล่วงหน้า 100%";
 
@@ -404,9 +408,9 @@ if (matchUrl) {
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
- const pageTitle = `${displayName} ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) มีห้อง ตรงปก 100% จ่ายหน้างาน`;
+ const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${escapeHTML(primaryZone)}) ฟิวแฟน ตรงปก 100% จ่ายหน้างาน`;
    
-const metaDescription = `🟢 สแตนด์บายพร้อมรับงาน! ${displayName} ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี มีห้อง ตรงปก 100% จ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);

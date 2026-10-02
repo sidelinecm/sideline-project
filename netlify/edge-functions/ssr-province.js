@@ -332,9 +332,9 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
       convenience: `ครอบคลุมโรงแรม รีสอร์ต และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} สแตนด์บายพร้อมเดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็วและเป็นส่วนตัวสูงสุด`
     },
 chiangmai: {
-  headline: `ไซด์ไลน์เชียงใหม่ สาวรับงานในเมือง และพื้นที่ใกล้เคียง`,
-  intro: `ศูนย์รวมโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่ และสาวรับงานเองในตัวเมือง ครอบคลุมโซนยอดนิยม นิมมาน เจ็ดยอด สันติธรรม ช้างเผือก หลัง มช. รวมถึงพื้นที่ใกล้เคียงอย่างสันทรายและแม่โจ้ น้องๆ มีห้องส่วนตัว พร้อมเดินทางไปหาที่โรงแรมได้ ดูแลสไตล์ฟิวแฟนแท้ๆ เอาใจเก่ง ไม่เร่งงาน การันตีตัวจริงตรงปก 100%`,
-  convenience: `สแตนด์บายพร้อมห้องส่วนตัว และเดินทางถึงที่พักในตัวเมืองเชียงใหม่${zoneText} ภายใน 15-30 นาที ปลอดภัย เจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณี`
+  headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
+  intro: `สำหรับผู้ที่เดินทางมาพักผ่อน ท่องเที่ยว หรือทำงานในเชียงใหม่ FirstModelHub คัดสรรเพื่อนเที่ยวระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience - GFE) ที่เน้นความสุภาพ อัธยาศัยดี และไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว การันตีตัวจริงตรงปก 100%`,
+  convenience: `โรงแรมและรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบาย ปลอดภัย เจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณี`
 },
     bangkok: {
       headline: `บริการเพื่อนเที่ยวระดับ VIP และผู้ดูแลไลฟ์สไตล์ส่วนบุคคล กรุงเทพฯ`,
@@ -835,10 +835,9 @@ for (const p of rawProfiles) {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
     const metaTitle = isNational 
-  ? "ไซด์ไลน์ทั่วไทย สาวรับงานทั่วไทย รับงานฟิวแฟน ตรงปก 100% จ่ายหน้างาน | FirstModelHub"
-  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} รับงาน${provinceNameThai} ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
-
-    // 🟢 นับจำนวนโปรไฟล์และจำนวนจังหวัดจริง ณ วินาทีนั้นแบบ Real-time
+  ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน ฟิวแฟนตรงปก 100% | First Model Hub`;
+  
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";
@@ -1113,8 +1112,8 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
    const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงานทั่วไทย</span>\n <span class="h1-line-2">รับงาน เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
-  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">รับงาน${escapeHTML(provinceNameThai)} ฟิวแฟน ตรงปก 100% มีห้อง จ่ายหน้างาน</span>`;
+  ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
+  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน</span>\n <span class="h1-line-2">ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
@@ -1290,11 +1289,30 @@ const popularLocationsFooter = `
             <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
           </div>
         `;
-      } else {
-        // 🔒 ถ้าจังหวัดนั้นไม่มีน้องจริง ให้เด้งกลับหน้าแรกทันที ป้องกัน Google ลงโทษ Soft 404
-        return Response.redirect(`${primaryDomain}/`, 302);
+     } else {
+        const fallbackCards = deduplicatedProfiles.slice(0, 6).map((p, i) => renderCardHtml(p, false, provinceNameThai, i)).join("");
+        displayAreaHtml = `
+          <div class="section-content-wrapper">
+            <div style="background: linear-gradient(135deg, #FFF1F2 0%, #FAF5FF 100%); border: 1.5px solid #FECDD3; border-radius: 20px; padding: 24px 16px; text-align: center; margin-bottom: 24px;">
+              <span style="font-size: 28px; display: inline-block; margin-bottom: 6px;">⚡</span>
+              <h3 style="font-size: 16px; font-weight: 900; color: #BE123C; margin: 0 0 6px 0;">โซน${escapeHTML(provinceNameThai)} อยู่ระหว่างเปิดรับสมัครและอัปเดตโปรไฟล์ใหม่</h3>
+              <p style="font-size: 12px; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">ทางระบบตรวจสอบตัวตนจริง (Verified 100%) เพื่อความปลอดภัยและตรงปกสูงสุด<br>สามารถแอดไลน์สอบถามคิวน้องๆ ที่พร้อมเดินทางดูแลในพื้นที่ หรือติดต่อลงโปรไฟล์ได้เลยค่ะ</p>
+              <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="btn-concierge-line" style="display: inline-flex; margin: 0 auto;">
+                <i class="fab fa-line"></i> แอดไลน์สอบถามคิวงานโซน${escapeHTML(provinceNameThai)}
+              </a>
+            </div>
+            <div class="province-header-row">
+                <h2 class="province-clean-title">
+                    <span class="province-pin-icon"><i class="fas fa-star" style="color: #F59E0B;"></i></span>
+                    <span class="province-prefix">น้องๆ ยอดนิยมแนะนำ</span>
+                    <span class="province-name-highlight">(พร้อมเดินทาง)</span>
+                </h2>
+                <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายหน้างาน ไร้มัดจำ</span>
+            </div>
+            <div class="profile-grid profiles-grid-row">${fallbackCards}</div>
+          </div>
+        `;
       }
-    }
     
 
     finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
