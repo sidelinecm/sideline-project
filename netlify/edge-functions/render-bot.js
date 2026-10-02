@@ -404,7 +404,7 @@ if (matchUrl) {
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
-   const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก 100%`;
+ const pageTitle = `${displayName} (${escapeHTML(primaryZone)}) ฟิวแฟน${provinceNameThai} มีห้อง ตรงปก 100% จ่ายหน้างาน`;
    
 const metaDescription = `🟢 สแตนด์บายพร้อมรับงาน! ${displayName} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี สไตล์ฟิวแฟนเอาใจเก่ง ตรงปก 100% นัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
