@@ -372,7 +372,10 @@ async function getSupabaseClient() {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
+.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+.replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     
@@ -1168,7 +1171,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
     // 🟢 2. ประกาศตัวแปรทั้งสองตัวนี้ เพื่อไม่ให้เกิด ReferenceError
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
-    const richAltText = `${modelName} สาวรับงาน${p.provinceNameThai || ''} ย่าน${locName} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub`;
+   const richAltText = `${modelName} (${p.provinceNameThai || 'เชียงใหม่'})`;
 
     // 🟢 3. ประกอบการ์ด HTML
     article.innerHTML = `
