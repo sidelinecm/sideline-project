@@ -228,7 +228,10 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "ฟิวแฟน") .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
+   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
+.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+    .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
@@ -407,9 +410,12 @@ chiangmai: {
          <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เอ็นเตอร์เทนเนอร์ (EN VIP) สำหรับงานเลี้ยงสังสรรค์ส่วนตัว</span></li>
       </ul>
     </div>
-    <div>
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและการรักษาความลับ</h3>
-      <p style="line-height: 1.65;">ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายตัวจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด (Zero-Log Policy) เลือกระยะเวลาการดูแลได้ทั้งแบบชั่วคราวและค้างคืน ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขมัดจำทุกกรณี</p>
+   <div>
+      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและข้อกำหนดการใช้งาน</h3>
+      <p style="line-height: 1.65; margin-bottom: 6px;">ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายตัวจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด (Zero-Log Policy) ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขมัดจำทุกกรณี</p>
+      <p style="line-height: 1.65; color: #64748B; font-size: 11.5px; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #7C3AED;">
+        <strong>ข้อกำหนดความปลอดภัย:</strong> FirstModelHub เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและเอ็นเตอร์เทนเมนต์เท่านั้น <u>เว็บไซต์ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือการกระทำผิดกฎหมายทุกรูปแบบ</u>
+      </p>
     </div>
   `;
 }
@@ -504,14 +510,9 @@ function formatLuxuryRate(rate) {
   return String(num);
 }
 
+
 function generateNaturalAlt(cleanName, provinceName, loc, index) {
-  const variations = [
-    `น้อง${cleanName} สาวรับงาน${provinceName} ย่าน${loc}`,
-    `ไซด์ไลน์${provinceName} น้อง${cleanName} ฟิวแฟน ตรงปก`,
-    `น้อง${cleanName} รับงาน${provinceName} ไม่มัดจำ`,
-    `น้อง${cleanName} เด็กเอ็น${provinceName} โซน${loc}`
-  ];
-  return variations[(index || 0) % variations.length];
+  return `น้อง${cleanName} (${provinceName})`;
 }
 
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", index = 0) => {
@@ -834,9 +835,12 @@ for (const p of rawProfiles) {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    const metaTitle = isNational 
+    // 🟢 ตัวกรองคำว่า "เมือง": ถ้าเป็นกรุงเทพฯ หรือทั่วไทย ไม่ต้องใส่ "เมือง" แต่จังหวัดอื่นให้ใส่ "เมือง" อัตโนมัติ
+const mueangPrefix = (provinceNameThai !== "กรุงเทพฯ" && provinceNameThai !== "ทั่วไทย") ? "เมือง" : "";
+
+const metaTitle = isNational 
   ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
-  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
+  : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${mueangPrefix}${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
   
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
@@ -920,21 +924,27 @@ const metaDescription = isNational
       });
     }
 
-    if (profilesList.length > 0) {
-      const displayProfiles = profilesList.slice(0, 12);
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonicalUrl}#itemlist`,
-        "numberOfItems": displayProfiles.length,
-        "itemListElement": displayProfiles.map((p, idx) => ({
-          "@type": "ListItem",
-          "position": idx + 1,
-          "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
-          "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
-          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-        }))
-      });
-    }
+   
+if (profilesList.length > 0) {
+  schemaGraph.push({
+    "@type": "ItemList",
+    "@id": `${canonicalUrl}#itemlist`,
+    "numberOfItems": profilesList.length,
+    "itemListElement": profilesList.map((p, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+      "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
+      "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
+      "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": sanitizeThaiText(p.location) || provinceNameThai,
+        "addressRegion": provinceNameThai,
+        "addressCountry": "TH"
+      }
+    }))
+  });
+}
 
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
@@ -1042,25 +1052,22 @@ const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
 
   const provListHtml = activeProvsInRegion.map((p, idx) => {
   const count = provinceCounts[p.key] || 0;
-    const zonesHtml = p.zones.map(z => {
-      const targetUrl = z.includes("นิมมาน") ? "/nimman" : `/location/${p.key}`;
-      const linkColor = z.includes("นิมมาน") ? "#C084FC" : "var(--text-muted)";
-      return `
-        <li style="padding-left: 10px;">
-          <a href="${targetUrl}" style="color: ${linkColor}; text-decoration: none;">• ${escapeHTML(z)}</a>
-        </li>
-      `;
-    }).join("");
-
+  const zonesHtml = p.zones.map(z => {
+  if (z.includes("นิมมาน")) {
     return `
-      <li style="${idx > 0 ? "margin-top: 8px;" : ""}">
-        <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">
-          ${escapeHTML(p.name)} (${count} คน)
-        </a>
+      <li style="padding-left: 10px;">
+        <a href="/nimman" style="color: #C084FC; text-decoration: none;">• ${escapeHTML(z)}</a>
       </li>
-      ${zonesHtml}
     `;
-  }).join("");
+  }
+
+ 
+  return `
+    <li style="padding-left: 10px;">
+      <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+    </li>
+  `;
+}).join("");
 
   return `
     <div class="directory-region-col">
@@ -1168,9 +1175,21 @@ const popularLocationsFooter = `
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
-   if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
-    if (reviewsHtml) finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
+    // 🟢 1. ดึงวันที่ปัจจุบันภาษาไทยอัตโนมัติ (เช่น 4 ตุลาคม 2569) + ดึงชื่อน้อง 4 คนแรกมาทำเป็นข้อความสดใหม่
+    const todayDateStr = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+    const topNames = profilesList.slice(0, 4).map(p => `น้อง${(p.name || '').trim().replace(/^(น้อง\s?)+/gi, '')}`).filter(Boolean).join(", ");
+    
+    // 🟢 2. กล่องแสดงความสดใหม่แบบ Real-time ดักคะแนน Google Algorithm
+    const freshnessBox = `
+      <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;">
+        ⚡ <strong>อัปเดตข้อมูลล่าสุด:</strong> ${todayDateStr} — มีโปรไฟล์พร้อมสแตนด์บายดูแลในพื้นที่${escapeHTML(provinceNameThai)} ${topNames ? `แนะนำเช่น ${escapeHTML(topNames)} ` : ''}รวมกว่า ${totalCount} คน การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน
+      </div>
+    `;
+
+    // 🟢 3. เอา freshnessBox ประกบหน้า linkedIntro แล้วใส่ลงในเนื้อหา
+    finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${freshnessBox}${linkedIntro}</div>`);
+    if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
+    finalHtml = finalHtml.replace(/<div id="reviews-wrapper-block"[\s\S]*?<\/div><\/div>/i, "");
 
     const dynamicReviewHeading = isNational 
       ? "⭐ รีวิวความประทับใจจากลูกค้าจริงทั่วไทย" 
@@ -1192,7 +1211,7 @@ const popularLocationsFooter = `
         <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
           <span class="hot-rank-badge">#${i + 1} HOT</span>
-          <img src="${img}" alt="น้อง${cleanName} สาวรับงาน${provinceNameThai} ย่าน${loc} ฟิวแฟน ตรงปก 100% - FirstModelHub" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <img src="${img}" alt="น้อง${cleanName} (${provinceNameThai})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
           <div class="vip-card-info">
@@ -1277,10 +1296,10 @@ const popularLocationsFooter = `
           <div class="section-content-wrapper">
             <div class="province-header-row">
                 <h2 class="province-clean-title">
-                    <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
-                    <span class="province-prefix">น้องๆ ในจังหวัด</span>
-                    <span class="province-name-highlight">${escapeHTML(provinceNameThai)}</span>
-                </h2>
+    <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
+    <span class="province-prefix">น้องๆ ในจังหวัด</span>
+    <span class="province-name-highlight">${escapeHTML(provinceNameThai)}</span>
+</h2>
                 <span class="province-count-pill">
                     <span class="pulse-dot-el"></span>
                     <span>${totalCount} โปรไฟล์</span>

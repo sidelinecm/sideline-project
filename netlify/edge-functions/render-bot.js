@@ -84,8 +84,9 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
-   .replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "เทคแคร์") 
+   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
+.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
    .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "ฟิวแฟน ")
@@ -407,10 +408,16 @@ if (matchUrl) {
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
+    // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
- const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${escapeHTML(primaryZone)}) ฟิวแฟน ตรงปก 100% จ่ายหน้างาน`;
+
+    // 🟢 2. Title หน้าเว็บ: คมชัด ไม่ยัดคำว่า "เชียงใหม่" ซ้ำ 2 รอบ
+    const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) ไซด์ไลน์ฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน`;
    
-const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+    // 🟢 3. Meta คำบรรยายใต้ลิงก์ Google: สละสลวย ไม่สแปมคำ ได้คีย์เวิร์ดครบ
+    const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ไซด์ไลน์ฟิวแฟนตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+
+    // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
     const reviewsList = getDeterministicReviews(rawSlug, 3);
@@ -769,6 +776,7 @@ const schemaGraph = {
                         <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
                         <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
                     </div>
+                    <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
                 </section>
             </article>
         </main>
