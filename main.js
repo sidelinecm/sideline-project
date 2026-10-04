@@ -787,6 +787,13 @@ async function getSupabaseClient() {
           const combined = `${tagStr} ${descStr} ${sloganStr} ${locStr}`;
 
           if (filterTag === "ตรงปก") return p.isVerified || combined.includes("ตรงปก");
+          
+          // 🟢 เพิ่มเงื่อนไขพิเศษ: ถ้าเป็นปุ่ม "เมือง..." ให้ดึงทั้งคนที่อยู่ "ตัวเมือง", "ในเมือง", หรือมีชื่อจังหวัดนั้นๆ
+          if (filterTag.startsWith("เมือง")) {
+            const rawProv = filterTag.replace(/^เมือง/, ""); // ตัดเหลือชื่อจังหวัด เช่น "เชียงใหม่"
+            return locStr.includes("เมือง") || locStr.includes("ตัวเมือง") || locStr.includes("ในเมือง") || combined.includes(filterTag) || combined.includes(rawProv);
+          }
+
           return combined.includes(filterTag);
         });
       }
@@ -1672,21 +1679,24 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     }
     if (descContainer) descContainer.style.display = "block";
     
-    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (ดึงตามที่น้องเพิ่มมาหลังบ้าน 100%)
+    // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (Universal Link สำหรับ iOS/Android ทุกเวอร์ชัน)
     const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
-    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8"; // Fallback เฉพาะกรณีที่น้องคนนั้นไม่ได้ระบุไลน์มาจริงๆ
+    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8"; // Fallback ปลอดภัย
 
     if (rawLine) {
       if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
-        // ถ้าน้องใส่มาเป็นลิงก์ เช่น https://lin.ee/xxx หรือ https://line.me/ti/p/xxx ให้ใช้ตามนั้นทันที
+        // ถ้าเป็นลิงก์เต็มมาแล้ว (เช่น https://lin.ee/... หรือ https://line.me/...) ใช้ได้ทันที
         lineUrl = rawLine;
       } else {
-        // ถ้าน้องใส่มาเป็น Line ID เช่น @som_za หรือ cute123 ให้แปลงเป็นลิงก์แอดไลน์อัตโนมัติ
-        const cleanHandle = rawLine.replace(/^@/, "").trim();
-        if (rawLine.startsWith("@")) {
-          lineUrl = `https://line.me/R/ti/p/${encodeURIComponent("@" + cleanHandle)}`;
+        const cleanHandle = rawLine.trim();
+        if (cleanHandle.startsWith("@")) {
+          // 1. กรณีเป็น LINE Official (มี @): ใช้ page.line.me แบบไม่เอา @
+          const cleanOa = cleanHandle.replace(/^@+/, "").trim();
+          if (cleanOa) lineUrl = `https://page.line.me/${cleanOa}`;
         } else {
-          lineUrl = `https://line.me/ti/p/${encodeURIComponent(cleanHandle)}`;
+          // 2. กรณีเป็น ID ส่วนบุคคล: ใช้ format https://line.me/R/ti/p/~ID (มี ~ คั่น)
+          const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+          if (cleanPersonalId) lineUrl = `https://line.me/R/ti/p/~${cleanPersonalId}`;
         }
       }
     }
