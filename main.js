@@ -333,7 +333,6 @@ async function getSupabaseClient() {
   function triggerHaptic(type = "light") {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       try {
-        // เช็คว่ามือถือพร้อมรับคำสั่งสั่นหรือยัง ถ้ายังไม่พร้อมให้ข้าม ไม่ให้ฟ้อง Error
         if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
         
         if (type === "light") {
@@ -347,8 +346,51 @@ async function getSupabaseClient() {
     }
   }
   window.triggerHaptic = triggerHaptic;
-  
-  
+
+  // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันแชร์โปรไฟล์ (พร้อมใช้งาน 100%)
+  window.shareProfile = async function (name, profileUrl) {
+    const shareData = {
+      title: `${name} | FirstModelHub`,
+      text: `ดูโปรไฟล์ ${name} เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน ไร้มัดจำ`,
+      url: profileUrl || window.location.href
+    };
+
+    if (typeof triggerHaptic === "function") triggerHaptic("light");
+
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch (_) {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        alert(`คัดลอกลิงก์โปรไฟล์ ${name} เรียบร้อยแล้วค่ะ!`);
+      } catch (_) {
+        prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareData.url);
+      }
+    }
+  };
+
+  // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันแทร็กการคลิก LINE
+  window.trackLineClick = async function(profileId) {
+    try {
+      const idNum = parseInt(profileId, 10);
+      if (isNaN(idNum)) return;
+
+      const sessionKey = `tracked_line_${idNum}`;
+      if (sessionStorage.getItem(sessionKey)) return;
+      sessionStorage.setItem(sessionKey, "true");
+
+      const client = await getSupabaseClient();
+      if (client) {
+        client.rpc("increment_likes", { profile_id_to_update: idNum }).catch(() => {});
+      }
+    } catch (_) {}
+  };
+
+  // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันกดจองคิว LINE
+  window.handleLineBooking = function(profileId, lineUrl) {
+    triggerHaptic("success");
+    window.trackLineClick(profileId);
+  };
 
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -2060,11 +2102,11 @@ if (isStandaloneProfile) {
 
   async function initApplication() {
     // 🟢 1. ตรวจสอบทันที: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่สร้างจาก render-bot.js)
-    // ให้หยุดทำงานทันที ไม่ต้องไปดึง Database Supabase 100+ คน และไม่ต้องเปิด Lightbox ซ้อน
     const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
     if (isStandaloneProfile) {
         hideGlobalLoader();
-        return; // ⛔ ออกจากการทำงานทันที ประหยัดเน็ต ประหยัด RAM 100%
+        initDockAutoHide(); // 👈 เพิ่มบรรทัดนี้ เพื่อให้แถบ Dock ด้านล่างทำงานได้
+        return; // ⛔ ข้ามการดึง Database 100+ คน ช่วยให้หน้าโปรไฟล์โหลดเร็ว
     }
 
     domCache.body = document.body;
@@ -2314,29 +2356,7 @@ if (isStandaloneProfile) {
       };
     }
 
-    // ✅ แก้เป็น
-    window.trackLineClick = async function(profileId) {
-      try {
-        const idNum = parseInt(profileId, 10);
-        if (isNaN(idNum)) return;
-
-        const sessionKey = `tracked_line_${idNum}`;
-        if (sessionStorage.getItem(sessionKey)) return;
-        sessionStorage.setItem(sessionKey, "true");
-
-        const client = await getSupabaseClient();
-        if (client) {
-          client.rpc("increment_likes", { profile_id_to_update: idNum }).catch(() => {});
-        }
-      } catch (_) {}
-    };
-
-    window.handleLineBooking = function(profileId, lineUrl) {
-      triggerHaptic("success"); // 👈 เติมบรรทัดนี้: สั่นจังหวะ Success ยืนยันการกดจอง
-      window.trackLineClick(profileId);
-    };
-
-    (function initDockAutoHide() {
+    function initDockAutoHide() {
       const floatingDock = document.querySelector('.floating-app-dock');
       if (!floatingDock) return;
 
@@ -2358,29 +2378,8 @@ if (isStandaloneProfile) {
           ticking = true;
         }
       }, { passive: true });
-    })();
-
-
-window.shareProfile = async function (name, profileUrl) {
-  const shareData = {
-    title: `${name} | FirstModelHub`,
-    text: `ดูโปรไฟล์ ${name} เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน ไร้มัดจำ`,
-    url: profileUrl || window.location.href
-  };
-
-  if (typeof triggerHaptic === "function") triggerHaptic("light");
-
-  if (navigator.share) {
-    try { await navigator.share(shareData); } catch (_) {}
-  } else {
-    try {
-      await navigator.clipboard.writeText(shareData.url);
-      alert(`คัดลอกลิงก์โปรไฟล์ ${name} เรียบร้อยแล้วค่ะ!`);
-    } catch (_) {
-      prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareData.url);
     }
-  }
-};
+    initDockAutoHide();
 
   
     await (async function initializeData() {
