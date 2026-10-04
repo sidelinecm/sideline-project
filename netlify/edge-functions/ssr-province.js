@@ -1044,31 +1044,43 @@ const REGION_CONFIG = [
 ];
 
 const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
-  // กรองเอาเฉพาะจังหวัดที่มีน้อง > 0 คนจริง
+  // 1. กรองเฉพาะจังหวัดที่มีน้อง > 0 คน
   const activeProvsInRegion = region.provinces.filter(p => (provinceCounts[p.key] || 0) > 0);
-  if (activeProvsInRegion.length === 0) return ""; // ถ้าไม่มีน้องในภาคนั้นเลย ให้ซ่อนทั้งภาค
+  if (activeProvsInRegion.length === 0) return ""; 
 
   const totalRegionProfiles = activeProvsInRegion.reduce((sum, p) => sum + (provinceCounts[p.key] || 0), 0);
 
-  const provListHtml = activeProvsInRegion.map((p, idx) => {
-  const count = provinceCounts[p.key] || 0;
-  const zonesHtml = p.zones.map(z => {
-  if (z.includes("นิมมาน")) {
+  // 2. สร้างรายการของแต่ละจังหวัด
+  const provListHtml = activeProvsInRegion.map(p => {
+    const count = provinceCounts[p.key] || 0;
+    const zonesHtml = p.zones.map(z => {
+      if (z.includes("นิมมาน")) {
+        return `
+          <li style="padding-left: 10px;">
+            <a href="/nimman" style="color: #C084FC; text-decoration: none;">• ${escapeHTML(z)}</a>
+          </li>
+        `;
+      }
+      return `
+        <li style="padding-left: 10px;">
+          <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+        </li>
+      `;
+    }).join("");
+
     return `
-      <li style="padding-left: 10px;">
-        <a href="/nimman" style="color: #C084FC; text-decoration: none;">• ${escapeHTML(z)}</a>
+      <li style="margin-bottom: 6px;">
+        <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">
+          ${escapeHTML(p.name)} (${count} คน)
+        </a>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          ${zonesHtml}
+        </ul>
       </li>
     `;
-  }
+  }).join("");
 
- 
-  return `
-    <li style="padding-left: 10px;">
-      <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
-    </li>
-  `;
-}).join("");
-
+  // 3. ปิดคอลัมน์ของแต่ละภาค
   return `
     <div class="directory-region-col">
       <strong style="color: #7C3AED; font-size: 13px; display: block; margin-bottom: 8px;">
