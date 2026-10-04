@@ -617,6 +617,28 @@ async function getSupabaseClient() {
     }
     
     initAgencyStories();
+    // 🟢 สร้างปุ่มลัด [ 📍 เมือง... ] แทรกอัตโนมัติตามจังหวัดที่เปิดอยู่
+    const pillsRow = document.getElementById("quick-filter-pills");
+    const provName = window.currentProvinceName;
+    if (pillsRow && provName && provName !== "ทั่วไทย" && !provName.includes("กรุงเทพ")) {
+      const mName = provName.startsWith("เมือง") ? provName : `เมือง${provName}`;
+      if (!pillsRow.querySelector(`[data-tag="${mName}"]`)) {
+        const btn = document.createElement("button");
+        btn.className = "filter-pill-tab";
+        btn.type = "button";
+        btn.setAttribute("data-tag", mName);
+        btn.innerHTML = `📍 ${mName}`;
+        btn.onclick = function(e) {
+          e.preventDefault();
+          if (typeof triggerHaptic === "function") triggerHaptic("light");
+          document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+          this.classList.add("active");
+          appState.activePillTag = mName;
+          executeFilterAndRender(true);
+        };
+        pillsRow.insertBefore(btn, pillsRow.children[1]); // แทรกเป็นปุ่มที่ 2 ต่อจาก 'น้องๆทั้งหมด'
+      }
+    }
 
     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
     const activeProvinceSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
@@ -869,7 +891,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
       const searchKeyword = domCache.searchInput?.value?.trim();
       
-      let sectionTitle = isEN ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>` : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>`;
+     let sectionTitle = isEN ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>` : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>`;
       
       if (searchKeyword) {
         sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
