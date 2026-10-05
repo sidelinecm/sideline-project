@@ -1016,7 +1016,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-    // ✅ ปรับ H1 ให้มีคีย์เวิร์ดครบถ้วน ซิงค์ตรงกับ SSR
+    // ✅ ซิงค์ตรงกับ H1 ตัวชนะเลิศของ SSR
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
@@ -1025,13 +1025,13 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
-     } else {
+      } else {
         const line1 = isAllOrNational 
-  ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
-  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
+          ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
+          : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
         const line2 = isAllOrNational 
-          ? "เด็กเอ็น ฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
-          : "ฟิวแฟน เด็กเอ็น ตรงปก 100% จ่ายหน้างาน";
+          ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" 
+          : "สาวรับงาน ฟิวแฟนตรงปก 100%";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
