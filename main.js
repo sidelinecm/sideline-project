@@ -788,10 +788,13 @@ async function getSupabaseClient() {
 
           if (filterTag === "ตรงปก") return p.isVerified || combined.includes("ตรงปก");
           
-          // 🟢 เพิ่มเงื่อนไขพิเศษ: ถ้าเป็นปุ่ม "เมือง..." ให้ดึงทั้งคนที่อยู่ "ตัวเมือง", "ในเมือง", หรือมีชื่อจังหวัดนั้นๆ
           if (filterTag.startsWith("เมือง")) {
-            const rawProv = filterTag.replace(/^เมือง/, ""); // ตัดเหลือชื่อจังหวัด เช่น "เชียงใหม่"
-            return locStr.includes("เมือง") || locStr.includes("ตัวเมือง") || locStr.includes("ในเมือง") || combined.includes(filterTag) || combined.includes(rawProv);
+            // 1. รวมคีย์เวิร์ดย่านในเมืองของเชียงใหม่ และคำว่า เมือง/ในเมือง ของจังหวัดอื่นๆ
+            const cityZones = ["เมือง", "ตัวเมือง", "ในเมือง", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "มช", "ท่าแพ", "คูเมือง"];
+            const isInCity = cityZones.some(z => locStr.includes(z));
+            
+            // 🔒 ตัด combined.includes(rawProv) ออก เพื่อไม่ให้น้องโซนแม่ริม/สันทราย หลุดเข้ามา
+            return isInCity || combined.includes(filterTag);
           }
 
           return combined.includes(filterTag);
@@ -815,6 +818,8 @@ async function getSupabaseClient() {
           const idStr = String(p.id || "");
           const ageStr = String(p.safeAge || p.age || "");
           const priceStr = String(p._price || p.rate || "");
+          // 🟢 เพิ่มการดึงค่าสัดส่วน (Stats / Cup) มาค้นหาด้วย
+          const statsStr = String(p.safeStats || p.stats || "").toLowerCase();
 
           return keywords.every(k => (
             idStr === k ||
@@ -826,7 +831,8 @@ async function getSupabaseClient() {
             slogan.includes(k) ||
             tags.includes(k) ||
             ageStr === k ||
-            priceStr.includes(k)
+            priceStr.includes(k) ||
+            statsStr.includes(k) // 👈 เช็กสัดส่วนตรงนี้
           ));
         });
 
@@ -839,7 +845,13 @@ async function getSupabaseClient() {
 
     
 if (currentCriteria.avail && currentCriteria.avail !== "all") {
-  results = results.filter(p => (p.availability || "").includes(currentCriteria.avail));
+  results = results.filter(p => {
+    const status = (p.availability || "").toLowerCase();
+    if (currentCriteria.avail === "รับงาน") {
+      return status.includes("รับงาน") || status.includes("ว่าง") || status.includes("available") || status.includes("online");
+    }
+    return status.includes(currentCriteria.avail);
+  });
 }
 
       if (!currentCriteria.text) {
