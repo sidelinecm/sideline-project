@@ -1923,9 +1923,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         targetUrl = `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        targetTitle = isEN 
-          ? `${provName} Escorts & Companions | FirstModelHub` 
-          : `สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
+        targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `ไซด์ไลน์${provName} สาวรับงาน${provName} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
 
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
