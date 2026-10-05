@@ -606,8 +606,11 @@ async function getSupabaseClient() {
     const availabilityStatus = raw.availability || raw.status || (isEN ? "Available" : "รับงาน");
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
     
-    // 🟢 ดึงค่าไลน์ทุกรูปแบบจากหลังบ้าน (รองรับทั้งลิงก์ https://lin.ee/..., https://line.me/... และ ID ไลน์ปกติ)
-    const rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
+   let rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
+    // ถ้าเป็นลิงก์ของน้องข้าวฟ่างที่โดนแบน ให้สลับไปใช้ LINE กลาง
+    if (/vos730x|318afxwt/i.test(rawLineVal)) {
+      rawLineVal = "https://line.me/ti/p/u8Bz9HsaY8";
+    }
 
     return {
       ...raw,
