@@ -698,46 +698,25 @@ export default async (req, context) => {
     let provinceSlug = "";
     let isNational = false;
 
-    if (segments.length === 0 || url.pathname === "/" || url.pathname === "/profiles") {
-      isNational = true;
-      provinceSlug = "national";
-    } else if (segments[0] === "location" && segments[1]) {
-      try {
-        provinceSlug = decodeURIComponent(segments[1]).toLowerCase();
-      } catch (_err) {
-        provinceSlug = segments[1].toLowerCase();
-      }
-    } else {
-      const lastSeg = segments[segments.length - 1] || "";
-      try {
-        provinceSlug = decodeURIComponent(lastSeg).toLowerCase();
-      } catch (_err) {
-        provinceSlug = lastSeg.toLowerCase();
-      }
-    }
+    // ✅ เพิ่มฟังก์ชันนี้ลงใน render-bot.js:
+function detectAccurateProvince(p) {
+  const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
+  if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
+    if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
+    if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
+    return orig;
+  }
 
-    const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
-    let provinceKeyVariants = [provinceSlug, cleanProvinceSlug, provinceSlug.replace(/-/g, "_"), provinceSlug.replace(/_/g, "-")];
-    provinceKeyVariants = [...new Set(provinceKeyVariants.filter(Boolean))];
+  const locText = (p.location || "").toLowerCase();
+  if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
+  if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
+  if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
+  if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
+  if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
+  if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
 
-    function detectAccurateProvince(p) {
-      // 🟢 อันดับ 1: ถ้าใน Database มีการระบุจังหวัดไว้อยู่แล้ว ให้เชื่อ Database เป็นหลัก 100%
-      const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
-      if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
-        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
-        return orig;
-      }
-
-      // 🟢 อันดับ 2: ถ้าใน Database ไม่มี ให้ตรวจจาก Location (ย่านที่น้องสแตนด์บายจริง)
-      const locText = (p.location || "").toLowerCase();
-      if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
-      if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
-      if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
-      if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
-      if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
-      if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
-
+  return "chiangmai";
+}
       // 🟢 อันดับ 3: หากยังไม่พบ จึงค่อยสแกนจากคำบรรยายทั้งหมด (เรียงลำดับเมืองหลักขึ้นก่อน)
       const textToSearch = [
         p.location || "",
