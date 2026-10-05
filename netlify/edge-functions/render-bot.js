@@ -351,11 +351,12 @@ export default async (req, context) => {
     let relatedProfiles = [];
     let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
     
-  if (cleanProvinceKey) {
+  // แก้ไขใน render-bot.js:
+if (cleanProvinceKey) {
   const { data: related } = await supabase
     .from("profiles")
     .select("*")
-    .or(`provinceKey.ilike.%${cleanProvinceKey}%,province_key.ilike.%${cleanProvinceKey}%,province_slug.ilike.%${cleanProvinceKey}%`)
+    .ilike("provinceKey", `%${cleanProvinceKey}%`)
     .eq("active", true)
     .neq("id", profile.id)
     .limit(6);

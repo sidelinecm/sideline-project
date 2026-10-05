@@ -159,7 +159,7 @@ const PROVINCE_SEO_DATA = {
   default: {
     name: "ทั่วไทย",
     geo: { lat: 13.7563, lng: 100.5018 },
-    zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "หาดใหญ่"],
+    zones: ["เชียงใหม่", "ขอนแก่น", "เชียงราย", "อุดรธานี", "ภูเก็ต", "ลำปาง", "กรุงเทพฯ", "ชลบุรี"],
     faqs: [
       { q: "เรียกใช้บริการเพื่อนเที่ยวผ่าน FirstModelHub ต้องโอนเงินมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีครับ ระบบของเราคือ 'นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระเงินโดยตรงกับน้อง' ปลอดภัย 100% ครับ" },
       { q: "บริการสไตล์ฟิวแฟน (Girlfriend Experience - GFE) คืออะไร?", a: "คือบริการที่เน้นการเทคแคร์ เอาใจใส่ ดูแลดุจคนรัก มีความสุภาพ อ่อนโยน เป็นกันเอง ไม่เร่งเวลา และให้เกียรติลูกค้าครับ" },
@@ -311,18 +311,27 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
 
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
 
+  // 🟢 1. กำหนดรายชื่อ slug จังหวัดที่มีน้องสแตนด์บายจริง (> 0 คน)
+  const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket"];
+
   const zoneLinks = cleanZones.slice(0, 6).map(z => {
     const cleanZ = sanitizeThaiText(z);
     if (!cleanZ) return "";
 
+    // 1. โซนพิเศษนิมมาน ให้ชี้ไปหน้า /nimman เสมอ
     if (cleanZ.includes("นิมมาน")) {
       return `<a href="/nimman" class="kw-zone" title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
     }
 
+    // 2. 🔒 ถ้าเป็นหน้าทั่วไทย ให้ทำลิงก์เฉพาะจังหวัดที่ "เปิดบริการจริงและมีน้อง" เท่านั้น
     if (isNation && PROV_SLUG_MAP[cleanZ]) {
-      return `<a href="/location/${PROV_SLUG_MAP[cleanZ]}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+      const targetSlug = PROV_SLUG_MAP[cleanZ];
+      if (ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
+        return `<a href="/location/${targetSlug}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+      }
     }
 
+    // 3. 🛡️ จังหวัดที่ยังไม่มีน้อง (เช่น กรุงเทพฯ, ชลบุรี, พัทยา) ให้แสดงเป็นข้อความ <span> ธรรมดา (ไม่ครอบลิงก์ ป้องกัน 404 ทันที 100%)
     return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
   }).filter(Boolean);
 
@@ -1441,7 +1450,7 @@ const popularLocationsFooter = `
         slogan: sanitizeThaiText(p.slogan || p.quote || ""),
         quote: sanitizeThaiText(p.quote || p.slogan || ""),
       
-        line_id: p.line_id || p.line || p.lineId || p.line_url || p.contact_line || "",
+        line_id: p.line_id || p.line || p.lineId || p.line_url || p.contact_line || CONFIG.SOCIAL_LINKS[0],
         availability: p.availability || "รับงาน",
         isfeatured: p.isfeatured === true || p.isFeatured === true,
         verified: p.verified === true || p.isVerified === true,
