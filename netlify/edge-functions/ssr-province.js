@@ -31,13 +31,11 @@ const CONFIG = {
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
   DEFAULT_TELEPHONE: "+66926997044",
-  SOCIAL_LINKS: [
+ SOCIAL_LINKS: [
     "https://line.me/ti/p/u8Bz9HsaY8",
     "https://tiktok.com/@sidelinecm",
-    "https://twitter.com/sidelinechiangmai",
     "https://bio.site/firstfiwfans.com",
-    "https://linktr.ee/kissmodel",
-    "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+    "https://linktr.ee/kissmodel", "https://bsky.app/profile/sidelinechiangmai.bsky.social"
   ]
 };
 
@@ -790,13 +788,18 @@ export default async (req, context) => {
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
     ]);
 
-    // 🟢 ถ้า URL ไม่มีจังหวัดนี้ในระบบจริง ๆ (เช่น พิมพ์มั่ว) ถึงจะตัดเป็น 404
-    const provinceData = provinceDataRes.data;
+    let provinceData = provinceDataRes?.data;
     if (!provinceData && !isNational) {
-      return new Response("404 Not Found - ไม่พบพื้นที่บริการที่ระบุ", { 
-        status: 404,
-        headers: { "Content-Type": "text/plain; charset=utf-8" }
-      });
+      // ตรวจสอบใน PROVINCE_SEO_DATA ถ้ามีข้อมูลรองรับอยู่ ให้สร้าง Object จังหวัดขึ้นมา
+      const fallbackSeo = PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA[provinceSlug];
+      if (fallbackSeo) {
+        provinceData = { id: 999, nameThai: fallbackSeo.name, key: provinceSlug };
+      } else {
+        return new Response("404 Not Found - ไม่พบพื้นที่บริการที่ระบุ", { 
+          status: 404,
+          headers: { "Content-Type": "text/plain; charset=utf-8" }
+        });
+      }
     }
 
     
@@ -812,10 +815,20 @@ export default async (req, context) => {
       const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
       if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
 
-      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-      // 🔒 ตัดคนไม่มีรูปจริง หรือใช้รูปโลโก้เว็บทิ้ง
-      if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
+     // 🔒 รายชื่อ ID รูปที่ลบออกจาก Cloudinary แล้ว
+      const DELETED_CLOUDINARY_IDS = [
+        "wzv2cgtiogejprhggbne",
+        "t0c6uyb85crikzsoa0tf",
+        "bj0u7aqe9cks0pfoyeyn",
+        "opbawohhjqjjkdrcqn4k",
+        "ghe0vmnhflxzwkebpsf5"
+      ];
 
+      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+      const isDeletedCloudinary = DELETED_CLOUDINARY_IDS.some(id => rawImg.includes(id));
+
+      // ตัดคนไม่มีรูปจริง หรือรูปที่ถูกลบออกจาก Cloudinary ทิ้งทันที
+      if (!rawImg || rawImg.includes("firstmodelhub.webp") || isDeletedCloudinary) continue;
       let imgSig = "";
       const parts = rawImg.split("?")[0].split("/");
       imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");

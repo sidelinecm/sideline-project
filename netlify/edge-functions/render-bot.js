@@ -139,20 +139,34 @@ function extractCleanNumber(rate) {
 }
 
 function optimizeImg(imagePath, mode = "card") {
-  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
+  const DEFAULT_FALLBACK_IMG = CONFIG.DEFAULT_FALLBACK_IMAGE;
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
     return DEFAULT_FALLBACK_IMG;
   }
 
   const cleanPath = imagePath.trim();
-  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ 400x560
+
+  // 🔒 ถ้ารูปถูกลบไปแล้ว ให้ส่งรูปสำรองเว็บทันที ไม่ส่ง URL Cloudinary ที่พังออกไป
+  const DELETED_CLOUDINARY_IDS = [
+    "wzv2cgtiogejprhggbne",
+    "t0c6uyb85crikzsoa0tf",
+    "bj0u7aqe9cks0pfoyeyn",
+    "opbawohhjqjjkdrcqn4k",
+    "ghe0vmnhflxzwkebpsf5"
+  ];
+  if (DELETED_CLOUDINARY_IDS.some(id => cleanPath.toLowerCase().includes(id))) {
+    return DEFAULT_FALLBACK_IMG;
+  }
+
+  // 🟢 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ 400x560
+  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
 
   if (mode === "thumb" || mode <= 150) {
     transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // 2. สตอรี่/ไอคอน 120x120
   } else if (mode === "og") {
-    transform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto"; // 3. รูปแชร์ LINE/Facebook 1200x630 เป๊ะ
+    transform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto"; // 3. รูปแชร์ LINE/Facebook 1200x630
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    transform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // 4. รูปใหญ่หน้าโปรไฟล์ 600x800 (แก้บั๊กจุดนี้ให้แล้ว)
+    transform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // 4. รูปใหญ่หน้าโปรไฟล์ 600x800
   } else if (mode === "full" || mode >= 700) {
     transform = "f_auto,q_auto:eco,w_800,c_limit"; // 5. รูปขยายเต็มจอ
   }
@@ -179,6 +193,12 @@ function generateSrcSet(imagePath) {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.includes("res.cloudinary.com")) {
     return "";
   }
+  // 🔒 ถ้าเป็นรูปที่ถูกลบ ไม่ต้องสร้าง srcset ให้เกิด Error
+  const DELETED_CLOUDINARY_IDS = ["wzv2cgtiogejprhggbne", "t0c6uyb85crikzsoa0tf", "bj0u7aqe9cks0pfoyeyn", "opbawohhjqjjkdrcqn4k", "ghe0vmnhflxzwkebpsf5"];
+  if (DELETED_CLOUDINARY_IDS.some(id => imagePath.toLowerCase().includes(id))) {
+    return "";
+  }
+
   const img400 = optimizeImg(imagePath, 400, 560);
   const img600 = optimizeImg(imagePath, 600, 800);
   return `${img400} 400w, ${img600} 600w`;
@@ -376,23 +396,25 @@ if (provinceKey) {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-   // 🟢 ปรับปรุงใหม่: รองรับ Universal Link มาตรฐาน LINE สำหรับ iOS & Android 100%
     const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
-    const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
-    if (matchUrl) {
-      lineId = matchUrl[0];
-    } else if (rawLineInput) {
-      const cleanHandle = rawLineInput.trim();
-      if (cleanHandle.startsWith("@")) {
-        // 1. ถ้ามี @ (LINE Official): ใช้ page.line.me (ตัด @ ออก) เปิดเข้าแอพได้ทันทีบน iOS/Android ไม่เออเร่อ
-        const cleanOa = cleanHandle.replace(/^@+/, "").trim();
-        if (cleanOa) lineId = `https://page.line.me/${cleanOa}`;
+    // 🔒 ตรวจสอบลิงก์ LINE ที่ถูกระงับ/ใช้งานไม่ได้
+    const isBrokenLine = ["vos730x", "318afxwt", "@318afxwt"].some(k => rawLineInput.toLowerCase().includes(k));
+
+    if (!isBrokenLine && rawLineInput) {
+      const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
+      if (matchUrl) {
+        lineId = matchUrl[0];
       } else {
-        // 2. ถ้าเป็น ID ส่วนตัว: ต้องมีเครื่องหมาย ~ นำหน้า เพื่อสั่งให้ LINE ทำการค้นหา User ID
-        const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
-        if (cleanPersonalId) lineId = `https://line.me/R/ti/p/~${cleanPersonalId}`;
+        const cleanHandle = rawLineInput.trim();
+        if (cleanHandle.startsWith("@")) {
+          const cleanOa = cleanHandle.replace(/^@+/, "").trim();
+          if (cleanOa) lineId = `https://page.line.me/${cleanOa}`;
+        } else {
+          const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+          if (cleanPersonalId) lineId = `https://line.me/R/ti/p/~${cleanPersonalId}`;
+        }
       }
     }
 
