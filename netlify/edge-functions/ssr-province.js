@@ -799,51 +799,7 @@ export default async (req, context) => {
       });
     }
 
-    const rawProfiles = profilesRes.data || [];
-    const seenImageKeys = new Set();
-    const seenNameKeys = new Set();
-    const deduplicatedProfiles = [];
-
-    for (const p of rawProfiles) {
-      if (!p) continue;
-
-      const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
-      if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
-
-      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-      if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
-
-      let imgSig = "";
-      const parts = rawImg.split("?")[0].split("/");
-      imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
-
-      // 🟢 กำหนดจังหวัดที่ถูกต้องก่อนนำไปทำ Signature
-      const realProvince = detectAccurateProvince(p);
-      p.provinceKey = realProvince;
-      p.province_slug = realProvince;
-
-      // 🔒 แก้บั๊กชื่อซ้ำ: ผูก realProvince เข้าไปด้วย ไม่ให้น้องชื่อซ้ำคนละจังหวัดโดนลบทิ้ง
-      const nameSig = `${cleanName}_${realProvince}_${p.age || ""}_${p.rate || ""}`;
-
-      if (imgSig && seenImageKeys.has(imgSig)) continue;
-      if (cleanName && seenNameKeys.has(nameSig)) continue;
-
-      seenImageKeys.add(imgSig);
-      seenNameKeys.add(nameSig);
-
-      deduplicatedProfiles.push(p);
-    }
-
-    let profilesList = deduplicatedProfiles;
-    if (!isNational && provinceSlug !== "national") {
-      profilesList = deduplicatedProfiles.filter(p => {
-        const pKey = (p.provinceKey || "").toLowerCase();
-        return provinceKeyVariants.includes(pKey);
-      });
-    }
-
-    const totalCount = profilesList.length;
-
+    
    const rawProfiles = profilesRes.data || [];
     const seenImageKeys = new Set();
     const seenNameKeys = new Set();
@@ -890,10 +846,10 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 3. นับจำนวนโปรไฟล์ (ประกาศครั้งเดียว ถูกต้องตามหลัก JS)
+   
     const totalCount = profilesList.length;
 
-    // 🛡️ (ไม่มีคำสั่ง return 404 Plain Text ตรงนี้ เพื่อให้ส่งต่อไปยัง UI เทมเพลตสำรองด้านล่าง รักษาการ Index ของ Google)
+    
 
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
