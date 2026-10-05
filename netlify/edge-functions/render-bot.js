@@ -350,21 +350,17 @@ export default async (req, context) => {
 
     let relatedProfiles = [];
     let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
-   // 🟢 แก้เป็นแบบนี้: ถ้าในจังหวัดมีน้องน้อยกว่า 3 คน ให้ดึงเท่าที่มี ไม่ดึงข้ามจังหวัดมาเปลี่ยนชื่อ Alt มั่ว
-if (provinceKey) {
-  const { data: allActive } = await supabase
+    
+  if (cleanProvinceKey) {
+  const { data: related } = await supabase
     .from("profiles")
     .select("*")
+    .or(`provinceKey.ilike.%${cleanProvinceKey}%,province_key.ilike.%${cleanProvinceKey}%,province_slug.ilike.%${cleanProvinceKey}%`)
     .eq("active", true)
     .neq("id", profile.id)
-    .limit(30);
+    .limit(6);
 
-  if (allActive && Array.isArray(allActive)) {
-    relatedProfiles = allActive.filter(p => {
-      const pKey = (p.provinceKey || p.province_key || p.province_slug || "").toLowerCase().replace(/[-_]/g, "");
-      return pKey === cleanProvinceKey;
-    }).slice(0, 6);
-  }
+  relatedProfiles = related || [];
 }
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
@@ -379,26 +375,25 @@ if (provinceKey) {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // 🟢 ปรับใหม่: ดักจับคอลัมน์ line และ line_url เพิ่ม + รองรับทั้งลิงก์ lin.ee, line.me และ ID ที่มี @
-const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
-let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
+   // 🟢 ปรับปรุงใหม่: รองรับ Universal Link มาตรฐาน LINE สำหรับ iOS & Android 100%
+    const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
+    let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
-const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
-if (matchUrl) {
- 
-  lineId = matchUrl[0];
-} else if (rawLineInput) {
-  // ถ้าน้องใส่มาเป็น ID
-  const cleanHandle = rawLineInput.trim();
-  if (cleanHandle.startsWith("@")) {
-    // ถ้ามี @ นำหน้า (LINE Official) ให้สร้างลิงก์แบบ OA
-    lineId = `https://line.me/R/ti/p/${encodeURIComponent(cleanHandle)}`;
-  } else {
-    // ถ้าเป็น ID บุคคลทั่วไป
-    const cleanId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
-    if (cleanId) lineId = `https://line.me/ti/p/${cleanId}`;
-  }
-}
+    const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
+    if (matchUrl) {
+      lineId = matchUrl[0];
+    } else if (rawLineInput) {
+      const cleanHandle = rawLineInput.trim();
+      if (cleanHandle.startsWith("@")) {
+        // 1. ถ้ามี @ (LINE Official): ใช้ page.line.me (ตัด @ ออก) เปิดเข้าแอพได้ทันทีบน iOS/Android ไม่เออเร่อ
+        const cleanOa = cleanHandle.replace(/^@+/, "").trim();
+        if (cleanOa) lineId = `https://page.line.me/${cleanOa}`;
+      } else {
+        // 2. ถ้าเป็น ID ส่วนตัว: ต้องมีเครื่องหมาย ~ นำหน้า เพื่อสั่งให้ LINE ทำการค้นหา User ID
+        const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+        if (cleanPersonalId) lineId = `https://line.me/R/ti/p/~${cleanPersonalId}`;
+      }
+    }
 
     const age = profile.age || "22";
     const height = profile.height || "162";
