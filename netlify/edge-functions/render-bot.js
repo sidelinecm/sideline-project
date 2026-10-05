@@ -351,12 +351,12 @@ export default async (req, context) => {
     let relatedProfiles = [];
     let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
     
-  // แก้ไขใน render-bot.js:
-if (cleanProvinceKey) {
+ 
+if (provinceKey) {
   const { data: related } = await supabase
     .from("profiles")
     .select("*")
-    .ilike("provinceKey", `%${cleanProvinceKey}%`)
+    .or(`provinceKey.ilike.%${cleanProvinceKey}%,provinceKey.ilike.%${provinceKey}%,province_key.ilike.%${cleanProvinceKey}%,province_key.ilike.%${provinceKey}%`)
     .eq("active", true)
     .neq("id", profile.id)
     .limit(6);
@@ -794,8 +794,8 @@ const schemaGraph = {
   
 const responseHeaders = {
   "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
-  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
   "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "Cross-Origin-Opener-Policy": "same-origin-allow-popups",

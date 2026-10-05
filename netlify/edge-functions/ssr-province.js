@@ -723,18 +723,34 @@ export default async (req, context) => {
     provinceKeyVariants = [...new Set(provinceKeyVariants.filter(Boolean))];
 
     function detectAccurateProvince(p) {
+      // 🟢 อันดับ 1: ถ้าใน Database มีการระบุจังหวัดไว้อยู่แล้ว ให้เชื่อ Database เป็นหลัก 100%
+      const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
+      if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
+        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
+        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
+        return orig;
+      }
+
+      // 🟢 อันดับ 2: ถ้าใน Database ไม่มี ให้ตรวจจาก Location (ย่านที่น้องสแตนด์บายจริง)
+      const locText = (p.location || "").toLowerCase();
+      if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
+      if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
+      if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
+      if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
+      if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
+      if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
+
+      // 🟢 อันดับ 3: หากยังไม่พบ จึงค่อยสแกนจากคำบรรยายทั้งหมด (เรียงลำดับเมืองหลักขึ้นก่อน)
       const textToSearch = [
         p.location || "",
         p.provinceThai || "",
         p.province_thai || "",
-        p.provinceName || "",
         p.description || "",
-        p.name || "",
-        p.quote || "",
-        p.slogan || ""
+        p.name || ""
       ].join(" ").toLowerCase();
 
       const RULES = [
+        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] },
         { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
         { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"] },
         { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก", "เด่นห้า"] },
@@ -747,8 +763,7 @@ export default async (req, context) => {
         { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม"] },
         { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
         { key: "lamphun", keywords: ["ลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"] },
-        { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] },
-        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] }
+        { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] }
       ];
 
       for (const rule of RULES) {
@@ -757,12 +772,6 @@ export default async (req, context) => {
         }
       }
 
-      const orig = (p.provinceKey || p.province_slug || "").toString().toLowerCase().trim();
-      if (orig && orig !== "no_province") {
-        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
-        return orig;
-      }
       return "chiangmai";
     }
 
@@ -781,7 +790,7 @@ export default async (req, context) => {
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
     ]);
 
-   
+    // 🟢 ถ้า URL ไม่มีจังหวัดนี้ในระบบจริง ๆ (เช่น พิมพ์มั่ว) ถึงจะตัดเป็น 404
     const provinceData = provinceDataRes.data;
     if (!provinceData && !isNational) {
       return new Response("404 Not Found - ไม่พบพื้นที่บริการที่ระบุ", { 
@@ -795,34 +804,35 @@ export default async (req, context) => {
     const seenNameKeys = new Set();
     const deduplicatedProfiles = [];
 
-    // ✅ แก้ไขใหม่: ต้องมีชื่อจริง และมีรูปคนจริงเท่านั้น
-for (const p of rawProfiles) {
-  if (!p) continue;
+    for (const p of rawProfiles) {
+      if (!p) continue;
 
-  const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
-  if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
+      const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
+      if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
 
-  const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-  // 🔒 ถ้าไม่มีรูป หรือใช้รูปโลโก้เว็บ ตัดทิ้งทันที ห้ามนำมานับ
-  if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
+      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+      if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
 
-  let imgSig = "";
-  const parts = rawImg.split("?")[0].split("/");
-  imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
-  const nameSig = `${cleanName}_${p.age || ""}_${p.rate || ""}`;
+      let imgSig = "";
+      const parts = rawImg.split("?")[0].split("/");
+      imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
 
-  if (imgSig && seenImageKeys.has(imgSig)) continue;
-  if (cleanName && seenNameKeys.has(nameSig)) continue;
+      // 🟢 กำหนดจังหวัดที่ถูกต้องก่อนนำไปทำ Signature
+      const realProvince = detectAccurateProvince(p);
+      p.provinceKey = realProvince;
+      p.province_slug = realProvince;
 
-  seenImageKeys.add(imgSig);
-  seenNameKeys.add(nameSig);
+      // 🔒 แก้บั๊กชื่อซ้ำ: ผูก realProvince เข้าไปด้วย ไม่ให้น้องชื่อซ้ำคนละจังหวัดโดนลบทิ้ง
+      const nameSig = `${cleanName}_${realProvince}_${p.age || ""}_${p.rate || ""}`;
 
-  const realProvince = detectAccurateProvince(p);
-  p.provinceKey = realProvince;
-  p.province_slug = realProvince;
-  deduplicatedProfiles.push(p);
-}
-    
+      if (imgSig && seenImageKeys.has(imgSig)) continue;
+      if (cleanName && seenNameKeys.has(nameSig)) continue;
+
+      seenImageKeys.add(imgSig);
+      seenNameKeys.add(nameSig);
+
+      deduplicatedProfiles.push(p);
+    }
 
     let profilesList = deduplicatedProfiles;
     if (!isNational && provinceSlug !== "national") {
@@ -834,16 +844,56 @@ for (const p of rawProfiles) {
 
     const totalCount = profilesList.length;
 
-    // ✅ จุดที่เพิ่ม: ดักตัดจบ 404 ทันที ถ้าจังหวัดนั้นไม่มีน้อง (แก้ปัญหา Soft 404 แบบเบ็ดเสร็จ)
-    if (!isNational && totalCount === 0) {
-      return new Response(`404 Not Found - ขณะนี้ยังไม่มีน้องๆ สแตนด์บายในพื้นที่ ${provinceData?.nameThai || provinceSlug}`, { 
-        status: 404,
-        headers: { 
-          "Content-Type": "text/plain; charset=utf-8",
-          "Cache-Control": "no-store, no-cache, must-revalidate"
-        }
+   const rawProfiles = profilesRes.data || [];
+    const seenImageKeys = new Set();
+    const seenNameKeys = new Set();
+    const deduplicatedProfiles = [];
+
+    // 🟢 1. คัดกรองโปรไฟล์: มีชื่อจริง + รูปคนจริง + ป้องกันชื่อซ้ำข้ามจังหวัด
+    for (const p of rawProfiles) {
+      if (!p) continue;
+
+      const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
+      if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
+
+      const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+      // 🔒 ตัดคนไม่มีรูปจริง หรือใช้รูปโลโก้เว็บทิ้ง
+      if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
+
+      let imgSig = "";
+      const parts = rawImg.split("?")[0].split("/");
+      imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
+
+      // 🟢 หาจังหวัดที่ถูกต้องก่อนทำ Signature
+      const realProvince = detectAccurateProvince(p);
+      p.provinceKey = realProvince;
+      p.province_slug = realProvince;
+
+      // 🔒 แก้บั๊กชื่อซ้ำ: ผูก realProvince เข้าไปด้วย เพื่อไม่ให้น้องชื่อซ้ำคนละจังหวัดโดนลบ
+      const nameSig = `${cleanName}_${realProvince}_${p.age || ""}_${p.rate || ""}`;
+
+      if (imgSig && seenImageKeys.has(imgSig)) continue;
+      if (cleanName && seenNameKeys.has(nameSig)) continue;
+
+      seenImageKeys.add(imgSig);
+      seenNameKeys.add(nameSig);
+
+      deduplicatedProfiles.push(p);
+    }
+
+    // 🟢 2. แยกโปรไฟล์ตามจังหวัดที่เปิดดู
+    let profilesList = deduplicatedProfiles;
+    if (!isNational && provinceSlug !== "national") {
+      profilesList = deduplicatedProfiles.filter(p => {
+        const pKey = (p.provinceKey || "").toLowerCase();
+        return provinceKeyVariants.includes(pKey);
       });
     }
+
+    // 🟢 3. นับจำนวนโปรไฟล์ (ประกาศครั้งเดียว ถูกต้องตามหลัก JS)
+    const totalCount = profilesList.length;
+
+    // 🛡️ (ไม่มีคำสั่ง return 404 Plain Text ตรงนี้ เพื่อให้ส่งต่อไปยัง UI เทมเพลตสำรองด้านล่าง รักษาการ Index ของ Google)
 
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
@@ -851,10 +901,10 @@ for (const p of rawProfiles) {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    // 🟢 Title แบบคลีน คีย์เวิร์ดตรงเป้าคนค้นหา (ไม่ยัดคำว่า "เมือง" ซ้ำซ้อน)
+    // 🟢 4. สูตร B: ดึง "สาวรับงาน" ขึ้นหน้าสุดทั้งหน้าแรกและหน้ารายจังหวัด
     const metaTitle = isNational 
-      ? "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub"
-      : `ไซด์ไลน์${provinceNameThai} สาวรับงาน${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
+      ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub"
+      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
       
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
@@ -870,7 +920,7 @@ for (const p of rawProfiles) {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 1. กำหนดโครงสร้างหลัก (Organization, WebSite, CollectionPage, LocalBusiness)
+    // 🟢 5. กำหนดโครงสร้างหลัก (CollectionPage / WebPage)
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -880,11 +930,10 @@ for (const p of rawProfiles) {
       "inLanguage": "th-TH",
       "dateModified": new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
-      "about": { "@id": `${canonicalUrl}#business` }, // 👈 ลิงก์เชื่อมโยงไปยัง Entity ธุรกิจในพื้นที่
+      "about": { "@id": `${canonicalUrl}#business` },
       "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
     };
 
-    // 🛡️ ถ้าไม่ใช่หน้าแรก ค่อยใส่ลิงก์เชื่อมต่อไปยัง BreadcrumbList ป้องกัน Unresolved Reference
     if (!isNational) {
       webpageSchema.breadcrumb = { "@id": `${canonicalUrl}#breadcrumb` };
     }
@@ -1494,8 +1543,8 @@ const popularLocationsFooter = `
     
 const responseHeaders = {
   "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
-  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
   "ETag": `"${GLOBAL_VERSION}"`,
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
