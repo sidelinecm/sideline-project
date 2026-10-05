@@ -1945,10 +1945,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       } else {
         targetUrl = isEN ? "/index-en" : "/";
         
-        // 🟢 สูตร B: หน้าแรก คืนค่าตัวแชมป์
-        targetTitle = isEN 
-          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-          : "ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
+       targetTitle = isEN 
+  ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+  : "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
 
         const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
         const liveProvinces = appState.provincesMap?.size || 6;
