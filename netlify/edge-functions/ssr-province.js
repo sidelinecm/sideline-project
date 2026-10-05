@@ -862,6 +862,24 @@ for (const p of rawProfiles) {
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
     // 🟢 1. กำหนดโครงสร้างหลัก (Organization, WebSite, CollectionPage, LocalBusiness)
+    const webpageSchema = {
+      "@type": "CollectionPage",
+      "@id": `${canonicalUrl}#webpage`,
+      "name": stripHTML(metaTitle),
+      "description": cleanMetaDesc,
+      "url": canonicalUrl,
+      "inLanguage": "th-TH",
+      "dateModified": new Date().toISOString(),
+      "isPartOf": { "@id": `${primaryDomain}/#website` },
+      "about": { "@id": `${canonicalUrl}#business` }, // 👈 ลิงก์เชื่อมโยงไปยัง Entity ธุรกิจในพื้นที่
+      "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
+    };
+
+    // 🛡️ ถ้าไม่ใช่หน้าแรก ค่อยใส่ลิงก์เชื่อมต่อไปยัง BreadcrumbList ป้องกัน Unresolved Reference
+    if (!isNational) {
+      webpageSchema.breadcrumb = { "@id": `${canonicalUrl}#breadcrumb` };
+    }
+
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -894,27 +912,15 @@ for (const p of rawProfiles) {
         "publisher": { "@id": `${primaryDomain}/#organization` },
         "inLanguage": "th-TH"
       },
+      webpageSchema,
       {
-        "@type": "CollectionPage",
-        "@id": `${canonicalUrl}#webpage`,
-        "name": stripHTML(metaTitle),
-        "description": cleanMetaDesc,
-        "url": canonicalUrl,
-        "inLanguage": "th-TH",
-        "dateModified": new Date().toISOString(),
-        "isPartOf": { "@id": `${primaryDomain}/#website` },
-        "about": { "@id": `${canonicalUrl}#business` }, // 👈 ลิงก์เชื่อมโยงไปยัง Entity ธุรกิจในพื้นที่
-        "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-        "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
-      },
-      {
-        // 👈 พระเอกดึงอันดับ Local Search (เชียงใหม่, ขอนแก่น, กทม.) คืนกลับมา
+        // 👈 ดึงอันดับ Local Search (เชียงใหม่, ขอนแก่น, กทม.) เชื่อมโยงกับ Google Maps Entity
         "@type": ["EntertainmentBusiness", "ProfessionalService"],
         "@id": `${canonicalUrl}#business`,
         "name": isNational 
           ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
           : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-        "image": verifiedHeroImage,
+        "image": heroImage, // ✅ แก้ไขแล้ว: ใช้ตัวแปร heroImage ที่มีอยู่จริง ไม่ Crash 100%
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
         "currenciesAccepted": "THB",
@@ -949,37 +955,35 @@ for (const p of rawProfiles) {
       }
     ];
 
-    // 🟢 2. BreadcrumbList เชื่อมต่อสมบูรณ์ (ป้องกัน Unresolved Node ทั้งหน้าแรกและหน้าจังหวัด)
-    const breadcrumbItems = [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "หน้าแรก",
-        "item": `${primaryDomain}/`
-      }
-    ];
-
+    // 🟢 2. BreadcrumbList (ใส่เฉพาะหน้าจังหวัดที่มี 2 ระดับชั้นขึ้นไปตามเกณฑ์ Google)
     if (!isNational) {
-      breadcrumbItems.push({
-        "@type": "ListItem",
-        "position": 2,
-        "name": `ไซด์ไลน์${provinceNameThai}`,
-        "item": canonicalUrl
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "หน้าแรก",
+            "item": `${primaryDomain}/`
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `ไซด์ไลน์${provinceNameThai}`,
+            "item": canonicalUrl
+          }
+        ]
       });
     }
 
-    schemaGraph.push({
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}#breadcrumb`,
-      "itemListElement": breadcrumbItems
-    });
-
-    // 🟢 3. ItemList (มาตรฐาน Google Carousel ถูกต้อง 100% + จำกัด 12 คนประหยัด Bandwidth)
+    // 🟢 3. ItemList (Carousel โปรไฟล์น้องๆ ลิมิต 12 คน ป้องกัน Payload บวม)
     if (profilesList.length > 0) {
-      const carouselProfiles = profilesList.slice(0, 12); // ลิมิต 12 คน ป้องกัน Payload บวม
+      const carouselProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
+        "isPartOf": { "@id": `${canonicalUrl}#webpage` },
         "numberOfItems": carouselProfiles.length,
         "itemListElement": carouselProfiles.map((p, idx) => ({
           "@type": "ListItem",
@@ -987,12 +991,11 @@ for (const p of rawProfiles) {
           "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
           "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
           "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-          // 🛡️ เอา address ใน ListItem ออกแล้ว เพราะผิด Schema Specification
         }))
       });
     }
 
-    // 🟢 4. FAQPage Rich Results (ช่วยให้มีกล่องคำถามพับได้ใต้ผลการค้นหาบน Google)
+    // 🟢 4. FAQPage Rich Results (ดึงคำถาม-คำตอบเพื่อสร้างกล่องพับใต้ผลค้นหา Google)
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -1167,8 +1170,10 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
-    finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
-    finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
+   // ✅ ลบแท็ก canonical และ og:url เดิมทั้งหมดทิ้ง แล้วแทรกแท็กที่ถูกต้องตรง URL ปัจจุบัน
+    finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "");
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*>/gi, "");
+    finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="canonical" id="canonical-link" href="${canonicalUrl}">\n  <meta property="og:url" content="${canonicalUrl}">\n</head>`);
     
     const cleanOgImageBlock = `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n  <meta property="og:image:alt" content="${escapeHTML(CONFIG.BRAND_NAME)} ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน${escapeHTML(provinceNameThai)}">`;
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:alt["'][^>]*>/i, cleanOgImageBlock);
