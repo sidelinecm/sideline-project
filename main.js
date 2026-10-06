@@ -1496,10 +1496,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    const dynamicTitle = isEn
+   const dynamicTitle = isEn
   ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
-  : `${displayName} สาวรับงาน${pProvText} ไซด์ไลน์${pProvText} (${primaryZone}) ฟิวแฟน ตรงปก 100% จ่ายหน้างาน | FirstModelHub`;
-    document.title = dynamicTitle;
+  : `${displayName} รับงาน${pProvText} ไซด์ไลน์ (${primaryZone}) ตรงปก 100% | FirstModelHub`;
 
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
     if (canonicalLink) {
