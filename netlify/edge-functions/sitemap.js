@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - DYNAMIC XML SITEMAP ENGINE (sitemap.js)
- * Production-Ready Ultra-Defensive Version (FULL 2026)
+ * Production-Ready Ultra-Defensive Version (FIXED 2026)
  * ==============================================================================
  */
 
@@ -81,7 +81,6 @@ export default async (request, _context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // 🟢 แก้ไขใช้ select("*") และสืบค้นแบบปลอดภัย ป้องกัน PostgREST 400 Error
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
       supabase.from("profiles").select("*").eq("active", true)
@@ -90,17 +89,37 @@ export default async (request, _context) => {
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
+    // 🟢 สร้าง Map วันที่อัปเดตล่าสุดของแต่ละจังหวัด โดยอิงจากน้องที่อัปเดตล่าสุดในจังหวัดนั้นจริง
+    const provinceLatestDateMap = new Map();
+    profiles.forEach(p => {
+      const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+      const pDateStr = p.lastUpdated || p.last_updated || p.updated_at || p.created_at;
+      if (pKey && pDateStr) {
+        const pTime = new Date(pDateStr).getTime();
+        const curLatest = provinceLatestDateMap.get(pKey) || 0;
+        if (!isNaN(pTime) && pTime > curLatest) {
+          provinceLatestDateMap.set(pKey, pTime);
+        }
+      }
+    });
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าสถิติหลัก (Static Core Pages)
+    // 1. หน้าสถิติหลักและคอนเทนต์สำคัญ (Core & High-Value Landing Pages)
     const staticPages = [
       { path: "", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
       { path: "/locations", priority: "0.9", changefreq: "daily" },
+      { path: "/nimman", priority: "0.9", changefreq: "daily" }, // 🟢 เพิ่มโซนยอดฮิต
+      { path: "/blog", priority: "0.8", changefreq: "weekly" }, // 🟢 เพิ่มสารบัญบทความ
+      { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความฟิวแฟน
+      { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความกันโกง
+      { path: "/blog/vip-etiquette-how-to-book-companion", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความ VIP
       { path: "/about", priority: "0.5", changefreq: "monthly" },
-      { path: "/faq", priority: "0.5", changefreq: "monthly" }
+      { path: "/faq", priority: "0.5", changefreq: "monthly" },
+      { path: "/privacy-policy", priority: "0.3", changefreq: "monthly" } // 🟢 เพิ่มนโยบาย
     ];
 
     staticPages.forEach(p => {
@@ -112,15 +131,22 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 2. หมวดจังหวัด (Provinces Section)
+    // 2. หมวดจังหวัด (Provinces Section) - แก้ไขบั๊กปี 2025 ให้ดึงวันที่อัปเดตล่าสุดของโปรไฟล์ในจังหวัดนั้น
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
           const cleanKey = String(p.key).trim().toLowerCase();
-          const provDate = safeGetIsoDate(p.updated_at || p.updatedAt || p.created_at, nowIso);
+          
+          // ตรวจสอบว่าจังหวัดนี้มีน้องคนไหนอัปเดตล่าสุดเมื่อไหร่ ถ้าไม่มีให้ใช้วันนี้ (nowIso)
+          let provIsoDate = nowIso;
+          const latestTimestamp = provinceLatestDateMap.get(cleanKey);
+          if (latestTimestamp && latestTimestamp > 0) {
+            provIsoDate = new Date(latestTimestamp).toISOString();
+          }
+
           xml += `  <url>\n`;
           xml += `    <loc>${domain}/location/${encodeURIComponent(cleanKey)}</loc>\n`;
-          xml += `    <lastmod>${provDate}</lastmod>\n`;
+          xml += `    <lastmod>${provIsoDate}</lastmod>\n`;
           xml += `    <changefreq>daily</changefreq>\n`;
           xml += `    <priority>0.9</priority>\n`;
           xml += `  </url>\n`;
