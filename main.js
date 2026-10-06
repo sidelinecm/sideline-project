@@ -563,7 +563,7 @@ async function getSupabaseClient() {
     else if (!pKey || pKey === "no_province") pKey = "chiangmai";
 
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
-    if (pKey === "khon-kaen") pKey = "khonkaen";
+    if (pKey === "khonkaen") pKey = "khon-kaen";
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
     
     // 🟢 แก้ไข: ใช้ parseRateToNumber ป้องกันบั๊กราคา 15.-
