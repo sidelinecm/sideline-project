@@ -46,14 +46,20 @@
 # ==============================================================================
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
+# 🛡️ ลำดับที่ 1: ด่านตรวจคนเข้าเมือง (ต้องอยู่บนสุด เพื่อสกัดบอทขยะก่อนส่งต่อไปฟังก์ชันอื่น)
+
+
+# 🟢 แผนผังเว็บไซต์
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
+# 🟢 ฟังก์ชันเรนเดอร์หน้ารายบุคคล
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
+# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและหน้าหลัก
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
@@ -71,10 +77,10 @@
   path = "/.well-known/*"
   
 # ==============================================================================
-# 3. REDIRECTS (เข้าหน้าไหนในเว็บเดิม เด้งไปหน้านั้นในเว็บใหม่แบบ 1:1 ทันที)
+# 3. REDIRECTS (ฉบับสมบูรณ์ ปลอดภัย ไร้ Loop และดันคะแนน SEO สูงสุด)
 # ==============================================================================
 
-# 🟢 ลำดับที่ 1: 301 Permanent Redirect ส่งต่อ 1:1 ทุก URL จาก sidelinechiangmai มา firstmodelhub
+# 🟢 ลำดับที่ 1: ย้ายโดเมนเดิม sidelinechiangmai มา firstmodelhub แบบ 1:1
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
   to = "https://firstmodelhub.com/:splat"
@@ -99,7 +105,7 @@
   status = 301
   force = true
 
-# 🟢 ลำดับที่ 2: รวมโดเมนสำรอง Netlify และ www เข้าสู่ https://firstmodelhub.com แบบ 1:1
+# 🟢 ลำดับที่ 2: รวมโดเมนสำรอง Netlify, www, และ Subdomain st. เข้าสู่โดเมนหลัก 1:1
 [[redirects]]
   from = "https://firstmodelhub.netlify.app/*"
   to = "https://firstmodelhub.com/:splat"
@@ -124,7 +130,20 @@
   status = 301
   force = true
 
-# 🟢 ลำดับที่ 3: จัดการ Clean URLs สำหรับพารามิเตอร์จังหวัด (?province=xxx -> /location/xxx)
+# 🛡️ ดึง Subdomain st. กลับเข้าโดเมนหลักทั้งหมด (ป้องกัน Google Index หน้าซ้ำ)
+[[redirects]]
+  from = "https://st.firstmodelhub.com/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://st.firstmodelhub.com/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+# 🟢 ลำดับที่ 3: จัดการ Clean URLs พารามิเตอร์จังหวัด (?province=xxx -> /location/xxx)
 [[redirects]]
   query = { province = ":p" }
   from = "/"
@@ -139,7 +158,66 @@
   status = 301
   force = true
 
-# 🟢 ลำดับที่ 4: SPA Fallback สำหรับระบบ Client-side Routing
+[[redirects]]
+  query = { province = ":p" }
+  from = "/profiles"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+[[redirects]]
+  query = { province = ":p" }
+  from = "/profiles.html"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+# 🟢 ลำดับที่ 4: แก้ไข URL ผิดปกติ และลบนามสกุล .html (301 Permanent Redirect)
+[[redirects]]
+  from = "/profiles.html"
+  to = "/profiles"
+  status = 301
+  force = true
+
+# ดักจับบั๊ก URL ที่มีเครื่องหมาย quote เกินมาใน Google Search Console
+[[redirects]]
+  from = "/profiles\"\""
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/profiles\"\"\""
+  to = "/profiles"
+  status = 301
+  force = true
+
+# 🟢 ลำดับที่ 5: จัดการหน้าภาษาอังกฤษ (/en เป็น URL สากล ไร้ปัญหา Loop 100%)
+# ถ้ามีคนพิมพ์ /index-en หรือ /index-en.html ให้ 301 ดีดมาที่ /en
+[[redirects]]
+  from = "/index-en.html"
+  to = "/en"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/index-en"
+  to = "/en"
+  status = 301
+  force = true
+
+# ให้ /en ดึงเนื้อหาจากไฟล์ index-en.html มาแสดง (Rewrite 200 โดย URL บนเบราว์เซอร์ยังเป็น /en สวยงาม)
+[[redirects]]
+  from = "/en"
+  to = "/index-en.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/*"
+  to = "/index-en.html"
+  status = 200
+
+# 🟢 ลำดับที่ 6: SPA Fallback สำหรับระบบ Client-side Routing (ต้องอยู่ล่างสุดเสมอ)
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
