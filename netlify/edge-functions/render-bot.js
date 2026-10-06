@@ -399,17 +399,20 @@ if (provinceKey) {
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-    const ageDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
+   const age = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
+      ? String(profile.age).replace(/\D/g, "") 
+      : "ไม่ระบุ";
+    const ageDisplay = age !== "ไม่ระบุ" ? `${age} ปี` : "ไม่ระบุ";
 
-    const cleanHeight = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
+    const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
-      : null;
-    const heightDisplay = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
+      : "ไม่ระบุ";
+    const heightDisplay = height !== "ไม่ระบุ" ? `${height} ซม.` : "ไม่ระบุ";
 
-    const cleanWeight = profile.weight && String(profile.weight).trim() !== "-" && String(profile.weight).trim() !== "0" 
+    const weight = profile.weight && String(profile.weight).trim() !== "-" && String(profile.weight).trim() !== "0" 
       ? String(profile.weight).replace(/\D/g, "") 
-      : null;
-    const weightDisplay = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
+      : "ไม่ระบุ";
+    const weightDisplay = weight !== "ไม่ระบุ" ? `${weight} กก.` : "ไม่ระบุ";
 
     const stats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
       ? String(profile.stats).trim() 
