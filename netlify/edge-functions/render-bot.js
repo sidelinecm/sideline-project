@@ -568,7 +568,7 @@ const schemaGraph = {
     <meta name="theme-color" content="#F6F3FA">
     <meta name="color-scheme" content="light">
 
-    <title>${escapeHTML(pageTitle)} | ${CONFIG.BRAND_NAME}</title>
+ <title>${escapeHTML(pageTitle)}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
 
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -658,7 +658,7 @@ const schemaGraph = {
           <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
             <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-          <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">สาวรับงาน / ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
+        <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>

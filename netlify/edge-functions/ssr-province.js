@@ -699,8 +699,8 @@ export default async (req, context) => {
     // 🟢 1. ระบบตรวจจับ Routing สำหรับหน้าแรก และ หน้ารายจังหวัด
     let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
     let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
-    if (provinceSlug === "chiang_mai") provinceSlug = "chiangmai";
-    if (provinceSlug === "khonkaen") provinceSlug = "khon-kaen";
+   if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
+    if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
 
     const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
     const provinceKeyVariants = [provinceSlug, cleanProvinceSlug];
@@ -862,8 +862,12 @@ export default async (req, context) => {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
     const metaTitle = isNational 
-      ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก (🟢 อัปเดตล่าสุดทั่วไทย) | FirstModelHub"
-      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รวมโปรไฟล์ฟิวแฟนตรงปก (อัปเดตล่าสุด) - FirstModelHub`;
+      ? "ไซด์ไลน์ทั่วไทย สาวรับงานเพื่อนเที่ยวฟิวแฟน (GFE) จ่ายหน้างาน ไม่โอนมัดจำ | FirstModelHub"
+      : (provinceSlug === "chiangmai"
+          ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก นิมมาน เจ็ดยอด จ่ายหน้างาน | FirstModelHub"
+          : (provinceSlug === "chiangrai"
+              ? "รับงานเชียงราย ไซด์ไลน์เชียงราย สาวรับงานบ้านดู่ หน้า มฟล. ตรงปก 100% | FirstModelHub"
+              : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน จ่ายหน้างาน ไม่มัดจำ | FirstModelHub`));
 
     
       
@@ -879,7 +883,6 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 5. กำหนดโครงสร้างหลัก (CollectionPage / WebPage)
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -889,13 +892,25 @@ export default async (req, context) => {
       "inLanguage": "th-TH",
       "dateModified": new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
-      "about": { "@id": `${canonicalUrl}#business` },
+      "about": isNational 
+        ? { "@id": `${canonicalUrl}#business` }
+        : {
+            "@type": "Place",
+            "name": `อำเภอเมือง${provinceNameThai}`,
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": provinceNameThai,
+              "addressRegion": provinceNameThai,
+              "addressCountry": "TH"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": seoData.geo?.lat || 18.7883,
+              "longitude": seoData.geo?.lng || 98.9853
+            }
+          },
       "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
     };
-
-    if (!isNational) {
-      webpageSchema.breadcrumb = { "@id": `${canonicalUrl}#breadcrumb` };
-    }
 
     const schemaGraph = [
       {
@@ -1205,10 +1220,9 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-   // ✅ คืนค่าโครงสร้าง H1 ตัวแชมป์ (เวอร์ชัน 17) ดึงยอดคลิกสูง
-   const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตรงปก 100%</span>` 
-  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">สาวรับงาน ฟิวแฟนตรงปก 100%</span>`;
+  const ssrH1Html = isNational 
+  ? `<span class="h1-line-1">ศูนย์รวมสาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
+  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
@@ -1279,7 +1293,10 @@ const todayDateStr = new Date().toLocaleDateString('th-TH', {
       </div>
     `;
 
-    // 🟢 3. เอา freshnessBox ประกบหน้า linkedIntro แล้วใส่ลงในเนื้อหา
+   // ปลดลิ้นชักที่พับออก + ลบเงาและปุ่มกดทิ้ง ให้กลายเป็นบทความเปิดโล่ง 100% สู้ Fanschao
+    finalHtml = finalHtml.replace(/class=["']seo-drawer-wrapper collapsed["']/gi, 'class="seo-drawer-wrapper"');
+    finalHtml = finalHtml.replace(/<div class="seo-drawer-fade"><\/div>/gi, '');
+    finalHtml = finalHtml.replace(/<button id="toggle-seo-drawer-btn"[\s\S]*?<\/button>/gi, '');
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${freshnessBox}${linkedIntro}</div>`);
    if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     // ✅ นำรีวิวใส่กลับคืนลงกล่อง id="reviews-container-grid" อย่างถูกต้อง
