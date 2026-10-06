@@ -708,49 +708,54 @@ export default async (req, context) => {
     if (provinceSlug === "khon-kaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
     if (provinceSlug === "ayutthaya") provinceKeyVariants.push("phra-nakhon-si-ayutthaya");
 
-    // 🟢 2. ฟังก์ชันระบุจังหวัดของน้องๆ แต่ละคนอย่างแม่นยำ
+    // 🟢 กฎและคีย์เวิร์ดตรวจจับจังหวัด (สร้างไว้นอกฟังก์ชันเพื่อประหยัด RAM และรันได้เร็วที่สุด)
+    const PROVINCE_DETECTION_RULES = [
+      { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] },
+      { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม", "อารีย์"] },
+      { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
+      { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"] },
+      { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มช.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
+      { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "ยูดี", "หนองประจักษ์", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "เซ็นทรัลอุดร", "รังษิณา", "ไฮเทค"] },
+      { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก", "เด่นห้า"] },
+      { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง", "เกาะคา", "อัศวิน", "กาดกองต้า"] },
+      { key: "lamphun", keywords: ["ลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"] },
+      { key: "korat", keywords: ["โคราช", "นครราชสีมา", "มทส", "ปากช่อง", "เขาใหญ่", "จอหอ"] },
+      { key: "songkhla", keywords: ["หาดใหญ่", "สงขลา", "ม.อ.", "ลีการ์เดนส์", "ด่านนอก", "คอหงส์"] },
+      { key: "suratthani", keywords: ["สุราษฎร์", "สมุย", "เกาะสมุย", "เฉวง", "ละไม", "บ่อผุด", "พะงัน"] },
+      { key: "ayutthaya", keywords: ["อยุธยา", "โรจนะ", "บางปะอิน", "ประตูชัย", "เสนา"] },
+      { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] }
+    ];
+
+    // 🟢 2. ฟังก์ชันระบุจังหวัดของน้องๆ แต่ละคนอย่างแม่นยำ (Production Ready)
     function detectAccurateProvince(p) {
-      const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
-      if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
-        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
-        return orig;
+      if (!p) return "chiangmai";
+
+      // 1. ตรวจสอบจาก Field จังหวัดเดิมใน Database พร้อมแปลง Alias ให้เป็นมาตรฐาน
+      const rawKey = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
+      const INVALID_KEYS = ["", "no_province", "other", "undefined", "null", "none"];
+
+      if (rawKey && !INVALID_KEYS.includes(rawKey)) {
+        if (rawKey === "chiang_mai" || rawKey === "chiang-mai") return "chiangmai";
+        if (rawKey === "khonkaen" || rawKey === "khon_kaen") return "khon-kaen";
+        if (rawKey === "phra-nakhon-si-ayutthaya") return "ayutthaya";
+        if (rawKey === "nakhon-ratchasima" || rawKey === "nakhonratchasima") return "korat";
+        if (rawKey === "hat-yai" || rawKey === "hatyai") return "songkhla";
+        if (rawKey === "samui" || rawKey === "surat-thani") return "suratthani";
+        return rawKey;
       }
-      const locText = [p.location || "", p.description || "", p.name || ""].join(" ").toLowerCase();
-      if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
-      if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
-      if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
-      if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
-      if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
-      if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
-      return "chiangmai";
-    }
-    
 
-      
-      const RULES = [
-        { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] },
-        { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
-        { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"] },
-        { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก", "เด่นห้า"] },
-        { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง", "เกาะคา", "อัศวิน", "กาดกองต้า"] },
-        { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "ยูดี", "หนองประจักษ์", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "เซ็นทรัลอุดร", "รังษิณา", "ไฮเทค"] },
-        { key: "ayutthaya", keywords: ["อยุธยา", "โรจนะ", "บางปะอิน", "ประตูชัย", "เสนา"] },
-        { key: "korat", keywords: ["โคราช", "นครราชสีมา", "มทส", "ปากช่อง", "เขาใหญ่"] },
-        { key: "songkhla", keywords: ["หาดใหญ่", "สงขลา", "ม.อ.", "ลีการ์เดนส์", "ด่านนอก"] },
-        { key: "suratthani", keywords: ["สุราษฎร์", "สมุย", "เฉวง", "ละไม", "บ่อผุด", "พะงัน"] },
-        { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม"] },
-        { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
-        { key: "lamphun", keywords: ["ลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"] },
-        { key: "phitsanulok", keywords: ["พิษณุโลก", "รอบ มน", "มน.", "ม.นเรศวร", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์"] }
-      ];
+      // 2. ถ้าใน DB ไม่มีจังหวัด ให้ตรวจสอบจาก location และ bio
+      const locText = (p.location || "").toLowerCase();
+      const fullText = [locText, p.description || "", p.name || ""].join(" ").toLowerCase();
 
-      for (const rule of RULES) {
-        if (rule.keywords.some(kw => textToSearch.includes(kw))) {
+      // สแกนจับคู่จากคีย์เวิร์ด
+      for (const rule of PROVINCE_DETECTION_RULES) {
+        if (rule.keywords.some(kw => fullText.includes(kw))) {
           return rule.key;
         }
       }
 
+      // 3. Fallback เริ่มต้นหากไม่พบข้อมูลเลย
       return "chiangmai";
     }
 
@@ -760,6 +765,8 @@ export default async (req, context) => {
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("created_at", { ascending: false });
+
+    
 
     const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
       isNational
@@ -858,9 +865,7 @@ export default async (req, context) => {
       ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก (🟢 อัปเดตล่าสุดทั่วไทย) | FirstModelHub"
       : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รวมโปรไฟล์ฟิวแฟนตรงปก (อัปเดตล่าสุด) - FirstModelHub`;
 
-    const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตัวจริงตรงปก 100%</span>` 
-  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">รวมสาวรับงานฟิวแฟน ตัวจริงตรงปก ปลอดภัยจ่ายหน้างาน</span>`;
+    
       
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
 
