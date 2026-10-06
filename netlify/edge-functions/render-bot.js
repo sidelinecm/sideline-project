@@ -396,19 +396,32 @@ if (provinceKey) {
       }
     }
 
-    const age = profile.age || "22";
-    const height = profile.height || "162";
-    const weight = profile.weight || "48";
-    const stats = profile.stats || "35-24-35";
+    const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
+      ? String(profile.age).replace(/\D/g, "") 
+      : null;
+    const ageDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
 
+    const cleanHeight = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
+      ? String(profile.height).replace(/\D/g, "") 
+      : null;
+    const heightDisplay = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
+
+    const cleanWeight = profile.weight && String(profile.weight).trim() !== "-" && String(profile.weight).trim() !== "0" 
+      ? String(profile.weight).replace(/\D/g, "") 
+      : null;
+    const weightDisplay = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
+
+    const stats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
+      ? String(profile.stats).trim() 
+      : "ไม่ระบุ";
+  
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
     // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    // 🟢 2. Title หน้าเว็บ: คมชัด ไม่ยัดคำว่า "เชียงใหม่" ซ้ำ 2 รอบ
-    const pageTitle = `${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) ไซด์ไลน์ฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน`;
+    const pageTitle = `${displayName} รับงาน${provinceNameThai} ไซด์ไลน์ (${escapeHTML(primaryZone)}) ตรงปก 100% | ${CONFIG.BRAND_NAME}`;
    
     // 🟢 3. Meta คำบรรยายใต้ลิงก์ Google: สละสลวย ไม่สแปมคำ ได้คีย์เวิร์ดครบ
     const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ไซด์ไลน์ฟิวแฟนตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
@@ -433,7 +446,8 @@ const schemaGraph = {
       "description": stripHTML(metaDescription),
       "inLanguage": "th-TH",
       "dateModified": new Date().toISOString(),
-      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
+      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+      "mainEntity": { "@id": `${canonicalUrl}#service` }
     },
     {
       "@type": "Person",
@@ -441,10 +455,11 @@ const schemaGraph = {
       "name": stripHTML(displayName),
       "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
       "gender": "https://schema.org/Female",
-      "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
+      "jobTitle": "ผู้ให้บริการดูแลสไตล์ฟิวแฟนและเพื่อนเที่ยว",
       "description": stripHTML(naturalDesc),
       "image": {
         "@type": "ImageObject",
+        "@id": `${canonicalUrl}#image`,
         "url": heroImageLarge
       },
       "url": canonicalUrl,
@@ -458,15 +473,9 @@ const schemaGraph = {
         "value": cleanWeightNum,
         "unitCode": "KGM"
       },
-      "knowsAbout": [
-        `สาวรับงาน${provinceNameThai}`,
-        `ไซด์ไลน์${provinceNameThai}`,
-        `เด็กเอ็น${provinceNameThai}`,
-        "เพื่อนเที่ยวฟิวแฟน"
-      ],
       "address": {
         "@type": "PostalAddress",
-        "addressLocality": profile.location || provinceNameThai,
+        "addressLocality": primaryZone || provinceNameThai,
         "addressRegion": provinceNameThai,
         "addressCountry": "TH"
       }
@@ -475,57 +484,43 @@ const schemaGraph = {
       "@type": "Service",
       "@id": `${canonicalUrl}#service`,
       "name": `บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน - ${stripHTML(displayName)}`,
+      "serviceType": "เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์",
       "provider": { "@id": `${canonicalUrl}#person` },
       "areaServed": {
         "@type": "AdministrativeArea",
-        "name": provinceNameThai
+        "name": provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`
       },
       "offers": {
         "@type": "Offer",
         "url": canonicalUrl,
         "price": rateNumber,
         "priceCurrency": "THB",
-        "description": "นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างาน ไม่มีมัดจำล่วงหน้า"
+        "availability": "https://schema.org/InStock",
+        "description": "นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างาน ปลอดภัยไม่มีโอนมัดจำล่วงหน้า"
       }
-    },
-    {
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq`,
-      "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
-          }
-        },
-        {
-          "@type": "Question",
-          "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
-          }
-        },
-        {
-          "@type": "Question",
-          "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ`
-          }
-        }
-      ]
     },
     {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${CONFIG.DOMAIN}/` },
-        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน / ไซด์ไลน์${provinceNameThai}`, "item": provinceHubUrl },
-        { "@type": "ListItem", "position": 3, "name": stripHTML(displayName), "item": canonicalUrl }
+        { 
+          "@type": "ListItem", 
+          "position": 1, 
+          "name": "หน้าแรก", 
+          "item": `${CONFIG.DOMAIN}/` 
+        },
+        { 
+          "@type": "ListItem", 
+          "position": 2, 
+          "name": `รับงาน${provinceNameThai}`, 
+          "item": provinceHubUrl 
+        },
+        { 
+          "@type": "ListItem", 
+          "position": 3, 
+          "name": stripHTML(displayName), 
+          "item": canonicalUrl 
+        }
       ]
     }
   ]
@@ -656,20 +651,18 @@ const schemaGraph = {
                     </div>
                 </header>
 
-                <!-- 🟢 1. ตารางสเปก 4 ช่อง (พร้อม Contextual Link กลับหน้าจังหวัด) -->
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
-                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
-                        <strong style="color: #140F22; font-weight: 800;">${escapeHTML(stats)}</strong>
-                    </div>
-                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">ส่วนสูง / น้ำหนัก</span>
-                        <strong style="color: #140F22; font-weight: 800;">${height} ซม. / ${weight} กก.</strong>
-                    </div>
-                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
-                        <strong style="color: #140F22; font-weight: 800;">${age} ปี</strong>
-                    </div>
+               <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
+    <strong style="color: #140F22; font-weight: 800;">${escapeHTML(stats)}</strong>
+</div>
+<div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">ส่วนสูง / น้ำหนัก</span>
+    <strong style="color: #140F22; font-weight: 800;">${heightDisplay} / ${weightDisplay}</strong>
+</div>
+<div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
+    <strong style="color: #140F22; font-weight: 800;">${ageDisplay}</strong>
+</div>
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
                         <a href="${provinceHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(provinceNameThai)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
@@ -680,112 +673,112 @@ const schemaGraph = {
                 </div>
 
                 <!-- 🟢 2. กล่องเนื้อหาบรรยาย (แก้ปัญหา Thin Content & สอดคล้องกับ Schema JSON-LD) -->
-                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
-                    ${escapeHTML(naturalDesc)}
-                </div>
-
-                <!-- 🟢 3. ปุ่มติดต่อ LINE CTA + ปุ่มแชร์โปรไฟล์แบบมินิมอล -->
-                <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
-                    <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
-                        <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
-                    </a>
-
-                    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-                    </button>
-                </div>
-
-                <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
-                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                            <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">1 ชม.</div>
-                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${rateNumber.toLocaleString()}.-</strong>
-                        </div>
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                            <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">2 ชม.</div>
-                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 1.8).toLocaleString()}.-</strong>
-                        </div>
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                            <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">ค้างคืน</div>
-                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 4.5).toLocaleString()}.-</strong>
-                        </div>
-                    </div>
-                </section>
-
-                <section style="margin-bottom: 1.5rem;">
-                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                            <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
-                            <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
-                        </div>
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                            <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
-                            <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
-                        </div>
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                            <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
-                            <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section style="margin-bottom: 1.5rem;">
-                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการจริง - ${escapeHTML(displayName)}</h2>
-                    ${reviewsList.map(r => `
-                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; margin-bottom: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                              <strong style="color: #140F22; font-size: 12.5px; font-weight: 800;">${escapeHTML(r.name)}</strong>
-                              <span style="color: #059669; font-size: 11px; font-weight: 700;">✓ ผู้ใช้บริการจริง</span>
-                            </div>
-                            <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">"${escapeHTML(r.text)}"</p>
-                        </div>
-                    `).join("")}
-                </section>
-                
-                ${relatedProfiles.length > 0 ? `
-                <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
-                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-                        ${relatedProfiles.map(p => {
-                          const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
-                          const relImg = p.imagePath || p.image_url || "";
-                          return `
-                            <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                                <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
-                                <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
-                            </a>
-                          `;
-                        }).join("")}
-                    </div>
-                    <div style="text-align: center;">
-                        <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
-                    </div>
-                </section>
-                ` : ""}
-
-                <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
-                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
-                        <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-                        <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
-                        <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
-                    </div>
-                    <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
-                </section>
-            </article>
-        </main>
-        
-        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #64748B; font-size: 11px;">
-            <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
-                <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
-                <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
-                <a href="/locations" style="color: #475569; text-decoration: none; font-weight: 600;">พื้นที่บริการ</a>
+            <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
+                ${escapeHTML(naturalDesc)}
             </div>
-            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
-        </footer>
-    </div>
+
+            <!-- 🟢 3. ปุ่มติดต่อ LINE CTA + ปุ่มแชร์โปรไฟล์แบบมินิมอล -->
+            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
+                <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
+                    <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
+                </a>
+
+                <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+                    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+                </button>
+            </div>
+
+            <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
+                <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
+                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">1 ชม.</div>
+                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${rateNumber.toLocaleString()}.-</strong>
+                    </div>
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
+                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">2 ชม.</div>
+                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 1.8).toLocaleString()}.-</strong>
+                    </div>
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
+                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">ค้างคืน</div>
+                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 4.5).toLocaleString()}.-</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-bottom: 1.5rem;">
+                <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
+                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
+                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
+                    </div>
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
+                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
+                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
+                    </div>
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
+                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
+                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-bottom: 1.5rem;">
+                <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการจริง - ${escapeHTML(displayName)}</h2>
+                ${reviewsList.map(r => `
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                          <strong style="color: #140F22; font-size: 12.5px; font-weight: 800;">${escapeHTML(r.name)}</strong>
+                          <span style="color: #059669; font-size: 11px; font-weight: 700;">✓ ผู้ใช้บริการจริง</span>
+                        </div>
+                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">"${escapeHTML(r.text)}"</p>
+                    </div>
+                `).join("")}
+            </section>
+            
+            ${relatedProfiles.length > 0 ? `
+            <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
+                <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                    ${relatedProfiles.map(p => {
+                      const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
+                      const relImg = p.imagePath || p.image_url || "";
+                      return `
+                        <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                            <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
+                            <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
+                        </a>
+                      `;
+                    }).join("")}
+                </div>
+                <div style="text-align: center;">
+                    <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
+                </div>
+            </section>
+            ` : ""}
+
+            <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
+                <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
+                <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
+                    <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
+                    <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
+                    <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
+                </div>
+                <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
+            </section>
+        </article>
+    </main>
+    
+    <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #64748B; font-size: 11px;">
+        <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
+            <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
+            <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
+            <a href="/locations" style="color: #475569; text-decoration: none; font-weight: 600;">พื้นที่บริการ</a>
+        </div>
+        © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+    </footer>
+</div>
    
 <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 </body>

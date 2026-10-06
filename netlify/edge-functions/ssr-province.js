@@ -693,39 +693,41 @@ export default async (req, context) => {
       return new Response(cachedPage.html, { headers: cachedPage.headers });
     }
 
-    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+   const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     const segments = url.pathname.split("/").filter(Boolean);
-    let provinceSlug = "";
-    let isNational = false;
+    
+    // 🟢 1. ระบบตรวจจับ Routing สำหรับหน้าแรก และ หน้ารายจังหวัด
+    let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
+    let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
+    if (provinceSlug === "chiang_mai") provinceSlug = "chiangmai";
+    if (provinceSlug === "khonkaen") provinceSlug = "khon-kaen";
 
-    // ✅ เพิ่มฟังก์ชันนี้ลงใน render-bot.js:
-function detectAccurateProvince(p) {
-  const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
-  if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
-    if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
-    if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
-    return orig;
-  }
+    const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
+    const provinceKeyVariants = [provinceSlug, cleanProvinceSlug];
+    if (provinceSlug === "chiangmai") provinceKeyVariants.push("chiang-mai", "chiang_mai");
+    if (provinceSlug === "khon-kaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
+    if (provinceSlug === "ayutthaya") provinceKeyVariants.push("phra-nakhon-si-ayutthaya");
 
-  const locText = (p.location || "").toLowerCase();
-  if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
-  if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
-  if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
-  if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
-  if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
-  if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
+    // 🟢 2. ฟังก์ชันระบุจังหวัดของน้องๆ แต่ละคนอย่างแม่นยำ
+    function detectAccurateProvince(p) {
+      const orig = (p.provinceKey || p.province_key || p.province_slug || "").toString().toLowerCase().trim();
+      if (orig && orig !== "no_province" && orig !== "other" && orig !== "undefined") {
+        if (orig === "chiang_mai" || orig === "chiang-mai") return "chiangmai";
+        if (orig === "khon-kaen" || orig === "khonkaen") return "khon-kaen";
+        return orig;
+      }
+      const locText = [p.location || "", p.description || "", p.name || ""].join(" ").toLowerCase();
+      if (locText.includes("นิมมาน") || locText.includes("สันติธรรม") || locText.includes("เจ็ดยอด") || locText.includes("มช") || locText.includes("เชียงใหม่")) return "chiangmai";
+      if (locText.includes("กังสดาล") || locText.includes("มข") || locText.includes("โนนม่วง") || locText.includes("ขอนแก่น")) return "khon-kaen";
+      if (locText.includes("ป่าตอง") || locText.includes("กะทู้") || locText.includes("ภูเก็ต")) return "phuket";
+      if (locText.includes("บ้านดู่") || locText.includes("มฟล") || locText.includes("เชียงราย")) return "chiangrai";
+      if (locText.includes("สวนดอก") || locText.includes("สบตุ๋ย") || locText.includes("ลำปาง")) return "lampang";
+      if (locText.includes("ud town") || locText.includes("หนองประจักษ์") || locText.includes("อุดร")) return "udonthani";
+      return "chiangmai";
+    }
+    
 
-  return "chiangmai";
-}
-      // 🟢 อันดับ 3: หากยังไม่พบ จึงค่อยสแกนจากคำบรรยายทั้งหมด (เรียงลำดับเมืองหลักขึ้นก่อน)
-      const textToSearch = [
-        p.location || "",
-        p.provinceThai || "",
-        p.province_thai || "",
-        p.description || "",
-        p.name || ""
-      ].join(" ").toLowerCase();
-
+      
       const RULES = [
         { key: "chiangmai", keywords: ["เชียงใหม่", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช", "หน้า มช", "มช.", "ห้วยแก้ว", "สันทราย", "รวมโชค", "พายัพ", "แม่โจ้", "แม่ริม", "หางดง", "ท่าแพ", "คูเมือง", "เซ็นทรัลเฟส"] },
         { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มข.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
@@ -839,9 +841,12 @@ function detectAccurateProvince(p) {
     }
 
    
-    const totalCount = profilesList.length;
+    // 1. นับจำนวนโปรไฟล์จริงที่เปิดรับงานอยู่ ณ เวลานั้น
+    const totalCount = profilesList.length; 
+    const liveTotalProfiles = deduplicatedProfiles.length;
 
-    
+    // 2. นับเฉพาะจังหวัดที่มีน้องพร้อมรับงานจริง (> 0 คน) จากฐานข้อมูล
+    const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
 
     const provinceNameThai = isNational ? "ทั่วไทย" : provinceData?.nameThai || "เชียงใหม่";
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
@@ -849,14 +854,15 @@ function detectAccurateProvince(p) {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    // 🟢 4. สูตร B: ดึง "สาวรับงาน" ขึ้นหน้าสุดทั้งหน้าแรกและหน้ารายจังหวัด
     const metaTitle = isNational 
-      ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub"
-      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
+      ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก (🟢 อัปเดตล่าสุดทั่วไทย) | FirstModelHub"
+      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รวมโปรไฟล์ฟิวแฟนตรงปก (อัปเดตล่าสุด) - FirstModelHub`;
+
+    const ssrH1Html = isNational 
+  ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n <span class="h1-line-2">เด็กเอ็น ฟิวแฟน ตัวจริงตรงปก 100%</span>` 
+  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n <span class="h1-line-2">รวมสาวรับงานฟิวแฟน ตัวจริงตรงปก ปลอดภัยจ่ายหน้างาน</span>`;
       
-    const liveTotalProfiles = deduplicatedProfiles.length;
-    const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 6;
-    const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";
+    const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
 
     const metaDescription = isNational
       ? `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveTotalProfiles}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${activeProvincesCount} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`
@@ -983,20 +989,23 @@ function detectAccurateProvince(p) {
       });
     }
 
-    // 🟢 3. ItemList (Carousel โปรไฟล์น้องๆ ลิมิต 12 คน ป้องกัน Payload บวม)
+    // 🟢 ItemList ถูกต้องตาม Google Carousel Rich Results (มีเงื่อนไขและประกาศตัวแปรถูกต้อง)
     if (profilesList.length > 0) {
       const carouselProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
-        "isPartOf": { "@id": `${canonicalUrl}#webpage` },
+        "name": `รายชื่อน้องๆ รับงานไซด์ไลน์ ${provinceNameThai}`,
         "numberOfItems": carouselProfiles.length,
         "itemListElement": carouselProfiles.map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
-          "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
-          "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
-          "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
+          "item": {
+            "@type": "Person",
+            "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
+            "image": optimizeImg(p.imagePath || p.image_url || "", 400, 560),
+            "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
+          }
         }))
       });
     }
@@ -1054,14 +1063,14 @@ function detectAccurateProvince(p) {
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
 
-    // ✅ แก้ไขใหม่: นับจำนวนจริงรายจังหวัด และคำนวณยอดรวมรายภาคแบบ Real-time
-const provinceCounts = deduplicatedProfiles.reduce((acc, p) => {
-  const k = (p.provinceKey || "").toLowerCase();
-  if (k) acc[k] = (acc[k] || 0) + 1;
-  return acc;
-}, {});
+    // นับยอดคนจริงของแต่ละจังหวัดจากฐานข้อมูล ณ วินาทีนั้น
+    const provinceCounts = deduplicatedProfiles.reduce((acc, p) => {
+      const k = (p.provinceKey || "").toLowerCase();
+      if (k) acc[k] = (acc[k] || 0) + 1;
+      return acc;
+    }, {});
 
-const REGION_CONFIG = [
+    const REGION_CONFIG = [
   {
     name: "ภาคเหนือ",
     icon: "📍",
@@ -1250,7 +1259,12 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
     // 🟢 1. ดึงวันที่ปัจจุบันภาษาไทยอัตโนมัติ (เช่น 4 ตุลาคม 2569) + ดึงชื่อน้อง 4 คนแรกมาทำเป็นข้อความสดใหม่
-    const todayDateStr = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+    // ดึงวันที่ปัจจุบันของจริงตามปฏิทินไทย
+const todayDateStr = new Date().toLocaleDateString('th-TH', { 
+  day: 'numeric', 
+  month: 'long', 
+  year: 'numeric' 
+});
     const topNames = profilesList.slice(0, 4).map(p => `น้อง${(p.name || '').trim().replace(/^(น้อง\s?)+/gi, '')}`).filter(Boolean).join(", ");
     
     // 🟢 2. กล่องแสดงความสดใหม่แบบ Real-time ดักคะแนน Google Algorithm
