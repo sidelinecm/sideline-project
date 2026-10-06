@@ -1293,14 +1293,15 @@ const todayDateStr = new Date().toLocaleDateString('th-TH', {
       </div>
     `;
 
-   // ปลดลิ้นชักที่พับออก + ลบเงาและปุ่มกดทิ้ง ให้กลายเป็นบทความเปิดโล่ง 100% สู้ Fanschao
+   
     finalHtml = finalHtml.replace(/class=["']seo-drawer-wrapper collapsed["']/gi, 'class="seo-drawer-wrapper"');
     finalHtml = finalHtml.replace(/<div class="seo-drawer-fade"><\/div>/gi, '');
-    finalHtml = finalHtml.replace(/<button id="toggle-seo-drawer-btn"[\s\S]*?<\/button>/gi, '');
+    // ลบทั้ง div ที่ครอบปุ่มออกทั้งหมด ไม่เหลือแท็กว่างทิ้งไว้
+    finalHtml = finalHtml.replace(/<div[^>]*style=["'][^"']*margin-top:\s*-6px[^"']*["']>[\s\S]*?<\/div>/gi, '');
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${freshnessBox}${linkedIntro}</div>`);
-   if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
-    // ✅ นำรีวิวใส่กลับคืนลงกล่อง id="reviews-container-grid" อย่างถูกต้อง
+    if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     if (reviewsHtml) finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
+    
     const dynamicReviewHeading = isNational 
       ? "⭐ รีวิวความประทับใจจากลูกค้าจริงทั่วไทย" 
       : `⭐ รีวิวเพื่อนเที่ยวและไซด์ไลน์${escapeHTML(provinceNameThai)} จากลูกค้าจริง`;
