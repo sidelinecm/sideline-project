@@ -705,7 +705,7 @@ export default async (req, context) => {
     const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
     const provinceKeyVariants = [provinceSlug, cleanProvinceSlug];
     if (provinceSlug === "chiangmai") provinceKeyVariants.push("chiang-mai", "chiang_mai");
-    if (provinceSlug === "khon-kaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
+    if (provinceSlug === "khonkaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
     if (provinceSlug === "ayutthaya") provinceKeyVariants.push("phra-nakhon-si-ayutthaya");
 
     // 🟢 กฎและคีย์เวิร์ดตรวจจับจังหวัด (สร้างไว้นอกฟังก์ชันเพื่อประหยัด RAM และรันได้เร็วที่สุด)
@@ -714,7 +714,7 @@ export default async (req, context) => {
       { key: "bangkok", keywords: ["กรุงเทพ", "กทม", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา", "สีลม", "พระราม", "อารีย์"] },
       { key: "chonburi", keywords: ["ชลบุรี", "พัทยา", "บางแสน", "ศรีราชา", "จอมเทียน", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"] },
       { key: "phuket", keywords: ["ภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"] },
-      { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "มช.", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
+    { key: "khon-kaen", keywords: ["ขอนแก่น", "กังสดาล", "หลัง มข", "หน้า มข", "ม.ขอนแก่น", "บึงแก่นนคร", "โนนม่วง", "ม.ภาค", "เซ็นทรัลขอนแก่น", "ศิลา"] },
       { key: "udonthani", keywords: ["อุดรธานี", "อุดร", "ud town", "ยูดี", "หนองประจักษ์", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "เซ็นทรัลอุดร", "รังษิณา", "ไฮเทค"] },
       { key: "chiangrai", keywords: ["เชียงราย", "บ้านดู่", "มฟล", "แม่ฟ้าหลวง", "แม่สาย", "รอบเวียง", "หอนาฬิกา", "ริมกก", "เด่นห้า"] },
       { key: "lampang", keywords: ["ลำปาง", "สวนดอก", "สบตุ๋ย", "ม.ราชภัฏลำปาง", "ราชภัฏลำปาง", "เกาะคา", "อัศวิน", "กาดกองต้า"] },

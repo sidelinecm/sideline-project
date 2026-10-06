@@ -424,7 +424,7 @@ if (provinceKey) {
     // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    const pageTitle = `${displayName} รับงาน${provinceNameThai} ไซด์ไลน์ (${escapeHTML(primaryZone)}) ตรงปก 100% | ${CONFIG.BRAND_NAME}`;
+    const cleanHeading = `${displayName} รับงาน${provinceNameThai} ไซด์ไลน์ (${escapeHTML(primaryZone)}) ตรงปก 100%`; const pageTitle = `${cleanHeading} | ${CONFIG.BRAND_NAME}`;
    
     // 🟢 3. Meta คำบรรยายใต้ลิงก์ Google: สละสลวย ไม่สแปมคำ ได้คีย์เวิร์ดครบ
     const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ไซด์ไลน์ฟิวแฟนตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
@@ -525,10 +525,40 @@ const schemaGraph = {
           "item": canonicalUrl 
         }
       ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "isPartOf": { "@id": `${canonicalUrl}#webpage` },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": `${stripHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `${stripHTML(displayName)} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
+          }
+        },
+        {
+          "@type": "Question",
+          "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${stripHTML(displayName)} เป็นอย่างไร?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
+          }
+        },
+        {
+          "@type": "Question",
+          "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${stripHTML(displayName)} ได้ทางใด?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ`
+          }
+        }
+      ]
     }
   ]
 };
-
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
 <head>
@@ -647,14 +677,18 @@ const schemaGraph = {
                 </section>
 
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
-                    <h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">${escapeHTML(pageTitle)}</h1>
+                   <h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">${escapeHTML(cleanHeading)}</h1>
+                   
                     <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 14px; border-radius: 100px;">
                         <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
                         <span style="color: #065F46; font-size: 11px; font-weight: 700;">(ยืนยันตัวตนจริง ตรงปก 100% ปลอดภัยจ่ายหน้างาน)</span>
                     </div>
                 </header>
 
-               <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                <!-- 🟢 เติมแท็กเปิด Grid 2 คอลัมน์ตรงนี้ -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
+                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        
     <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
     <strong style="color: #140F22; font-weight: 800;">${escapeHTML(stats)}</strong>
 </div>
