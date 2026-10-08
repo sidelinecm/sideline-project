@@ -1041,12 +1041,13 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
       } else {
-        const line1 = isAllOrNational 
-          ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
-          : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
-        const line2 = isAllOrNational 
-          ? "เด็กเอ็น ฟิวแฟน ตรงปก 100%" 
-          : "สาวรับงาน ฟิวแฟนตรงปก 100%";
+        // ✅ ปรับให้ตรงกัน ป้องกันคำกระตุกสลับไปมา
+const line1 = isAllOrNational 
+  ? "ศูนย์รวมสาวรับงาน • ไซด์ไลน์ทั่วไทย" 
+  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
+const line2 = isAllOrNational 
+  ? "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
+  : "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
@@ -2121,7 +2122,23 @@ if (isStandaloneProfile) {
     executeFilterAndRender(false);
   }
 
-  async function initApplication() {
+ async function initApplication() {
+    // 🟢 ดึง URL ไลน์แอดมินจาก Supabase มาอัปเดต 3 จุดติดต่อแอดมินอัตโนมัติ
+    getSupabaseClient().then(client => {
+      if (!client) return;
+      client.from('site_settings').select('value').eq('key', 'admin_line_url').maybeSingle().then(({ data }) => {
+        if (data && data.value) {
+          const liveLine = data.value;
+          // 1. ตรงด้านล่าง (แถบ Bottom Dock ปุ่มจองคิว)
+          document.querySelectorAll('.dock-item-line').forEach(el => el.href = liveLine);
+          // 2. ตรงล่างสุดในเมนู (ปุ่ม Sidebar & ไอคอน Line ท้ายเว็บ)
+          document.querySelectorAll('.sidebar-line-btn, .social-btn.line').forEach(el => el.href = liveLine);
+          // 3. ตรงติดต่อแจ้งปัญหา (ศูนย์รับเรื่องร้องเรียน)
+          document.querySelectorAll('.btn-concierge-line').forEach(el => el.href = liveLine);
+        }
+      });
+    });
+
     // 🟢 1. ตรวจสอบทันที: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่สร้างจาก render-bot.js)
     const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
     if (isStandaloneProfile) {
