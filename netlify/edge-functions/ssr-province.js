@@ -768,13 +768,18 @@ export default async (req, context) => {
 
     
 
-    const [provinceDataRes, profilesRes, allProvincesRes] = await Promise.all([
+    const [provinceDataRes, profilesRes, allProvincesRes, settingsRes] = await Promise.all([
       isNational
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", provinceKeyVariants).limit(1).maybeSingle(),
       profilesQuery,
-      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
+      supabase.from("site_settings").select("key, value")
     ]);
+
+    // สกัดเอา URL ไลน์ล่าสุดออกมา
+    const settingsMap = new Map((settingsRes?.data || []).map(s => [s.key, s.value]));
+    const liveAdminLine = settingsMap.get("admin_line_url") || "https://line.me/ti/p/u8Bz9HsaY8";
 
     let provinceData = provinceDataRes?.data;
     if (!provinceData && !isNational) {
@@ -862,13 +867,12 @@ export default async (req, context) => {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
     const metaTitle = isNational 
-      ? "ไซด์ไลน์ทั่วไทย สาวรับงานเพื่อนเที่ยวฟิวแฟน (GFE) จ่ายหน้างาน ไม่โอนมัดจำ | FirstModelHub"
+      ? "สาวรับงาน ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน ไม่มัดจำ | FirstModelHub"
       : (provinceSlug === "chiangmai"
-          ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก นิมมาน เจ็ดยอด จ่ายหน้างาน | FirstModelHub"
+          ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
           : (provinceSlug === "chiangrai"
-              ? "รับงานเชียงราย ไซด์ไลน์เชียงราย สาวรับงานบ้านดู่ หน้า มฟล. ตรงปก 100% | FirstModelHub"
-              : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน จ่ายหน้างาน ไม่มัดจำ | FirstModelHub`));
-
+              ? "รับงานเชียงราย ไซด์ไลน์เชียงราย ฟิวแฟนตรงปก ไม่มัดจำ | FirstModelHub"
+              : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน จ่ายหน้างาน | FirstModelHub`));
     
       
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
@@ -1277,9 +1281,8 @@ const popularLocationsFooter = `
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    // 🟢 1. ดึงวันที่ปัจจุบันภาษาไทยอัตโนมัติ (เช่น 4 ตุลาคม 2569) + ดึงชื่อน้อง 4 คนแรกมาทำเป็นข้อความสดใหม่
-    // ดึงวันที่ปัจจุบันของจริงตามปฏิทินไทย
-const todayDateStr = new Date().toLocaleDateString('th-TH', { 
+    const todayDateStr = new Date().toLocaleDateString('th-TH', { 
+  timeZone: 'Asia/Bangkok',
   day: 'numeric', 
   month: 'long', 
   year: 'numeric' 
@@ -1524,7 +1527,8 @@ const todayDateStr = new Date().toLocaleDateString('th-TH', {
       const lcpImgUrl = optimizeImg(profilesList[0].imagePath || profilesList[0].image_url || "", 400, 560);
       finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="preload" as="image" href="${lcpImgUrl}" fetchpriority="high">\n</head>`);
     }
-
+// 🟢 สั่งแทนที่ URL ไลน์เดิมทั้งหน้าให้เป็นค่าใหม่ล่าสุดจาก Supabase
+    finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     
 const responseHeaders = {
   "Content-Type": "text/html; charset=utf-8",
