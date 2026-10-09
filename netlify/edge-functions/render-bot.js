@@ -530,11 +530,8 @@ const schemaGraph = {
     }
   ]
 };
-    // 🟢 ตรวจสอบคุณภาพ: ถ้าโปรไฟล์ไม่มีประวัติจริง หรือข้อความสั้นกว่า 35 ตัวอักษร ให้ noindex ป้องกันเว็บโดนลงโทษ Thin Content
-    const isQualityBio = profile.description && profile.description.trim().length >= 35 && !/เรทราคา รายละเอียดค่ะ|ไม่รวมห้อง/i.test(profile.description);
-    const robotsTag = isQualityBio
-      ? '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">'
-      : '<meta name="robots" content="noindex, follow">';
+   // 🟢 อนุญาตให้จัดทำดัชนีตามปกติ (เนื่องจาก Title และ Schema ได้รับการปรับปรุงให้ปลอดภัยแล้ว)
+    const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
 
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
