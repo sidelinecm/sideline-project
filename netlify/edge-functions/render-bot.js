@@ -424,10 +424,12 @@ if (provinceKey) {
     // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    const cleanHeading = `${displayName} รับงาน${provinceNameThai} ไซด์ไลน์ (${escapeHTML(primaryZone)}) ตรงปก 100%`; const pageTitle = `${cleanHeading} | ${CONFIG.BRAND_NAME}`;
+    // ✅ ตัดคำว่า "รับงาน / ไซด์ไลน์" ออก ปล่อยให้หน้าจังหวัดครองอันดับคำนี้ไปคนเดียว
+    const cleanHeading = `${displayName} (${escapeHTML(primaryZone)}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`; 
+    const pageTitle = `${cleanHeading} - ${provinceNameThai} | ${CONFIG.BRAND_NAME}`;
    
-    // 🟢 3. Meta คำบรรยายใต้ลิงก์ Google: สละสลวย ไม่สแปมคำ ได้คีย์เวิร์ดครบ
-    const metaDescription = `🟢 สแตนด์บายพร้อมดูแล! ${displayName} สาวรับงาน${provinceNameThai} (${escapeHTML(primaryZone)}) สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี ไซด์ไลน์ฟิวแฟนตรงปก 100% ปลอดภัยจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+    // 🟢 Meta คำบรรยายใต้ลิงก์ Google: โฟกัสฟิวแฟนและพิกัดย่าน ไม่ยัดคำซ้ำ
+    const metaDescription = `🟢 ${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน โซน${escapeHTML(primaryZone)} จ.${provinceNameThai} สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี การันตีตัวจริงตรงปก ปลอดภัยนัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
 
     // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
@@ -502,7 +504,7 @@ const schemaGraph = {
         "description": "นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างาน ปลอดภัยไม่มีโอนมัดจำล่วงหน้า"
       }
     },
-    {
+   {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
       "itemListElement": [
@@ -525,40 +527,15 @@ const schemaGraph = {
           "item": canonicalUrl 
         }
       ]
-    },
-    {
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq`,
-      "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": `${stripHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `${stripHTML(displayName)} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
-          }
-        },
-        {
-          "@type": "Question",
-          "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${stripHTML(displayName)} เป็นอย่างไร?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
-          }
-        },
-        {
-          "@type": "Question",
-          "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${stripHTML(displayName)} ได้ทางใด?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ`
-          }
-        }
-      ]
     }
   ]
 };
+    // 🟢 ตรวจสอบคุณภาพ: ถ้าโปรไฟล์ไม่มีประวัติจริง หรือข้อความสั้นกว่า 35 ตัวอักษร ให้ noindex ป้องกันเว็บโดนลงโทษ Thin Content
+    const isQualityBio = profile.description && profile.description.trim().length >= 35 && !/เรทราคา รายละเอียดค่ะ|ไม่รวมห้อง/i.test(profile.description);
+    const robotsTag = isQualityBio
+      ? '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">'
+      : '<meta name="robots" content="noindex, follow">';
+
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
 <head>
@@ -571,7 +548,7 @@ const schemaGraph = {
  <title>${escapeHTML(pageTitle)}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
 
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    ${robotsTag}
 
     <link rel="canonical" href="${canonicalUrl}">
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
@@ -761,18 +738,7 @@ const schemaGraph = {
                 </div>
             </section>
 
-            <section style="margin-bottom: 1.5rem;">
-                <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">ข้อความความประทับใจจากผู้รับบริการจริง - ${escapeHTML(displayName)}</h2>
-                ${reviewsList.map(r => `
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                          <strong style="color: #140F22; font-size: 12.5px; font-weight: 800;">${escapeHTML(r.name)}</strong>
-                          <span style="color: #059669; font-size: 11px; font-weight: 700;">✓ ผู้ใช้บริการจริง</span>
-                        </div>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">"${escapeHTML(r.text)}"</p>
-                    </div>
-                `).join("")}
-            </section>
+            <!-- ตัดส่วนรีวิวที่ซ้ำซ้อนออก เพื่อป้องกัน Google ตรวจจับว่าเป็นรีวิวที่สร้างขึ้นอัตโนมัติ (Fake Review) -->
             
             ${relatedProfiles.length > 0 ? `
             <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
