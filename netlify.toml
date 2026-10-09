@@ -1,5 +1,5 @@
 # ==============================================================================
-# Netlify configuration for First Model Hub (SEO & Edge Optimized 2026)
+# Netlify configuration for First Model Hub
 # ==============================================================================
 [build]
   publish = "."
@@ -46,8 +46,11 @@
 # ==============================================================================
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
-# 🛡️ ลำดับที่ 1: ด่านตรวจคนเข้าเมือง (ต้องอยู่บนสุด เพื่อสกัดบอทขยะก่อนส่งต่อไปฟังก์ชันอื่น)
 
+# 🛡️ ลำดับที่ 1 ด่านหน้าสุด: สกัดโดเมนเก่าแล้วดีด 301 ทันที
+[[edge_functions]]
+  function = "domain-redirect"
+  path = "/*"
 
 # 🟢 แผนผังเว็บไซต์
 [[edge_functions]]
@@ -77,73 +80,8 @@
   path = "/.well-known/*"
   
 # ==============================================================================
-# 3. REDIRECTS (ฉบับสมบูรณ์ ปลอดภัย ไร้ Loop และดันคะแนน SEO สูงสุด)
+# 3. REDIRECTS & CLEAN URLS
 # ==============================================================================
-
-# 🟢 ลำดับที่ 1: ย้ายโดเมนเดิม sidelinechiangmai มา firstmodelhub แบบ 1:1
-[[redirects]]
-  from = "https://sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-# 🟢 ลำดับที่ 2: รวมโดเมนสำรอง Netlify, www, และ Subdomain st. เข้าสู่โดเมนหลัก 1:1
-[[redirects]]
-  from = "https://firstmodelhub.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://firstmodelhub.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://www.firstmodelhub.com/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.firstmodelhub.com/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-# 🛡️ ดึง Subdomain st. กลับเข้าโดเมนหลักทั้งหมด (ป้องกัน Google Index หน้าซ้ำ)
-[[redirects]]
-  from = "https://st.firstmodelhub.com/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://st.firstmodelhub.com/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
-# 🟢 ลำดับที่ 3: จัดการ Clean URLs พารามิเตอร์จังหวัด (?province=xxx -> /location/xxx)
 [[redirects]]
   query = { province = ":p" }
   from = "/"
@@ -172,14 +110,12 @@
   status = 301
   force = true
 
-# 🟢 ลำดับที่ 4: แก้ไข URL ผิดปกติ และลบนามสกุล .html (301 Permanent Redirect)
 [[redirects]]
   from = "/profiles.html"
   to = "/profiles"
   status = 301
   force = true
 
-# ดักจับบั๊ก URL ที่มีเครื่องหมาย quote เกินมาใน Google Search Console
 [[redirects]]
   from = "/profiles\"\""
   to = "/profiles"
@@ -192,8 +128,6 @@
   status = 301
   force = true
 
-# 🟢 ลำดับที่ 5: จัดการหน้าภาษาอังกฤษ (/en เป็น URL สากล ไร้ปัญหา Loop 100%)
-# ถ้ามีคนพิมพ์ /index-en หรือ /index-en.html ให้ 301 ดีดมาที่ /en
 [[redirects]]
   from = "/index-en.html"
   to = "/en"
@@ -206,7 +140,6 @@
   status = 301
   force = true
 
-# ให้ /en ดึงเนื้อหาจากไฟล์ index-en.html มาแสดง (Rewrite 200 โดย URL บนเบราว์เซอร์ยังเป็น /en สวยงาม)
 [[redirects]]
   from = "/en"
   to = "/index-en.html"
@@ -217,7 +150,6 @@
   to = "/index-en.html"
   status = 200
 
-# 🟢 ลำดับที่ 6: SPA Fallback สำหรับระบบ Client-side Routing (ต้องอยู่ล่างสุดเสมอ)
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
