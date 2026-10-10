@@ -887,6 +887,7 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
+    // 🟢 1. กำหนดโครงสร้างหน้าเว็บ (CollectionPage) แบบมาตรฐาน ไร้ Dangling ID
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -894,13 +895,19 @@ export default async (req, context) => {
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-      "dateModified": new Date().toISOString(),
+      // ✅ ใช้วันที่ Deploy จริง ไม่ปั๊มวันปัจจุบันหลอกบอท
+      "dateModified": "2026-03-20T00:00:00+07:00",
       "isPartOf": { "@id": `${primaryDomain}/#website` },
-      "about": isNational 
-        ? { "@id": `${canonicalUrl}#business` }
+      // ✅ ระบุพื้นที่ที่เกี่ยวข้องเป็น Entity พื้นที่จริง ไม่แอบอ้างเป็นหน้าร้าน
+      "about": isNational
+        ? {
+            "@type": "Country",
+            "name": "ประเทศไทย",
+            "identifier": "TH"
+          }
         : {
             "@type": "Place",
-            "name": `อำเภอเมือง${provinceNameThai}`,
+            "name": `จังหวัด${provinceNameThai}`,
             "address": {
               "@type": "PostalAddress",
               "addressLocality": provinceNameThai,
@@ -912,10 +919,15 @@ export default async (req, context) => {
               "latitude": seoData.geo?.lat || 18.7883,
               "longitude": seoData.geo?.lng || 98.9853
             }
-          },
-      "mainEntity": profilesList.length > 0 ? { "@id": `${canonicalUrl}#itemlist` } : { "@id": `${canonicalUrl}#business` }
+          }
     };
 
+    // เชื่อมต่อ Main Entity: ถ้ามีโปรไฟล์ให้ชี้ไปที่ ItemList ถ้าไม่มีให้ปล่อยว่าง
+    if (profilesList.length > 0) {
+      webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
+    }
+
+    // 🟢 2. สร้าง Schema Graph หลัก (ตัด EntertainmentBusiness / ProfessionalService ปลอมออกแล้ว 100%)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -948,51 +960,12 @@ export default async (req, context) => {
         "publisher": { "@id": `${primaryDomain}/#organization` },
         "inLanguage": "th-TH"
       },
-      webpageSchema,
-      {
-        // 👈 ดึงอันดับ Local Search (เชียงใหม่, ขอนแก่น, กทม.) เชื่อมโยงกับ Google Maps Entity
-        "@type": ["EntertainmentBusiness", "ProfessionalService"],
-        "@id": `${canonicalUrl}#business`,
-        "name": isNational 
-          ? `ศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
-          : `บริการเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน ${provinceNameThai} - ${CONFIG.BRAND_NAME}`,
-        "image": heroImage, // ✅ แก้ไขแล้ว: ใช้ตัวแปร heroImage ที่มีอยู่จริง ไม่ Crash 100%
-        "telephone": CONFIG.DEFAULT_TELEPHONE,
-        "priceRange": "฿฿",
-        "currenciesAccepted": "THB",
-        "paymentAccepted": "Cash, PromptPay",
-        "url": canonicalUrl,
-        "description": cleanMetaDesc,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressRegion": isNational ? "ประเทศไทย" : provinceNameThai,
-          "addressCountry": "TH"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": seoData.geo?.lat || 13.7563,
-          "longitude": seoData.geo?.lng || 100.5018
-        },
-        "areaServed": isNational 
-          ? { 
-              "@type": "Country", 
-              "name": "Thailand",
-              "sameAs": "https://th.wikipedia.org/wiki/ประเทศไทย"
-            } 
-          : [
-              { 
-                "@type": "AdministrativeArea", 
-                "name": provinceNameThai,
-                "sameAs": `https://th.wikipedia.org/wiki/${encodeURIComponent(provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`)}`
-              },
-              ...cleanZonesList.map(z => ({ "@type": "AdministrativeArea", "name": z }))
-            ]
-      }
+      webpageSchema
     ];
 
-    // 🟢 2. BreadcrumbList (ใส่เฉพาะหน้าจังหวัดที่มี 2 ระดับชั้นขึ้นไปตามเกณฑ์ Google)
+    // 🟢 3. BreadcrumbList (ใส่เฉพาะหน้าจังหวัดที่มี 2 ระดับชั้นขึ้นไป)
     if (!isNational) {
+      webpageSchema.breadcrumb = { "@id": `${canonicalUrl}#breadcrumb` };
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${canonicalUrl}#breadcrumb`,
@@ -1013,13 +986,13 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 ItemList ถูกต้องตาม Google Carousel Rich Results (มีเงื่อนไขและประกาศตัวแปรถูกต้อง)
+    // 🟢 4. ItemList Carousel รายชื่อน้องๆ (Google Carousel Rich Results สะอาด ถูกต้อง 100%)
     if (profilesList.length > 0) {
       const carouselProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
-        "name": `รายชื่อน้องๆ รับงานไซด์ไลน์ ${provinceNameThai}`,
+        "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}`,
         "numberOfItems": carouselProfiles.length,
         "itemListElement": carouselProfiles.map((p, idx) => ({
           "@type": "ListItem",
@@ -1034,7 +1007,7 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 4. FAQPage Rich Results (ดึงคำถาม-คำตอบเพื่อสร้างกล่องพับใต้ผลค้นหา Google)
+    // 🟢 5. FAQPage Rich Results (สร้างแถบพับถาม-ตอบใต้ผลค้นหา Google)
     if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -1229,8 +1202,8 @@ const popularLocationsFooter = `
 
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
     const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p"><span class="t-chunk">ศูนย์รวมลงประกาศ</span> <span class="t-chunk"><strong>น้องๆรับงาน</strong>,</span> <span class="t-chunk"><strong>ไซด์ไลน์ทั่วไทย</strong></span> <span class="t-chunk">และเพื่อนเที่ยวสไตล์</span> <span class="t-chunk"><strong>ฟิวแฟน (GFE)</strong></span> <span class="t-chunk">โปรไฟล์จริงตรงปก</span> <span class="t-chunk">นัดพบปลอดภัย</span> <span class="t-chunk">จ่ายเงินหน้างาน</span> <span class="t-chunk"><strong>ไม่โอนมัดจำล่วงหน้าเด็ดขาด</strong></span></p>`
-      : `<p class="hero-subtitle-p"><span class="t-chunk">ศูนย์รวมลงประกาศ</span> <span class="t-chunk"><strong>ไซด์ไลน์${escapeHTML(provinceNameThai)}</strong></span> <span class="t-chunk">และ <strong>สาวรับงาน${escapeHTML(provinceNameThai)}</strong></span> <span class="t-chunk">สไตล์เพื่อนเที่ยว</span> <span class="t-chunk"><strong>ฟิวแฟน (GFE)</strong></span> <span class="t-chunk">โซนยอดนิยม ${escapeHTML(currentZonesText)}</span> <span class="t-chunk">การันตีตัวจริงตรงปก 100%</span> <span class="t-chunk">นัดพบปลอดภัย</span> <span class="t-chunk">จ่ายเงินหน้างาน</span> <span class="t-chunk"><strong>ไม่มีโอนมัดจำล่วงหน้าเด็ดขาด</strong></span></p>`;
+  ? `<p class="hero-subtitle-p">FirstModelHub แพลตฟอร์มสื่อกลางลงประกาศเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน (GFE) ทั่วไทย การันตีตัวจริงตรงปก ปลอดภัยด้วยนโยบายนัดพบและชำระเงินหน้างานโดยตรง ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี</p>`
+  : `<p class="hero-subtitle-p">คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน (GFE) ในจังหวัด${escapeHTML(provinceNameThai)} ครอบคลุมพิกัดยอดนิยม ${escapeHTML(currentZonesText)} การันตีตัวจริงตรงปก ปลอดภัยนัดพบจ่ายเงินหน้างาน ไม่มีมัดจำล่วงหน้าทุกกรณี</p>`;
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
 
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
@@ -1239,7 +1212,12 @@ const popularLocationsFooter = `
     if (!isNational) {
       finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
       finalHtml = finalHtml.replace('<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;"></span>', `<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`);
-    }
+
+      // 🟢 ตัดกล่องที่ซ้ำกับหน้าแรกออกเมื่อเป็นหน้าจังหวัด (แก้ Doorway Pages ให้ Google)
+      finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
+      finalHtml = finalHtml.replace(/<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id="seo-drawer-wrapper")/i, "");
+      finalHtml = finalHtml.replace(/<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
+    } // ✅ ต้องมีปีกกาปิดตรงนี้ครับ
 
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
@@ -1279,20 +1257,9 @@ const popularLocationsFooter = `
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    const todayDateStr = new Date().toLocaleDateString('th-TH', { 
-  timeZone: 'Asia/Bangkok',
-  day: 'numeric', 
-  month: 'long', 
-  year: 'numeric' 
-});
-    const topNames = profilesList.slice(0, 4).map(p => `น้อง${(p.name || '').trim().replace(/^(น้อง\s?)+/gi, '')}`).filter(Boolean).join(", ");
     
-    // 🟢 2. กล่องแสดงความสดใหม่แบบ Real-time ดักคะแนน Google Algorithm
-    const freshnessBox = `
-      <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;">
-        ⚡ <strong>อัปเดตข้อมูลล่าสุด:</strong> ${todayDateStr} — มีโปรไฟล์พร้อมสแตนด์บายดูแลในพื้นที่${escapeHTML(provinceNameThai)} ${topNames ? `แนะนำเช่น ${escapeHTML(topNames)} ` : ''}รวมกว่า ${totalCount} คน การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน
-      </div>
-    `;
+    
+    const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ:</strong> ข้อมูลโปรไฟล์และสถานะการสแตนด์บายในพื้นที่${escapeHTML(provinceNameThai)} ได้รับการตรวจสอบอย่างสม่ำเสมอ การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน </div> `;
 
    
     finalHtml = finalHtml.replace(/class=["']seo-drawer-wrapper collapsed["']/gi, 'class="seo-drawer-wrapper"');
@@ -1301,7 +1268,7 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<div[^>]*style=["'][^"']*margin-top:\s*-6px[^"']*["']>[\s\S]*?<\/div>/gi, '');
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${freshnessBox}${linkedIntro}</div>`);
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
-    if (reviewsHtml) finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
+    finalHtml = finalHtml.replace(/<div id="reviews-wrapper-block">[\s\S]*?<\/div>\s*<\/div>/i, "");
     
     const dynamicReviewHeading = isNational 
       ? "⭐ รีวิวความประทับใจจากลูกค้าจริงทั่วไทย" 

@@ -444,23 +444,26 @@ const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "WebPage",
+      // 1. เปลี่ยนเป็น ProfilePage ให้ตรงกับประเภทเนื้อหาจริง
+      "@type": "ProfilePage",
       "@id": `${canonicalUrl}#webpage`,
       "url": canonicalUrl,
       "name": stripHTML(pageTitle),
       "description": stripHTML(metaDescription),
       "inLanguage": "th-TH",
-      "dateModified": new Date().toISOString(),
+      "dateModified": profile.updated_at || profile.created_at || "2026-03-20T00:00:00+07:00",
       "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      "mainEntity": { "@id": `${canonicalUrl}#service` }
+      // 2. ชี้ mainEntity ไปที่บุคคล (#person) โดยตรง
+      "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
+      // 3. คง Person ไว้ แต่ระบุพิกัดเป็น homeLocation แทนการตั้งเป็นหน้าร้าน
       "@type": "Person",
       "@id": `${canonicalUrl}#person`,
       "name": stripHTML(displayName),
       "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
       "gender": "https://schema.org/Female",
-      "jobTitle": "ผู้ให้บริการดูแลสไตล์ฟิวแฟนและเพื่อนเที่ยว",
+      "jobTitle": "เพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน",
       "description": stripHTML(naturalDesc),
       "image": {
         "@type": "ImageObject",
@@ -478,33 +481,19 @@ const schemaGraph = {
         "value": cleanWeightNum,
         "unitCode": "KGM"
       },
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": primaryZone || provinceNameThai,
-        "addressRegion": provinceNameThai,
-        "addressCountry": "TH"
+      "homeLocation": {
+        "@type": "Place",
+        "name": primaryZone || provinceNameThai,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": primaryZone || provinceNameThai,
+          "addressRegion": provinceNameThai,
+          "addressCountry": "TH"
+        }
       }
     },
+    // 4. ตัด @type: "Service" และ "Offer" ออกทั้งหมด
     {
-      "@type": "Service",
-      "@id": `${canonicalUrl}#service`,
-      "name": `บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน - ${stripHTML(displayName)}`,
-      "serviceType": "เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์",
-      "provider": { "@id": `${canonicalUrl}#person` },
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": provinceNameThai === "กรุงเทพฯ" ? "กรุงเทพมหานคร" : `จังหวัด${provinceNameThai}`
-      },
-      "offers": {
-        "@type": "Offer",
-        "url": canonicalUrl,
-        "price": rateNumber,
-        "priceCurrency": "THB",
-        "availability": "https://schema.org/InStock",
-        "description": "นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างาน ปลอดภัยไม่มีโอนมัดจำล่วงหน้า"
-      }
-    },
-   {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
       "itemListElement": [
@@ -517,7 +506,7 @@ const schemaGraph = {
         { 
           "@type": "ListItem", 
           "position": 2, 
-          "name": `รับงาน${provinceNameThai}`, 
+          "name": `เพื่อนเที่ยว${provinceNameThai}`, 
           "item": provinceHubUrl 
         },
         { 
