@@ -3,8 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_${Date.now()}`;
-
+let GLOBAL_PROFILE_VERSION = `v_20261010_prod`; // 👈 เปลี่ยนให้ตรงกัน
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -440,24 +439,30 @@ if (provinceKey) {
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
    
+// 🟢 1. ย้ายมาประกาศตัวแปรก่อน เพื่อให้ข้างล่างเรียกใช้ได้ ไม่เออเร่อ
+const breadcrumbOptions = [
+  `ไซด์ไลน์${provinceNameThai}`,
+  `รับงาน${provinceNameThai}`,
+  `เพื่อนเที่ยว${provinceNameThai}`
+];
+const activeBreadcrumbText = breadcrumbOptions[(profile.id || 0) % breadcrumbOptions.length];
+
+// 🟢 2. สร้าง Schema Graph โดยมีเครื่องหมายจุลภาคคั่นถูกต้อง 100%
 const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      // 1. เปลี่ยนเป็น ProfilePage ให้ตรงกับประเภทเนื้อหาจริง
       "@type": "ProfilePage",
       "@id": `${canonicalUrl}#webpage`,
       "url": canonicalUrl,
       "name": stripHTML(pageTitle),
       "description": stripHTML(metaDescription),
       "inLanguage": "th-TH",
-      "dateModified": profile.updated_at || profile.created_at || "2026-03-20T00:00:00+07:00",
+      "dateModified": new Date().toISOString(),
       "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      // 2. ชี้ mainEntity ไปที่บุคคล (#person) โดยตรง
       "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
-      // 3. คง Person ไว้ แต่ระบุพิกัดเป็น homeLocation แทนการตั้งเป็นหน้าร้าน
       "@type": "Person",
       "@id": `${canonicalUrl}#person`,
       "name": stripHTML(displayName),
@@ -492,7 +497,6 @@ const schemaGraph = {
         }
       }
     },
-    // 4. ตัด @type: "Service" และ "Offer" ออกทั้งหมด
     {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
@@ -506,9 +510,9 @@ const schemaGraph = {
         { 
           "@type": "ListItem", 
           "position": 2, 
-          "name": `เพื่อนเที่ยว${provinceNameThai}`, 
+          "name": stripHTML(activeBreadcrumbText), 
           "item": provinceHubUrl 
-        },
+        }, // 👈 ใส่เครื่องหมายจุลภาคตรงนี้แล้ว
         { 
           "@type": "ListItem", 
           "position": 3, 
@@ -519,8 +523,8 @@ const schemaGraph = {
     }
   ]
 };
-   // 🟢 อนุญาตให้จัดทำดัชนีตามปกติ (เนื่องจาก Title และ Schema ได้รับการปรับปรุงให้ปลอดภัยแล้ว)
-    const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
+
+const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
 
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
@@ -618,14 +622,18 @@ const schemaGraph = {
         </header>
 
         <nav aria-label="breadcrumb">
-          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
-            <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-        <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
-          </ol>
-        </nav>
+  <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
+    <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li>
+      <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
+        ${escapeHTML(activeBreadcrumbText)}
+      </a>
+    </li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+  </ol>
+</nav>
 
         <main class="main-content">
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 22px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); box-shadow: 0 15px 35px rgba(124, 58, 237, 0.06);">

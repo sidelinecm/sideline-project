@@ -2,7 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_${Date.now()}`;
+// ✅ กำหนดเวอร์ชันให้คงที่ตามรอบวัน บอทกูเกิลจะเก็บแคชได้เร็ว ไม่เสีย Crawl Budget
+let GLOBAL_VERSION = `v_20261010_prod`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -34,7 +35,6 @@ const CONFIG = {
  SOCIAL_LINKS: [
     "https://line.me/ti/p/u8Bz9HsaY8",
     "https://tiktok.com/@sidelinecm",
-    "https://bio.site/firstfiwfans.com",
     "https://linktr.ee/kissmodel", "https://bsky.app/profile/sidelinechiangmai.bsky.social"
   ]
 };
@@ -895,8 +895,8 @@ export default async (req, context) => {
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-      // ✅ ใช้วันที่ Deploy จริง ไม่ปั๊มวันปัจจุบันหลอกบอท
-      "dateModified": "2026-03-20T00:00:00+07:00",
+     // ✅ ส่งเวลาปัจจุบัน (ISO String) สดใหม่ตลอดเวลาที่บอทเข้ามา Crawl
+"dateModified": new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       // ✅ ระบุพื้นที่ที่เกี่ยวข้องเป็น Entity พื้นที่จริง ไม่แอบอ้างเป็นหน้าร้าน
       "about": isNational
@@ -1434,12 +1434,23 @@ const popularLocationsFooter = `
       }
       const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
 
+      // 🟢 1. สกัดข้อความขยะรูปกระต่าย และข้อความสแปมก๊อปวางทิ้งทันที
+      let cleanDesc = sanitizeThaiText(p.description || "").trim();
+      const isSpamText = /เรทราคา|ไม่รวมห้อง|•ㅅ•|づ♡|รายละเอียดค่ะ/i.test(cleanDesc) || cleanDesc.length < 8;
+
+      if (isSpamText) {
+        // ✅ ถ้าเจอข้อความก๊อปปี้ ให้เปลี่ยนเป็นคำบรรยาย SEO เฉพาะบุคคล (ไม่ซ้ำกันเด็ดขาด)
+        const modelName = (p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "").trim();
+        const modelLoc = p.location ? sanitizeThaiText(p.location) : (PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่");
+        cleanDesc = `น้อง${modelName} เพื่อนเที่ยวสไตล์ฟิวแฟน พิกัด${modelLoc} ตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน`;
+      }
+
       return {
         id: p.id,
         slug: p.slug || String(p.id),
         name: p.name || "น้อง",
         imagePath: p.imagePath || p.image_url || p.imageUrl || "",
-        galleryPaths: cleanGallery, // 👈 บรรทัดนี้แหละครับที่ขาดไป! ต้องใส่เพื่อให้รูปอัลบั้มส่งไปหน้าเว็บ
+        galleryPaths: cleanGallery,
         provinceKey: p.provinceKey || "chiangmai",
         provinceThai: PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่",
         location: sanitizeThaiText(p.location || ""),
@@ -1448,7 +1459,7 @@ const popularLocationsFooter = `
         height: p.height || "",
         weight: p.weight || "",
         stats: p.stats || "",
-        description: sanitizeThaiText(p.description || "").slice(0, 90),
+        description: cleanDesc.slice(0, 110), // 👈 ใช้ตัวแปร cleanDesc ที่กรองสะอาดแล้ว
         slogan: sanitizeThaiText(p.slogan || p.quote || ""),
         quote: sanitizeThaiText(p.quote || p.slogan || ""),
       
