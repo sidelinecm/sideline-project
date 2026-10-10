@@ -1784,34 +1784,36 @@ const line2 = isAllOrNational
       `;
     }
 
-    // ⭐ 12. รีวิวจากลูกค้าจริง
+    // ⭐ 12. มาตรฐานความปลอดภัยและการันตีตรงปก (แทนที่รีวิวสุ่ม เพื่อป้องกัน Google ตรวจจับ Fake Review)
+    const reviewsSection = document.getElementById("lightboxReviewsSection");
     const reviewsList = document.getElementById("lightboxReviewsList");
-    if (reviewsList) {
-      const defaultPool = [
-        { name: "คุณชลสิทธิ์", text: "ตรงเวลามากครับ น้องน่ารัก อัธยาศัยดี พูดจาสุภาพ ดูแลสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ" },
-        { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" },
-        { name: "พี่โจ", text: "จองง่าย ไม่ต้องโอนมัดจำล่วงหน้า ไปเจอน้องตัวจริงแล้วค่อยจ่าย สบายใจและปลอดภัย 100% ครับ" },
-        { name: "คุณกอล์ฟ", text: "น้องน่ารักสไตล์ผู้ดี มารยาทดีมาก เทคแคร์เอาใจใส่เป็นธรรมชาติ แนะนำคนนี้เลยครับ" }
-      ];
-      const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : defaultPool;
-      const poolLen = pool.length;
-      const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
-      const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      
-      const selectedReviews = [
-        pool[hash % poolLen],
-        pool[(hash + 2) % poolLen],
-        pool[(hash + 4) % poolLen]
-      ];
-      reviewsList.innerHTML = selectedReviews.map(r => `
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">${r.name}</strong>
-            <span style="color: #D97706; font-size: 10.5px;">⭐⭐⭐⭐⭐</span>
+    if (reviewsSection && reviewsList) {
+      // ปรับหัวข้อให้เป็นทางการและน่าเชื่อถือ
+      const sectionHeading = reviewsSection.querySelector("h4");
+      if (sectionHeading) {
+        sectionHeading.innerHTML = "🛡️ มาตรฐานความปลอดภัย &amp; การันตีตรงปก 100%";
+        sectionHeading.style.color = "#7C3AED";
+      }
+
+      reviewsList.innerHTML = `
+        <div style="background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 14px; padding: 14px; text-align: left;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <i class="fas fa-check-circle" style="color: #059669; font-size: 13px;"></i>
+            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">ปลอดภัยจ่ายหน้างาน ไร้มัดจำ 100%</strong>
           </div>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">"${r.text}"</p>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.6; margin: 0 0 10px 0;">
+            นัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้วจึงชำระเงินกับน้องโดยตรง ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี
+          </p>
+
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <i class="fas fa-check-circle" style="color: #059669; font-size: 13px;"></i>
+            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">ไม่ตรงปก สามารถยกเลิกได้ทันที</strong>
+          </div>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.6; margin: 0;">
+            ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายจริง หากพบว่าตัวจริงไม่ตรงตามรูป สามารถปฏิเสธการรับบริการและยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่าย
+          </p>
         </div>
-      `).join("");
+      `;
     }
 
     // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
@@ -2384,15 +2386,7 @@ if (isStandaloneProfile) {
       });
     });
 
-    const toggleSeoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
-    const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
-    if (toggleSeoDrawerBtn && seoDrawerWrapper) {
-      toggleSeoDrawerBtn.onclick = () => {
-        const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
-        toggleSeoDrawerBtn.querySelector("span").textContent = isCollapsed ? (isEN ? "Read More" : "ดูข้อมูลพื้นที่บริการทั้งหมด") : (isEN ? "Collapse" : "ย่อข้อความ");
-        toggleSeoDrawerBtn.querySelector("i").className = isCollapsed ? "fas fa-chevron-down" : "fas fa-chevron-up";
-      };
-    }
+   
 
     function initDockAutoHide() {
       const floatingDock = document.querySelector('.floating-app-dock');
