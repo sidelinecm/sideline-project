@@ -1425,8 +1425,8 @@ const popularLocationsFooter = `
     }).join(" ");
 
     const botDirectorySectionHtml = `
-      <section class="bot-seo-directory-block" aria-label="สารบัญโปรไฟล์ทั้งหมด" style="margin-top: 2rem; margin-bottom: 2rem; padding: 16px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px;">
-        <h3 style="font-size: 13px; color: #7C3AED; font-weight: 800; margin: 0 0 10px 0;">📋 รายชื่อโปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั้งหมด</h3>
+      <section class="bot-seo-directory-block" aria-label="สารบัญโปรไฟล์ทั้งหมด" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 12px 14px; background: rgba(255, 255, 255, 0.5); border-radius: 12px; border: 1px dashed rgba(124, 58, 237, 0.15);">
+        <h3 style="font-size: 11.5px; color: #64748B; font-weight: 700; margin: 0 0 8px 0;">📋 สารบัญโปรไฟล์ประจำพื้นที่</h3>
         <div style="display: flex; flex-wrap: wrap; gap: 6px; line-height: 1.6;">
           ${directoryLinksHtml}
         </div>
