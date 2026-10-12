@@ -439,13 +439,7 @@ if (provinceKey) {
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
    
-// 🟢 1. ย้ายมาประกาศตัวแปรก่อน เพื่อให้ข้างล่างเรียกใช้ได้ ไม่เออเร่อ
-const breadcrumbOptions = [
-  `ไซด์ไลน์${provinceNameThai}`,
-  `รับงาน${provinceNameThai}`,
-  `เพื่อนเที่ยว${provinceNameThai}`
-];
-const activeBreadcrumbText = breadcrumbOptions[(profile.id || 0) % breadcrumbOptions.length];
+const activeBreadcrumbText = `ไซด์ไลน์${provinceNameThai}`;
 
 // 🟢 2. สร้าง Schema Graph โดยมีเครื่องหมายจุลภาคคั่นถูกต้อง 100%
 const schemaGraph = {
@@ -714,24 +708,14 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                 </div>
             </section>
 
-            <section style="margin-bottom: 1.5rem;">
-                <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
-                    </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
-                    </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
-                    </div>
-                </div>
-            </section>
-
+            <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
+    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
+        <div><strong style="color: #7C3AED;">สไตล์การดูแล:</strong> ${Array.isArray(profile.styleTags) && profile.styleTags.length > 0 ? profile.styleTags.map(t => `#${escapeHTML(t)}`).join(" ") : "#ฟิวแฟน #เทคแคร์ดี #ตรงปก"}</div>
+        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(provinceNameThai)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
+        <div><strong style="color: #7C3AED;">ความประทับใจส่วนตัว:</strong> "${escapeHTML(profile.description || profile.slogan || profile.quote || "ฟิวแฟน อบอุ่น สุภาพ ไม่เร่งงาน ตัวจริงตรงปก 100%")}"</div>
+    </div>
+</section>
             <!-- ตัดส่วนรีวิวที่ซ้ำซ้อนออก เพื่อป้องกัน Google ตรวจจับว่าเป็นรีวิวที่สร้างขึ้นอัตโนมัติ (Fake Review) -->
             
             ${relatedProfiles.length > 0 ? `

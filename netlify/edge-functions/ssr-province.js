@@ -564,8 +564,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
               width="400"
               height="560"
               class="profile-card-img"
-             loading="${index === 0 ? "eager" : "lazy"}"
-fetchpriority="${index === 0 ? "high" : "low"}"
+              loading="${isPriorityLCP ? "eager" : "lazy"}"
+              fetchpriority="${isPriorityLCP ? "high" : "auto"}"
               decoding="async"
               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
@@ -1286,11 +1286,13 @@ const popularLocationsFooter = `
       const slug = encodeURIComponent(p.slug || p.id);
       const img = optimizeImg(p.imagePath || p.image_url || "", 400, 560);
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
+      const imgLoading = i === 0 ? "eager" : "lazy";
+      const imgPriority = i === 0 ? "high" : "auto";
       return `
         <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
           <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${provinceNameThai})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <img src="${img}" alt="น้อง${cleanName} (${provinceNameThai})" width="175" height="245" loading="${imgLoading}" fetchpriority="${imgPriority}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
           <div class="vip-card-info">
@@ -1414,8 +1416,24 @@ const popularLocationsFooter = `
       }
     
 
-    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
+    // 1. สร้างลิงก์โปรไฟล์ทุกคนแบบ Raw HTML สำหรับ Googlebot
+    const allProfilesList = isNational ? deduplicatedProfiles : profilesList;
+    const directoryLinksHtml = (allProfilesList || []).map(p => {
+      const pSlug = encodeURIComponent(p.slug || p.id);
+      const pName = escapeHTML((p.name || "").replace(/^(น้อง\s?)+/gi, "").trim());
+      return `<a href="/sideline/${pSlug}" style="color: #64748B; font-size: 11px; text-decoration: none; display: inline-block; padding: 2px 6px; background: rgba(124, 58, 237, 0.05); border-radius: 4px;">น้อง${pName}</a>`;
+    }).join(" ");
 
+    const botDirectorySectionHtml = `
+      <section class="bot-seo-directory-block" aria-label="สารบัญโปรไฟล์ทั้งหมด" style="margin-top: 2rem; margin-bottom: 2rem; padding: 16px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px;">
+        <h3 style="font-size: 13px; color: #7C3AED; font-weight: 800; margin: 0 0 10px 0;">📋 รายชื่อโปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั้งหมด</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; line-height: 1.6;">
+          ${directoryLinksHtml}
+        </div>
+      </section>
+    `;
+
+    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงานและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}${botDirectorySectionHtml}</div>`);
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -1491,7 +1509,7 @@ const popularLocationsFooter = `
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
-    finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" loading="lazy" src="${mapEmbedUrl}"`);
+    finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
