@@ -1008,12 +1008,22 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           const gridEl = sectionEl.querySelector(".profile-grid");
           await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
         }
-      } else {
+  } else {
         domCache.profilesDisplayArea.innerHTML = "";
-        domCache.noResultsMessage?.classList.remove("hidden");
+        if (domCache.noResultsMessage) {
+          if (!domCache.noResultsMessage.hasChildNodes()) {
+            const tmpl = document.getElementById("no-results-template");
+            if (tmpl) domCache.noResultsMessage.appendChild(tmpl.content.cloneNode(true));
+          }
+          domCache.noResultsMessage.style.display = "block";
+          domCache.noResultsMessage.classList.remove("hidden");
+        }
       }
     }
   }
+
+ 
+
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
@@ -2445,10 +2455,9 @@ if (isStandaloneProfile) {
           // 3. กรอง ID ซ้ำ
           if (raw.id && seenIds.has(String(raw.id))) continue;
 
-          // 4. กรองชื่อซ้ำในจังหวัดเดียวกัน
           const pKey = (raw.provinceKey || raw.province_slug || "").toLowerCase();
-          const nameSig = `${cleanName}_${pKey}`;
-          if (seenNames.has(nameSig)) continue;
+const nameSig = `${cleanName}_${pKey}_${raw.age || ""}_${raw.rate || ""}`;
+if (seenNames.has(nameSig)) continue;
 
           // 5. สร้างลายเซ็นรูปภาพเพื่อเช็ครูปซ้ำ
           let imgSig = "";
@@ -2511,9 +2520,16 @@ if (isStandaloneProfile) {
         }
 
         return false;
-      } catch (fetchErr) {
+     } catch (fetchErr) {
         console.error("Data Fetch Error:", fetchErr);
-        domCache.fetchErrorMessage?.classList.remove("hidden");
+        if (domCache.fetchErrorMessage) {
+          if (!domCache.fetchErrorMessage.hasChildNodes()) {
+            const tmpl = document.getElementById("fetch-error-template");
+            if (tmpl) domCache.fetchErrorMessage.appendChild(tmpl.content.cloneNode(true));
+          }
+          domCache.fetchErrorMessage.style.display = "block";
+          domCache.fetchErrorMessage.classList.remove("hidden");
+        }
         return false;
       } finally {
         appState.isFetching = false;

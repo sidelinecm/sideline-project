@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="FirstModelHub">
 
-  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub</title>
+ <title>สาวรับงาน ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน ไม่มัดจำ | FirstModelHub</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนทั่วไทย ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ การันตีตัวจริงตรงปก 100%">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
@@ -244,21 +244,31 @@
         </div>
         <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายเงินหน้างาน ไม่มีมัดจำ</span>
       </div>
-      <div id="featured-profiles-container" class="profile-grid" aria-labelledby="featured-heading"></div>
+      <div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading"></div>
     </section>
 
-    <div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงาน"></div>
+    <!-- พื้นที่แสดงการ์ดโปรไฟล์หลัก (SSR & CSR) -->
+    <div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงานและเพื่อนเที่ยว"></div>
 
-    <div id="no-results-message" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-      <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
-      <p style="font-size: 14px; font-weight: 700;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
-      <p style="font-size: 12px;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
-    </div>
+    <!-- 🟢 กล่องเปล่าสำหรับรองรับการแจ้งเตือน (ไม่มีข้อความ Error ค้างใน HTML ดิบ) -->
+    <div id="no-results-message" class="hidden" style="display: none;"></div>
+    <div id="fetch-error-message" class="hidden" style="display: none;"></div>
 
-    <div id="fetch-error-message" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--crimson-main);">
-      <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
-      <p style="font-size: 14px; font-weight: 700;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-    </div>
+    <!-- 🛡️ ซ่อนข้อความ Error ไว้ในแท็ก <template> (บอท Google และ AI จะมองข้าม 100% ไม่นับเป็นเนื้อหาหน้าเว็บ) -->
+    <template id="no-results-template">
+      <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+        <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
+        <p style="font-size: 14px; font-weight: 700; margin: 0 0 4px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
+        <p style="font-size: 12px; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
+      </div>
+    </template>
+
+    <template id="fetch-error-template">
+      <div style="text-align: center; padding: 40px 20px; color: var(--crimson-main);">
+        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
+        <p style="font-size: 14px; font-weight: 700; margin: 0;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+      </div>
+    </template>
 
     <!-- Concierge, Trust & Safety Section -->
     <section class="concierge-luxury-section" aria-label="ศูนย์รวมความปลอดภัยและคู่มือการนัดหมาย">
