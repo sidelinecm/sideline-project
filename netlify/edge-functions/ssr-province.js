@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
 // ✅ กำหนดเวอร์ชันให้คงที่ตามรอบวัน บอทกูเกิลจะเก็บแคชได้เร็ว ไม่เสีย Crawl Budget
-let GLOBAL_VERSION = `v_20261020_prod`;
+let GLOBAL_VERSION = `v_20261011_prod`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -340,62 +340,96 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
   const LOCAL_CONTEXT = {
-    national: {
-      headline: `ศูนย์รวมลงประกาศไซด์ไลน์และสาวรับงานทั่วไทย อันดับ 1`,
-      intro: `FirstModelHub คือแพลตฟอร์มศูนย์รวมเพื่อนเที่ยวและไซด์ไลน์ฟิวแฟน (GFE) ระดับพรีเมียมที่ครอบคลุมมากที่สุดในประเทศไทย คัดสรรโปรไฟล์จริง การันตีตัวจริงตรงปก 100% ดูแลเอาใจใส่ สุภาพ ไม่เร่งเวลา ปลอดภัยด้วยนโยบายนัดพบจ่ายหน้างาน ปราศจากความเสี่ยงจากการโอนเงินมัดจำล่วงหน้าทุกกรณี`,
-      convenience: `ครอบคลุมโรงแรม รีสอร์ต และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} สแตนด์บายพร้อมเดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็วและเป็นส่วนตัวสูงสุด`
-    },
-chiangmai: {
-  headline: `คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน จ.เชียงใหม่`,
-  intro: `สำหรับผู้ที่เดินทางมาพักผ่อน ท่องเที่ยว หรือทำงานในเชียงใหม่ FirstModelHub คัดสรรเพื่อนเที่ยวระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience - GFE) ที่เน้นความสุภาพ อัธยาศัยดี และไม่เร่งเวลา พร้อมเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัว การันตีตัวจริงตรงปก 100%`,
-  convenience: `โรงแรมและรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบาย ปลอดภัย เจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณี`
-},
-    bangkok: {
-      headline: `บริการเพื่อนเที่ยวระดับ VIP และผู้ดูแลไลฟ์สไตล์ส่วนบุคคล กรุงเทพฯ`,
-      intro: `ศูนย์รวมเพื่อนเที่ยวมืออาชีพและน้องๆ สไตล์ฟิวแฟนในกรุงเทพฯ ครอบคลุมทั้งสายเรียบร้อยน่ารัก พริตตี้ และสาวสวยบุคลิกดี เหมาะสำหรับนักธุรกิจและผู้ที่ต้องการเพื่อนร่วมโต๊ะอาหาร ออกงานสังคม หรือการพักผ่อนอย่างเป็นส่วนตัวหลังเลิกงาน`,
-      convenience: `ครอบคลุมทั้งแนวรถไฟฟ้า คอนโดมิเนียมหรู และโรงแรมชั้นนำ${zoneText} สามารถระบุพิกัดที่ต้องการให้น้องเดินทางไปดูแล (Outcall) ได้อย่างรวดเร็ว`
-    },
-    chonburi: {
-      headline: `เพื่อนเที่ยวพัทยา-ชลบุรี เติมเต็มทริปพักผ่อนริมทะเลอย่างมั่นใจ`,
-      intro: `มาเที่ยวพัทยา บางแสน ให้การพักผ่อนสมบูรณ์แบบยิ่งขึ้นด้วยเพื่อนเที่ยวสายสดใส เป็นกันเอง พร้อมร่วมกิจกรรมริมหาด ปาร์ตี้พูลวิลล่าส่วนตัว หรือดูแลสไตล์ฟิวแฟนแบบใกล้ชิด`,
-      convenience: `รองรับพิกัดที่พักทั่วพัทยา จอมเทียน และบางแสน${zoneText} เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็ว ปลอดภัย ไร้กังวลเรื่องเวลา`
-    },
-    phuket: {
-      headline: `สัมผัสการพักผ่อนระดับไฮเอนด์กับเพื่อนเที่ยว VIP ภูเก็ต`,
-      intro: `ยกระดับวันหยุดบนเกาะภูเก็ตด้วยเพื่อนเที่ยวระดับพรีเมียม สื่อสารคล่องแคล่ว บุคลิกสง่างาม พร้อมเป็นเพื่อนร่วมทริป ดินเนอร์ชมพระอาทิตย์ตก นั่งเรือยอร์ช หรือดูแลอย่างอบอุ่นในพูลวิลล่าส่วนตัว`,
-      convenience: `บริการทั่วทั้งเกาะภูเก็ต${zoneText} เข้าพบที่รีสอร์ตหรือวิลล่าส่วนตัวตามเวลานัดหมายอย่างตรงเวลา`
-    },
-    khonkaen: {
-      headline: `เพื่อนเที่ยวฟิวแฟน ขอนแก่น คัดสรรโปรไฟล์ตรงปก 100%`,
-      intro: `ผ่อนคลายในเมืองศูนย์กลางภาคอีสานกับน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ขี้อ้อน เทคแคร์ดี เอาใจใส่ดุจคนรู้ใจ ตอบโจทย์ทั้งการนัดทานข้าว นั่งร้านชิล หรือนัดพบส่วนตัว`,
-      convenience: `สแตนด์บายครอบคลุมโซนมหาวิทยาลัยและโรงแรมใจกลางขอนแก่น${zoneText} เดินทางสะดวก รวดเร็วทันใจ`
-    },
-    chiangrai: {
-      headline: `เพื่อนเที่ยวเชียงราย สาวสวยฟิวแฟน อบอุ่น ตรงปก ไม่มัดจำ`,
-      intro: `สัมผัสบรรยากาศเมืองเหนือสุดโรแมนติกกับน้องๆ วัยใสน่ารัก นักศึกษา และสาวสวยสไตล์ฟิวแฟนในเชียงราย พร้อมเป็นเพื่อนร่วมทาง ทานอาหาร นั่งคาเฟ่ หรือดูแลผ่อนคลายในที่พักส่วนตัวอย่างสุภาพและให้เกียรติ`,
-      convenience: `ครอบคลุมทั้งโซนมหาวิทยาลัยและโรงแรมชั้นนำ${zoneText} นัดหมายง่าย น้องๆ เดินทางถึงที่พักรวดเร็ว ปลอดภัย ไร้กังวล`
-    },
-    udonthani: {
-      headline: `สาวรับงานและเพื่อนเที่ยวอุดรธานี บริการระดับพรีเมียม ปลอดภัย 100%`,
-      intro: `เปิดประสบการณ์พักผ่อนอย่างอบอุ่นในอุดรธานีกับสาวสวยสไตล์ฟิวแฟน เอาใจเก่ง คุยสนุก ยิ้มแย้มสดใส ให้ความรู้สึกเป็นกันเองเสมือนคนรัก พร้อมสร้างความประทับใจในทุกช่วงเวลา`,
-      convenience: `สแตนด์บายครอบคลุมย่านเศรษฐกิจและโรงแรมใจกลางเมือง${zoneText} นัดพบตัวจริง ตรวจสอบความตรงปกหน้างานแล้วค่อยจ่ายเงิน`
-    },
-    lampang: {
-      headline: `เพื่อนเที่ยวลำปาง สไตล์ฟิวแฟน เรียบร้อย น่ารัก เอาใจเก่ง`,
-      intro: `เติมเต็มช่วงเวลาพักผ่อนในเมืองรถม้ากับน้องๆ สาวสวยบุคลิกดี วัยใส มารยาทเรียบร้อย อัธยาศัยดี พร้อมเป็นเพื่อนคลายเหงา นั่งคุย ทานข้าว หรือพักผ่อนส่วนตัวโดยไม่เร่งรีบ`,
-      convenience: `รองรับโรงแรมและที่พักชั้นนำทั่วเมืองลำปาง${zoneText} นัดหมายสะดวก เป็นส่วนตัว และปลอดภัยสูงสุด`
-    },
-    lamphun: {
-      headline: `เพื่อนเที่ยวลำพูน สาวรับงานฟิวแฟน ดูแลใกล้ชิด เดินทางไว`,
-      intro: `คลายความเหนื่อยล้าในจังหวัดลำพูนด้วยบริการเพื่อนเที่ยวที่เน้นความจริงใจ สุภาพ และตรงปก 100% ตอบโจทย์ทั้งผู้ที่มาทำงานในนิคมอุตสาหกรรมหรือท่องเที่ยวพักผ่อน`,
-      convenience: `ครอบคลุมทั้งโซนนิคมอุตสาหกรรมและตัวเมือง${zoneText} สแตนด์บายพร้อมดูแลถึงที่พักอย่างรวดเร็วและมิดชิด`
-    },
-    phitsanulok: {
-      headline: `เพื่อนเที่ยวพิษณุโลก สเปควัยใส นักศึกษา ฟิวแฟนตรงปก`,
-      intro: `ศูนย์รวมน้องๆ สาวสวยวัยใสในพิษณุโลก บุคลิกน่ารัก ชวนคุยเก่ง เทคแคร์เอาใจใส่เป็นธรรมชาติ ดูแลดุจแฟนคนพิเศษ ให้ความรู้สึกผ่อนคลายและประทับใจในทุกการนัดหมาย`,
-      convenience: `ครอบคลุมโซนรอบมหาวิทยาลัยและโรงแรมใจกลางเมือง${zoneText} นัดหมายง่าย ปลอดภัย จ่ายหน้างาน ไม่ต้องโอนมัดจำ`
-    }
-  };
+  national: {
+    headline: `สาวรับงาน • ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน`,
+    intro: `FirstModelHub ศูนย์รวมสาวรับงานและน้องๆ ไซด์ไลน์ทั่วประเทศ คัดสรรโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) น่ารัก อัธยาศัยดี พูดเพราะ เอาใจเก่ง ไม่เร่งรีบ ให้ความรู้สึกอบอุ่นผ่อนคลายเหมือนไปเดตกับแฟนตัวจริง ปลอดภัยสูงสุดด้วยระบบนัดพบเจอตัวจริงก่อน แล้วค่อยชำระค่าบริการหน้างาน ไร้ความเสี่ยง ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ`,
+    convenience: `ครอบคลุมโรงแรม คอนโด และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางดูแลถึงที่พักอย่างรวดเร็ว มิดชิด และรักษาความเป็นส่วนตัวสูงสุด`
+  },
+
+  chiangmai: {
+    headline: `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก นัดเจอง่าย จ่ายหน้างาน`,
+    intro: `หาไซด์ไลน์เชียงใหม่และสาวรับงานฟิวแฟนน่ารักๆ ในตัวเมือง FirstModelHub คัดสรรน้องๆ วัยใส นักศึกษา และสาวสวยหุ่นดี บุคลิกน่ารัก ชวนคุยเก่ง เทคแคร์อบอุ่นเป็นธรรมชาติ ไม่เร่งเวลา เหมาะสำหรับเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลคลายเหงาอย่างเป็นส่วนตัว การันตีรูปจริงตรงปก เจอตัวจริงเช็คความเรียบร้อยก่อนค่อยจ่ายเงิน สบายใจ ไร้มัดจำ 100% ค่ะ`,
+    convenience: `โรงแรม คอนโด และรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบาย ปลอดภัย จ่ายตรงกับน้องหน้างานได้เลย`
+  },
+
+  bangkok: {
+    headline: `สาวรับงานกรุงเทพฯ • ไซด์ไลน์ กทม. เพื่อนเที่ยวฟิวแฟน VIP ตัวท็อป`,
+    intro: `รวมสาวรับงานกรุงเทพฯ และน้องๆ ไซด์ไลน์ระดับพรีเมียม ครอบคลุมทั้งสาววัยใส นักศึกษา พริตตี้ และสาวสวยหุ่นนางแบบ วางตัวดี สุภาพ อัธยาศัยดี ชวนคุยสนุก ตอบโจทย์ทั้งการหาเพื่อนร่วมโต๊ะอาหาร ดินเนอร์ ออกงานสังคม นั่งดื่มชิลๆ หรือพักผ่อนคลายเหงาส่วนตัวหลังเลิกงาน มั่นใจในความปลอดภัย นัดพบตัวจริงตรงปก ชำระเงินหน้างาน ไม่มีความเสี่ยงเรื่องโอนเงินก่อนค่ะ`,
+    convenience: `ครอบคลุมตามแนวรถไฟฟ้า BTS/MRT คอนโดหรู และโรงแรมชั้นนำทั่วกรุงเทพฯ${zoneText} นัดหมายง่าย ระบุพิกัดให้น้องเดินทางไปดูแล (Outcall) ได้อย่างรวดเร็วและเป็นส่วนตัว`
+  },
+
+  chonburi: {
+    headline: `สาวรับงานพัทยา-ชลบุรี • ไซด์ไลน์บางแสน เด็กเอ็นปาร์ตี้ & ฟิวแฟนริมหาด`,
+    intro: `เติมเต็มทริปเที่ยวทะเลพัทยา บางแสน และศรีราชา ให้สนุกและน่าจดจำยิ่งขึ้นกับน้องๆ เพื่อนเที่ยวฟิวแฟนและเด็กเอ็น (EN VIP) สายสดใส น่ารัก เฟรนด์ลี่ ชงเหล้าเก่ง ชวนคุยสนุก พร้อมร่วมกิจกรรมปาร์ตี้พูลวิลล่าส่วนตัว ดินเนอร์ริมหาด หรือดูแลใกล้ชิดสไตล์ฟิวแฟนอย่างเป็นธรรมชาติ นัดเจอง่าย จ่ายหน้างาน มั่นใจตรงปก ไม่ต้องโอนมัดจำล่วงหน้าค่ะ`,
+    convenience: `รองรับโรงแรม รีสอร์ต และพูลวิลล่าทั่วพัทยา จอมเทียน บางแสน และศรีราชา${zoneText} น้องๆ เดินทางถึงที่พักตรงเวลา ปลอดภัย ไร้กังวลเรื่องเวลา`
+  },
+
+  phuket: {
+    headline: `สาวรับงานภูเก็ต • ไซด์ไลน์ภูเก็ต พูลวิลล่า & เพื่อนเที่ยว VIP ทริปส่วนตัว`,
+    intro: `สัมผัสการพักผ่อนสุดพิเศษบนเกาะภูเก็ตกับน้องๆ เพื่อนเที่ยวฟิวแฟนและเด็กเอ็น VIP คัดสาวสวยหุ่นดี ผิวพรรณดี บุคลิกภาพเด่น สื่อสารภาษาอังกฤษได้ (สายฝอ) พร้อมเป็นเพื่อนร่วมเดินทาง ดินเนอร์ชมพระอาทิตย์ตก ปาร์ตี้พูลวิลล่าส่วนตัว หรือล่องเรือยอร์ชอย่างเอ็กซ์คลูซีฟ วางตัวดี ให้เกียรติลูกค้า ปลอดภัยด้วยระบบเจอตัวจริงตรงปกหน้างานค่อยชำระเงิน ไร้มัดจำค่ะ`,
+    convenience: `สแตนด์บายครอบคลุมโรงแรม รีสอร์ตหรู และพูลวิลล่าทั่วเกาะภูเก็ต${zoneText} เดินทางเข้าดูแลถึงที่พักตามเวลานัดหมายอย่างรวดเร็วและปลอดภัย`
+  },
+
+  khonkaen: {
+    headline: `รับงานขอนแก่น • ไซด์ไลน์ขอนแก่น วัยใสนักศึกษา โซนหลัง มข. กังสดาล ฟิวแฟนตรงปก`,
+    intro: `รวมสาวรับงานขอนแก่นและน้องๆ ไซด์ไลน์ตัวท็อปแดนอีสาน เน้นสเปกวัยใส นักศึกษา น่ารัก ขี้อ้อน ผิวขาว ตัวเล็ก ให้บริการสไตล์ฟิวแฟน (GFE) แท้ๆ คุยเก่ง เทคแคร์ดีดุจคนรู้ใจ เหมาะสำหรับนัดทานข้าว นั่งร้านชิล หรือนัดพบพักผ่อนส่วนตัวโดยไม่เร่งรีบ หมดกังวลเรื่องมิจฉาชีพ นัดเจอน้องตัวจริง เช็คความตรงปกก่อนค่อยจ่ายเงินหน้างาน สบายใจ 100% ค่ะ`,
+    convenience: `สแตนด์บายครอบคลุมรอบรั้วมหาวิทยาลัยขอนแก่นและโรงแรมใจกลางเมือง${zoneText} น้องๆ พักอยู่ในพื้นที่ เดินทางรวดเร็วทันใจ พร้อมดูแลถึงที่พัก`
+  },
+
+  chiangrai: {
+    headline: `รับงานเชียงราย • ไซด์ไลน์เชียงราย วัยใสน่ารัก โซน มฟล. บ้านดู่ ฟิวแฟนตรงปก ไม่มัดจำ`,
+    intro: `พักผ่อนแอ่วเมืองเหนือกับน้องๆ สาวรับงานเชียงรายและไซด์ไลน์น่ารักๆ สเปกวัยใส นักศึกษา หน้า มฟล. และสาวสวยในเมือง บุคลิกสดใส อัธยาศัยดี ยิ้มหวาน พร้อมเป็นเพื่อนร่วมทาง ทานอาหาร นั่งคาเฟ่ หรือดูแลผ่อนคลายในที่พักส่วนตัวอย่างอบอุ่น สุภาพ ไม่เร่งงาน มั่นใจ ปลอดภัย นัดเจอน้องตัวจริงตรงปกก่อนค่อยจ่ายเงิน ไร้เงื่อนไขโอนมัดจำล่วงหน้าค่ะ`,
+    convenience: `ครอบคลุมทั้งโซนมหาวิทยาลัยแม่ฟ้าหลวง บ้านดู่ และโรงแรมใจกลางเมืองเชียงราย${zoneText} นัดหมายสะดวก น้องๆ เดินทางถึงที่พักรวดเร็ว ตรงเวลา`
+  },
+
+  udonthani: {
+    headline: `รับงานอุดร • ไซด์ไลน์อุดรธานี เพื่อนเที่ยวฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน`,
+    intro: `เปิดประสบการณ์พักผ่อนอย่างอบอุ่นในอุดรธานีกับน้องๆ สาวรับงานและไซด์ไลน์ฟิวแฟน คัดโปรไฟล์สาวสวย วัยใส ตัวเล็ก ผิวขาว น่ารัก เอาใจเก่ง ชวนคุยสนุก ให้ความรู้สึกสนิทสนมเป็นกันเองเหมือนอยู่กับแฟน นัดเจอง่าย สบายใจ จ่ายเงินหน้างานตรงกับน้องหลังจากเจอตัวจริงและเช็คความตรงปกเรียบร้อยแล้ว ไม่มีความเสี่ยงเรื่องมัดจำค่ะ`,
+    convenience: `สแตนด์บายครอบคลุมย่านเศรษฐกิจ โรงแรม และที่พักชั้นนำใจกลางเมืองอุดร${zoneText} นัดหมายสะดวกรวดเร็ว น้องๆ เดินทางเข้าดูแลถึงที่พักอย่างมิดชิด`
+  },
+
+  lampang: {
+    headline: `รับงานลำปาง • ไซด์ไลน์ลำปาง เพื่อนเที่ยวฟิวแฟน เรียบร้อย น่ารัก เอาใจเก่ง`,
+    intro: `คลายเหงาในเมืองรถม้ากับน้องๆ สาวรับงานลำปางและไซด์ไลน์คุณภาพ สเปกสาวสวยวัยใส มารยาทเรียบร้อย อัธยาศัยดี พูดจาไพเราะ พร้อมเป็นเพื่อนร่วมทาง นั่งคุย ทานข้าว หรือพักผ่อนส่วนตัวอย่างผ่อนคลาย เทคแคร์ดีเสมือนคนพิเศษ ไม่เร่งเวลา ปลอดภัยด้วยนโยบายเจอตัวจริงตรงปกหน้างานค่อยชำระเงิน ไร้กังวลเรื่องการโอนเงินก่อนค่ะ`,
+    convenience: `รองรับโรงแรมและที่พักส่วนตัวชั้นนำทั่วเมืองลำปาง${zoneText} นัดหมายง่าย เป็นส่วนตัว และปลอดภัยสูงสุด`
+  },
+
+  lamphun: {
+    headline: `สาวรับงานลำพูน • ไซด์ไลน์ลำพูน โซนนิคมและตัวเมือง ฟิวแฟนอบอุ่น เดินทางไว`,
+    intro: `คลายความเหนื่อยล้าหลังเลิกงานในลำพูนกับน้องๆ เพื่อนเที่ยวสไตล์ฟิวแฟน สาวสวยบุคลิกดี อัธยาศัยดี พร้อมดูแลเอาใจใส่ด้วยความจริงใจ สุภาพ และให้เกียรติลูกค้า ตอบโจทย์ทั้งคนในพื้นที่และผู้ที่เดินทางมาทำงานในนิคมอุตสาหกรรม การันตีรูปจริงตรงปก ชำระเงินหน้างานตรงกับน้อง มั่นใจ ปลอดภัย ไร้มัดจำค่ะ`,
+    convenience: `ครอบคลุมทั้งโซนนิคมอุตสาหกรรมลำพูนและตัวเมือง${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางเข้าดูแลถึงโรงแรมที่พักได้อย่างรวดเร็ว`
+  },
+
+  phitsanulok: {
+    headline: `รับงานพิษณุโลก • ไซด์ไลน์พิษณุโลก วัยใสนักศึกษา โซน มน. และตัวเมือง ฟิวแฟนตรงปก`,
+    intro: `หาเพื่อนเที่ยวคลายเหงาในเมืองสองแควกับน้องๆ สาวรับงานพิษณุโลกและไซด์ไลน์วัยใส โซนรอบ ม.นเรศวร (มน.) และในเมือง สเปกน่ารัก ชวนคุยเก่ง เฟรนด์ลี่ เทคแคร์เอาใจใส่เป็นธรรมชาติ ดูแลดุจแฟนคนพิเศษ ให้ความรู้สึกสบายใจและไม่เร่งรีบ นัดเจอง่าย ปลอดภัย นัดพบตัวจริงตรงปกก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำล่วงหน้าค่ะ`,
+    convenience: `ครอบคลุมโซนรอบมหาวิทยาลัยนเรศวร ท่าโพธิ์ และโรงแรมใจกลางเมืองพิษณุโลก${zoneText} นัดหมายง่าย เดินทางถึงที่พักอย่างรวดเร็ว ปลอดภัย เป็นส่วนตัว`
+  },
+
+  ayutthaya: {
+    headline: `สาวรับงานอยุธยา • ไซด์ไลน์อยุธยา โซนโรจนะและตัวเมือง ฟิวแฟนน่ารัก จ่ายหน้างาน`,
+    intro: `พักผ่อนสบายๆ ในอยุธยากับน้องๆ เพื่อนเที่ยวฟิวแฟน สาวสวยวัยใส น่ารัก เอาใจเก่ง ชวนคุยสนุก พร้อมเป็นเพื่อนทานข้าว นั่งคาเฟ่ หรือดูแลผ่อนคลายในที่พักส่วนตัวอย่างใกล้ชิด ตอบโจทย์ทั้งวันพักผ่อนและพี่ๆ ที่ทำงานในนิคมโรจนะ การันตีตัวจริงตรงปก 100% เจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไร้ความเสี่ยงเรื่องมัดจำค่ะ`,
+    convenience: `ครอบคลุมโรงแรมและที่พักชั้นนำทั่วโซนนิคมโรจนะ บางปะอิน และตัวเมืองอยุธยา${zoneText} นัดหมายสะดวกรวดเร็ว ปลอดภัย เป็นส่วนตัวสูงสุด`
+  },
+
+  korat: {
+    headline: `สาวรับงานโคราช • ไซด์ไลน์นครราชสีมา ฟิวแฟนน่ารัก & เพื่อนเที่ยวทริปเขาใหญ่`,
+    intro: `ผ่อนคลายในเมืองย่าโมกับน้องๆ สาวรับงานโคราชและไซด์ไลน์นครราชสีมา รวมโปรไฟล์สาวสวย วัยใส นักศึกษา และสาวสวยหุ่นดี บุคลิกน่ารัก ชวนคุยเก่ง เทคแคร์ดีสไตล์ฟิวแฟน เหมาะสำหรับนัดทานข้าว นั่งดื่มชิล หรือเป็นเพื่อนร่วมทริปท่องเที่ยวพักผ่อนแถวปากช่อง-เขาใหญ่ การันตีตรงปก จ่ายเงินหน้างาน ไม่มีโอนก่อนค่ะ`,
+    convenience: `สแตนด์บายครอบคลุมโรงแรมใจกลางเมืองโคราช เซ็นทรัล มทส. ตลอดจนรีสอร์ตแถวปากช่องและเขาใหญ่${zoneText} เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกสบาย`
+  },
+
+  songkhla: {
+    headline: `สาวรับงานหาดใหญ่ • ไซด์ไลน์หาดใหญ่-สงขลา เพื่อนเที่ยวฟิวแฟนตรงปก จ่ายหน้างาน`,
+    intro: `รวมสาวรับงานหาดใหญ่และน้องๆ ไซด์ไลน์สงขลา คัดเฉพาะโปรไฟล์พรีเมียม สไตล์ฟิวแฟน น่ารัก สุภาพ ชวนคุยสนุก เอาใจเก่ง พร้อมเป็นเพื่อนร่วมทาง ดินเนอร์ หรือดูแลผ่อนคลายอย่างเป็นส่วนตัวในโรงแรมที่พัก ตอบโจทย์ทั้งนักท่องเที่ยวและคนทำงาน มั่นใจ ปลอดภัย นัดเจอตัวจริงตรงปกแล้วค่อยจ่ายเงิน ไร้กังวลเรื่องมัดจำค่ะ`,
+    convenience: `ครอบคลุมโรงแรมชั้นนำทั่วตัวเมืองหาดใหญ่ ย่านลีการ์เดนส์ ม.อ. และตัวเมืองสงขลา${zoneText} น้องๆ พร้อมเดินทางไปดูแล (Outcall) ถึงที่พักอย่างรวดเร็วและปลอดภัย`
+  },
+
+  suratthani: {
+    headline: `สาวรับงานสุราษฎร์-เกาะสมุย • ไซด์ไลน์สมุย เพื่อนเที่ยวฟิวแฟน ทริปทะเลส่วนตัว`,
+    intro: `เติมเต็มการพักผ่อนริมทะเลกับน้องๆ สาวรับงานสุราษฎร์ธานีและไซด์ไลน์เกาะสมุย คัดสาวสวยหุ่นดี ผิวพรรณดี อัธยาศัยดี พร้อมเป็นเพื่อนเที่ยว ดินเนอร์ริมหาด คาเฟ่ หรือดูแลใกล้ชิดสไตล์ฟิวแฟนในวิลล่าส่วนตัวอย่างอบอุ่นและให้เกียรติลูกค้า นัดเจอง่าย สบายใจ ตรวจสอบความตรงปกหน้างานแล้วค่อยชำระเงิน ปลอดภัย 100% ค่ะ`,
+    convenience: `บริการครอบคลุมทั้งตัวเมืองสุราษฎร์ธานี และรีสอร์ต/พูลวิลล่าทั่วเกาะสมุย (หาดเฉวง, ละไม, บ่อผุด)${zoneText} เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกและเป็นส่วนตัว`
+  }
+};
 
   LOCAL_CONTEXT["khon-kaen"] = LOCAL_CONTEXT.khonkaen;
   LOCAL_CONTEXT["chiang-mai"] = LOCAL_CONTEXT.chiangmai;
@@ -598,7 +632,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                   <h3 class="profile-card-name">น้อง${cleanName}</h3>
                   ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
               </div>
-              <div class="profile-card-bottom-row">
+             <div class="profile-card-bottom-row">
                   <span class="profile-card-location">
                       <i class="fas fa-map-marker-alt"></i> ${loc}
                   </span>
@@ -608,6 +642,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
       </article>
     </div>
   `;
+};
 
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
@@ -1119,36 +1154,53 @@ const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
 
   const totalRegionProfiles = activeProvsInRegion.reduce((sum, p) => sum + (provinceCounts[p.key] || 0), 0);
 
-  // 2. สร้างรายการของแต่ละจังหวัด
-  const provListHtml = activeProvsInRegion.map(p => {
-    const count = provinceCounts[p.key] || 0;
-    const zonesHtml = p.zones.map(z => {
-      if (z.includes("นิมมาน")) {
+ // 2. สร้างรายการของแต่ละจังหวัด
+    const provListHtml = activeProvsInRegion.map(p => {
+      const count = provinceCounts[p.key] || 0;
+
+      // 🟢 กรณีที่ 1: ถ้าเป็นหน้าแรก (isNational)
+      // กฎเหล็ก: "ห้ามมีย่านย่อยในหน้าแรกเด็ดขาด" ให้แสดงเฉพาะชื่อจังหวัด เพื่อตัดปัญหา Google ดึงย่านไปแปะใต้ Title ทั่วไทย!
+      if (isNational) {
         return `
-          <li style="padding-left: 10px;">
-            <a href="/nimman" style="color: #C084FC; text-decoration: none;">• ${escapeHTML(z)}</a>
+          <li style="margin-bottom: 6px;">
+            <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+              <span>• ${escapeHTML(p.name)}</span>
+              <span style="color: #7C3AED; font-size: 11px; font-weight: 800; background: rgba(124, 58, 237, 0.08); padding: 1px 8px; border-radius: 100px;">${count} คน</span>
+            </a>
           </li>
         `;
       }
+
+      // 🟢 กรณีที่ 2: ถ้าเป็นหน้าจังหวัด (!isNational)
+      // ให้มีย่านย่อยได้ แต่ "ห้ามชี้ไปที่ URL เดียวกัน" ต้องใส่ Parameter หรือเป็นหน้าเฉพาะ (?zone=...) 
+      const zonesHtml = p.zones.map(z => {
+        // ดึงเฉพาะคำสำคัญ เช่น เจ็ดยอด, หลัง มช.
+        const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
+        
+        // ถ้าเป็นนิมมานให้ไปหน้า /nimman นอกนั้นให้ส่งพารามิเตอร์ ?zone= เพื่อไม่ให้ซ้ำ URL เดิม
+        const zoneHref = z.includes("นิมมาน") 
+          ? "/nimman" 
+          : `/location/${p.key}?zone=${encodeURIComponent(cleanZ)}`;
+
+        return `
+          <li style="padding-left: 10px;">
+            <a href="${zoneHref}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+          </li>
+        `;
+      }).join("");
+
       return `
-        <li style="padding-left: 10px;">
-          <a href="/location/${p.key}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+        <li style="margin-bottom: 6px;">
+          <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">
+            ${escapeHTML(p.name)} (${count} คน)
+          </a>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${zonesHtml}
+          </ul>
         </li>
       `;
     }).join("");
-
-    return `
-      <li style="margin-bottom: 6px;">
-        <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 800;">
-          ${escapeHTML(p.name)} (${count} คน)
-        </a>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          ${zonesHtml}
-        </ul>
-      </li>
-    `;
-  }).join("");
-
+    
   // 3. ปิดคอลัมน์ของแต่ละภาค
   return `
     <div class="directory-region-col">
@@ -1199,18 +1251,38 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-  const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">ศูนย์รวมสาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน</span>` 
-  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • สาวรับงาน${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`;
+  // 🟢 1. H1 พลังทำเงินสูงสุด: เอาคีย์เวิร์ดอันดับ 1 (รับงาน + ไซด์ไลน์) ขึ้นนำหน้าทันที
+    const ssrH1Html = isNational 
+      ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน</span>` 
+      : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
-    const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) ? cleanZonesList.slice(0, 4).join(" ") : "ในตัวเมือง";
+    // 🟢 2. รายชื่อย่านธรรมชาติ (คั่นด้วยจุลภาค อ่านลื่นไหล ไม่ติดกันเป็นพืด)
+    const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
+      ? cleanZonesList.slice(0, 5).join(", ") 
+      : "ในตัวเมือง";
+
+    // 🟢 3. แถบปุ่มลัดย่านย่อย (Sub-zone Pills) ฝังดัก Sitelink Cards ให้ Google ดึงไปทำเป็นการ์ดใต้ผลค้นหา
+    let zonePillsHtml = "";
+    if (!isNational && cleanZonesList && cleanZonesList.length > 0) {
+      const pills = cleanZonesList.slice(0, 5).map(z => {
+        const cleanZ = escapeHTML(z);
+        const href = z.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(z)}`;
+        return `<a href="${href}" style="background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 4px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-block;">• ${cleanZ}</a>`;
+      }).join(" ");
+      zonePillsHtml = `<div class="hero-zones-quickbar" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">${pills}</div>`;
+    }
+
+    // 🟢 4. คำโปรยธรรมชาติสไตล์คนจริง (ลบ [จังหวัด] หลุด และตัดภาษา AI แปลอังกฤษทิ้ง 100%)
     const dynamicHeroDesc = isNational
-  ? `<p class="hero-subtitle-p">FirstModelHub แพลตฟอร์มสื่อกลางลงประกาศเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน (GFE) ทั่วไทย การันตีตัวจริงตรงปก ปลอดภัยด้วยนโยบายนัดพบและชำระเงินหน้างานโดยตรง ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี</p>`
-  : `<p class="hero-subtitle-p">คู่มือนัดหมายเพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน (GFE) ในจังหวัด${escapeHTML(provinceNameThai)} ครอบคลุมพิกัดยอดนิยม ${escapeHTML(currentZonesText)} การันตีตัวจริงตรงปก ปลอดภัยนัดพบจ่ายเงินหน้างาน ไม่มีมัดจำล่วงหน้าทุกกรณี</p>`;
+      ? `<p class="hero-subtitle-p">FirstModelHub ศูนย์รวมสาวรับงานและน้องๆ ไซด์ไลน์ทั่วไทย คัดเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน น่ารัก เอาใจเก่ง เทคแคร์ดุจคนรัก ปลอดภัยกว่าด้วยระบบนัดพบจ่ายหน้างาน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ</p>`
+      : `<p class="hero-subtitle-p">รวมน้องๆ สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} สไตล์ฟิวแฟนน่ารักๆ ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% สุภาพ เป็นกันเอง ไม่เร่งเวลา สบายใจ นัดเจอตัวจริงแล้วค่อยจ่ายเงินหน้างาน ไร้มัดจำค่ะ</p>${zonePillsHtml}`;
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
 
-    const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
+    // 🟢 5. H2 หัวข้อแนะนำที่น่าคลิกขึ้น
+    const ssrFeaturedH2 = isNational 
+      ? `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span> (จ่ายหน้างาน)`
+      : `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span> (ตัวจริงตรงปก)`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
     if (!isNational) {
@@ -1221,20 +1293,19 @@ const popularLocationsFooter = `
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
       finalHtml = finalHtml.replace(/<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id="seo-drawer-wrapper")/i, "");
       finalHtml = finalHtml.replace(/<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
-    } // ✅ ต้องมีปีกกาปิดตรงนี้ครับ
+    }
 
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
+    // 🟢 6. สตอรี่ด้านบน (ใส่ Alt Text ระบุชื่อ + จังหวัด เพื่อดันอันดับ Google Image Search)
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p, idx) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(p.slug || p.id);
       
-      // 🟢 แก้ปัญหาข้อ 1: ถ้ารูปพังหรือเป็นโลโก้ ให้ใช้ Cloudinary บังคับสัดส่วน 3:4 และเบลอภาพแทน ป้องกัน Layout Shift (CLS)
       let rawImg = p.imagePath || p.image_url || "";
       if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
-         // ใช้รูปภาพคนจริงๆ มาทำเป็นภาพเบลอ (Placeholder) สัดส่วนเป๊ะ
          rawImg = "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
       }
       const sImg = optimizeImg(rawImg, "thumb");
@@ -1243,7 +1314,7 @@ const popularLocationsFooter = `
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="ดูโปรไฟล์ น้อง${sName}">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-             <img src="${sImg}" alt="${sName}" loading="lazy" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+             <img src="${sImg}" alt="น้อง${sName} (${escapeHTML(provinceNameThai)})" loading="lazy" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             </div>
             <span class="story-status-dot online" aria-hidden="true"></span>
           </div>
@@ -1420,12 +1491,12 @@ const popularLocationsFooter = `
       }
     
 
-    // 1. สร้างลิงก์โปรไฟล์ทุกคนแบบ Raw HTML สำหรับ Googlebot
     const allProfilesList = isNational ? deduplicatedProfiles : profilesList;
     const directoryLinksHtml = (allProfilesList || []).map(p => {
       const pSlug = encodeURIComponent(p.slug || p.id);
       const pName = escapeHTML((p.name || "").replace(/^(น้อง\s?)+/gi, "").trim());
-      return `<a href="/sideline/${pSlug}" style="color: #64748B; font-size: 11px; text-decoration: none; display: inline-block; padding: 2px 6px; background: rgba(124, 58, 237, 0.05); border-radius: 4px;">น้อง${pName}</a>`;
+      const pProv = escapeHTML(p.provinceThai || PROVINCE_SEO_DATA[p.provinceKey]?.name || provinceNameThai);
+      return `<a href="/sideline/${pSlug}" style="color: #64748B; font-size: 11px; text-decoration: none; display: inline-block; padding: 2px 6px; background: rgba(124, 58, 237, 0.05); border-radius: 4px;">น้อง${pName} (${pProv})</a>`;
     }).join(" ");
 
     const botDirectorySectionHtml = `
@@ -1456,9 +1527,8 @@ const popularLocationsFooter = `
       }
       const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
 
-      // 🟢 1. สกัดข้อความขยะรูปกระต่าย และข้อความสแปมก๊อปวางทิ้งทันที
-      let cleanDesc = sanitizeThaiText(p.description || "").trim();
-      const isSpamText = /เรทราคา|ไม่รวมห้อง|•ㅅ•|づ♡|รายละเอียดค่ะ/i.test(cleanDesc) || cleanDesc.length < 8;
+     let cleanDesc = sanitizeThaiText(p.description || "").trim();
+      const isSpamText = /เรทราคา|ไม่รวมห้อง|•ㅅ•|づ♡|รายละเอียดค่ะ|ค่ารถคิดราคา|ตรงปก%|1,500\/\s*1|1500\/1/i.test(cleanDesc) || cleanDesc.length < 12;
 
       if (isSpamText) {
         // ✅ ถ้าเจอข้อความก๊อปปี้ ให้เปลี่ยนเป็นคำบรรยาย SEO เฉพาะบุคคล (ไม่ซ้ำกันเด็ดขาด)

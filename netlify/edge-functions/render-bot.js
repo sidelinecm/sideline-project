@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261020_prod`; // 👈 เปลี่ยนให้ตรงกัน
+let GLOBAL_PROFILE_VERSION = `v_20261011_prod`; // 👈 เปลี่ยนให้ตรงกัน
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -183,11 +183,8 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 REPLACEMENT: ระบบสุ่มคำบรรยายต้านทาน Google Core Update (ต้าน Thin Content 100%)
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  // สร้าง Hash แบบละเอียดเพื่อใช้สุ่มแยกชิ้นส่วน
   const hash = String(p.slug || p.id || displayName).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  
   const hNum = parseInt(height, 10) || 160;
   const wNum = parseInt(weight, 10) || 48;
   const rawTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
@@ -198,49 +195,49 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
   else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en")) persona = "party";
   else if (rawTags.includes("อวบ") || wNum >= 54) persona = "curvy";
 
-  // คลังคำศัพท์ (Spintax Matrix)
+  // 🟢 คลังคำสไตล์คนจริง: อบอุ่น เป็นกันเอง ชวนเดต ไม่ประดิษฐ์คำแปลกๆ
   const matrix = {
     petite: {
-      greetings: [`พบกับ ${displayName}`, `ขอแนะนำ ${displayName}`, `ทำความรู้จักกับ ${displayName}`],
-      highlights: [`เพื่อนเที่ยวไซส์มินิสุดน่ารัก`, `สาวสวยตัวเล็กสเปคยอดฮิต`, `สาวน้อยวัยใสขี้อ้อน`],
-      actions: [`พร้อมเอาใจใส่ดูแลดุจแฟนคนพิเศษ`, `ชวนคุยสนุก คลายเหงาได้ดีเยี่ยม`, `เทคแคร์เป็นกันเอง ไม่มีความเกร็ง`]
+      vibes: ["สาวสวยตัวเล็ก สเปกน่ารักสดใส", "น้องวัยใส ไซส์มินิ ขี้อ้อนเอาใจเก่ง", "สาวน้อยน่าทะนุถนอม ยิ้มหวานเป็นกันเอง"],
+      cares: ["เน้นดูแลฟิวแฟนแท้ๆ เทคแคร์อบอุ่นเหมือนไปเดต", "คุยสนุก คลายเหงา อยู่ด้วยแล้วสบายใจไม่อึดอัด", "เอาใจใส่ทุกรายละเอียด ไม่เร่งเวลา"]
     },
     model: {
-      greetings: [`ยกระดับการพักผ่อนกับ ${displayName}`, `สัมผัสประสบการณ์เหนือระดับกับ ${displayName}`, `ขอแนะนำ ${displayName}`],
-      highlights: [`สาวสวยหุ่นนางแบบสุดพรีเมียม`, `เพื่อนเที่ยวบุคลิกสง่างาม`, `สาวสวยโปรไฟล์ VIP`],
-      actions: [`เหมาะสำหรับควงคู่ดินเนอร์หรูและออกงาน`, `ดูแลท่านอย่างเอ็กซ์คลูซีฟและให้เกียรติ`, `สร้างความประทับใจในทุกช่วงเวลา`]
+      vibes: ["สาวสวยหุ่นนางแบบ บุคลิกดี โปรไฟล์พรีเมียม", "สาวสวยลุคคุณหนู หุ่นเพรียว มีเสน่ห์สะกดสายตา", "เพื่อนเที่ยวระดับ VIP ควงออกงานได้ไม่อายใคร"],
+      cares: ["พร้อมเป็นเพื่อนทานข้าว ดินเนอร์ ออกงานสังคมอย่างมั่นใจ", "วางตัวดี สุภาพ ให้เกียรติและดูแลอย่างเอ็กซ์คลูซีฟ", "สร้างช่วงเวลาพักผ่อนสุดพิเศษและน่าประทับใจ"]
     },
     party: {
-      greetings: [`สายปาร์ตี้ต้องไม่พลาด ${displayName}`, `มองหาคนรู้ใจไปนั่งดื่ม ขอแนะนำ ${displayName}`, `เพิ่มความสนุกด้วย ${displayName}`],
-      highlights: [`เด็กเอ็น (EN) สายชงตัวท็อป`, `เพื่อนเที่ยวสายปาร์ตี้อารมณ์ดี`, `เอ็นเตอร์เทนเนอร์สุดฮอต`],
-      actions: [`ชงเหล้าเก่ง ละลายพฤติกรรมเยี่ยม`, `สร้างรอยยิ้มและบรรยากาศสนุกสนาน`, `ดูแลเพื่อนดื่มอย่างมืออาชีพ`]
+      vibes: ["เด็กเอ็น (EN) ตัวท็อป สายปาร์ตี้ เฟรนด์ลี่คุยสนุก", "เพื่อนเที่ยวสายบันเทิง ร่าเริง ชงเหล้าเก่ง", "สายเอ็นเตอร์เทนน่ารัก ยิ้มเก่ง ละลายพฤติกรรมเยี่ยม"],
+      cares: ["สร้างบรรยากาศปาร์ตี้ให้สนุกสนาน ไม่ปล่อยให้เหงา", "ดูแลเพื่อนดื่มอย่างรู้ใจ เอนเตอร์เทนเป็นธรรมชาติ", "พร้อมร่วมทริปสังสรรค์ นั่งชิลร้านโปรด"]
     },
     curvy: {
-      greetings: [`สัมผัสความนุ่มนวลกับ ${displayName}`, `เติมความอบอุ่นกับ ${displayName}`, `ขอแนะนำ ${displayName}`],
-      highlights: [`สาวสวยหุ่นอวบอิ่มมีน้ำมีนวล`, `สเปคสาวทรงโตน่ากอด`, `เพื่อนเที่ยวสรีระเย้ายวน`],
-      actions: [`ดูแลใกล้ชิด เอาใจใส่ทุกรายละเอียด`, `เทคแคร์สุภาพ อ่อนโยน ผ่อนคลายแท้จริง`, `คุยเก่ง ดูแลเป็นธรรมชาติ`]
+      vibes: ["สาวสวยหุ่นอวบอิ่ม สเปกสาวทรงโต ผิวพรรณดี", "สาวสวยมีน้ำมีนวล กอดอุ่น นุ่มนวลน่าหลงใหล", "เพื่อนเที่ยวหุ่นเย้ายวน น่ารัก ขี้เล่นเป็นกันเอง"],
+      cares: ["เทคแคร์ใกล้ชิด ดูแลอ่อนโยน ผ่อนคลายตั้งแต่แรกพบ", "คุยเก่ง เอาใจเก่ง ให้ความรู้สึกเป็นกันเองดุจคนรัก", "ไม่เร่งรีบ ดูแลเต็มที่ด้วยความจริงใจ"]
     },
     gfe: {
-      greetings: [`สัมผัสการดูแลอบอุ่นกับ ${displayName}`, `หากต้องการเพื่อนรู้ใจ ขอแนะนำ ${displayName}`, `ให้ ${displayName} ดูแลคุณ`],
-      highlights: [`เพื่อนเที่ยวสไตล์ Girlfriend Experience`, `สาวสวยอัธยาศัยดีสไตล์ฟิวแฟน`, `คนดูแลส่วนตัวสุดน่ารัก`],
-      actions: [`ให้เกียรติและเทคแคร์ดุจคนรัก`, `พร้อมเป็นเพื่อนทานข้าว ดูหนัง อย่างเป็นธรรมชาติ`, `ดูแลด้วยความจริงใจ สุภาพ ไม่เร่งรีบ`]
+      vibes: ["เพื่อนเที่ยวสไตล์แฟนสาวตัวจริง สุภาพ น่ารัก อบอุ่น", "สาวสวยอัธยาศัยดี ฟิวแฟนแท้ๆ เทคแคร์ดุจคนพิเศษ", "คนรู้ใจร่วมทริป ดูแลเอาใจใส่เป็นธรรมชาติ"],
+      cares: ["พร้อมเป็นเพื่อนทานข้าว ดูหนัง คาเฟ่ หรือพักผ่อนส่วนตัว", "ดูแลดุจคนรัก สุภาพ ให้เกียรติ ไม่เร่งเวลาแน่นอน", "สร้างความผ่อนคลายและรอยยิ้มตลอดการนัดหมาย"]
     }
   };
 
-  const getSpintax = (arr, offset) => arr[(hash + offset) % arr.length];
-  const pData = matrix[persona] || matrix["gfe"];
+  const getSp = (arr, off) => arr[(hash + off) % arr.length];
+  const pData = matrix[persona] || matrix.gfe;
+  const v = getSp(pData.vibes, 1);
+  const c = getSp(pData.cares, 2);
 
-  const greeting = getSpintax(pData.greetings, 1);
-  const highlight = getSpintax(pData.highlights, 2);
-  const action = getSpintax(pData.actions, 3);
-  const safetyNote = "ยืนยันนัดพบอย่างปลอดภัย ชำระค่าบริการหน้างาน 100% ไร้กังวลเรื่องมัดจำ";
-  
-  let customBio = "";
-  if (p.description && p.description.trim().length > 10 && !/เรทราคา|ไม่มีมัดจำ|1500\/1/i.test(p.description)) {
-    customBio = ` เธอบอกว่า: "${sanitizeThaiText(p.description)}"`;
+  const cleanLoc = (zone || "ในตัวเมือง").replace(/^ย่าน/g, "");
+  let bioPart = "";
+  if (p.description && p.description.trim().length > 6 && !/เรทราคา|มัดจำ|1500\/1|•ㅅ•/i.test(p.description)) {
+    bioPart = ` เธอบอกว่า: "${sanitizeThaiText(p.description)}"`;
   }
 
-  return `${greeting} ${highlight} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${action}${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+  // สลับ 3 โครงสร้างประโยคแบบธรรมชาติ (ไม่ใช้คำว่า "ปัจจุบันอายุ" หรือ "สแตนด์บายพร้อมดูแล")
+  const patterns = [
+    `${displayName} (${v}) นัดพบในโซน ${cleanLoc} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${c}${bioPart} เรทเริ่มต้น ${priceDisplay} นัดเจอจ่ายหน้างานตัวจริง ไม่ต้องโอนมัดจำล่วงหน้าค่ะ`,
+    `หากคุณกำลังมองหา${v} แนะนำ ${displayName} โซน${cleanLoc} (${provinceName}) วัย ${age} ปี รูปร่าง ${stats} สูง ${height} ซม. ${c}${bioPart} ค่าบริการเริ่มต้น ${priceDisplay} จ่ายตรงกับน้องหน้างาน ปลอดภัย มั่นใจตรงปก 100%`,
+    `${displayName} สาวสวยโซน ${cleanLoc} จ.${provinceName} อายุ ${age} ปี หุ่น ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${v} ${c}${bioPart} เรทเพียง ${priceDisplay} เจอตัวจริงเช็คความตรงปกก่อนค่อยจ่ายเงิน ไม่มีความเสี่ยงเรื่องมัดจำค่ะ`
+  ];
+
+  return patterns[(hash + 3) % patterns.length];
 }
     
 
@@ -397,8 +394,7 @@ if (provinceKey) {
     // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    // ✅ ตัดคำว่า "รับงาน / ไซด์ไลน์" ออก ปล่อยให้หน้าจังหวัดครองอันดับคำนี้ไปคนเดียว
-    const cleanHeading = `${displayName} (${escapeHTML(primaryZone)}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`; 
+    const cleanHeading = `${displayName} (${primaryZone}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`;
     const pageTitle = `${cleanHeading} - ${provinceNameThai} | ${CONFIG.BRAND_NAME}`;
    
     // 🟢 Meta คำบรรยายใต้ลิงก์ Google: โฟกัสฟิวแฟนและพิกัดย่าน ไม่ยัดคำซ้ำ
@@ -497,54 +493,63 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
 <head>
+    <!-- 1. Technical & Rendering Directives (ต้องอยู่อันดับแรกสุด) -->
     <meta charset="utf-8">
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#F6F3FA">
     <meta name="color-scheme" content="light">
+    <meta name="format-detection" content="telephone=no">
 
- <title>${escapeHTML(pageTitle)}</title>
+    <!-- 2. Primary Meta & SEO Discovery -->
+    <title>${escapeHTML(pageTitle)}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
-
     ${robotsTag}
-
     <link rel="canonical" href="${canonicalUrl}">
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
 
+    <!-- 3. Network Handshakes (เปิดท่อเชื่อมต่อ CDN ล่วงหน้าทันที) -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+
+    <!-- 4. Critical Asset Preloads (ดึงฟอนต์และรูป LCP เข้ามาก่อน เพื่อคะแนน Core Web Vitals) -->
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    ${heroSrcSet 
+      ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">`
+      : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
+    }
+
+    <!-- 5. Render-Blocking Stylesheet -->
+    <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
+
+    <!-- 6. Icons & Manifest -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+
+    <!-- 7. OpenGraph / LINE / Facebook Sharing -->
     <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="${escapeHTML(pageTitle)}">
     <meta property="og:description" content="${escapeHTML(metaDescription)}">
     <meta property="og:url" content="${canonicalUrl}">
-    
     <meta property="og:image" content="${ogImageSocial}">
     <meta property="og:image:secure_url" content="${ogImageSocial}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
+    <!-- 8. Twitter (X) Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${ogImageSocial}">
     <meta name="twitter:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="dns-prefetch" href="https://res.cloudinary.com">
-
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-
-    <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
-  
-    <link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">
-
+    <!-- 9. Structured Data (JSON-LD) สำหรับ Rich Results & AI Overview -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 </head>
 
@@ -624,21 +629,20 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </header>
 
-                <!-- 🟢 เติมแท็กเปิด Grid 2 คอลัมน์ตรงนี้ -->
+               <!-- 🟢 1. สเปกพื้นฐาน 4 ช่อง (สัดส่วน / ส่วนสูง / อายุ / พิกัด) -->
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-                        
-    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
-    <strong style="color: #140F22; font-weight: 800;">${escapeHTML(stats)}</strong>
-</div>
-<div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">ส่วนสูง / น้ำหนัก</span>
-    <strong style="color: #140F22; font-weight: 800;">${heightDisplay} / ${weightDisplay}</strong>
-</div>
-<div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-    <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
-    <strong style="color: #140F22; font-weight: 800;">${ageDisplay}</strong>
-</div>
+                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
+                        <strong style="color: #140F22; font-weight: 800;">${escapeHTML(stats)}</strong>
+                    </div>
+                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">ส่วนสูง / น้ำหนัก</span>
+                        <strong style="color: #140F22; font-weight: 800;">${heightDisplay} / ${weightDisplay}</strong>
+                    </div>
+                    <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
+                        <strong style="color: #140F22; font-weight: 800;">${ageDisplay}</strong>
+                    </div>
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
                         <a href="${provinceHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(provinceNameThai)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
@@ -648,121 +652,121 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </div>
 
-                <!-- 🟢 2. กล่องเนื้อหาบรรยาย (แก้ปัญหา Thin Content & สอดคล้องกับ Schema JSON-LD) -->
-            <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
-                ${escapeHTML(naturalDesc)}
-            </div>
-
-            <!-- 🟢 3. ปุ่มติดต่อ LINE CTA + ปุ่มแชร์โปรไฟล์แบบมินิมอล -->
-            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; width: 100%;">
-                <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
-                    <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
-                </a>
-
-                <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-                    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-                </button>
-            </div>
-
-            <section style="margin-bottom: 1.5rem; background: #FFFFFF; border-radius: 16px; padding: 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
-                <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">1 ชม.</div>
-                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${rateNumber.toLocaleString()}.-</strong>
+                <!-- 🟢 2. [ย้ายขึ้นมาตรงนี้] ตารางอัตราค่าบริการ (เห็นสเปกปุ๊บ เห็นราคาทันที ชนะ NavBoost 100%) -->
+                <section style="margin-bottom: 1.25rem; background: #FFFFFF; border-radius: 16px; padding: 14px 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
+                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+                            <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
+                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${rateNumber.toLocaleString()}.-</strong>
+                        </div>
+                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+                            <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชม.</div>
+                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 1.8).toLocaleString()}.-</strong>
+                        </div>
+                        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+                            <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน</div>
+                            <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 4.5).toLocaleString()}.-</strong>
+                        </div>
                     </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">2 ชม.</div>
-                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 1.8).toLocaleString()}.-</strong>
-                    </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 12px 6px; border-radius: 12px;">
-                        <div style="color: #64748B; font-size: 12px; font-weight: 800; margin-bottom: 4px;">ค้างคืน</div>
-                        <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNumber * 4.5).toLocaleString()}.-</strong>
-                    </div>
+                </section>
+
+                <!-- 🟢 3. [ย้ายมาต่อจากราคา] ปุ่มติดต่อ LINE CTA + ปุ่มแชร์ (เห็นราคาแล้วกดแอดไลน์ได้ทันที) -->
+                <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; width: 100%;">
+                    <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
+                        <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
+                    </a>
+
+                    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+                    </button>
                 </div>
-            </section>
 
-            <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
-    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
-    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
-        <div><strong style="color: #7C3AED;">สไตล์การดูแล:</strong> ${Array.isArray(profile.styleTags) && profile.styleTags.length > 0 ? profile.styleTags.map(t => `#${escapeHTML(t)}`).join(" ") : "#ฟิวแฟน #เทคแคร์ดี #ตรงปก"}</div>
-        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(provinceNameThai)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
-        <div><strong style="color: #7C3AED;">ความประทับใจส่วนตัว:</strong> "${escapeHTML(profile.description || profile.slogan || profile.quote || "ฟิวแฟน อบอุ่น สุภาพ ไม่เร่งงาน ตัวจริงตรงปก 100%")}"</div>
+                <!-- 🟢 4. กล่องเนื้อหาบรรยายเฉพาะตัว (แก้ปัญหา Thin Content ผ่าน Spintax) -->
+                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
+                    ${escapeHTML(naturalDesc)}
+                </div>
+
+                <!-- 🟢 5. ข้อมูลและลักษณะเด่นเฉพาะตัว -->
+                <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
+                    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
+                        <div><strong style="color: #7C3AED;">สไตล์การดูแล:</strong> ${Array.isArray(profile.styleTags) && profile.styleTags.length > 0 ? profile.styleTags.map(t => `#${escapeHTML(t)}`).join(" ") : "#ฟิวแฟน #เทคแคร์ดี #ตรงปก"}</div>
+                        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(provinceNameThai)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
+                        <div><strong style="color: #7C3AED;">ความประทับใจส่วนตัว:</strong> "${escapeHTML(profile.description || profile.slogan || profile.quote || "ฟิวแฟน อบอุ่น สุภาพ ไม่เร่งงาน ตัวจริงตรงปก 100%")}"</div>
+                    </div>
+                </section>
+
+                ${relatedProfiles.length > 0 ? `
+                <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
+                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                        ${relatedProfiles.map(p => {
+                          const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
+                          const relImg = p.imagePath || p.image_url || "";
+                          return `
+                            <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                                <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
+                                <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
+                            </a>
+                          `;
+                        }).join("")}
+                    </div>
+                    <div style="text-align: center;">
+                        <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
+                    </div>
+                </section>
+                ` : ""}
+
+                <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
+                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
+                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
+                        <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
+                        <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
+                        <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
+                    </div>
+                    <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
+                </section>
+            </article>
+        </main>
+        
+        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #64748B; font-size: 11px;">
+            <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
+                <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
+                <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
+                <a href="/locations" style="color: #475569; text-decoration: none; font-weight: 600;">พื้นที่บริการ</a>
+            </div>
+            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+        </footer>
     </div>
-</section>
-            <!-- ตัดส่วนรีวิวที่ซ้ำซ้อนออก เพื่อป้องกัน Google ตรวจจับว่าเป็นรีวิวที่สร้างขึ้นอัตโนมัติ (Fake Review) -->
-            
-            ${relatedProfiles.length > 0 ? `
-            <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
-                <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-                    ${relatedProfiles.map(p => {
-                      const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
-                      const relImg = p.imagePath || p.image_url || "";
-                      return `
-                        <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                            <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
-                            <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
-                        </a>
-                      `;
-                    }).join("")}
-                </div>
-                <div style="text-align: center;">
-                    <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
-                </div>
-            </section>
-            ` : ""}
+       
+    <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
-            <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
-                <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
-                <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
-                    <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-                    <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
-                    <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
-                </div>
-                <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
-            </section>
-        </article>
-    </main>
-    
-    <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #64748B; font-size: 11px;">
-        <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
-            <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
-            <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
-            <a href="/locations" style="color: #475569; text-decoration: none; font-weight: 600;">พื้นที่บริการ</a>
-        </div>
-        © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
-    </footer>
-</div>
-   
-<script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
+    <!-- Sticky Bottom CTA (แถบติดล่างสุดของจอมือถือ) -->
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 9999; display: flex; gap: 10px; align-items: center;">
+        <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+            <i class="fab fa-line" style="font-size: 22px;"></i> จองคิวน้อง${escapeHTML(displayName.replace("น้อง",""))}
+        </a>
+        <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}" style="width: 50px; height: 50px; border-radius: 100px; background: #FFF; border: 1.5px solid #7C3AED; color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+            <i class="fas fa-share-alt" style="font-size: 18px;"></i>
+        </button>
+    </div>
 
-<!-- Sticky Bottom CTA -->
-<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 9999; display: flex; gap: 10px; align-items: center;">
-    <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
-        <i class="fab fa-line" style="font-size: 22px;"></i> จองคิวน้อง${escapeHTML(displayName.replace("น้อง",""))}
-    </a>
-    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}" style="width: 50px; height: 50px; border-radius: 100px; background: #FFF; border: 1.5px solid #7C3AED; color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-        <i class="fas fa-share-alt" style="font-size: 18px;"></i>
-    </button>
-</div>
+    </body>
+    </html>`;
 
-</body>
-</html>`;
-
-  
-const responseHeaders = {
-  "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
-  "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
-  "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "X-XSS-Protection": "1; mode=block",
-  "Referrer-Policy": "strict-origin-when-cross-origin"
-};
+    const responseHeaders = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    };
 
     setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
     return new Response(htmlResponse, { headers: responseHeaders });
@@ -772,3 +776,4 @@ const responseHeaders = {
     return context.next();
   }
 };
+  
