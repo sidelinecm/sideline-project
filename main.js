@@ -1008,22 +1008,12 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           const gridEl = sectionEl.querySelector(".profile-grid");
           await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
         }
-  } else {
+      } else {
         domCache.profilesDisplayArea.innerHTML = "";
-        if (domCache.noResultsMessage) {
-          if (!domCache.noResultsMessage.hasChildNodes()) {
-            const tmpl = document.getElementById("no-results-template");
-            if (tmpl) domCache.noResultsMessage.appendChild(tmpl.content.cloneNode(true));
-          }
-          domCache.noResultsMessage.style.display = "block";
-          domCache.noResultsMessage.classList.remove("hidden");
-        }
+        domCache.noResultsMessage?.classList.remove("hidden");
       }
     }
   }
-
- 
-
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
@@ -1270,6 +1260,15 @@ const line2 = isAllOrNational
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
    const richAltText = `${modelName} (${p.provinceNameThai || 'เชียงใหม่'})`;
 
+    // 🟢 REPLACEMENT: ล็อกขนาด Aspect Ratio ให้การ์ดและรูปภาพ ป้องกัน CLS (หน้ากระตุก) 100%
+    const article = document.createElement("article");
+    article.className = "profile-card-new interactive-card";
+    article.setAttribute("data-profile-id", p.id);
+    article.setAttribute("data-profile-slug", p.slug || p.id);
+    article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; // 👈 เพิ่มบรรทัดนี้
+
+    // ... (ส่วนโค้ดเช็คชื่อ/รูปภาพ/สเปกต่างๆ ปล่อยไว้เหมือนเดิม) ...
+
     // 🟢 3. ประกอบการ์ด HTML
     article.innerHTML = `
       <img src="${imgSrc}" 
@@ -1277,6 +1276,7 @@ const line2 = isAllOrNational
            width="400" 
            height="560" 
            class="profile-card-img" 
+           style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;" 
            loading="${index < 4 ? "eager" : "lazy"}" 
            fetchpriority="${index === 0 ? "high" : "auto"}" 
            decoding="async" 
@@ -2455,9 +2455,10 @@ if (isStandaloneProfile) {
           // 3. กรอง ID ซ้ำ
           if (raw.id && seenIds.has(String(raw.id))) continue;
 
+          // 4. กรองชื่อซ้ำในจังหวัดเดียวกัน
           const pKey = (raw.provinceKey || raw.province_slug || "").toLowerCase();
-const nameSig = `${cleanName}_${pKey}_${raw.age || ""}_${raw.rate || ""}`;
-if (seenNames.has(nameSig)) continue;
+          const nameSig = `${cleanName}_${pKey}`;
+          if (seenNames.has(nameSig)) continue;
 
           // 5. สร้างลายเซ็นรูปภาพเพื่อเช็ครูปซ้ำ
           let imgSig = "";
@@ -2520,16 +2521,9 @@ if (seenNames.has(nameSig)) continue;
         }
 
         return false;
-     } catch (fetchErr) {
+      } catch (fetchErr) {
         console.error("Data Fetch Error:", fetchErr);
-        if (domCache.fetchErrorMessage) {
-          if (!domCache.fetchErrorMessage.hasChildNodes()) {
-            const tmpl = document.getElementById("fetch-error-template");
-            if (tmpl) domCache.fetchErrorMessage.appendChild(tmpl.content.cloneNode(true));
-          }
-          domCache.fetchErrorMessage.style.display = "block";
-          domCache.fetchErrorMessage.classList.remove("hidden");
-        }
+        domCache.fetchErrorMessage?.classList.remove("hidden");
         return false;
       } finally {
         appState.isFetching = false;
