@@ -3698,3 +3698,140 @@ body, body.fmh-app-page {
 #lightboxSafetySection strong {
   color: #065F46 !important;
 }
+
+/* ==========================================================================
+   💎 PEARL GLASSMORPHISM UI - ULTIMATE LUXURY OVERRIDE (2026)
+   - อัปเกรดหน้าตาเว็บขั้นสุด โดยไม่ต้องแก้ HTML/JS เดิม
+   ========================================================================== */
+
+
+/* 2. กรอบเนื้อหาหลัก (Hero, Bento) ให้เป็นกระจกใสกริ๊ง */
+.hero-section, .celestial-hero-box, .luxury-bento-wrapper,
+#reviews-wrapper-block, #faq-wrapper-block, .editorial-digest-card {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 20px 50px rgba(15, 10, 26, 0.08), inset 0 1px 1px rgba(255,255,255,1) !important;
+}
+
+/* 3. ปลดล็อกรูปโปรไฟล์ ให้เป็น EDGE-TO-EDGE (รูปเต็มขอบ ไร้กรอบขาว) */
+.profile-card-new, .vip-card-item {
+  background: #140F22 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(124, 58, 237, 0.1) !important;
+  border-radius: 24px !important; /* มนขึ้น ดูแพงขึ้น */
+}
+.profile-card-new:hover, .vip-card-item:hover {
+  transform: translateY(-5px) scale(1.03) !important;
+  box-shadow: 0 25px 45px rgba(225, 29, 72, 0.25), 0 10px 20px rgba(124, 58, 237, 0.2) !important;
+  border-color: rgba(225, 29, 72, 0.4) !important;
+}
+
+/* เพิ่มแอนิเมชันซูมรูปช้าๆ เวลามอง */
+.profile-card-img, .vip-card-item img {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+.profile-card-new:hover .profile-card-img, .vip-card-item:hover img {
+  transform: scale(1.08) !important;
+}
+
+/* ดันเงาดำขึ้นมาให้ตัวหนังสือลอยเด่น */
+.profile-card-gradient-overlay, .vip-card-overlay {
+  background: linear-gradient(to top, rgba(10, 6, 20, 0.95) 0%, rgba(10, 6, 20, 0.6) 35%, transparent 70%) !important;
+}
+
+/* 4. เสกป้ายสถานะ (รับงาน/HOT) ให้เป็นกระจกฝ้า (Glassmorphism) */
+.badge-status {
+  background: rgba(20, 15, 30, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #10B981 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+.badge-status .status-dot {
+  box-shadow: 0 0 8px #10B981 !important;
+  animation: pulseGreen 2s infinite ease-out !important;
+}
+.badge-hot-tag {
+  background: rgba(225, 29, 72, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4) !important;
+}
+.badge-verified-top {
+  background: rgba(124, 58, 237, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 5. เปลี่ยนตัวหนังสือและป้ายข้อมูลบนรูป ให้อ่านง่ายและหรูหรา */
+.profile-card-info-content {
+  background: transparent !important; /* ลบพื้นหลังทึบที่ติดมา */
+  border: none !important;
+  padding: 16px 14px !important;
+}
+
+.profile-card-name {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important; /* ลบสีรุ้งออก ให้ดูแพงแบบคลาสสิก */
+  background: none !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9) !important;
+  letter-spacing: 0.5px !important;
+}
+
+.profile-card-location {
+  color: #E2E8F0 !important;
+  font-size: 11.5px !important;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.9) !important;
+}
+
+.card-vibe-pill {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #FFFFFF !important;
+  font-size: 10px !important;
+  padding: 3px 8px !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
+}
+
+.profile-card-age-tag {
+  background: rgba(15, 10, 26, 0.6) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ราคาเป็นป้ายเขียวมรกต ลอยเด่น */
+.profile-card-price {
+  background: rgba(16, 185, 129, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(16, 185, 129, 0.6) !important;
+  color: #34D399 !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  padding: 4px 10px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* 6. อัปเกรด Bottom App Dock (เมนูล่างมือถือ) ให้เป็นกระจก Apple Style */
+@media (max-width: 768px) {
+  .floating-app-dock {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(35px) !important;
+    -webkit-backdrop-filter: blur(35px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 -10px 40px rgba(15, 10, 26, 0.15), inset 0 1px 1px rgba(255,255,255,0.8) !important;
+    padding: 0 6px !important;
+    height: 66px !important;
+  }
+  nav.floating-app-dock a.dock-item.dock-item-line {
+    background: linear-gradient(135deg, #06C755 0%, #00A300 100%) !important;
+    box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4), inset 0 1px 1px rgba(255,255,255,0.4) !important;
+    height: 50px !important;
+  }
+}
