@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
 // ✅ กำหนดเวอร์ชันให้คงที่ตามรอบวัน บอทกูเกิลจะเก็บแคชได้เร็ว ไม่เสีย Crawl Budget
-let GLOBAL_VERSION = `v_20261010_prod`;
+let GLOBAL_VERSION = `v_20261020_prod`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -321,16 +321,20 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
       return `<a href="/nimman" class="kw-zone" title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
     }
 
-    // 2. 🔒 ถ้าเป็นหน้าทั่วไทย ให้ทำลิงก์เฉพาะจังหวัดที่ "เปิดบริการจริงและมีน้อง" เท่านั้น
-    if (isNation && PROV_SLUG_MAP[cleanZ]) {
+    // 2. 🔒 ถ้าเป็นหน้า "ทั่วไทย"
+    if (isNation) {
       const targetSlug = PROV_SLUG_MAP[cleanZ];
-      if (ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
+      if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
+        // จังหวัดที่มีน้อง ให้เปิดลิงก์ไปหน้าจังหวัด
         return `<a href="/location/${targetSlug}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+      } else {
+        // จังหวัดที่ยังไม่มีน้อง (เช่น กรุงเทพ) ให้ปิดลิงก์ไว้ ป้องกัน 404
+        return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
       }
     }
 
-    // 3. 🛡️ จังหวัดที่ยังไม่มีน้อง (เช่น กรุงเทพฯ, ชลบุรี, พัทยา) ให้แสดงเป็นข้อความ <span> ธรรมดา (ไม่ครอบลิงก์ ป้องกัน 404 ทันที 100%)
-    return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
+    // 3. 🟢 REPLACEMENT (กฎข้อ 3): ถ้าอยู่ในหน้าจังหวัดแล้ว ให้เปลี่ยน <span> ของย่านต่างๆ เป็นแท็ก <a> เพื่อให้บอทเดินทะลุเก็บคีย์เวิร์ดย่อยได้ (Micro-Location Silo)
+    return `<a href="/location/${cleanSlug}?zone=${encodeURIComponent(cleanZ)}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
   }).filter(Boolean);
 
   const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
@@ -556,19 +560,17 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
     : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
 
-  // 🟢 ประกาศตัวแปรก่อน return เข้า HTML (ถูกต้อง 100%)
-  const uniqueCardName = (loc && loc !== provinceName) ? `น้อง${cleanName} (${loc})` : `น้อง${cleanName}`;
-
   return `
     <div class="profile-card-new-container">
-      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
+      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}" style="aspect-ratio: 3/4.2; display: flex; flex-direction: column;">
        <img src="${cardImg}" 
               alt="${generateNaturalAlt(cleanName, provinceName, loc, index)}"
               width="400"
               height="560"
               class="profile-card-img"
-              loading="${index === 0 ? "eager" : "lazy"}"
-              fetchpriority="${index === 0 ? "high" : "low"}"
+              style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;"
+              loading="${isPriorityLCP ? "eager" : "lazy"}"
+              fetchpriority="${isPriorityLCP ? "high" : "auto"}"
               decoding="async"
               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
@@ -593,7 +595,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                   ${vibeTagsHtml}
               </div>
               <div class="profile-card-title-row">
-                  <h3 class="profile-card-name">${uniqueCardName}</h3>
+                  <h3 class="profile-card-name">น้อง${cleanName}</h3>
                   ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
               </div>
               <div class="profile-card-bottom-row">
@@ -606,7 +608,6 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
       </article>
     </div>
   `;
-};
 
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
@@ -898,8 +899,8 @@ export default async (req, context) => {
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-  // ดึงเวลาอัปเดตล่าสุดของโปรไฟล์คนแรกในจังหวัดนั้น ถ้าไม่มีให้ใช้วันที่ Deploy ประจำรอบ
-"dateModified": profilesList[0]?.updated_at || profilesList[0]?.created_at || "2026-10-12T00:00:00+07:00",
+     // ✅ ส่งเวลาปัจจุบัน (ISO String) สดใหม่ตลอดเวลาที่บอทเข้ามา Crawl
+"dateModified": new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       // ✅ ระบุพื้นที่ที่เกี่ยวข้องเป็น Entity พื้นที่จริง ไม่แอบอ้างเป็นหน้าร้าน
       "about": isNational
@@ -989,14 +990,15 @@ export default async (req, context) => {
       });
     }
 
+    // 🟢 4. ItemList Carousel รายชื่อน้องๆ (Google Carousel Rich Results สะอาด ถูกต้อง 100%)
     if (profilesList.length > 0) {
-  const carouselProfiles = profilesList.slice(0, 12);
-  schemaGraph.push({
-    "@type": "ItemList",
-    "@id": `${canonicalUrl}#itemlist`,
-    "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}`,
-    "numberOfItems": profilesList.length, // ✅ ระบุยอดจริงตามที่แสดงบนหน้าเว็บ (เช่น 61)
-    "itemListElement": carouselProfiles.map((p, idx) => ({
+      const carouselProfiles = profilesList.slice(0, 12);
+      schemaGraph.push({
+        "@type": "ItemList",
+        "@id": `${canonicalUrl}#itemlist`,
+        "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}`,
+        "numberOfItems": carouselProfiles.length,
+        "itemListElement": carouselProfiles.map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
           "item": {
@@ -1288,11 +1290,13 @@ const popularLocationsFooter = `
       const slug = encodeURIComponent(p.slug || p.id);
       const img = optimizeImg(p.imagePath || p.image_url || "", 400, 560);
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
+      const imgLoading = i === 0 ? "eager" : "lazy";
+      const imgPriority = i === 0 ? "high" : "auto";
       return `
         <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
           <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${provinceNameThai})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <img src="${img}" alt="น้อง${cleanName} (${provinceNameThai})" width="175" height="245" loading="${imgLoading}" fetchpriority="${imgPriority}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
           <div class="vip-card-info">
@@ -1416,8 +1420,24 @@ const popularLocationsFooter = `
       }
     
 
-    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
+    // 1. สร้างลิงก์โปรไฟล์ทุกคนแบบ Raw HTML สำหรับ Googlebot
+    const allProfilesList = isNational ? deduplicatedProfiles : profilesList;
+    const directoryLinksHtml = (allProfilesList || []).map(p => {
+      const pSlug = encodeURIComponent(p.slug || p.id);
+      const pName = escapeHTML((p.name || "").replace(/^(น้อง\s?)+/gi, "").trim());
+      return `<a href="/sideline/${pSlug}" style="color: #64748B; font-size: 11px; text-decoration: none; display: inline-block; padding: 2px 6px; background: rgba(124, 58, 237, 0.05); border-radius: 4px;">น้อง${pName}</a>`;
+    }).join(" ");
 
+    const botDirectorySectionHtml = `
+      <section class="bot-seo-directory-block" aria-label="สารบัญโปรไฟล์ทั้งหมด" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 12px 14px; background: rgba(255, 255, 255, 0.5); border-radius: 12px; border: 1px dashed rgba(124, 58, 237, 0.15);">
+        <h3 style="font-size: 11.5px; color: #64748B; font-weight: 700; margin: 0 0 8px 0;">📋 สารบัญโปรไฟล์ประจำพื้นที่</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; line-height: 1.6;">
+          ${directoryLinksHtml}
+        </div>
+      </section>
+    `;
+
+    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงานและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}${botDirectorySectionHtml}</div>`);
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -1493,7 +1513,7 @@ const popularLocationsFooter = `
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
-    finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" loading="lazy" src="${mapEmbedUrl}"`);
+    finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");

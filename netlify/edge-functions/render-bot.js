@@ -3,8 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261012_prod`;
-
+let GLOBAL_PROFILE_VERSION = `v_20261020_prod`; // 👈 เปลี่ยนให้ตรงกัน
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -184,91 +183,65 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
+// 🟢 REPLACEMENT: ระบบสุ่มคำบรรยายต้านทาน Google Core Update (ต้าน Thin Content 100%)
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
- 
-  const seedStr = String(p.slug || p.id || displayName);
-const hash = seedStr.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-const v = hash % 3;
-
-  let customBio = "";
-  if (p.description && p.description.trim().length > 10) {
-    const isSpamText = /เรทราคา รายละเอียดค่ะ|1500\/1 ชม\. ไม่รวมห้อง|ฟีลแฟน เอาใจเก่ง ไม่เร่ง ตรงปก|\\ \(\\ \(\„•ㅅ•„\)|╭ \/ づ♡/i.test(p.description);
-    
-    if (!isSpamText) {
-      customBio = ` พร้อมข้อความส่วนตัว: "${sanitizeThaiText(p.description)}"`;
-    } else {
-      const dynamicBios = [
-        ` สแตนด์บายพร้อมดูแลคุณด้วยความสุภาพ อัธยาศัยดี และเอาใจใส่เป็นธรรมชาติในโซน${zone} นัดพบปลอดภัย จ่ายหน้างาน 100%`,
-        ` พร้อมเป็นเพื่อนร่วมทาง ทานอาหาร นั่งคุยคลายเหงา ดูแลดุจแฟนคนพิเศษในพิกัด${zone} การันตีตัวจริงตรงปก ไร้มัดจำ`,
-        ` บุคลิกน่ารัก ยิ้มแย้ม คุยสนุก สแตนด์บายพร้อมบริการเพื่อนเที่ยวฟิวแฟนในพื้นที่${zone} ดูแลอย่างจริงใจ ไม่เร่งเวลาค่ะ`
-      ];
-      customBio = dynamicBios[v];
-    }
-  }
-
-  // 🟢 2. วิเคราะห์สไตล์ของน้องๆ จาก Tags และ สัดส่วน (คงไว้เหมือนเดิม)
-  const rawTags = (Array.isArray(p.styleTags || p.style_tags) 
-    ? (p.styleTags || p.style_tags).join(" ") 
-    : String(p.styleTags || p.style_tags || "")).toLowerCase();
+  // สร้าง Hash แบบละเอียดเพื่อใช้สุ่มแยกชิ้นส่วน
+  const hash = String(p.slug || p.id || displayName).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   
   const hNum = parseInt(height, 10) || 160;
   const wNum = parseInt(weight, 10) || 48;
+  const rawTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
 
   let persona = "gfe";
-  if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก") || rawTags.includes("นักศึกษา") || (hNum <= 158 && wNum <= 46)) {
-    persona = "petite";
-  } else if (rawTags.includes("นางแบบ") || rawTags.includes("vip") || rawTags.includes("หรู") || hNum >= 166) {
-    persona = "model";
-  } else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en") || rawTags.includes("คุยสนุก")) {
-    persona = "party";
-  } else if (rawTags.includes("อวบ") || rawTags.includes("เนื้อนมไข่") || wNum >= 54) {
-    persona = "curvy";
+  if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก") || (hNum <= 158 && wNum <= 46)) persona = "petite";
+  else if (rawTags.includes("นางแบบ") || rawTags.includes("vip") || hNum >= 166) persona = "model";
+  else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en")) persona = "party";
+  else if (rawTags.includes("อวบ") || wNum >= 54) persona = "curvy";
+
+  // คลังคำศัพท์ (Spintax Matrix)
+  const matrix = {
+    petite: {
+      greetings: [`พบกับ ${displayName}`, `ขอแนะนำ ${displayName}`, `ทำความรู้จักกับ ${displayName}`],
+      highlights: [`เพื่อนเที่ยวไซส์มินิสุดน่ารัก`, `สาวสวยตัวเล็กสเปคยอดฮิต`, `สาวน้อยวัยใสขี้อ้อน`],
+      actions: [`พร้อมเอาใจใส่ดูแลดุจแฟนคนพิเศษ`, `ชวนคุยสนุก คลายเหงาได้ดีเยี่ยม`, `เทคแคร์เป็นกันเอง ไม่มีความเกร็ง`]
+    },
+    model: {
+      greetings: [`ยกระดับการพักผ่อนกับ ${displayName}`, `สัมผัสประสบการณ์เหนือระดับกับ ${displayName}`, `ขอแนะนำ ${displayName}`],
+      highlights: [`สาวสวยหุ่นนางแบบสุดพรีเมียม`, `เพื่อนเที่ยวบุคลิกสง่างาม`, `สาวสวยโปรไฟล์ VIP`],
+      actions: [`เหมาะสำหรับควงคู่ดินเนอร์หรูและออกงาน`, `ดูแลท่านอย่างเอ็กซ์คลูซีฟและให้เกียรติ`, `สร้างความประทับใจในทุกช่วงเวลา`]
+    },
+    party: {
+      greetings: [`สายปาร์ตี้ต้องไม่พลาด ${displayName}`, `มองหาคนรู้ใจไปนั่งดื่ม ขอแนะนำ ${displayName}`, `เพิ่มความสนุกด้วย ${displayName}`],
+      highlights: [`เด็กเอ็น (EN) สายชงตัวท็อป`, `เพื่อนเที่ยวสายปาร์ตี้อารมณ์ดี`, `เอ็นเตอร์เทนเนอร์สุดฮอต`],
+      actions: [`ชงเหล้าเก่ง ละลายพฤติกรรมเยี่ยม`, `สร้างรอยยิ้มและบรรยากาศสนุกสนาน`, `ดูแลเพื่อนดื่มอย่างมืออาชีพ`]
+    },
+    curvy: {
+      greetings: [`สัมผัสความนุ่มนวลกับ ${displayName}`, `เติมความอบอุ่นกับ ${displayName}`, `ขอแนะนำ ${displayName}`],
+      highlights: [`สาวสวยหุ่นอวบอิ่มมีน้ำมีนวล`, `สเปคสาวทรงโตน่ากอด`, `เพื่อนเที่ยวสรีระเย้ายวน`],
+      actions: [`ดูแลใกล้ชิด เอาใจใส่ทุกรายละเอียด`, `เทคแคร์สุภาพ อ่อนโยน ผ่อนคลายแท้จริง`, `คุยเก่ง ดูแลเป็นธรรมชาติ`]
+    },
+    gfe: {
+      greetings: [`สัมผัสการดูแลอบอุ่นกับ ${displayName}`, `หากต้องการเพื่อนรู้ใจ ขอแนะนำ ${displayName}`, `ให้ ${displayName} ดูแลคุณ`],
+      highlights: [`เพื่อนเที่ยวสไตล์ Girlfriend Experience`, `สาวสวยอัธยาศัยดีสไตล์ฟิวแฟน`, `คนดูแลส่วนตัวสุดน่ารัก`],
+      actions: [`ให้เกียรติและเทคแคร์ดุจคนรัก`, `พร้อมเป็นเพื่อนทานข้าว ดูหนัง อย่างเป็นธรรมชาติ`, `ดูแลด้วยความจริงใจ สุภาพ ไม่เร่งรีบ`]
+    }
+  };
+
+  const getSpintax = (arr, offset) => arr[(hash + offset) % arr.length];
+  const pData = matrix[persona] || matrix["gfe"];
+
+  const greeting = getSpintax(pData.greetings, 1);
+  const highlight = getSpintax(pData.highlights, 2);
+  const action = getSpintax(pData.actions, 3);
+  const safetyNote = "ยืนยันนัดพบอย่างปลอดภัย ชำระค่าบริการหน้างาน 100% ไร้กังวลเรื่องมัดจำ";
+  
+  let customBio = "";
+  if (p.description && p.description.trim().length > 10 && !/เรทราคา|ไม่มีมัดจำ|1500\/1/i.test(p.description)) {
+    customBio = ` เธอบอกว่า: "${sanitizeThaiText(p.description)}"`;
   }
 
-  
-
-  const safetyNote = "นัดพบเจอตัวจริงตรงปกอย่างปลอดภัย ชำระค่าบริการหน้างานโดยตรง ไร้กังวลเรื่องการโอนมัดจำล่วงหน้า 100%";
-
-  switch (persona) {
-    case "petite":
-      return v === 0
-        ? `พบกับ ${displayName} เพื่อนเที่ยวสายหวานตัวเล็กน่ารัก สดใส สไตล์คุณหนู พิกัดดูแล${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนกะทัดรัด ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) บุคลิกยิ้มแย้ม อัธยาศัยดี เอาใจเก่ง${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : v === 1
-        ? `สำหรับท่านที่ชื่นชอบสาวไซส์มินิ น่าทะนุถนอม ขอแนะนำ ${displayName} พิกัด${zone} (${provinceName}) วัยใส ${age} ปี รูปร่าง ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ชวนคุยสนุก คลายเหงา ทานข้าว ดูหนัง เป็นกันเองอย่างสุภาพ${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : `${displayName} สาวสวยตัวเล็ก บุคลิกสดใส เป็นกันเอง พร้อมสแตนด์บายให้บริการเพื่อนเที่ยวฟิวแฟนใน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) มารยาทเรียบร้อย เทคแคร์ดีเสมือนแฟนคนพิเศษ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
-
-    case "model":
-      return v === 0
-        ? `ยกระดับการพักผ่อนระดับพรีเมียมกับ ${displayName} เพื่อนเที่ยวระดับ VIP บุคลิกสง่างาม หุ่นนางแบบ พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนสุดเฟิร์ม ${stats} สูงโปร่ง ${height} ซม. น้ำหนัก ${weight} กก. วางตัวสุภาพ เหมาะสำหรับดินเนอร์หรู ออกงานสังคม หรือนัดพบส่วนตัว${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : v === 1
-        ? `สัมผัสประสบการณ์เหนือระดับกับ ${displayName} สาวสวยโปรไฟล์พรีเมียม โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. ผิวพรรณสะอาดสะอ้าน มารยาทดีเยี่ยม ไม่เร่งเวลา พร้อมดูแลท่านอย่างเอ็กซ์คลูซีฟ${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : `แนะนำ ${displayName} สวยหรู สไตล์พริตตี้-นางแบบ พิกัดดูแลย่าน${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนเป๊ะ ${stats} สูง ${height} ซม. บุคลิกโดดเด่น น่าประทับใจ ให้เกียรติและสร้างความสบายใจในทุกช่วงเวลา${customBio} อัตราเริ่มต้น ${priceDisplay} ${safetyNote}`;
-
-    case "party":
-      return v === 0
-        ? `สายสังสรรค์ นั่งชิล ต้องไม่พลาด ${displayName} เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ (EN VIP) พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. ชงเหล้าเก่ง คุยสนุก อารมณ์ดี ละลายพฤติกรรมเยี่ยม เหมาะกับงานเลี้ยง ปาร์ตี้ หรือดินเนอร์ยามค่ำคืน${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : v === 1
-        ? `เพิ่มความมีชีวิตชีวาให้มื้อค่ำกับ ${displayName} เด็กเอ็นและเพื่อนเที่ยวสายปาร์ตี้ โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} ยิ้มหวาน เป็นมิตร เข้ากับทุกคนง่าย สร้างรอยยิ้มและบรรยากาศสนุกสนานได้อย่างลงตัว${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : `มองหาคนรู้ใจไปนั่งดื่ม ฟังเพลง หรือสังสรรค์ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี รูปร่าง ${stats} สูง ${height} ซม. เทคแคร์เพื่อนดื่มอย่างมืออาชีพ อารมณ์ดีตลอดเวลา ไร้กังวลเรื่องเร่งเวลา${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
-
-    case "curvy":
-      return v === 0
-        ? `สัมผัสความอบอุ่น นุ่มนวลกับ ${displayName} สาวสวยเจ้าเสน่ห์ หุ่นอวบอิ่มมีน้ำมีนวล สเปคสายกอดอุ่น พิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วนเต็มสรีระ ${stats} สูง ${height} ซม. หนัก ${weight} กก. นิสัยน่ารัก ขี้อ้อน เอาใจใส่ทุกรายละเอียด${customBio} ค่าดูแลเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : v === 1
-        ? `สำหรับผู้ที่หลงใหลในความนุ่มนวลและสรีระที่ชัดเจน ขอแนะนำ ${displayName} โซน${zone} (${provinceName}) วัย ${age} ปี รูปร่างเซ็กซี่อวบอิ่ม ${stats} สัมผัสฟิวแฟนอย่างใกล้ชิด เทคแคร์สุภาพ อ่อนโยน ให้ความรู้สึกผ่อนคลายอย่างแท้จริง${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : `${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน สรีระเย้ายวนมีน้ำมีนวล ประจำเขต${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. หนัก ${weight} กก.) น่ารัก คุยเก่ง ดูแลเป็นธรรมชาติ ไม่เกร็ง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
-
-    default:
-      return v === 0
-        ? `สัมผัสการดูแลอย่างอบอุ่นสไตล์ Girlfriend Experience (GFE) แท้ๆ กับ ${displayName} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. เทคแคร์เอาใจใส่ดุจแฟนคนพิเศษ สุภาพ อ่อนโยน ไม่เร่งรีบ ให้เกียรติและสร้างความผ่อนคลายสูงสุด${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`
-        : v === 1
-        ? `แนะนำ ${displayName} เพื่อนเที่ยวฟิวแฟนที่จะทำให้ช่วงเวลาพักผ่อนของคุณมีความหมาย ในพื้นที่${zone} (${provinceName}) วัย ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. บุคลิกน่ารัก พูดจาไพเราะ พร้อมเป็นเพื่อนทานข้าว เดินเล่น ดูหนัง และดูแลอย่างใกล้ชิด${customBio} อัตราค่าบริการ ${priceDisplay} ${safetyNote}`
-        : `หากคุณกำลังมองหาเพื่อนเที่ยวรู้ใจที่ดูแลด้วยความจริงใจ ขอแนะนำ ${displayName} ประจำพิกัด${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} สูง ${height} ซม. หนัก ${weight} กก. สไตล์ฟิวแฟนหวานละมุน อัธยาศัยดี มีความเป็นกันเอง${customBio} อัตราค่าบริการเริ่มต้น ${priceDisplay} ${safetyNote}`;
-  }
-}          
-
-  
-
+  return `${greeting} ${highlight} พิกัดบริการ${zone} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${action}${customBio} เรทเริ่มต้น ${priceDisplay} ${safetyNote}`;
+}
     
 
 export default async (req, context) => {
@@ -440,24 +413,24 @@ if (provinceKey) {
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
 
    
+const activeBreadcrumbText = `ไซด์ไลน์${provinceNameThai}`;
+
+// 🟢 2. สร้าง Schema Graph โดยมีเครื่องหมายจุลภาคคั่นถูกต้อง 100%
 const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      // 1. เปลี่ยนเป็น ProfilePage ให้ตรงกับประเภทเนื้อหาจริง
       "@type": "ProfilePage",
       "@id": `${canonicalUrl}#webpage`,
       "url": canonicalUrl,
       "name": stripHTML(pageTitle),
       "description": stripHTML(metaDescription),
       "inLanguage": "th-TH",
-      "dateModified": profile.updated_at || profile.created_at || "2026-03-20T00:00:00+07:00",
+      "dateModified": new Date().toISOString(),
       "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      // 2. ชี้ mainEntity ไปที่บุคคล (#person) โดยตรง
       "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
-      // 3. คง Person ไว้ แต่ระบุพิกัดเป็น homeLocation แทนการตั้งเป็นหน้าร้าน
       "@type": "Person",
       "@id": `${canonicalUrl}#person`,
       "name": stripHTML(displayName),
@@ -492,7 +465,6 @@ const schemaGraph = {
         }
       }
     },
-    // 4. ตัด @type: "Service" และ "Offer" ออกทั้งหมด
     {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
@@ -503,13 +475,12 @@ const schemaGraph = {
           "name": "หน้าแรก", 
           "item": `${CONFIG.DOMAIN}/` 
         },
-       // ใน Schema JSON-LD
-{ 
-  "@type": "ListItem", 
-  "position": 2, 
-  "name": `ไซด์ไลน์${provinceNameThai}`, 
-  "item": provinceHubUrl 
-},
+        { 
+          "@type": "ListItem", 
+          "position": 2, 
+          "name": stripHTML(activeBreadcrumbText), 
+          "item": provinceHubUrl 
+        }, // 👈 ใส่เครื่องหมายจุลภาคตรงนี้แล้ว
         { 
           "@type": "ListItem", 
           "position": 3, 
@@ -520,8 +491,8 @@ const schemaGraph = {
     }
   ]
 };
-   // 🟢 อนุญาตให้จัดทำดัชนีตามปกติ (เนื่องจาก Title และ Schema ได้รับการปรับปรุงให้ปลอดภัยแล้ว)
-    const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
+
+const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
 
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
@@ -592,7 +563,7 @@ const schemaGraph = {
     <span>จองคิว</span>
   </a>
 </nav>
-    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
+    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); backdrop-filter: blur(10px);">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก" style="text-decoration: none;">
@@ -619,15 +590,18 @@ const schemaGraph = {
         </header>
 
         <nav aria-label="breadcrumb">
-          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
-            <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-       <!-- ใน HTML -->
-<li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="ไซด์ไลน์${escapeHTML(provinceNameThai)}">ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
-          </ol>
-        </nav>
+  <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
+    <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li>
+      <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
+        ${escapeHTML(activeBreadcrumbText)}
+      </a>
+    </li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+  </ol>
+</nav>
 
         <main class="main-content">
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 22px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); box-shadow: 0 15px 35px rgba(124, 58, 237, 0.06);">
@@ -708,24 +682,14 @@ const schemaGraph = {
                 </div>
             </section>
 
-            <section style="margin-bottom: 1.5rem;">
-                <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
-                    </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
-                    </div>
-                    <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px;">
-                        <h3 style="font-size: 12.5px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
-                    </div>
-                </div>
-            </section>
-
+            <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
+    <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
+        <div><strong style="color: #7C3AED;">สไตล์การดูแล:</strong> ${Array.isArray(profile.styleTags) && profile.styleTags.length > 0 ? profile.styleTags.map(t => `#${escapeHTML(t)}`).join(" ") : "#ฟิวแฟน #เทคแคร์ดี #ตรงปก"}</div>
+        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(provinceNameThai)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
+        <div><strong style="color: #7C3AED;">ความประทับใจส่วนตัว:</strong> "${escapeHTML(profile.description || profile.slogan || profile.quote || "ฟิวแฟน อบอุ่น สุภาพ ไม่เร่งงาน ตัวจริงตรงปก 100%")}"</div>
+    </div>
+</section>
             <!-- ตัดส่วนรีวิวที่ซ้ำซ้อนออก เพื่อป้องกัน Google ตรวจจับว่าเป็นรีวิวที่สร้างขึ้นอัตโนมัติ (Fake Review) -->
             
             ${relatedProfiles.length > 0 ? `
@@ -772,6 +736,17 @@ const schemaGraph = {
 </div>
    
 <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
+
+<!-- Sticky Bottom CTA -->
+<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 9999; display: flex; gap: 10px; align-items: center;">
+    <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+        <i class="fab fa-line" style="font-size: 22px;"></i> จองคิวน้อง${escapeHTML(displayName.replace("น้อง",""))}
+    </a>
+    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}" style="width: 50px; height: 50px; border-radius: 100px; background: #FFF; border: 1.5px solid #7C3AED; color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+        <i class="fas fa-share-alt" style="font-size: 18px;"></i>
+    </button>
+</div>
+
 </body>
 </html>`;
 
