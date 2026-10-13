@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261010_prod`; // 👈 เปลี่ยนให้ตรงกัน
+let GLOBAL_PROFILE_VERSION = `v_20261011_prod`; // 👈 เปลี่ยนให้ตรงกัน
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -323,16 +323,20 @@ export default async (req, context) => {
     
  
 if (provinceKey) {
-  const { data: related } = await supabase
-    .from("profiles")
-    .select("*")
-    .or(`provinceKey.ilike.%${cleanProvinceKey}%,provinceKey.ilike.%${provinceKey}%,province_key.ilike.%${cleanProvinceKey}%,province_key.ilike.%${provinceKey}%`)
-    .eq("active", true)
-    .neq("id", profile.id)
-    .limit(6);
+      // 🟢 ดึงข้อมูลทั้งหมดโดยไม่จำกัด limit และเลือกเฉพาะฟิลด์ที่ต้องใช้
+      const { data: related } = await supabase
+        .from("profiles")
+        .select("id, slug, name, imagePath, image_url, provinceKey, province_key")
+        .eq("active", true)
+        .neq("id", profile.id);
 
-  relatedProfiles = related || [];
-}
+      // กรองจังหวัดใน JavaScript
+      relatedProfiles = (related || []).filter(p => {
+        const k = (p.provinceKey || p.province_key || "").toLowerCase();
+        return k.includes(cleanProvinceKey) || k.includes(provinceKey);
+      }).slice(0, 3);
+    }
+    
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
@@ -551,9 +555,16 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
 
     <!-- 9. Structured Data (JSON-LD) สำหรับ Rich Results & AI Overview -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PG0QFDWTTG');
+    </script>
 </head>
-
-<body style="background-color: #F8F6FC; color: #140F22; font-family: 'Prompt', sans-serif;">
+<body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22; font-family: 'Prompt', sans-serif;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); backdrop-filter: blur(10px);">
           <div class="header-logo-container">
@@ -581,18 +592,18 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
         </header>
 
         <nav aria-label="breadcrumb">
-          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
-            <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li>
-              <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
-                ${escapeHTML(activeBreadcrumbText)}
-              </a>
-            </li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
-          </ol>
-        </nav>
+  <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
+    <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li>
+      <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
+        ${escapeHTML(activeBreadcrumbText)}
+      </a>
+    </li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+  </ol>
+</nav>
 
         <main class="main-content">
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 22px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); box-shadow: 0 15px 35px rgba(124, 58, 237, 0.06);">
@@ -615,7 +626,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </header>
 
-                <!-- สเปกพื้นฐาน 4 ช่อง -->
+               <!-- 🟢 1. สเปกพื้นฐาน 4 ช่อง (สัดส่วน / ส่วนสูง / อายุ / พิกัด) -->
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
@@ -638,7 +649,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </div>
 
-                <!-- ตารางอัตราค่าบริการ -->
+                <!-- 🟢 2. [ย้ายขึ้นมาตรงนี้] ตารางอัตราค่าบริการ (เห็นสเปกปุ๊บ เห็นราคาทันที ชนะ NavBoost 100%) -->
                 <section style="margin-bottom: 1.25rem; background: #FFFFFF; border-radius: 16px; padding: 14px 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
@@ -657,7 +668,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </section>
 
-                <!-- ปุ่มติดต่อ LINE CTA + ปุ่มแชร์ -->
+                <!-- 🟢 3. [ย้ายมาต่อจากราคา] ปุ่มติดต่อ LINE CTA + ปุ่มแชร์ (เห็นราคาแล้วกดแอดไลน์ได้ทันที) -->
                 <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; width: 100%;">
                     <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
@@ -668,12 +679,12 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </button>
                 </div>
 
-                <!-- กล่องเนื้อหาบรรยายเฉพาะตัว -->
+                <!-- 🟢 4. กล่องเนื้อหาบรรยายเฉพาะตัว (แก้ปัญหา Thin Content ผ่าน Spintax) -->
                 <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
                     ${escapeHTML(naturalDesc)}
                 </div>
 
-                <!-- ข้อมูลและลักษณะเด่นเฉพาะตัว -->
+                <!-- 🟢 5. ข้อมูลและลักษณะเด่นเฉพาะตัว -->
                 <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
                     <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
                     <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
@@ -716,7 +727,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
             </article>
         </main>
         
-        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #64748B; font-size: 11px;">
+       <footer role="contentinfo" style="text-align: center; padding: 2rem 0 3rem 0; color: #64748B; font-size: 11px;">
             <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
                 <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
                 <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
@@ -728,16 +739,26 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
        
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
-    <!-- Sticky Bottom CTA (แถบติดล่างสุดของจอมือถือ - ลอยเดี่ยวไม่ชน Dock) -->
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 9999; display: flex; gap: 10px; align-items: center;">
-        <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+    <!-- Sticky Bottom CTA (รองรับ iPhone Safe Area + แชร์มี Fallback) -->
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -4px 25px rgba(0,0,0,0.06); z-index: 9999; display: flex; gap: 10px; align-items: center;">
+        <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
             <i class="fab fa-line" style="font-size: 22px;"></i> จองคิว${escapeHTML(displayName)}
         </a>
-        <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 50px; height: 50px; border-radius: 100px; background: #FFF; border: 1.5px solid #7C3AED; color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-            <i class="fas fa-share-alt" style="font-size: 18px;"></i>
+        <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+            <i class="fas fa-share-alt" style="font-size: 17px;"></i>
         </button>
     </div>
 
+    <!-- ลงทะเบียน Service Worker ให้เหมือน index.html -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            console.warn('SW Registration failed: ', err);
+          });
+        });
+      }
+    </script>
 </body>
 </html>`;
 
