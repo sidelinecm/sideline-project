@@ -1189,10 +1189,7 @@ const line2 = isAllOrNational
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
 
-    const article = document.createElement("article");
-    article.className = "profile-card-new interactive-card";
-    article.setAttribute("data-profile-id", p.id);
-    article.setAttribute("data-profile-slug", p.slug || p.id);
+
 
     // 🟢 แก้ปัญหาข้อ 1: ถ้าระบบจับได้ว่าเป็นโลโก้เว็บ (ทำให้สัดส่วนเพี้ยน) ให้สลับไปใช้ภาพ Placeholder แบบเบลอ 3:4 ทันที
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
@@ -1265,9 +1262,7 @@ const line2 = isAllOrNational
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
-    article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; // 👈 เพิ่มบรรทัดนี้
-
-    // ... (ส่วนโค้ดเช็คชื่อ/รูปภาพ/สเปกต่างๆ ปล่อยไว้เหมือนเดิม) ...
+    article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; 
 
     // 🟢 3. ประกอบการ์ด HTML
     article.innerHTML = `
