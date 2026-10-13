@@ -1031,7 +1031,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-    // ✅ ซิงค์ตรงกับ H1 ตัวชนะเลิศของ SSR
+    // ✅ ซิงค์ตรงกับ H1 ตัวชนะเลิศของ SSR 100% (หยุดปัญหาข้อความกระตุกสลับคำ)
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
@@ -1041,13 +1041,12 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
       } else {
-        // ✅ ปรับให้ตรงกัน ป้องกันคำกระตุกสลับไปมา
-const line1 = isAllOrNational 
-  ? "ศูนย์รวมสาวรับงาน • ไซด์ไลน์ทั่วไทย" 
-  : `ไซด์ไลน์${escapeHTML(targetName)} • สาวรับงาน${escapeHTML(targetName)}`;
-const line2 = isAllOrNational 
-  ? "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน" 
-  : "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ";
+        const line1 = isAllOrNational 
+          ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
+          : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
+        const line2 = isAllOrNational 
+          ? "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน" 
+          : "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
@@ -1056,13 +1055,16 @@ const line2 = isAllOrNational
       }
     }
 
+    // ✅ ซิงค์ H2 ให้ตรงกับ SSR
     const featuredH2 = document.getElementById("featured-heading");
     if (featuredH2) {
       if (isEN) {
         const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
         featuredH2.innerHTML = `Featured Companions in <span class="province-name-highlight">${escapeHTML(enLocName)}</span>`;
       } else {
-        featuredH2.innerHTML = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(targetName)}</span>`;
+        featuredH2.innerHTML = isAllOrNational
+          ? `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span> (จ่ายหน้างาน)`
+          : `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(targetName)}</span> (ตัวจริงตรงปก)`;
       }
     }
 
