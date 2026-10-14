@@ -39,7 +39,7 @@
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=4">
+  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=8">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
@@ -50,8 +50,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-  <link rel="stylesheet" href="/styles.css?v=v_20261011_prod">
-  <link rel="modulepreload" href="/main.js?v=v_20261011_prod">
+  <link rel="stylesheet" href="/styles.css?v=v_20261015_clean">
+  <link rel="modulepreload" href="/main.js?v=v_20261015_clean">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -249,13 +249,13 @@
 
     <div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงาน"></div>
 
-    <div id="no-results-message" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+  <div id="no-results-message" class="hidden" style="display: none; text-align: center; padding: 40px 20px; color: var(--text-muted);">
       <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
       <p style="font-size: 14px; font-weight: 700;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
       <p style="font-size: 12px;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
     </div>
 
-    <div id="fetch-error-message" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--crimson-main);">
+   <div id="fetch-error-message" class="hidden" style="display: none; text-align: center; padding: 40px 20px; color: var(--crimson-main);">
       <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
       <p style="font-size: 14px; font-weight: 700;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
     </div>
@@ -396,7 +396,7 @@
       <div class="verification-box">
         <i class="fas fa-shield-alt" style="font-size: 24px; color: #7C3AED; flex-shrink: 0;"></i>
         <p style="font-size: 11.5px; color: var(--text-sub); margin: 0; line-height: 1.6;">
-          <strong id="verification-heading" style="color: var(--text-main); font-weight: 800;">COMMUNITY & SAFETY PROTOCOL:</strong> โปรไฟล์ทุกคนผ่านการตรวจสอบรูปถ่ายจริงตรงปก 100% นัดเจอจ่ายหน้างานไม่มีโอนมัดจำ <u>ทั้งนี้ FirstModelHub เป็นเพียงพื้นที่สื่อกลางสำหรับเพื่อนเที่ยวและงานเอ็นเตอร์เทนเมนต์เท่านั้น เว็บไซต์ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ หรือการกระทำที่ผิดต่อกฎหมายทุกรูปแบบ</u>
+          <strong id="verification-heading" style="color: var(--text-main); font-weight: 800;">COMMUNITY & SAFETY PROTOCOL:</strong> โปรไฟล์ทุกคนผ่านการตรวจสอบรูปถ่ายจริงตรงปก 100% นัดเจอจ่ายหน้างานไม่มีโอนมัดจำ <span>ทั้งนี้ FirstModelHub เป็นพื้นที่สื่อกลางลงประกาศและนัดหมาย โปรไฟล์ทุกคนผ่านการตรวจสอบรูปถ่ายจริงตรงปก 100% นัดเจอจ่ายหน้างาน ปราศจากความเสี่ยงเรื่องโอนมัดจำล่วงหน้าทุกกรณี</span>
         </p>
       </div>
     </section>
@@ -658,7 +658,7 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261011_prod"></script>
+  <script type="module" src="/main.js?v=v_20261015_clean"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
