@@ -2204,6 +2204,21 @@ if (isStandaloneProfile) {
       applyFilterBtn.onclick = () => {
         executeFilterAndRender(true);
         toggleSearchDrawer(false);
+
+        // 🟢 เพิ่มคำสั่งนี้: สั่งให้หน้าจอเลื่อนวิ่งขึ้นไปหารายชื่อน้องๆ ทันที
+        setTimeout(() => {
+          const displayArea = document.getElementById("profiles-display-area");
+          if (displayArea) {
+            const headerOffset = 70; // เผื่อความสูงของแถบ Header ด้านบน
+            const elementPosition = displayArea.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+              top: Math.max(0, offsetPosition),
+              behavior: "smooth"
+            });
+          }
+        }, 150); // รอให้หน้าต่างตัวกรองพับปิดเสร็จ แล้วเลื่อนขึ้นทันที
       };
     }
 
@@ -2218,7 +2233,49 @@ if (isStandaloneProfile) {
       });
     }
 
+  // 🟢 1. ฟังก์ชันตัวช่วยสั่งเลื่อนหน้าจอวิ่งไปหาโซนรายชื่อน้องๆ
+    function scrollToProfilesArea() {
+      setTimeout(() => {
+        const displayArea = document.getElementById("profiles-display-area");
+        if (displayArea) {
+          const headerOffset = 70; // เผื่อความสูงของแถบ Header ด้านบน ไม่ให้บังหัวข้อ
+          const elementPosition = displayArea.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: "smooth"
+          });
+        }
+      }, 150); // รอให้หน้าต่างตัวกรองพับปิดเรียบร้อยก่อน แล้วเลื่อนจอทันที
+    }
+
     if (domCache.searchInput) {
+      // 🟢 2. เพิ่มตัวดักปุ่ม Enter / ปุ่มแว่นขยายบนแป้นพิมพ์มือถือ
+      domCache.searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          clearTimeout(window.searchTimeout);
+
+          // ซ่อนแป้นพิมพ์มือถือทันที (แก้ปัญหาแป้นพิมพ์บังจอ)
+          domCache.searchInput.blur();
+
+          // ปิดป๊อปอัปคำค้นหาแนะนำ
+          const popover = document.getElementById("search-suggestions");
+          if (popover) popover.style.display = "none";
+
+          // สั่งปิดหน้าต่างตัวกรอง (Drawer) ลงมา
+          if (typeof toggleSearchDrawer === "function") {
+            toggleSearchDrawer(false);
+          }
+
+          // ค้นหาข้อมูล และเลื่อนจอขึ้นไปหาน้องๆ ทันที
+          executeFilterAndRender(true);
+          scrollToProfilesArea();
+        }
+      });
+
+      // 3. ขณะพิมพ์ข้อความ (Realtime Search พร้อมปุ่มกากบาท)
       domCache.searchInput.addEventListener("input", (e) => {
         clearTimeout(window.searchTimeout);
         const queryText = e.target.value;
@@ -2230,15 +2287,20 @@ if (isStandaloneProfile) {
         }, 200);
       });
 
+      // 4. เมื่อแตะที่ช่องค้นหา
       domCache.searchInput.addEventListener("focus", () => {
         showSearchSuggestions(domCache.searchInput.value);
       });
     }
 
+    // 5. ปุ่มกากบาท (X) ล้างคำค้นหา
     const clearSearchBtn = document.getElementById("clear-search-btn");
     if (clearSearchBtn) {
       clearSearchBtn.addEventListener("click", () => {
-        if (domCache.searchInput) domCache.searchInput.value = "";
+        if (domCache.searchInput) {
+          domCache.searchInput.value = "";
+          domCache.searchInput.focus();
+        }
         clearSearchBtn.style.display = "none";
         const popover = document.getElementById("search-suggestions");
         if (popover) popover.style.display = "none";
