@@ -2,8 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-// ✅ กำหนดเวอร์ชันให้คงที่ตามรอบวัน บอทกูเกิลจะเก็บแคชได้เร็ว ไม่เสีย Crawl Budget
-let GLOBAL_VERSION = `v_20261011_prod`;
+let GLOBAL_VERSION = `v_20261015_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -49,10 +48,10 @@ const PROVINCE_SEO_DATA = {
       "เซ็นทรัลเฟส", "สนามบินเชียงใหม่", "แม่ริม", "หางดง"
     ],
     faqs: [
-      { q: "นัดพบเพื่อนเที่ยวเชียงใหม่ โซนไหนเดินทางสะดวกและรวดเร็วที่สุด?", a: "ย่านนิมมานเหมินท์ เจ็ดยอด และสันติธรรม เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด สามารถเดินทางไปดูแลที่โรงแรมได้รวดเร็วภายใน 15-25 นาทีครับ" },
-      { q: "ต้องการน้องไปนั่งคาเฟ่ ทานข้าว หรือเดินเล่นในเมืองเชียงใหม่ มีบริการไหม?", a: "มีครับ น้องๆ สไตล์ฟิวแฟน (GFE) ยินดีเป็นเพื่อนร่วมทาง ทานอาหาร และท่องเที่ยว คุยสนุก สุภาพ และให้เกียรติลูกค้าครับ" },
-      { q: "หากพักแถวแม่ริม หรือหางดง น้องๆ สามารถเดินทางไปหาได้หรือไม่?", a: "สามารถเดินทางไปได้ครับ โดยอาจมีค่าเดินทางเพิ่มเติมตามระยะทางจริง ซึ่งสามารถตกลงรายละเอียดกับน้องหรือแอดมินก่อนเริ่มงานได้เลยครับ" },
-      { q: "การนัดหมายในเชียงใหม่ ปลอดภัยจากการโดนหลอกโอนเงินอย่างไร?", a: "FirstModelHub ยึดระบบ 'เจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระเงิน' ไม่มีมัดจำล่วงหน้าทุกกรณี ปลอดภัย 100% ครับ" }
+      { q: "นัดหมายสาวรับงานและไซด์ไลน์เชียงใหม่ โซนไหนเดินทางสะดวกที่สุด?", a: "ย่านนิมมานเหมินท์ เจ็ดยอด สันติธรรม ช้างเผือก และรอบ มช. เป็นโซนหลักที่มีน้องๆ สแตนด์บายมากที่สุด เดินทางถึงโรงแรมหรือที่พักได้รวดเร็วภายใน 15-30 นาทีครับ" },
+      { q: "เรทราคาค่าบริการรับงานเชียงใหม่ เริ่มต้นเท่าไหร่?", a: "เรทเริ่มต้นมาตรฐานอยู่ที่ 1,500 บาทสำหรับการดูแลสไตล์ฟิวแฟน 1 ชั่วโมง โดยมีทั้งบริการแบบชั่วคราว (Short Time) และค้างคืน (Overnight) แสดงราคาชัดเจนบนหน้าโปรไฟล์ครับ" },
+      { q: "หากพักแถวแม่ริม สันทราย หรือหางดง น้องๆ สามารถเดินทางไปหาได้หรือไม่?", a: "สามารถเดินทางไปดูแลได้ครับ โดยอาจมีค่าเดินทางเพิ่มเติมตามระยะทางจริง สามารถตกลงรายละเอียดกับน้องก่อนเริ่มงานได้เลยครับ" },
+      { q: "การนัดหมายในเชียงใหม่ มั่นใจได้อย่างไรว่าจะไม่โดนโกงมัดจำ?", a: "FirstModelHub ใช้ระบบ 'นัดเจอตัวจริง ตรวจสอบความตรงปกหน้างานแล้วค่อยจ่ายเงิน' ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี ปลอดภัย 100% ครับ" }
     ]
   },
   bangkok: {
@@ -346,10 +345,10 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
     convenience: `ครอบคลุมโรงแรม คอนโด และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางดูแลถึงที่พักอย่างรวดเร็ว มิดชิด และรักษาความเป็นส่วนตัวสูงสุด`
   },
 
-  chiangmai: {
-    headline: `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก นัดเจอง่าย จ่ายหน้างาน`,
-    intro: `หาไซด์ไลน์เชียงใหม่และสาวรับงานฟิวแฟนน่ารักๆ ในตัวเมือง FirstModelHub คัดสรรน้องๆ วัยใส นักศึกษา และสาวสวยหุ่นดี บุคลิกน่ารัก ชวนคุยเก่ง เทคแคร์อบอุ่นเป็นธรรมชาติ ไม่เร่งเวลา เหมาะสำหรับเป็นเพื่อนทานข้าวดินเนอร์ นั่งคาเฟ่ชิลๆ หรือดูแลคลายเหงาอย่างเป็นส่วนตัว การันตีรูปจริงตรงปก เจอตัวจริงเช็คความเรียบร้อยก่อนค่อยจ่ายเงิน สบายใจ ไร้มัดจำ 100% ค่ะ`,
-    convenience: `โรงแรม คอนโด และรีสอร์ตในตัวเมือง โดยเฉพาะ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางถึงที่พักภายใน 15-30 นาที สะดวกสบาย ปลอดภัย จ่ายตรงกับน้องหน้างานได้เลย`
+ chiangmai: {
+    headline: `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ตัวจริงตรงปก นัดเจอง่าย จ่ายหน้างาน`,
+    intro: `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา และสาวสวยหุ่นดี คัดสรรโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจ ปลอดภัยด้วยมาตรฐานจ่ายหน้างาน เจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระค่าบริการ หมดกังวลเรื่องการโดนหลอกมัดจำล่วงหน้าค่ะ`,
+    convenience: `พร้อมเดินทางดูแลถึงโรงแรม คอนโด และที่พักส่วนตัวในจังหวัดเชียงใหม่${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
   },
 
   bangkok: {
@@ -455,11 +454,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
          <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เอ็นเตอร์เทนเนอร์ (EN VIP) สำหรับงานเลี้ยงสังสรรค์ส่วนตัว</span></li>
       </ul>
     </div>
-   <div>
+  <div>
       <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและข้อกำหนดการใช้งาน</h3>
-      <p style="line-height: 1.65; margin-bottom: 6px;">ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายตัวจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด (Zero-Log Policy) ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขมัดจำทุกกรณี</p>
+      <p style="line-height: 1.65; margin-bottom: 6px;">ทุกโปรไฟล์ผ่านการยืนยันตัวตนด้วยรูปถ่ายจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด (Zero-Log Policy) ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี</p>
       <p style="line-height: 1.65; color: #64748B; font-size: 11.5px; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #7C3AED;">
-        <strong>ข้อกำหนดความปลอดภัย:</strong> FirstModelHub เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและเอ็นเตอร์เทนเมนต์เท่านั้น <u>เว็บไซต์ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือการกระทำผิดกฎหมายทุกรูปแบบ</u>
+        <strong>ข้อกำหนดการใช้งาน:</strong> FirstModelHub เป็นพื้นที่สื่อกลางลงประกาศข้อมูล ผู้ใช้งานและผู้ลงประกาศต้องมีอายุ 20 ปีบริบูรณ์ขึ้นไป และปฏิบัติตามเงื่อนไขข้อตกลงการใช้งานอย่างเคร่งครัด
       </p>
     </div>
   `;
@@ -1491,24 +1490,11 @@ const popularLocationsFooter = `
       }
     
 
-    const allProfilesList = isNational ? deduplicatedProfiles : profilesList;
-    const directoryLinksHtml = (allProfilesList || []).map(p => {
-      const pSlug = encodeURIComponent(p.slug || p.id);
-      const pName = escapeHTML((p.name || "").replace(/^(น้อง\s?)+/gi, "").trim());
-      const pProv = escapeHTML(p.provinceThai || PROVINCE_SEO_DATA[p.provinceKey]?.name || provinceNameThai);
-      return `<a href="/sideline/${pSlug}" style="color: #64748B; font-size: 11px; text-decoration: none; display: inline-block; padding: 2px 6px; background: rgba(124, 58, 237, 0.05); border-radius: 4px;">น้อง${pName} (${pProv})</a>`;
-    }).join(" ");
-
-    const botDirectorySectionHtml = `
-      <section class="bot-seo-directory-block" aria-label="สารบัญโปรไฟล์ทั้งหมด" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 12px 14px; background: rgba(255, 255, 255, 0.5); border-radius: 12px; border: 1px dashed rgba(124, 58, 237, 0.15);">
-        <h3 style="font-size: 11.5px; color: #64748B; font-weight: 700; margin: 0 0 8px 0;">📋 สารบัญโปรไฟล์ประจำพื้นที่</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 6px; line-height: 1.6;">
-          ${directoryLinksHtml}
-        </div>
-      </section>
-    `;
-
-    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงานและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}${botDirectorySectionHtml}</div>`);
+    finalHtml = finalHtml.replace(
+      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, 
+      `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆ รับงานและไซด์ไลน์${provinceNameThai}">${displayAreaHtml}</div>`
+    );
+    
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;

@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261011_prod`; // 👈 เปลี่ยนให้ตรงกัน
+let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -722,7 +722,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                         <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
                         <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
                     </div>
-                    <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายพื้นที่สื่อกลาง</strong>: เว็บไซต์ทำหน้าที่เป็นพื้นที่สื่อกลางลงประกาศเพื่อนเที่ยวและฟิวแฟนเท่านั้น <u>ไม่อนุญาตให้มีการซื้อขายบริการทางเพศ การค้าประเวณี หรือกิจกรรมใดๆ ที่ผิดต่อกฎหมายทุกรูปแบบ</u></p>
+                   <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายการนัดหมาย</strong>: นัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้วจึงชำระเงินกับน้องหน้างานโดยตรง ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี</p>
                 </section>
             </article>
         </main>
