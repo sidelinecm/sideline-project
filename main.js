@@ -926,47 +926,81 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     appState.renderId = (appState.renderId || 0) + 1;
     const activeRenderId = appState.renderId;
 
-    domCache.noResultsMessage?.classList.add("hidden");
-    domCache.fetchErrorMessage?.classList.add("hidden");
+    // 🟢 1. เคลียร์และซ่อนกล่อง Error & No Results เริ่มต้น
+    if (domCache.noResultsMessage) {
+      domCache.noResultsMessage.classList.add("hidden");
+      domCache.noResultsMessage.style.display = "none";
+      domCache.noResultsMessage.innerHTML = "";
+    }
+    if (domCache.fetchErrorMessage) {
+      domCache.fetchErrorMessage.classList.add("hidden");
+      domCache.fetchErrorMessage.style.display = "none";
+    }
 
-  if (domCache.featuredSection) {
-    const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/") && (!appState.activePillTag || appState.activePillTag === "all");
-    
-    const alreadyHasCards = domCache.featuredContainer && domCache.featuredContainer.children.length > 0;
-    
-    // 🟢 ถ้ามีรูปชุด Featured อยู่แล้ว ให้แสดงไว้ ไม่ต้องสั่ง return เพื่อให้โค้ดทำงานต่อจนสุด
-    if (isHomeView && alreadyHasCards && !isFilteredOrLocationView) {
-      domCache.featuredSection.classList.remove("hidden");
-    } else {
-      const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
-      const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
-      const hasFeatured = featuredList.length > 0;
-      
-      domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
-      if (isHomeView && hasFeatured && domCache.featuredContainer) {
-        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+    // 🟢 2. จัดการส่วน Featured (แนะนำ) ด้านบน
+    if (domCache.featuredSection) {
+      const isHomeView = !isFilteredOrLocationView && 
+                         !window.location.pathname.includes("/location/") && 
+                         !window.location.pathname.includes("/province/") && 
+                         (!appState.activePillTag || appState.activePillTag === "all") &&
+                         (!domCache.searchInput?.value?.trim());
+
+      const alreadyHasCards = domCache.featuredContainer && domCache.featuredContainer.children.length > 0;
+
+      if (isHomeView && alreadyHasCards) {
+        domCache.featuredSection.classList.remove("hidden");
+      } else if (isHomeView) {
+        const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
+        const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
+        const hasFeatured = featuredList.length > 0;
+
+        domCache.featuredSection.classList.toggle("hidden", !hasFeatured);
+        if (hasFeatured && domCache.featuredContainer) {
+          await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+        }
+      } else {
+        // เมื่อค้นหา หรือดูหน้ารายจังหวัด ให้ซ่อนแถบ Featured แนะนำออก
+        domCache.featuredSection.classList.add("hidden");
       }
     }
-  }
-    
+
+    // 🟢 3. กรณีค้นหาแล้ว "ไม่พบโปรไฟล์ตรงกับเงื่อนไข" (0 ผลลัพธ์)
+    if (!profiles || profiles.length === 0) {
+      domCache.profilesDisplayArea.innerHTML = "";
+      if (domCache.noResultsMessage) {
+        domCache.noResultsMessage.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
+            <p style="font-size: 14px; font-weight: 700; color: #140F22; margin: 0 0 6px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
+            <p style="font-size: 12px; color: #64748B; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
+          </div>
+        `;
+        domCache.noResultsMessage.classList.remove("hidden");
+        domCache.noResultsMessage.style.display = "block";
+      }
+      return;
+    }
 
     const isExplicitLocationPath = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
 
+    // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
     if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
       const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
       const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
       const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
       const searchKeyword = domCache.searchInput?.value?.trim();
-      
-     let sectionTitle = isEN ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>` : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>`;
-      
+
+      let sectionTitle = isEN 
+        ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>` 
+        : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>`;
+
       if (searchKeyword) {
         sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
       } else if (appState.activePillTag && appState.activePillTag !== "all") {
         sectionTitle = `✨ หมวดหมู่: <span class="province-name-highlight">#${escapeHTML(appState.activePillTag)}</span>`;
       }
 
-    const countBadgeText = `${profiles.length} โปรไฟล์`;
+      const countBadgeText = `${profiles.length} โปรไฟล์`;
       const wrapper = document.createElement("div");
       wrapper.className = "section-content-wrapper";
       wrapper.style.cssText = "margin-top: 24px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
@@ -987,6 +1021,8 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       domCache.profilesDisplayArea.appendChild(wrapper);
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
+
+    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (แสดงแยกตามจังหวัด)
     } else {
       const groupedByProvince = profiles.reduce((acc, p) => {
         const k = p.provinceKey || "no_province";
@@ -1013,7 +1049,17 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         }
       } else {
         domCache.profilesDisplayArea.innerHTML = "";
-        domCache.noResultsMessage?.classList.remove("hidden");
+        if (domCache.noResultsMessage) {
+          domCache.noResultsMessage.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+              <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
+              <p style="font-size: 14px; font-weight: 700; color: #140F22; margin: 0 0 6px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
+              <p style="font-size: 12px; color: #64748B; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
+            </div>
+          `;
+          domCache.noResultsMessage.classList.remove("hidden");
+          domCache.noResultsMessage.style.display = "block";
+        }
       }
     }
   }
