@@ -408,7 +408,7 @@ if (provinceKey) {
     const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
     const cleanHeading = `${displayName} (${primaryZone}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`;
-    const pageTitle = `${cleanHeading} - ${provinceNameThai} | ${CONFIG.BRAND_NAME}`;
+const pageTitle = `${displayName} (${primaryZone}) ไซด์ไลน์${provinceNameThai} รับงานฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
    
     // 🟢 Meta คำบรรยายใต้ลิงก์ Google: โฟกัสฟิวแฟนและพิกัดย่าน ไม่ยัดคำซ้ำ
     const metaDescription = `🟢 ${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน โซน${escapeHTML(primaryZone)} จ.${provinceNameThai} สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี การันตีตัวจริงตรงปก ปลอดภัยนัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;

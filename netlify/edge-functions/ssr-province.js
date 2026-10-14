@@ -879,9 +879,8 @@ export default async (req, context) => {
       p.provinceKey = realProvince;
       p.province_slug = realProvince;
 
-      // 🔒 แก้บั๊กชื่อซ้ำ: ผูก realProvince เข้าไปด้วย เพื่อไม่ให้น้องชื่อซ้ำคนละจังหวัดโดนลบ
-      const nameSig = `${cleanName}_${realProvince}_${p.age || ""}_${p.rate || ""}`;
-
+     // ✅ ถ้าชื่อซ้ำในจังหวัดเดียวกัน ให้เก็บแค่คนเดียวที่สมบูรณ์ที่สุด
+const nameSig = `${cleanName}_${realProvince}`;
       if (imgSig && seenImageKeys.has(imgSig)) continue;
       if (cleanName && seenNameKeys.has(nameSig)) continue;
 
@@ -915,10 +914,8 @@ export default async (req, context) => {
     const activeReviews = getDynamicReviews(provinceNameThai);
 
    const metaTitle = isNational 
-  ? "สาวรับงาน ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน จ่ายหน้างาน | FirstModelHub" 
-  : (provinceSlug === "chiangmai" 
-      ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ วัยใสฟิวแฟน จ่ายหน้างาน | FirstModelHub" 
-      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน จ่ายหน้างาน | FirstModelHub`);
+  ? "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub" 
+  : `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
     
       
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
@@ -1258,7 +1255,9 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-  const ssrH1Html = isNational ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน</span>` : (provinceSlug === "chiangmai" ? `<span class="h1-line-1">รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่</span>\n<span class="h1-line-2">วัยใสนักศึกษา ฟิวแฟนตัวจริงตรงปก ปลอดภัยจ่ายหน้างาน 100%</span>` : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`);
+  const ssrH1Html = isNational 
+  ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n<span class="h1-line-2">เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน</span>` 
+  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • รับงาน${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน 100%</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     // 🟢 2. รายชื่อย่านธรรมชาติ (คั่นด้วยจุลภาค อ่านลื่นไหล ไม่ติดกันเป็นพืด)
