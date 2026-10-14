@@ -395,33 +395,36 @@ async function getSupabaseClient() {
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสียและตัวอักษรตกแต่งวัยรุ่นทั้งหมด
+    // 1. ล้างรหัส Unicode เสีย, อิโมจิขยะวัยรุ่น (แยกจุด . ออกมา ไม่ลบทศนิยม 1.5)
     .replace(/[\uD800-\uDFFF]/g, "")
     .replace(/\uFFFD/g, "")
-    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺.]+/g, " ")
+    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
+    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลาซ้ำๆ เช่น ... แต่ไม่แตะ 1.5k
     
-    // 2. ล้างคำสะกดผิดยอดฮิต
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // สระซ้ำ
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
-    .replace(/ฟิวแฟว/g, "ฟิวแฟน")
-    .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
+    .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-
-    // 3. ตัดคำล่อแหลมทิ้งอย่างนุ่มนวล (ไม่ใช้ String ยาวๆ มายัดซ้ำจนพัง)
+    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%") // ดึงมาจาก render-bot ซิงค์ให้ครบ
+    
+    // 3. กรองคำล่อแหลมแบบ Single-Pass (ไม่วนแก้ซ้ำซ้อน และไม่ตัดจนคำแหว่ง)
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
-.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
-.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
-.replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง") // ยุบรวมรอบเดียวจบ
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     
-    // 4. ล้างเศษเครื่องหมายตกค้าง (- * ! /) ที่ลอยอยู่หลังคำที่ถูกตัด
+    // 4. ล้างคำซ้ำซ้อน และจัดระเบียบคำว่าฟิวแฟน
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+    
+    // 5. ล้างเศษเครื่องหมายวรรคตอนที่ตกค้างจากการตัดคำ
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
     .replace(/\s*([!*~_·\-\/])\s*(?=[!*~_·\-\/])/g, "")
     .replace(/\s+/g, " ")
@@ -1791,37 +1794,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       `;
     }
 
-    // ⭐ 12. มาตรฐานความปลอดภัยและการันตีตรงปก (แทนที่รีวิวสุ่ม เพื่อป้องกัน Google ตรวจจับ Fake Review)
-    const reviewsSection = document.getElementById("lightboxReviewsSection");
-    const reviewsList = document.getElementById("lightboxReviewsList");
-    if (reviewsSection && reviewsList) {
-      // ปรับหัวข้อให้เป็นทางการและน่าเชื่อถือ
-      const sectionHeading = reviewsSection.querySelector("h4");
-      if (sectionHeading) {
-        sectionHeading.innerHTML = "🛡️ มาตรฐานความปลอดภัย &amp; การันตีตรงปก 100%";
-        sectionHeading.style.color = "#7C3AED";
-      }
-
-      reviewsList.innerHTML = `
-        <div style="background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 14px; padding: 14px; text-align: left;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <i class="fas fa-check-circle" style="color: #059669; font-size: 13px;"></i>
-            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">ปลอดภัยจ่ายหน้างาน ไร้มัดจำ 100%</strong>
-          </div>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.6; margin: 0 0 10px 0;">
-            นัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้วจึงชำระเงินกับน้องโดยตรง ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี
-          </p>
-
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <i class="fas fa-check-circle" style="color: #059669; font-size: 13px;"></i>
-            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">ไม่ตรงปก สามารถยกเลิกได้ทันที</strong>
-          </div>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.6; margin: 0;">
-            ทุกโปรไฟล์ผ่านการยืนยันรูปถ่ายจริง หากพบว่าตัวจริงไม่ตรงตามรูป สามารถปฏิเสธการรับบริการและยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่าย
-          </p>
-        </div>
-      `;
-    }
+    
 
     // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
     const relatedTitle = document.getElementById("lightboxRelatedTitle");

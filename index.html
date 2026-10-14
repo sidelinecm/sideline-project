@@ -39,7 +39,7 @@
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=8">
+  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=4">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
@@ -574,7 +574,7 @@
     </div>
   </footer>
 
-  <!-- Lightbox Modal -->
+  <!-- Lightbox Modal (ฉบับสมบูรณ์: เรียงลำดับสเปก ➔ ราคา ➔ ปุ่มจอง ➔ คำบรรยาย) -->
   <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none; pointer-events: none;" aria-hidden="true">
     <div id="lightbox-content-wrapper-el">
       <div class="sheet-drag-pill-bar" id="lightbox-drag-bar" aria-hidden="true"></div>
@@ -595,14 +595,19 @@
       <button id="closeLightboxBtn" type="button" class="lightbox-close-circle-btn" aria-label="ปิดหน้าต่างโปรไฟล์">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
+      
       <div class="lightbox-scroll-body" id="lightboxScrollBody" style="-webkit-overflow-scrolling: touch;">
         <div class="lightbox-grid-layout">
+          
+          <!-- คอลัมน์ซ้าย: รูปภาพหลัก + สไลด์ภาพอัลบั้ม -->
           <div class="lightbox-image-column">
             <div class="lightbox-hero-container">
               <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5.6'%3E%3C/svg%3E" alt="รูปโปรไฟล์ตัวจริงตรงปก" width="400" height="560">
             </div>
             <div id="lightboxThumbnailStrip"></div>
           </div>
+          
+          <!-- คอลัมน์ขวา: รายละเอียดการตัดสินใจ (เรียงตามลำดับความต้องการลูกค้า) -->
           <div class="lightbox-details">
             <header style="display: flex; flex-direction: column; gap: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
@@ -612,36 +617,54 @@
                 <div id="lightbox-availability-badge-wrapper"></div>
               </div>
             </header>
+
             <div id="lightboxQuote" class="lightbox-quote-card" style="display: none;"></div>
             <div id="lightboxTags" class="lightbox-tags-row"></div>
+
+            <!-- 1. สเปกพื้นฐาน (อายุ / สัดส่วน / ส่วนสูง / พิกัด) -->
             <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 4px;">
               <div id="lightboxDetailsCompact"></div>
             </div>
-            <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 4px;">
-              <div id="lightboxDescriptionContent" style="font-size: 11.5px; color: var(--text-sub); line-height: 1.5; white-space: pre-wrap;"></div>
-            </div>
+
+            <!-- 2. ตารางเรทราคา 3 ช่อง (ย้ายขึ้นมาเหนือปุ่มไลน์ ให้ลูกค้าเห็นราคาทันที) -->
+            <section id="lightboxRatesSection" style="margin-top: 10px; background: #FFFFFF; border-radius: 16px; padding: 12px 14px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.05);">
+              <h4 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13px; margin: 0 0 8px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยวฟิวแฟน (จ่ายหน้างาน)</h4>
+              <div id="lightboxRatesGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;"></div>
+            </section>
+
+            <!-- 3. ปุ่มแอดไลน์ CTA + ปุ่มแชร์ (เห็นราคาปุ๊บ มีปุ่มพร้อมให้กดทักทันที) -->
             <div id="line-btn-sticky-wrapper" style="margin-top: 10px; width: 100%;"></div>
+
+            <!-- 4. คำบรรยายสไตล์ฟิวแฟนเฉพาะตัว (ให้อ่านเพื่อเพิ่มเวลาบนหน้าเว็บ Dwell Time) -->
+            <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 10px;">
+              <div id="lightboxDescriptionContent" style="font-size: 12px; color: var(--text-sub); line-height: 1.6; white-space: pre-wrap;"></div>
+            </div>
+
+            <!-- 5. ส่วนขยายความปลอดภัยและคำแนะนำเพิ่มเติม -->
             <div id="lightboxExtendedSections" style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 16px;">
-              <section id="lightboxRatesSection" style="background: #FFFFFF; border-radius: 16px; padding: 14px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
-                <h4 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยวฟิวแฟน (เรทมาตรฐาน)</h4>
-                <div id="lightboxRatesGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;"></div>
-              </section>
+              
+              <!-- กล่องคำถามพบบ่อย (FAQ) -->
               <section id="lightboxFaqSection">
                 <h4 id="lightboxFaqTitle" style="color: #140F22; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">คำถามพบบ่อยเกี่ยวกับการนัดหมาย</h4>
                 <div id="lightboxFaqList" style="display: flex; flex-direction: column; gap: 8px;"></div>
               </section>
-              <!-- กล่องรับประกันความปลอดภัยแทนที่กล่องรีวิวหลอกเดิม -->
+
+              <!-- กล่องมาตรฐานความปลอดภัย (Zero-Deposit) -->
               <section id="lightboxAssuranceSection" style="background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px;">
                 <h4 style="color: #7C3AED; font-size: 13px; font-weight: 900; margin: 0 0 8px 0; text-align: center;">🛡️ มาตรฐานความพึงพอใจและความปลอดภัย</h4>
                 <p style="font-size: 11.5px; color: #475569; line-height: 1.6; margin: 0; text-align: center;">
                   มั่นใจได้ด้วยระบบนัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีมัดจำล่วงหน้าทุกกรณี หากไม่ตรงปกสามารถปฏิเสธและยกเลิกได้ทันที
                 </p>
               </section>
+
+              <!-- แนะนำน้องๆ โซนเดียวกัน -->
               <section id="lightboxRelatedSection" style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
                 <h4 id="lightboxRelatedTitle" style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติม</h4>
                 <div id="lightboxRelatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;"></div>
                 <div id="lightboxRelatedMoreLink" style="text-align: center;"></div>
               </section>
+
+              <!-- ข้อตกลงอายุ 20+ และกฎหมาย -->
               <section id="lightboxSafetySection" style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
                 <h4 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; text-align: center; margin: 0 0 8px 0;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h4>
                 <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 13px; font-size: 11px; color: #64748B; line-height: 1.65;">
@@ -650,6 +673,7 @@
                   <p style="margin: 0;"><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy):</strong> ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุด</p>
                 </div>
               </section>
+
             </div>
           </div>
         </div>
