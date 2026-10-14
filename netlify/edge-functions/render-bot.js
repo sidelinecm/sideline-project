@@ -69,28 +69,36 @@ const PROVINCE_NAME_MAP = {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    .replace(/[\uD800-\uDFFF]/g, "")
-    .replace(/\uFFFD/g, "")
-    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺.]+/g, " ")
+    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม 1.5k)
+    .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
+    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
+    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
+    
+    // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
-    .replace(/ฟิวแฟว/g, "ฟิวแฟน")
-    .replace(/ตรงปก\s*%/g, "ตรงปก 100%")
-    .replace(/ตรงปก\s*💯\s*%/g, "ตรงปก 100%")
+    .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
+    .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
+    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%")
+    
+    // 3. กรองคำล่อแหลมแบบไม่ทำให้ไวยากรณ์พัง
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
-.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
-.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
-   .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "ฟิวแฟน ")
-    .replace(/(ฟิวแฟน\s*)+/gi, "ฟิวแฟน ")
-    .replace(/[\*\!\_]/g, "")
+    
+    // 4. จัดระเบียบคำซ้ำ
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+    
+    // 5. ล้างเศษเครื่องหมายวรรคตอน
+    .replace(/([!*~_·\-\/])\s*\1+/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -183,6 +191,7 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
+// ✅ สร้าง 2 ย่อหน้าคุณภาพสูง มีมิติภาพลักษณ์ + ความรู้สึกฟิวแฟนแท้ๆ
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
   const hash = String(p.slug || p.id || displayName).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const hNum = parseInt(height, 10) || 160;
@@ -195,49 +204,49 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
   else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en")) persona = "party";
   else if (rawTags.includes("อวบ") || wNum >= 54) persona = "curvy";
 
-  // 🟢 คลังคำสไตล์คนจริง: อบอุ่น เป็นกันเอง ชวนเดต ไม่ประดิษฐ์คำแปลกๆ
   const matrix = {
     petite: {
-      vibes: ["สาวสวยตัวเล็ก สเปกน่ารักสดใส", "น้องวัยใส ไซส์มินิ ขี้อ้อนเอาใจเก่ง", "สาวน้อยน่าทะนุถนอม ยิ้มหวานเป็นกันเอง"],
-      cares: ["เน้นดูแลฟิวแฟนแท้ๆ เทคแคร์อบอุ่นเหมือนไปเดต", "คุยสนุก คลายเหงา อยู่ด้วยแล้วสบายใจไม่อึดอัด", "เอาใจใส่ทุกรายละเอียด ไม่เร่งเวลา"]
+      p1: [
+        `หากคุณกำลังมองหาความผ่อนคลายที่ไร้ความเกร็งใน${provinceName} ${displayName} คือสาวสวยไซส์มินิน่าทะนุถนอม รูปร่างกะทัดรัด สัดส่วนชวนมอง ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) พกพาผิวพรรณเนียนละเอียด กลิ่นกายหอมสะอาด และรอยยิ้มหวานเป็นธรรมชาติ การันตีตัวจริงสวยสดใสตรงปก 100% ไม่จืดชืดแน่นอนค่ะ`,
+        `${displayName} สาวสวยวัยใสสไตล์น่ารัก โซน${zone} จ.${provinceName} โดดเด่นด้วยเสน่ห์ความสดใส รูปร่างตัวเล็กพิมพ์นิยม ${stats} ผิวขาวออร่า ให้ความรู้สึกอบอุ่น สบายตา และมีชีวิตชีวาตั้งแต่แรกพบ`
+      ],
+      p2: [
+        `สไตล์การดูแลเน้นฟิวแฟน (Girlfriend Experience) แท้ๆ พูดจาไพเราะ อ่อนหวาน ขี้อ้อนเอาใจเก่งอย่างพอเหมาะ พร้อมเป็นเพื่อนเคียงข้างไม่ว่าจะนั่งทานข้าว คาเฟ่ หรือพักผ่อนส่วนตัว ดูแลดั่งคนพิเศษ ไม่มีการเร่งรีบดูเวลา ให้คุณได้คลายความเหนื่อยล้าอย่างเต็มที่`,
+        `เสน่ห์มัดใจคือการเทคแคร์อย่างใกล้ชิดและจริงใจ ชวนคุยเก่ง สนทนาลื่นไหล ไร้ความอึดอัด ให้ความรู้สึกสบายใจเสมือนได้ออกเดตกับแฟนสาวคนโปรดในบรรยากาศส่วนตัวสูงสุด`
+      ]
     },
     model: {
-      vibes: ["สาวสวยหุ่นนางแบบ บุคลิกดี โปรไฟล์พรีเมียม", "สาวสวยลุคคุณหนู หุ่นเพรียว มีเสน่ห์สะกดสายตา", "เพื่อนเที่ยวระดับ VIP ควงออกงานได้ไม่อายใคร"],
-      cares: ["พร้อมเป็นเพื่อนทานข้าว ดินเนอร์ ออกงานสังคมอย่างมั่นใจ", "วางตัวดี สุภาพ ให้เกียรติและดูแลอย่างเอ็กซ์คลูซีฟ", "สร้างช่วงเวลาพักผ่อนสุดพิเศษและน่าประทับใจ"]
-    },
-    party: {
-      vibes: ["เด็กเอ็น (EN) ตัวท็อป สายปาร์ตี้ เฟรนด์ลี่คุยสนุก", "เพื่อนเที่ยวสายบันเทิง ร่าเริง ชงเหล้าเก่ง", "สายเอ็นเตอร์เทนน่ารัก ยิ้มเก่ง ละลายพฤติกรรมเยี่ยม"],
-      cares: ["สร้างบรรยากาศปาร์ตี้ให้สนุกสนาน ไม่ปล่อยให้เหงา", "ดูแลเพื่อนดื่มอย่างรู้ใจ เอนเตอร์เทนเป็นธรรมชาติ", "พร้อมร่วมทริปสังสรรค์ นั่งชิลร้านโปรด"]
-    },
-    curvy: {
-      vibes: ["สาวสวยหุ่นอวบอิ่ม สเปกสาวทรงโต ผิวพรรณดี", "สาวสวยมีน้ำมีนวล กอดอุ่น นุ่มนวลน่าหลงใหล", "เพื่อนเที่ยวหุ่นเย้ายวน น่ารัก ขี้เล่นเป็นกันเอง"],
-      cares: ["เทคแคร์ใกล้ชิด ดูแลอ่อนโยน ผ่อนคลายตั้งแต่แรกพบ", "คุยเก่ง เอาใจเก่ง ให้ความรู้สึกเป็นกันเองดุจคนรัก", "ไม่เร่งรีบ ดูแลเต็มที่ด้วยความจริงใจ"]
+      p1: [
+        `สำหรับผู้ที่มองหาเพื่อนเที่ยวระดับพรีเมียม ${displayName} คือนิยามของสาวสวยหุ่นเพรียว สูงโปร่ง ${height} ซม. สัดส่วนลงตัว ${stats} บุคลิกภาพสง่างาม วางตัวดี มีเสน่ห์สะกดสายตา พร้อมเป็นเพื่อนร่วมโต๊ะอาหาร ดินเนอร์ หรือออกงานสังคมได้อย่างมั่นใจ`,
+        `โดดเด่นด้วยลุคคุณหนูพรีเมียม ${displayName} พกพาความมั่นใจและสัดส่วนที่เป๊ะทุกมุมมอง ผิวพรรณผุดผ่อง สะอาดสะอ้าน ทุกภาพโปรไฟล์ผ่านการยืนยันตัวตนจริง ไร้การแต่งรูปหลอกตา`
+      ],
+      p2: [
+        `บริการด้วยมารยาทสุภาพ ให้เกียรติผู้ใช้บริการระดับสูงสุด สนทนาลื่นไหล สร้างบรรยากาศที่น่าประทับใจและผ่อนคลายในค่ำคืนพิเศษ ไม่เร่งเวลา พร้อมสร้างความทรงจำที่น่าจดจำในทุกการพบปะ`,
+        `เทคแคร์ดุจคนพิเศษด้วยมาตรฐานการดูแลระดับ VIP เป็นเพื่อนคู่คิด เพื่อนร่วมเดินทาง หรือเพื่อนพักผ่อนคลายเหงาที่มอบทั้งความสบายใจและรอยยิ้มอย่างแท้จริง`
+      ]
     },
     gfe: {
-      vibes: ["เพื่อนเที่ยวสไตล์แฟนสาวตัวจริง สุภาพ น่ารัก อบอุ่น", "สาวสวยอัธยาศัยดี ฟิวแฟนแท้ๆ เทคแคร์ดุจคนพิเศษ", "คนรู้ใจร่วมทริป ดูแลเอาใจใส่เป็นธรรมชาติ"],
-      cares: ["พร้อมเป็นเพื่อนทานข้าว ดูหนัง คาเฟ่ หรือพักผ่อนส่วนตัว", "ดูแลดุจคนรัก สุภาพ ให้เกียรติ ไม่เร่งเวลาแน่นอน", "สร้างความผ่อนคลายและรอยยิ้มตลอดการนัดหมาย"]
+      p1: [
+        `สัมผัสบรรยากาศความสุขและความสบายใจกับ ${displayName} สาวสวยอัธยาศัยดี โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วนสมส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) กลิ่นกายหอมละมุน รูปร่างทรงเสน่ห์ และมีรอยยิ้มพิมพ์ใจที่ทำให้บรรยากาศอบอุ่นขึ้นทันที`,
+        `${displayName} มอบภาพลักษณ์เพื่อนเที่ยวฟิวแฟนที่ใครเห็นก็ต้องหลงรัก ด้วยความเรียบร้อย น่ารัก ผิวพรรณดี และความเป็นธรรมชาติที่จับต้องได้ นัดพบตัวจริงสวยตรงปก 100%`
+      ],
+      p2: [
+        `เน้นการดูแลสไตล์คนรักตัวจริง (GFE) พูดหวาน เอาใจเก่ง พร้อมรับฟังและอยู่เคียงข้างให้คุณคลายจากความตึงเครียด ดูแลด้วยความอ่อนโยน จริงใจ และไม่เร่งงานแม้แต่นาทีเดียว`,
+        `ไม่ว่าจะร่วมโต๊ะอาหาร เดินเล่น หรือพักผ่อนในที่พักส่วนตัว ${displayName} จะทำให้คุณรู้สึกเหมือนได้ไปเที่ยวกับคนรู้ใจ ให้เกียรติ อบอุ่น และปลอดภัยไร้กังวลตลอดการนัดหมาย`
+      ]
     }
   };
 
-  const getSp = (arr, off) => arr[(hash + off) % arr.length];
-  const pData = matrix[persona] || matrix.gfe;
-  const v = getSp(pData.vibes, 1);
-  const c = getSp(pData.cares, 2);
+  const selected = matrix[persona] || matrix.gfe;
+  const part1 = selected.p1[hash % selected.p1.length];
+  const part2 = selected.p2[(hash + 1) % selected.p2.length];
 
-  const cleanLoc = (zone || "ในตัวเมือง").replace(/^ย่าน/g, "");
-  let bioPart = "";
-  if (p.description && p.description.trim().length > 6 && !/เรทราคา|มัดจำ|1500\/1|•ㅅ•/i.test(p.description)) {
-    bioPart = ` เธอบอกว่า: "${sanitizeThaiText(p.description)}"`;
+  let bioText = "";
+  if (p.description && p.description.trim().length > 10 && !/เรทราคา|มัดจำ|1500\/1|•ㅅ•/i.test(p.description)) {
+    bioText = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(124, 58, 237, 0.15);"><strong style="color: #7C3AED;">ข้อความจากน้อง:</strong> "${sanitizeThaiText(p.description)}"</div>`;
   }
 
-  // สลับ 3 โครงสร้างประโยคแบบธรรมชาติ (ไม่ใช้คำว่า "ปัจจุบันอายุ" หรือ "สแตนด์บายพร้อมดูแล")
-  const patterns = [
-    `${displayName} (${v}) นัดพบในโซน ${cleanLoc} จ.${provinceName} อายุ ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${c}${bioPart} เรทเริ่มต้น ${priceDisplay} นัดเจอจ่ายหน้างานตัวจริง ไม่ต้องโอนมัดจำล่วงหน้าค่ะ`,
-    `หากคุณกำลังมองหา${v} แนะนำ ${displayName} โซน${cleanLoc} (${provinceName}) วัย ${age} ปี รูปร่าง ${stats} สูง ${height} ซม. ${c}${bioPart} ค่าบริการเริ่มต้น ${priceDisplay} จ่ายตรงกับน้องหน้างาน ปลอดภัย มั่นใจตรงปก 100%`,
-    `${displayName} สาวสวยโซน ${cleanLoc} จ.${provinceName} อายุ ${age} ปี หุ่น ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${v} ${c}${bioPart} เรทเพียง ${priceDisplay} เจอตัวจริงเช็คความตรงปกก่อนค่อยจ่ายเงิน ไม่มีความเสี่ยงเรื่องมัดจำค่ะ`
-  ];
-
-  return patterns[(hash + 3) % patterns.length];
+  return `<p style="margin: 0 0 8px 0; line-height: 1.65;">${part1}</p><p style="margin: 0; line-height: 1.65;">${part2}</p>${bioText}`;
 }
     
 
@@ -455,15 +464,16 @@ const schemaGraph = {
         "unitCode": "KGM"
       },
       "homeLocation": {
-        "@type": "Place",
-        "name": primaryZone || provinceNameThai,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": primaryZone || provinceNameThai,
-          "addressRegion": provinceNameThai,
-          "addressCountry": "TH"
-        }
-      }
+  "@type": "Place",
+  "name": `${primaryZone} ${provinceNameThai}`,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": primaryZone,
+    "addressLocality": primaryZone,
+    "addressRegion": provinceNameThai,
+    "addressCountry": "TH"
+  }
+}
     },
     {
       "@type": "BreadcrumbList",
@@ -741,9 +751,12 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
 
     <!-- Sticky Bottom CTA (รองรับ iPhone Safe Area + แชร์มี Fallback) -->
     <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -4px 25px rgba(0,0,0,0.06); z-index: 9999; display: flex; gap: 10px; align-items: center;">
-        <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
-            <i class="fab fa-line" style="font-size: 22px;"></i> จองคิว${escapeHTML(displayName)}
-        </a>
+       <!-- ✅ เติม Micro-Trust Badge จ่ายหน้างาน 100% ไร้มัดจำ -->
+<a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 12px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+    <i class="fab fa-line" style="font-size: 20px;"></i>
+    <span>จองคิว${escapeHTML(displayName)}</span>
+    <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
+</a>
         <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
             <i class="fas fa-share-alt" style="font-size: 17px;"></i>
         </button>

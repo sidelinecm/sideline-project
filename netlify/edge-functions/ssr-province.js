@@ -211,26 +211,36 @@ PROVINCE_SEO_DATA["samui"] = PROVINCE_SEO_DATA["suratthani"];
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // 1. ล้างรหัส Unicode เสีย, อิโมจิขยะวัยรุ่น (แยกจุด . ออกมา ไม่ลบทศนิยม 1.5)
     .replace(/[\uD800-\uDFFF]/g, "")
     .replace(/\uFFFD/g, "")
-    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺.]+/g, " ")
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
+    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลาซ้ำๆ เช่น ... แต่ไม่แตะ 1.5k
+    
+    // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // สระซ้ำ
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
-    .replace(/ฟิวแฟว/g, "ฟิวแฟน")
-    .replace(/มีอารมร่วม/g, "มีอารมณ์ร่วม")
+    .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
+    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%") // ดึงมาจาก render-bot ซิงค์ให้ครบ
+    
+    // 3. กรองคำล่อแหลมแบบ Single-Pass (ไม่วนแก้ซ้ำซ้อน และไม่ตัดจนคำแหว่ง)
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-   .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|จูบ|ลูบ\s*คลำ)/gi, "")
-.replace(/(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
-.replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
-    .replace(/มีอารมณ์?ร่วม/gi, "ดูแลเป็นกันเอง")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง") // ยุบรวมรอบเดียวจบ
     .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    
+    // 4. ล้างคำซ้ำซ้อน และจัดระเบียบคำว่าฟิวแฟน
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+    
+    // 5. ล้างเศษเครื่องหมายวรรคตอนที่ตกค้างจากการตัดคำ
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
     .replace(/\s*([!*~_·\-\/])\s*(?=[!*~_·\-\/])/g, "")
     .replace(/\s+/g, " ")
@@ -904,13 +914,11 @@ export default async (req, context) => {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-    const metaTitle = isNational 
-      ? "สาวรับงาน ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน ไม่มัดจำ | FirstModelHub"
-      : (provinceSlug === "chiangmai"
-          ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub"
-          : (provinceSlug === "chiangrai"
-              ? "รับงานเชียงราย ไซด์ไลน์เชียงราย ฟิวแฟนตรงปก ไม่มัดจำ | FirstModelHub"
-              : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน จ่ายหน้างาน | FirstModelHub`));
+   const metaTitle = isNational 
+  ? "สาวรับงาน ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน จ่ายหน้างาน | FirstModelHub" 
+  : (provinceSlug === "chiangmai" 
+      ? "รับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ วัยใสฟิวแฟน จ่ายหน้างาน | FirstModelHub" 
+      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน จ่ายหน้างาน | FirstModelHub`);
     
       
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
@@ -1250,10 +1258,7 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-  // 🟢 1. H1 พลังทำเงินสูงสุด: เอาคีย์เวิร์ดอันดับ 1 (รับงาน + ไซด์ไลน์) ขึ้นนำหน้าทันที
-    const ssrH1Html = isNational 
-      ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน</span>` 
-      : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`;
+  const ssrH1Html = isNational ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน</span>` : (provinceSlug === "chiangmai" ? `<span class="h1-line-1">รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่</span>\n<span class="h1-line-2">วัยใสนักศึกษา ฟิวแฟนตัวจริงตรงปก ปลอดภัยจ่ายหน้างาน 100%</span>` : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ</span>`);
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     // 🟢 2. รายชื่อย่านธรรมชาติ (คั่นด้วยจุลภาค อ่านลื่นไหล ไม่ติดกันเป็นพืด)
@@ -1537,7 +1542,7 @@ const popularLocationsFooter = `
         height: p.height || "",
         weight: p.weight || "",
         stats: p.stats || "",
-        description: cleanDesc.slice(0, 110), // 👈 ใช้ตัวแปร cleanDesc ที่กรองสะอาดแล้ว
+        description: cleanDesc.slice(0, 500), // 👈 ใช้ตัวแปร cleanDesc ที่กรองสะอาดแล้ว
         slogan: sanitizeThaiText(p.slogan || p.quote || ""),
         quote: sanitizeThaiText(p.quote || p.slogan || ""),
       
