@@ -140,7 +140,7 @@ function escapeHTML(str) {
 
 function stripHTML(str) {
   if (str == null) return "";
-  return String(str).replace(/<[^>]*>?/gm, "").trim();
+  return String(str).replace(/<\/(p|div|h\d)>|<br\s*\/?>/gi, " ").replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim();
 }
 
 function getDeterministicReviews(seedStr, count = 3) {
@@ -777,14 +777,13 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                 </section>
                 ` : ""}
 
-                <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
+              <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
                     <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
                     <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
                         <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
                         <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
                         <p><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
                     </div>
-                   <p style="margin-top: 0.4rem; margin-bottom: 0;"><strong style="color: #140F22;">✓ นโยบายการนัดหมาย</strong>: นัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้วจึงชำระเงินกับน้องหน้างานโดยตรง ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี</p>
                 </section>
             </article>
         </main>

@@ -612,8 +612,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
   if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
-  const vibeTagsHtml = Array.isArray(rawTags) && rawTags.length > 0
-    ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#/, ""))}</span>`).join("")
+ const vibeTagsHtml = Array.isArray(rawTags) && rawTags.length > 0
+    ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#+/, ""))}</span>`).join("")
     : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
 
   const isFiwFan = Array.isArray(rawTags) && rawTags.some(t => {
@@ -769,14 +769,13 @@ export default async (req, context) => {
     // 🟢 1. ระบบตรวจจับ Routing สำหรับหน้าแรก และ หน้ารายจังหวัด
     let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
     let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
-   if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
+  if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
     if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
 
     const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
     const provinceKeyVariants = [provinceSlug, cleanProvinceSlug];
     if (provinceSlug === "chiangmai") provinceKeyVariants.push("chiang-mai", "chiang_mai");
-    if (provinceSlug === "khonkaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
-    if (provinceSlug === "ayutthaya") provinceKeyVariants.push("phra-nakhon-si-ayutthaya");
+    if (provinceSlug === "khon-kaen" || provinceSlug === "khonkaen") provinceKeyVariants.push("khonkaen", "khon_kaen");
 
     // 🟢 กฎและคีย์เวิร์ดตรวจจับจังหวัด (สร้างไว้นอกฟังก์ชันเพื่อประหยัด RAM และรันได้เร็วที่สุด)
     const PROVINCE_DETECTION_RULES = [
@@ -1319,15 +1318,16 @@ const popularLocationsFooter = `
       finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
       finalHtml = finalHtml.replace('<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;"></span>', `<span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`);
 
-      // 🟢 ตัดกล่องที่ซ้ำกับหน้าแรกออกเมื่อเป็นหน้าจังหวัด (แก้ Doorway Pages ให้ Google)
+      // 🟢 ตัดกล่องที่ซ้ำกับหน้าแรกออกเมื่อเป็นหน้าจังหวัด ให้ลบรวมคอมเมนต์หัวเรื่องไปด้วย
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
-      finalHtml = finalHtml.replace(/<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id="seo-drawer-wrapper")/i, "");
-      finalHtml = finalHtml.replace(/<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
-      // 🔒 ตัดกล่องศูนย์รับเรื่องร้องเรียนขนาดยาว และกล่องโปรโตคอลความปลอดภัยที่ซ้ำกันทุกจังหวัดออก
-      finalHtml = finalHtml.replace(/<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
-      finalHtml = finalHtml.replace(/<section id="verification-process"[\s\S]*?<\/section>/i, "");
-    }
+      finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?(?=<!--\s*SEO Information Section)/i, "");
+      finalHtml = finalHtml.replace(/<!--\s*Editorial Digest\s*-->\s*<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
+      // 🔒 ตัดกล่องศูนย์รับเรื่องร้องเรียนและโปรโตคอลความปลอดภัยพร้อมคอมเมนต์
+      finalHtml = finalHtml.replace(/<!--\s*Trust & Safety Reporting Center\s*-->[\s\S]*?<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
+      finalHtml = finalHtml.replace(/<!--\s*Safety Protocol & Maps\s*-->\s*<section id="verification-process"[\s\S]*?<\/section>/i, "");
+    } // 👈 🟢 ต้องมีปีกกาปิดตรงนี้ครับ!
 
+    // 🟢 2 บรรทัดนี้ต้องอยู่นอก if เพราะต้องแสดงผลทั้งหน้าแรก และหน้ารายจังหวัด
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
@@ -1519,12 +1519,11 @@ const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-
                 </h2>
                 <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายหน้างาน ไร้มัดจำ</span>
             </div>
-            <div class="profile-grid profiles-grid-row">${fallbackCards}</div>
+          <div class="profile-grid profiles-grid-row">${fallbackCards}</div>
           </div>
         `;
       }
-      }
-    
+    }
 
     finalHtml = finalHtml.replace(
       /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, 
@@ -1550,7 +1549,7 @@ const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-
       const cleanGallery = Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [];
 
      let cleanDesc = sanitizeThaiText(p.description || "").trim();
-      const isSpamText = /เรทราคา|ไม่รวมห้อง|•ㅅ•|づ♡|รายละเอียดค่ะ|ค่ารถคิดราคา|ตรงปก%|1,500\/\s*1|1500\/1/i.test(cleanDesc) || cleanDesc.length < 12;
+      const isSpamText = /เรทราคา|ไม่รวมห้อง|•ㅅ•|づ♡|รายละเอียดค่ะ|ค่ารถคิดราคา|ตรงปก%|1,500\/\s*1|1500\/1|line\.me|lin\.ee/i.test(cleanDesc) || cleanDesc.length < 12;
 
       if (isSpamText) {
         // ✅ ถ้าเจอข้อความก๊อปปี้ ให้เปลี่ยนเป็นคำบรรยาย SEO เฉพาะบุคคล (ไม่ซ้ำกันเด็ดขาด)
@@ -1606,7 +1605,7 @@ const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
     finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
-    finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
+   finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
