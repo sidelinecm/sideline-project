@@ -66,6 +66,30 @@ const PROVINCE_NAME_MAP = {
   "phra-nakhon-si-ayutthaya": "อยุธยา"
 };
 
+
+// 🟢 เพิ่มฟังก์ชันคำนวณเวลาจริงจากฐานข้อมูล Supabase ตรงนี้
+function getRealTimeAgo(dateInput) {
+  if (!dateInput) return "วันนี้";
+  const updatedTime = typeof dateInput === "number" ? dateInput : new Date(dateInput).getTime();
+  if (isNaN(updatedTime) || updatedTime <= 0) return "วันนี้";
+
+  const now = Date.now();
+  const diffMinutes = Math.floor((now - updatedTime) / (1000 * 60));
+
+  if (diffMinutes < 5) return "ออนไลน์เมื่อสักครู่";
+  if (diffMinutes < 60) return `อัปเดตเมื่อ ${Math.max(1, diffMinutes)} นาทีที่แล้ว`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `อัปเดตเมื่อ ${diffHours} ชั่วโมงที่แล้ว`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "อัปเดตเมื่อวานนี้";
+  if (diffDays < 7) return `อัปเดตเมื่อ ${diffDays} วันที่แล้ว`;
+
+  return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
+}
+
+
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -191,63 +215,60 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// ✅ สร้าง 2 ย่อหน้าคุณภาพสูง มีมิติภาพลักษณ์ + ความรู้สึกฟิวแฟนแท้ๆ
+// 🟢 ระบบ AI Persona Generator อัจฉริยะ: คำนวณจากสเปกจริง + พิกัดย่านจริง (ภาษาพูดคนจริง 100% ไร้คำซ้ำ)
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  const hash = String(p.slug || p.id || displayName).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  // สกัดตัวเลขสเปกจริง
   const hNum = parseInt(height, 10) || 160;
   const wNum = parseInt(weight, 10) || 48;
+  const rawStats = String(stats || "").trim();
+  const bustNum = parseInt(rawStats.split(/[-/]/)[0], 10) || 34;
+  const pLocation = sanitizeThaiText(p.location || zone || provinceName);
+
+  // สกัดแท็กและคีย์เวิร์ด
   const rawTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
+  const isTalkative = rawTags.includes("คุยสนุก") || rawTags.includes("อัธยาศัยดี");
+  const isCaring = rawTags.includes("เอาใจเก่ง") || rawTags.includes("ฟิวแฟน") || rawTags.includes("ขี้อ้อน");
+  const isRelaxed = rawTags.includes("ไม่เร่ง") || rawTags.includes("ตามใจ");
+  const isWhiteSkin = rawTags.includes("ขาว") || rawTags.includes("ผิวขาว");
 
-  let persona = "gfe";
-  if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก") || (hNum <= 158 && wNum <= 46)) persona = "petite";
-  else if (rawTags.includes("นางแบบ") || rawTags.includes("vip") || hNum >= 166) persona = "model";
-  else if (rawTags.includes("ชงเหล้า") || rawTags.includes("ปาร์ตี้") || rawTags.includes("en")) persona = "party";
-  else if (rawTags.includes("อวบ") || wNum >= 54) persona = "curvy";
+  // 1. ประกอบประโยคท่อนที่ 1: แนะนำรูปร่างและตัวตนตามตัวเลขจริง
+  let lookTrait = "รูปร่างสมส่วนกำลังดี";
+  if (hNum <= 158 && wNum <= 46) lookTrait = "สาวสวยไซส์มินิ ตัวเล็กน่ารัก พกพาง่าย";
+  else if (hNum >= 165) lookTrait = "สาวสวยหุ่นเพรียว สูงโปร่ง ขาเรียว บุคลิกภาพดี";
+  else if (bustNum >= 36) lookTrait = "สาวสวยหุ่นเซ็กซี่ ทรวดทรงอกเอวชัดเจนสะดุดตา";
+  else if (wNum >= 54) lookTrait = "สาวสวยสายอวบอิ่ม เนื้อนมไข่ มีเสน่ห์น่ากอด";
 
-  const matrix = {
-    petite: {
-      p1: [
-        `หากคุณกำลังมองหาความผ่อนคลายที่ไร้ความเกร็งใน${provinceName} ${displayName} คือสาวสวยไซส์มินิน่าทะนุถนอม รูปร่างกะทัดรัด สัดส่วนชวนมอง ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) พกพาผิวพรรณเนียนละเอียด กลิ่นกายหอมสะอาด และรอยยิ้มหวานเป็นธรรมชาติ การันตีตัวจริงสวยสดใสตรงปก 100% ไม่จืดชืดแน่นอนค่ะ`,
-        `${displayName} สาวสวยวัยใสสไตล์น่ารัก โซน${zone} จ.${provinceName} โดดเด่นด้วยเสน่ห์ความสดใส รูปร่างตัวเล็กพิมพ์นิยม ${stats} ผิวขาวออร่า ให้ความรู้สึกอบอุ่น สบายตา และมีชีวิตชีวาตั้งแต่แรกพบ`
-      ],
-      p2: [
-        `สไตล์การดูแลเน้นฟิวแฟน (Girlfriend Experience) แท้ๆ พูดจาไพเราะ อ่อนหวาน ขี้อ้อนเอาใจเก่งอย่างพอเหมาะ พร้อมเป็นเพื่อนเคียงข้างไม่ว่าจะนั่งทานข้าว คาเฟ่ หรือพักผ่อนส่วนตัว ดูแลดั่งคนพิเศษ ไม่มีการเร่งรีบดูเวลา ให้คุณได้คลายความเหนื่อยล้าอย่างเต็มที่`,
-        `เสน่ห์มัดใจคือการเทคแคร์อย่างใกล้ชิดและจริงใจ ชวนคุยเก่ง สนทนาลื่นไหล ไร้ความอึดอัด ให้ความรู้สึกสบายใจเสมือนได้ออกเดตกับแฟนสาวคนโปรดในบรรยากาศส่วนตัวสูงสุด`
-      ]
-    },
-    model: {
-      p1: [
-        `สำหรับผู้ที่มองหาเพื่อนเที่ยวระดับพรีเมียม ${displayName} คือนิยามของสาวสวยหุ่นเพรียว สูงโปร่ง ${height} ซม. สัดส่วนลงตัว ${stats} บุคลิกภาพสง่างาม วางตัวดี มีเสน่ห์สะกดสายตา พร้อมเป็นเพื่อนร่วมโต๊ะอาหาร ดินเนอร์ หรือออกงานสังคมได้อย่างมั่นใจ`,
-        `โดดเด่นด้วยลุคคุณหนูพรีเมียม ${displayName} พกพาความมั่นใจและสัดส่วนที่เป๊ะทุกมุมมอง ผิวพรรณผุดผ่อง สะอาดสะอ้าน ทุกภาพโปรไฟล์ผ่านการยืนยันตัวตนจริง ไร้การแต่งรูปหลอกตา`
-      ],
-      p2: [
-        `บริการด้วยมารยาทสุภาพ ให้เกียรติผู้ใช้บริการระดับสูงสุด สนทนาลื่นไหล สร้างบรรยากาศที่น่าประทับใจและผ่อนคลายในค่ำคืนพิเศษ ไม่เร่งเวลา พร้อมสร้างความทรงจำที่น่าจดจำในทุกการพบปะ`,
-        `เทคแคร์ดุจคนพิเศษด้วยมาตรฐานการดูแลระดับ VIP เป็นเพื่อนคู่คิด เพื่อนร่วมเดินทาง หรือเพื่อนพักผ่อนคลายเหงาที่มอบทั้งความสบายใจและรอยยิ้มอย่างแท้จริง`
-      ]
-    },
-    gfe: {
-      p1: [
-        `สัมผัสบรรยากาศความสุขและความสบายใจกับ ${displayName} สาวสวยอัธยาศัยดี โซน${zone} (${provinceName}) วัย ${age} ปี สัดส่วนสมส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) กลิ่นกายหอมละมุน รูปร่างทรงเสน่ห์ และมีรอยยิ้มพิมพ์ใจที่ทำให้บรรยากาศอบอุ่นขึ้นทันที`,
-        `${displayName} มอบภาพลักษณ์เพื่อนเที่ยวฟิวแฟนที่ใครเห็นก็ต้องหลงรัก ด้วยความเรียบร้อย น่ารัก ผิวพรรณดี และความเป็นธรรมชาติที่จับต้องได้ นัดพบตัวจริงสวยตรงปก 100%`
-      ],
-      p2: [
-        `เน้นการดูแลสไตล์คนรักตัวจริง (GFE) พูดหวาน เอาใจเก่ง พร้อมรับฟังและอยู่เคียงข้างให้คุณคลายจากความตึงเครียด ดูแลด้วยความอ่อนโยน จริงใจ และไม่เร่งงานแม้แต่นาทีเดียว`,
-        `ไม่ว่าจะร่วมโต๊ะอาหาร เดินเล่น หรือพักผ่อนในที่พักส่วนตัว ${displayName} จะทำให้คุณรู้สึกเหมือนได้ไปเที่ยวกับคนรู้ใจ ให้เกียรติ อบอุ่น และปลอดภัยไร้กังวลตลอดการนัดหมาย`
-      ]
-    }
-  };
+  let skinTrait = isWhiteSkin ? "ผิวขาวสะอาดสะอ้าน" : "ผิวพรรณเนียนสวย ดูสุขภาพดี";
+  let personalityTrait = "นิสัยน่ารัก ยิ้มแย้ม อัธยาศัยดี คุยสนุก";
+  if (isTalkative) personalityTrait = "คุยเก่ง ชวนคุยเพลิน อารมณ์ดี เป็นกันเอง ไม่มีช่วงเกร็ง";
+  else if (isCaring) personalityTrait = "ขี้อ้อน เอาใจเก่ง พูดจาเพราะ นุ่มนวล";
 
-  const selected = matrix[persona] || matrix.gfe;
-  const part1 = selected.p1[hash % selected.p1.length];
-  const part2 = selected.p2[(hash + 1) % selected.p2.length];
+  const p1 = `${displayName} ${lookTrait} สแตนด์บายใน${provinceName} วัย ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${skinTrait} ${personalityTrait} ไม่ตึงไม่เหวี่ยง การันตีตัวจริงสวยตรงปก 100% ค่ะ`;
 
+  // 2. ประกอบประโยคท่อนที่ 2: สไตล์การเทคแคร์และเวลา (ตามความเป็นจริง)
+  let careStyle = "เน้นการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ คอยเทคแคร์ให้ผ่อนคลาย";
+  if (isCaring && isRelaxed) careStyle = "เน้นฟิวแฟนแบบใกล้ชิด เอาใจเก่ง ไม่เร่งรอบ ให้เวลาเต็มที่เหมือนอยู่กับคนรู้ใจ";
+  else if (isRelaxed) careStyle = "สไตล์การดูแลเป็นกันเอง สบายๆ ชิลล์ๆ ไม่เร่งงาน";
+
+  const p2 = `สไตล์การดูแล: ${careStyle} ไม่ว่าจะนัดทานข้าว นั่งคาเฟ่ ดินเนอร์ หรือพักผ่อนส่วนตัวในที่พัก พร้อมดูแลด้วยความสุภาพ จริงใจ และให้เกียรติลูกค้าค่ะ`;
+
+  // 3. ประกอบประโยคท่อนที่ 3: พิกัดห้องจริง + นโยบายความปลอดภัย
+  let roomContext = `พิกัดบริการ: มีห้องพักส่วนตัวย่าน${pLocation} สะอาด มิดชิด ปลอดภัย มีที่จอดรถสะดวก หรือนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรมในเมืองได้รวดเร็วภายใน 15-30 นาที`;
+  if (pLocation.includes("นิมมาน") || pLocation.includes("เจ็ดยอด") || pLocation.includes("กังสดาล")) {
+    roomContext = `พิกัดบริการ: พักอยู่ในโซน ${pLocation} เดินทางสะดวก มิดชิด นัดหมายเดินทางไปพบที่โรงแรมหรือคอนโดส่วนตัวในพื้นที่ได้อย่างสะดวกรวดเร็ว`;
+  }
+
+  const p3 = `${roomContext} • มั่นใจได้ 100% ด้วยมาตรฐานนัดพบเจอตัวจริง ตรวจสอบความถูกต้องหน้างานก่อน จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีมัดจำล่วงหน้าทุกกรณีค่ะ`;
+
+  // 4. สกัดข้อความจริงของน้อง (ถ้าแอดมินพิมพ์มาดี จะนำมาเสริมท้าย แต่ถ้าพิมพ์สแปมมา จะตัดทิ้งอัตโนมัติ)
   let bioText = "";
-  if (p.description && p.description.trim().length > 10 && !/เรทราคา|มัดจำ|1500\/1|•ㅅ•/i.test(p.description)) {
+  if (p.description && p.description.trim().length > 10 && !/เรทราคา|ไม่รวมห้อง|•ㅅ•|1500\/1|มัดจำ/i.test(p.description)) {
     bioText = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(124, 58, 237, 0.15);"><strong style="color: #7C3AED;">ข้อความจากน้อง:</strong> "${sanitizeThaiText(p.description)}"</div>`;
   }
 
-  return `<p style="margin: 0 0 8px 0; line-height: 1.65;">${part1}</p><p style="margin: 0; line-height: 1.65;">${part2}</p>${bioText}`;
+  return `<p style="margin: 0 0 8px 0; line-height: 1.65;">${p1}</p><p style="margin: 0 0 8px 0; line-height: 1.65;">${p2}</p><p style="margin: 0; line-height: 1.65;">${p3}</p>${bioText}`;
 }
+
     
 
 export default async (req, context) => {
@@ -402,10 +423,16 @@ if (provinceKey) {
       : "ไม่ระบุ";
   
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
-    const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
+const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
 
-    // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
-    const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
+// 🟢 คำนวณเวลาจริงและสถานะจาก Database ก่อนนำไปใช้ใน HTML
+const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
+const isOnlineNow = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
+const realStatusText = profile.availability || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
+const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
+
+// 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
+const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
     const cleanHeading = `${displayName} (${primaryZone}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`;
 const pageTitle = `${displayName} (${primaryZone}) ไซด์ไลน์${provinceNameThai} รับงานฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
@@ -429,14 +456,14 @@ const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "ProfilePage",
-      "@id": `${canonicalUrl}#webpage`,
-      "url": canonicalUrl,
-      "name": stripHTML(pageTitle),
-      "description": stripHTML(metaDescription),
-      "inLanguage": "th-TH",
-      "dateModified": new Date().toISOString(),
-      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+     "@type": "ProfilePage",
+    "@id": `${canonicalUrl}#webpage`,
+    "url": canonicalUrl,
+    "name": stripHTML(pageTitle),
+    "description": stripHTML(metaDescription),
+    "inLanguage": "th-TH",
+    "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
+    "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
       "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
@@ -630,10 +657,20 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
                    <h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">${escapeHTML(cleanHeading)}</h1>
                    
-                    <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 14px; border-radius: 100px;">
-                        <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
-                        <span style="color: #065F46; font-size: 11px; font-weight: 700;">(ยืนยันตัวตนจริง ตรงปก 100% ปลอดภัยจ่ายหน้างาน)</span>
-                    </div>
+                  
+
+<div style="display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
+    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 12px; border-radius: 100px;">
+        <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
+        <span style="color: #065F46; font-size: 11px; font-weight: 700;">ตรงปก 100%</span>
+    </div>
+    <div style="display: inline-flex; align-items: center; gap: 5px; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor}; display: inline-block;"></span>
+        <span style="color: #140F22; font-size: 11px; font-weight: 800;">${escapeHTML(realStatusText)}</span>
+        <span style="color: #94A3B8; font-size: 10px;">•</span>
+        <span style="color: #64748B; font-size: 11px; font-weight: 600;">${realTimeText}</span>
+    </div>
+</div>
                 </header>
 
                <!-- 🟢 1. สเปกพื้นฐาน 4 ช่อง (สัดส่วน / ส่วนสูง / อายุ / พิกัด) -->

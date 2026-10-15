@@ -208,6 +208,28 @@ PROVINCE_SEO_DATA["hatyai"] = PROVINCE_SEO_DATA["songkhla"];
 PROVINCE_SEO_DATA["surat-thani"] = PROVINCE_SEO_DATA["suratthani"];
 PROVINCE_SEO_DATA["samui"] = PROVINCE_SEO_DATA["suratthani"];
 
+// 🟢 เพิ่มฟังก์ชันคำนวณเวลาจริงจาก Database สำหรับหน้ารวมจังหวัด
+function getRealTimeAgo(dateInput) {
+  if (!dateInput) return "วันนี้";
+  const updatedTime = typeof dateInput === "number" ? dateInput : new Date(dateInput).getTime();
+  if (isNaN(updatedTime) || updatedTime <= 0) return "วันนี้";
+
+  const now = Date.now();
+  const diffMinutes = Math.floor((now - updatedTime) / (1000 * 60));
+
+  if (diffMinutes < 5) return "ออนไลน์เมื่อสักครู่";
+  if (diffMinutes < 60) return `อัปเดตเมื่อ ${Math.max(1, diffMinutes)} นาทีที่แล้ว`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `อัปเดตเมื่อ ${diffHours} ชั่วโมงที่แล้ว`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "อัปเดตเมื่อวานนี้";
+  if (diffDays < 7) return `อัปเดตเมื่อ ${diffDays} วันที่แล้ว`;
+
+  return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
+}
+
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -357,8 +379,8 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
 
  chiangmai: {
     headline: `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ตัวจริงตรงปก นัดเจอง่าย จ่ายหน้างาน`,
-    intro: `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา และสาวสวยหุ่นดี คัดสรรโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจ ปลอดภัยด้วยมาตรฐานจ่ายหน้างาน เจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระค่าบริการ หมดกังวลเรื่องการโดนหลอกมัดจำล่วงหน้าค่ะ`,
-    convenience: `พร้อมเดินทางดูแลถึงโรงแรม คอนโด และที่พักส่วนตัวในจังหวัดเชียงใหม่${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
+    intro: `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา มช. และสาวสวยหุ่นดี คัดสรรเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจปลอดภัยด้วยมาตรฐานจ่ายหน้างาน นัดเจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระเงิน หมดกังวลเรื่องการโดนหลอกโอนมัดจำล่วงหน้า 100% ค่ะ`,
+    convenience: `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่วเชียงใหม่ เช่น โซนโรงแรมเลิฟโบ๊ต, มูฟเม้นท์, 3Q, ไซน่าชิก ตลอดจนที่พักย่าน${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
   },
 
   bangkok: {
@@ -928,9 +950,16 @@ const nameSig = `${cleanName}_${realProvince}`;
     const mapZoom = isNational ? 6 : 12;
     const mapQuery = isNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${provinceNameThai}`);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
-    const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
+   const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 1. กำหนดโครงสร้างหน้าเว็บ (CollectionPage) แบบมาตรฐาน ไร้ Dangling ID
+    // 🟢 คำนวณหาเวลาอัปเดตล่าสุดจริงของน้องในจังหวัดนั้นจาก Database ก่อน
+    const latestUpdateMillis = profilesList.reduce((latest, p) => {
+      const t = new Date(p.updated_at || p.created_at || 0).getTime();
+      return t > latest ? t : latest;
+    }, 0);
+    const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
+
+    // 🟢 1. กำหนดโครงสร้างหน้าเว็บ (CollectionPage) พร้อมระบุวันแก้ไขจริงจาก Database
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -938,10 +967,8 @@ const nameSig = `${cleanName}_${realProvince}`;
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-     // ✅ ส่งเวลาปัจจุบัน (ISO String) สดใหม่ตลอดเวลาที่บอทเข้ามา Crawl
-"dateModified": new Date().toISOString(),
+      "dateModified": latestUpdateMillis > 0 ? new Date(latestUpdateMillis).toISOString() : new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
-      // ✅ ระบุพื้นที่ที่เกี่ยวข้องเป็น Entity พื้นที่จริง ไม่แอบอ้างเป็นหน้าร้าน
       "about": isNational
         ? {
             "@type": "Country",
@@ -1296,6 +1323,9 @@ const popularLocationsFooter = `
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
       finalHtml = finalHtml.replace(/<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id="seo-drawer-wrapper")/i, "");
       finalHtml = finalHtml.replace(/<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
+      // 🔒 ตัดกล่องศูนย์รับเรื่องร้องเรียนขนาดยาว และกล่องโปรโตคอลความปลอดภัยที่ซ้ำกันทุกจังหวัดออก
+      finalHtml = finalHtml.replace(/<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
+      finalHtml = finalHtml.replace(/<section id="verification-process"[\s\S]*?<\/section>/i, "");
     }
 
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
@@ -1337,7 +1367,9 @@ const popularLocationsFooter = `
 
     
     
-    const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ:</strong> ข้อมูลโปรไฟล์และสถานะการสแตนด์บายในพื้นที่${escapeHTML(provinceNameThai)} ได้รับการตรวจสอบอย่างสม่ำเสมอ การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน </div> `;
+    
+
+const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ (${realProvinceTimeText}):</strong> มีน้องๆ สแตนด์บายใน${escapeHTML(provinceNameThai)} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวตนตรงปกแล้ว นัดเจอจ่ายหน้างาน ปลอดภัย 100% </div> `;
 
    
     finalHtml = finalHtml.replace(/class=["']seo-drawer-wrapper collapsed["']/gi, 'class="seo-drawer-wrapper"');
