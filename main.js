@@ -472,23 +472,50 @@ async function getSupabaseClient() {
 
   const cleanPath = imagePath.trim();
   
-let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
-  
+  let baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  let watermarkTransform = "l_text:Arial_16_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_12,y_12";
+
+  // 🟢 1. รูปวงกลมสตอรี่ / Avatar (120x120): ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
   if (mode === "thumb" || mode <= 150) {
-    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
-  } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
-    transform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // รูปโปรไฟล์ขนาดกลาง
-  } else if (mode === "full" || mode >= 700 || mode === "og") {
-    transform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
+    baseTransform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
+    watermarkTransform = ""; 
+  }
+  // 🟢 2. รูปพรีวิวแชร์โซเชียล LINE / Facebook (1200x630)
+  else if (mode === "og") {
+    baseTransform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto";
+    watermarkTransform = "l_text:Arial_28_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_24,y_24";
+  }
+  // 🟢 3. รูปขยายเต็มจอใน Lightbox (800px ขึ้นไป หรือโหมด full)
+  else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
+    baseTransform = "f_auto,q_auto:eco,w_800,c_limit";
+    watermarkTransform = "l_text:Arial_24_bold:FirstModelHub,co_rgb:ffffff,o_40,g_south_east,x_20,y_20";
+  }
+  // 🟢 4. รูปใหญ่หน้าโปรไฟล์เดี่ยว (600x800)
+  else if (mode === 600 || (typeof mode === "number" && mode >= 500 && mode < 700)) {
+    baseTransform = "f_auto,q_auto:eco,w_600,h_800,c_fill";
+    watermarkTransform = "l_text:Arial_20_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_16,y_16";
+  }
+  // 🟢 5. รูปน้องแนะนำขนาดเล็กด้านล่าง (300x400)
+  else if (typeof mode === "number" && mode >= 200 && mode < 400) {
+    baseTransform = "f_auto,q_auto:eco,w_300,h_400,c_fill";
+    watermarkTransform = "l_text:Arial_14_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_10,y_10";
+  }
+  // 🟢 6. การ์ดโปรไฟล์มาตรฐานหน้าแรก / หน้าจังหวัด (400x560)
+  else {
+    baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+    watermarkTransform = "l_text:Arial_16_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_12,y_12";
   }
 
-  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ
+  // รวมคำสั่งแปลงภาพ: สเกลขนาดก่อน แล้วค่อยประทับลายน้ำ (Chained Transformations)
+  const fullTransform = watermarkTransform ? `${baseTransform}/${watermarkTransform}` : baseTransform;
+
+  // ดึง Cloud Name และชื่อไฟล์จริง (ล้าง Transform เก่าออก ป้องกันลายน้ำซ้อนกัน)
   if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
+    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:.*\/)?(v\d+\/.*|images\/.*|[^\/]+\.[a-z0-9]+)$/i);
     if (match) {
       const cloudName = match[1];
       const imageFile = match[2];
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${fullTransform}/${imageFile}`;
     }
     return cleanPath;
   }
@@ -498,7 +525,7 @@ let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${fullTransform}/${formatted}`;
 }
   
 
@@ -1938,6 +1965,16 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       `;
     }
 
+
+ 
+    if (typeof gtag === "function") {
+      gtag("event", "page_view", {
+        page_title: dynamicTitle,
+        page_location: canonicalProfileUrl,
+        page_path: `/sideline/${profileSlug}`
+      });
+    }
+
     // 🟢 14. สั่น Haptic + เด้งสปริง 60 FPS + ล็อกพื้นหลังไม่ให้เลื่อนตาม
     if (typeof triggerHaptic === "function") triggerHaptic("medium");
     lightboxEl.style.display = "flex";
@@ -2012,9 +2049,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       } else {
         targetUrl = isEN ? "/index-en" : "/";
         
-       targetTitle = isEN 
-  ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-  : "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
+        targetTitle = isEN 
+          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
+          : "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
 
         const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
         const liveProvinces = appState.provincesMap?.size || 6;
@@ -2046,6 +2083,15 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
       const ogImgEl = document.querySelector('meta[property="og:image"]');
       if (ogImgEl) ogImgEl.setAttribute("content", defaultHeroImg);
+
+      // 🟢 จุดที่เติมเพิ่ม: ยิง Pageview คืนค่าหน้าหลัก/หน้าจังหวัดให้ Google Analytics (GA4)
+      if (typeof gtag === "function") {
+        gtag("event", "page_view", {
+          page_title: targetTitle,
+          page_location: fullCanonical,
+          page_path: targetUrl
+        });
+      }
     }
 
     appState.currentProfileSlug = null;
