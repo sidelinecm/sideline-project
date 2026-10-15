@@ -1090,12 +1090,12 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
       } else {
-        const line1 = isAllOrNational 
-          ? "สาวรับงาน • ไซด์ไลน์ทั่วไทย" 
-          : `รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}`;
+      const line1 = isAllOrNational 
+          ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
+          : `ไซด์ไลน์${escapeHTML(targetName)} • รับงาน${escapeHTML(targetName)}`;
         const line2 = isAllOrNational 
-          ? "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน" 
-          : "เพื่อนเที่ยวฟิวแฟน ตัวจริงตรงปก ปลอดภัยไม่โอนมัดจำ";
+          ? "เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน" 
+          : "เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน 100%";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
