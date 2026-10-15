@@ -44,9 +44,24 @@
   <!-- HEADER -->
   <header id="page-header" role="banner">
     <div class="header-logo-container">
-        <a href="/" aria-label="FirstModelHub">
-           <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
-        </a>
+       <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
+  <span class="luxe-star-crest" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
+      <defs>
+        <linearGradient id="fmh-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FFF0B3"></stop>
+          <stop offset="50%" stop-color="#F59E0B"></stop>
+          <stop offset="100%" stop-color="#D97706"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  </span>
+  <span class="luxe-brand-text">
+    <span class="txt-first">First</span><span class="txt-model">Model</span>
+  </span>
+  <span class="luxe-hub-badge">HUB</span>
+</a>
     </div>
     <div class="nav-controls">
         <nav class="desktop-nav">
@@ -60,6 +75,34 @@
         <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
     </div>
   </header>
+  <!-- 📱 เมนูด้านข้าง (Mobile Sidebar) -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span class="sidebar-title">Navigation Hub</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-links-wrapper">
+    <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
+    <a href="/location/chiangmai"><i class="fas fa-map-marker-alt icon-gold"></i> สาวรับงานเชียงใหม่</a>
+    <a href="/nimman" class="active"><i class="fas fa-gem icon-pink"></i> โซนนิมมาน เชียงใหม่</a>
+    <a href="/profiles"><i class="fas fa-user-check icon-green"></i> รวมโปรไฟล์ VIP</a>
+    <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
+    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple"></i> ความปลอดภัย ไร้มัดจำ</a>
+    <a href="/faq"><i class="fas fa-question-circle icon-red"></i> คำถามที่พบบ่อย (FAQ)</a>
+    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple"></i> English Version (EN)</a>
+  </div>
+
+  <div class="sidebar-footer-cta">
+    <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+      <i class="fab fa-line"></i> แอดไลน์จองคิวน้องโซนนิมมาน
+    </a>
+  </div>
+</aside>
+
 
   <!-- MAIN PRIVACY CONTENT -->
   <main class="privacy-page-wrapper">

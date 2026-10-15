@@ -43,6 +43,12 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/*.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
 # ==============================================================================
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
@@ -74,6 +80,11 @@
 [[edge_functions]]
   function = "ssr-province"
   path = "/index.html"
+
+# 🟢 [เติมจุดที่ขาด] ให้ Edge Function เรนเดอร์หน้าภาษาอังกฤษด้วย
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/index-en"
 
 [[edge_functions]]
   function = "ssr-province"
@@ -110,9 +121,46 @@
   status = 301
   force = true
 
+# 🟢 [เติมจุดที่ขาด] บังคับตัดนามสกุล .html ทิ้งทั้งหมดเพื่อผลดีต่อ SEO สูงสุด (Canonical Clean URLs)
 [[redirects]]
   from = "/profiles.html"
   to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/about.html"
+  to = "/about"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/faq.html"
+  to = "/faq"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations.html"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/nimman.html"
+  to = "/nimman"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/blog.html"
+  to = "/blog"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy-policy.html"
+  to = "/privacy-policy"
   status = 301
   force = true
 
@@ -128,28 +176,25 @@
   status = 301
   force = true
 
+# 🟢 [แก้ไขจุดที่ชนกัน] รวม URL ภาษาอังกฤษเข้า /index-en แบบเป็นมาตรฐาน
 [[redirects]]
   from = "/index-en.html"
-  to = "/en"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/index-en"
-  to = "/en"
+  to = "/index-en"
   status = 301
   force = true
 
 [[redirects]]
   from = "/en"
-  to = "/index-en.html"
-  status = 200
+  to = "/index-en"
+  status = 301
+  force = true
 
 [[redirects]]
-  from = "/en/*"
+  from = "/index-en"
   to = "/index-en.html"
   status = 200
 
+# 🟢 Fallback Routes สำหรับ Client-Side Routing
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
