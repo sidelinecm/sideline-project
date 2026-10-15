@@ -6,10 +6,21 @@
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
   
-  <title>บทความและคู่มือท่องเที่ยวสไตล์ฟิวแฟน | First Model Hub</title>
-  <meta name="description" content="ติดตามบทความ สาระน่ารู้ เคล็ดลับความปลอดภัย และคู่มือท่องเที่ยวเดทสไตล์ฟิวแฟนอย่างมีระดับจาก First Model Hub">
+  <title>บทความและคู่มือท่องเที่ยวสไตล์ฟิวแฟน | FirstModelHub</title>
+  <meta name="description" content="ติดตามบทความ สาระน่ารู้ เคล็ดลับความปลอดภัย และคู่มือท่องเที่ยวเดทสไตล์ฟิวแฟนอย่างมีระดับจาก FirstModelHub">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://firstmodelhub.com/blog">
+
+  <!-- OpenGraph สำหรับแชร์ลง LINE / Facebook -->
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:site_name" content="FirstModelHub">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="บทความและคู่มือท่องเที่ยวสไตล์ฟิวแฟน | FirstModelHub">
+  <meta property="og:description" content="ติดตามบทความ สาระน่ารู้ เคล็ดลับความปลอดภัย และคู่มือท่องเที่ยวเดทสไตล์ฟิวแฟนอย่างมีระดับ">
+  <meta property="og:url" content="https://firstmodelhub.com/blog">
+  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
@@ -18,8 +29,68 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
 
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=v_20261015_clean">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Schema ให้ Google เข้าใจโครงสร้างหน้าบทความ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "บทความและคู่มือท่องเที่ยวสไตล์ฟิวแฟน",
+    "description": "รวมเกร็ดความรู้ มาตรฐานความปลอดภัย และไอเดียการจัดทริปท่องเที่ยวเดทอย่างมีระดับ",
+    "url": "https://firstmodelhub.com/blog",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "FirstModelHub",
+      "url": "https://firstmodelhub.com/"
+    }
+  }
+  </script>
+  
+  <style>
+    .blog-card-link {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid rgba(124, 58, 237, 0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .blog-card-link:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.12);
+      border-color: #7C3AED;
+    }
+    .blog-card-img-wrap {
+      aspect-ratio: 16/10;
+      width: 100%;
+      overflow: hidden;
+      background-color: #EFE9F8;
+    }
+    .blog-card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .blog-card-link:hover .blog-card-img-wrap img {
+      transform: scale(1.04);
+    }
+    .blog-card-body {
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      flex: 1;
+    }
+  </style>
 </head>
 
 <body class="fmh-app-page">
@@ -31,14 +102,14 @@
     <span>หน้าแรก</span>
   </a>
   <a href="/profiles" class="dock-item">
-    <i class="fas fa-search"></i>
-    <span>ตัวกรอง</span>
+    <i class="fas fa-user-friends"></i>
+    <span>รวมน้องๆ</span>
   </a>
   <a href="/blog" class="dock-item active">
     <i class="fas fa-newspaper"></i>
     <span>บทความ</span>
   </a>
-  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
+  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
     <i class="fab fa-line"></i>
     <span>จองคิว</span>
   </a>
@@ -47,8 +118,23 @@
 <!-- 🧭 HEADER -->
 <header id="page-header" role="banner">
   <div class="header-logo-container">
-    <a href="/" aria-label="FirstModelHub">
-      <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
+    <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
+      <span class="luxe-star-crest" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
+          <defs>
+            <linearGradient id="fmh-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFF0B3"></stop>
+              <stop offset="50%" stop-color="#F59E0B"></stop>
+              <stop offset="100%" stop-color="#D97706"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <span class="luxe-brand-text">
+        <span class="txt-first">First</span><span class="txt-model">Model</span>
+      </span>
+      <span class="luxe-hub-badge">HUB</span>
     </a>
   </div>
   <div class="nav-controls">
@@ -60,7 +146,7 @@
       <a href="/about">เกี่ยวกับเรา</a>
     </nav>
     <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
-    <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
+    <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนู"><i class="fas fa-bars"></i></button>
   </div>
 </header>
 
@@ -86,7 +172,7 @@
   </div>
 
   <div class="sidebar-footer-cta">
-    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+    <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
       <i class="fab fa-line"></i> แอดไลน์จองคิว VIP
     </a>
   </div>
@@ -96,50 +182,85 @@
 
 <!-- 🌟 MAIN BLOG CONTENT -->
 <main id="main-content" style="padding-top: 14px; padding-bottom: 100px;">
-  <div class="container" style="max-width: 900px;">
+  <div class="container" style="max-width: 960px;">
     
     <div style="text-align: center; margin-bottom: 24px;">
-      <span class="bento-tag-pill">VIP CONCIERGE EDITORIAL</span>
-      <h1 style="font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: var(--text-main); margin: 6px 0 10px 0;">บทความและคู่มือไลฟ์สไตล์ฟิวแฟน</h1>
-      <p style="font-size: 12.5px; color: var(--text-sub); max-width: 600px; margin: 0 auto; line-height: 1.6;">รวมเกร็ดความรู้ มาตรฐานความปลอดภัย และไอเดียการจัดทริปท่องเที่ยวเดทอย่างมีระดับ</p>
+      <span class="bento-tag-pill" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED; border: 1px solid rgba(124, 58, 237, 0.2); padding: 4px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; display: inline-block;">VIP CONCIERGE EDITORIAL</span>
+      <h1 style="font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: #140F22; margin: 8px 0 10px 0;">บทความและคู่มือไลฟ์สไตล์ฟิวแฟน</h1>
+      <p style="font-size: 12.5px; color: #64748B; max-width: 600px; margin: 0 auto; line-height: 1.6;">รวมเกร็ดความรู้ มาตรฐานความปลอดภัย และไอเดียการจัดทริปท่องเที่ยวเดทอย่างมีระดับ</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+    <!-- กริดแสดงบทความครบทั้ง 5 รายการตรงกับไฟล์จริงใน GitHub -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
       
-      <!-- Article 1 -->
-      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
-        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
-          <img src="/images/firstmodelhub.webp" alt="5 เคล็ดลับความปลอดภัย" style="width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
-          <span style="font-size: 10px; font-weight: 800; color: #7C3AED; text-transform: uppercase;">SAFETY & TRUST</span>
-          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">5 เคล็ดลับความปลอดภัย เมื่อนัดหมายเพื่อนเที่ยวครั้งแรก</h2>
-          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">สร้างความมั่นใจสูงสุดในการนัดพบ เรียนรู้วิธีป้องกันมิจฉาชีพ และการใช้สิทธิ์จ่ายหน้างาน 100%</p>
-        </div>
+      <!-- Article 1: safety-tips.html -->
+      <article>
+        <a href="/blog/safety-tips" class="blog-card-link">
+          <div class="blog-card-img-wrap">
+            <img src="/images/firstmodelhub.webp" alt="5 เคล็ดลับความปลอดภัย" loading="lazy">
+          </div>
+          <div class="blog-card-body">
+            <span style="font-size: 10px; font-weight: 800; color: #7C3AED; text-transform: uppercase;">SAFETY & TRUST</span>
+            <h2 style="font-size: 14.5px; font-weight: 800; color: #140F22; line-height: 1.4; margin: 2px 0;">5 เคล็ดลับความปลอดภัย เมื่อนัดหมายเพื่อนเที่ยวครั้งแรก</h2>
+            <p style="font-size: 12px; color: #64748B; line-height: 1.55; margin: 0;">สร้างความมั่นใจสูงสุดในการนัดพบ เรียนรู้วิธีป้องกันมิจฉาชีพ และการใช้สิทธิ์จ่ายหน้างาน 100%</p>
+          </div>
+        </a>
       </article>
 
-      <!-- Article 2 -->
-      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
-        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
-          <img src="/images/firstmodelhub.webp" alt="คู่มือเดทนิมมาน" style="width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
-          <span style="font-size: 10px; font-weight: 800; color: var(--crimson-main); text-transform: uppercase;">LIFESTYLE & TRAVEL</span>
-          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">คู่มือจัดทริปเที่ยวฉบับฟีลแฟน: ร้านอาหารและบาร์ลับนิมมาน</h2>
-          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">แนะนำพิกัดร้านอาหารบรรยากาศดี คาเฟ่สวย และสถานที่แฮงก์เอาต์ส่วนตัวสำหรับเดทสุดพิเศษ</p>
-        </div>
+      <!-- Article 2: safe-booking-anti-scam-guide.html -->
+      <article>
+        <a href="/blog/safe-booking-anti-scam-guide" class="blog-card-link">
+          <div class="blog-card-img-wrap">
+            <img src="/images/firstmodelhub.webp" alt="คู่มือป้องกันมิจฉาชีพหลอกมัดจำ" loading="lazy">
+          </div>
+          <div class="blog-card-body">
+            <span style="font-size: 10px; font-weight: 800; color: #DC2626; text-transform: uppercase;">ANTI-SCAM GUIDE</span>
+            <h2 style="font-size: 14.5px; font-weight: 800; color: #140F22; line-height: 1.4; margin: 2px 0;">5 สัญญาณเตือนมิจฉาชีพหลอกโอนมัดจำไซด์ไลน์ และวิธีนัดเจอจ่ายหน้างาน</h2>
+            <p style="font-size: 12px; color: #64748B; line-height: 1.55; margin: 0;">รู้ทันกลโกงมิจฉาชีพหลอกโอนค่ารถ/ค่ามัดจำ ปลอดภัยกว่าด้วยระบบจ่ายตรงกับน้องหลังตรวจตรงปก</p>
+          </div>
+        </a>
       </article>
 
-      <!-- Article 3 -->
-      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
-        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
-          <img src="/images/firstmodelhub.webp" alt="ตรงปกคืออะไร" style="width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
-          <span style="font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase;">SERVICE STANDARD</span>
-          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">ตรงปก 100% คืออะไร? เจาะลึกระบบ Verified ของ First Model Hub</h2>
-          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">ทำความเข้าใจขั้นตอนการตรวจสอบรูปถ่ายและคลิปยืนยันตัวตน เพื่อความมั่นใจก่อนนัดหมาย</p>
-        </div>
+      <!-- Article 3: nimman-feel-fan-guide.html -->
+      <article>
+        <a href="/blog/nimman-feel-fan-guide" class="blog-card-link">
+          <div class="blog-card-img-wrap">
+            <img src="/images/firstmodelhub.webp" alt="คู่มือเดทนิมมาน" loading="lazy">
+          </div>
+          <div class="blog-card-body">
+            <span style="font-size: 10px; font-weight: 800; color: #E11D48; text-transform: uppercase;">LIFESTYLE & TRAVEL</span>
+            <h2 style="font-size: 14.5px; font-weight: 800; color: #140F22; line-height: 1.4; margin: 2px 0;">คู่มือจัดทริปเที่ยวฉบับฟีลแฟน: ร้านอาหารและบาร์ลับนิมมาน</h2>
+            <p style="font-size: 12px; color: #64748B; line-height: 1.55; margin: 0;">แนะนำพิกัดร้านอาหารบรรยากาศดี คาเฟ่สวย และสถานที่แฮงก์เอาต์ส่วนตัวสำหรับเดทสุดพิเศษ</p>
+          </div>
+        </a>
+      </article>
+
+      <!-- Article 4: vip-etiquette-how-to-book-companion.html -->
+      <article>
+        <a href="/blog/vip-etiquette-how-to-book-companion" class="blog-card-link">
+          <div class="blog-card-img-wrap">
+            <img src="/images/firstmodelhub.webp" alt="คู่มือนัดหมายเพื่อนเที่ยวระดับ VIP" loading="lazy">
+          </div>
+          <div class="blog-card-body">
+            <span style="font-size: 10px; font-weight: 800; color: #9333EA; text-transform: uppercase;">VIP ETIQUETTE</span>
+            <h2 style="font-size: 14.5px; font-weight: 800; color: #140F22; line-height: 1.4; margin: 2px 0;">คู่มือนัดหมายเพื่อนเที่ยวระดับ VIP: เตรียมตัวอย่างไรให้ได้คะแนนใจเต็ม 10/10</h2>
+            <p style="font-size: 12px; color: #64748B; line-height: 1.55; margin: 0;">มารยาทและการวางตัว เพื่อให้การนัดหมายเป็นไปอย่างราบรื่น อบอุ่น และประทับใจทั้งสองฝ่าย</p>
+          </div>
+        </a>
+      </article>
+
+      <!-- Article 5: what-is-trong-pok.html -->
+      <article>
+        <a href="/blog/what-is-trong-pok" class="blog-card-link">
+          <div class="blog-card-img-wrap">
+            <img src="/images/firstmodelhub.webp" alt="ตรงปกคืออะไร" loading="lazy">
+          </div>
+          <div class="blog-card-body">
+            <span style="font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase;">SERVICE STANDARD</span>
+            <h2 style="font-size: 14.5px; font-weight: 800; color: #140F22; line-height: 1.4; margin: 2px 0;">ตรงปก 100% คืออะไร? เจาะลึกระบบ Verified ของ FirstModelHub</h2>
+            <p style="font-size: 12px; color: #64748B; line-height: 1.55; margin: 0;">ทำความเข้าใจขั้นตอนการตรวจสอบรูปถ่ายและคลิปยืนยันตัวตน เพื่อความมั่นใจก่อนนัดหมาย</p>
+          </div>
+        </a>
       </article>
 
     </div>
@@ -151,10 +272,18 @@
   <div class="container">
     <div class="footer-top-grid">
       <div class="footer-brand-col">
-        <span class="brand-logo-text">
-          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-        </span>
-        <p class="footer-brand-desc">
+        <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
+          <span class="luxe-star-crest" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
+            </svg>
+          </span>
+          <span class="luxe-brand-text">
+            <span class="txt-first">First</span><span class="txt-model">Model</span>
+          </span>
+          <span class="luxe-hub-badge">HUB</span>
+        </a>
+        <p class="footer-brand-desc" style="margin-top: 10px;">
           <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 รูปถ่ายตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ
         </p>
       </div>
