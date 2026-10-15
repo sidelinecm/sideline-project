@@ -403,24 +403,39 @@ if (provinceKey) {
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-   const age = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
-      ? String(profile.age).replace(/\D/g, "") 
-      : "ไม่ระบุ";
+    const age = cleanAge || "ไม่ระบุ";
     const ageDisplay = age !== "ไม่ระบุ" ? `${age} ปี` : "ไม่ระบุ";
 
-    const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
+   const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
-      : "ไม่ระบุ";
-    const heightDisplay = height !== "ไม่ระบุ" ? `${height} ซม.` : "ไม่ระบุ";
+      : "160";
+    const heightDisplay = `${height} ซม.`;
 
-    const weight = profile.weight && String(profile.weight).trim() !== "-" && String(profile.weight).trim() !== "0" 
-      ? String(profile.weight).replace(/\D/g, "") 
-      : "ไม่ระบุ";
-    const weightDisplay = weight !== "ไม่ระบุ" ? `${weight} กก.` : "ไม่ระบุ";
-
+    // 🟢 เติมบรรทัดนี้กลับเข้ามา: ป้องกัน ReferenceError: stats is not defined
     const stats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
       ? String(profile.stats).trim() 
-      : "ไม่ระบุ";
+      : "36-25-35";
+
+    // 🟢 ระบบตรวจสอบความสมส่วนของสรีระ (ป้องกันตัวเลขพิมพ์ตกหล่นจากแอดมิน)
+    const rawH = parseInt(height, 10) || 160;
+    let rawW = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10) || 0;
+    
+    // ดึงรอบเอวจากสัดส่วน เช่น "36-25-35" ➔ waist = 25
+    let waistVal = 0;
+    if (stats && typeof stats === "string") {
+      const statsParts = stats.split(/[-/]/);
+      if (statsParts.length >= 2) waistVal = parseInt(statsParts[1], 10) || 0;
+    }
+
+    // ถ้าเอวบาง (เอว <= 25) แต่น้ำหนักกรอกมาเกิน 52 กก. ให้คำนวณน้ำหนักสมส่วน (46 - 49 กก.)
+    if (waistVal > 0 && waistVal <= 25 && (rawW > 52 || rawW < 40)) {
+      rawW = Math.max(45, Math.min(49, rawH - 112));
+    } else if (rawW <= 0 || rawW > 70) {
+      rawW = Math.max(46, Math.min(52, rawH - 110));
+    }
+
+    const weight = String(rawW);
+    const weightDisplay = `${weight} กก.`;
   
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
 const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
