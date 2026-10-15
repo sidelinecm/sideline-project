@@ -177,50 +177,32 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   
-  let baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
-  // ✅ 1. แก้ไขไวยากรณ์ลายน้ำให้ถูกต้อง มี fl_layer_apply ครบถ้วน
-  let watermarkTransform = "co_rgb:ffffff,l_text:Arial_16_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_12,y_12";
-
-  // 🟢 1. รูปวงกลมสตอรี่ / Avatar (120x120): ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
+  // 1. กำหนดขนาดรูปภาพพื้นฐาน (Base Transform)
+  let baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
+  // 2. คำสั่งใส่ลายน้ำ Cloudinary ที่ถูกต้อง (มี /fl_layer_apply ปิดท้าย)
+  let watermark = "/co_rgb:ffffff,l_text:Arial_16_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_12,y_12";
+  
   if (mode === "thumb" || mode <= 150) {
-    baseTransform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
-    watermarkTransform = ""; 
-  }
-  // 🟢 2. รูปพรีวิวแชร์โซเชียล LINE / Facebook (1200x630)
-  else if (mode === "og") {
-    baseTransform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto";
-    watermarkTransform = "co_rgb:ffffff,l_text:Arial_28_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_24,y_24";
-  }
-  // 🟢 3. รูปขยายเต็มจอใน Lightbox (800px ขึ้นไป หรือโหมด full)
-  else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
-    baseTransform = "f_auto,q_auto:eco,w_800,c_limit";
-    watermarkTransform = "co_rgb:ffffff,l_text:Arial_24_bold:FirstModelHub/fl_layer_apply,g_south_east,o_40,x_20,y_20";
-  }
-  // 🟢 4. รูปใหญ่หน้าโปรไฟล์เดี่ยว (600x800)
-  else if (mode === 600 || (typeof mode === "number" && mode >= 500 && mode < 700)) {
-    baseTransform = "f_auto,q_auto:eco,w_600,h_800,c_fill";
-    watermarkTransform = "co_rgb:ffffff,l_text:Arial_20_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_16,y_16";
-  }
-  // 🟢 5. รูปน้องแนะนำขนาดเล็กด้านล่าง (300x400)
-  else if (typeof mode === "number" && mode >= 200 && mode < 400) {
-    baseTransform = "f_auto,q_auto:eco,w_300,h_400,c_fill";
-    watermarkTransform = "co_rgb:ffffff,l_text:Arial_14_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_10,y_10";
-  }
-  // 🟢 6. การ์ดโปรไฟล์มาตรฐานหน้าแรก / หน้าจังหวัด (400x560)
-  else {
-    baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
-    watermarkTransform = "co_rgb:ffffff,l_text:Arial_16_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_12,y_12";
+    baseTransform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
+    watermark = ""; // รูปวงกลมเล็ก ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
+  } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
+    baseTransform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // รูปโปรไฟล์ขนาดกลาง
+    watermark = "/co_rgb:ffffff,l_text:Arial_20_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_16,y_16";
+  } else if (mode === "full" || mode >= 700 || mode === "og") {
+    baseTransform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
+    watermark = "/co_rgb:ffffff,l_text:Arial_24_bold:FirstModelHub/fl_layer_apply,g_south_east,o_40,x_20,y_20";
   }
 
-  // รวมคำสั่ง: สเกลภาพก่อน แล้วค่อยประทับลายน้ำปิดท้าย
-  const fullTransform = watermarkTransform ? `${baseTransform}/${watermarkTransform}` : baseTransform;
+  // รวมคำสั่ง: สเกลรูป + ประทับลายน้ำมุมขวาล่าง
+  const transform = `${baseTransform}${watermark}`;
 
+  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ (คงเดิม 100%)
   if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:.*\/)?(v\d+\/.*|images\/.*|[^\/]+\.[a-z0-9]+)$/i);
+    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
     if (match) {
       const cloudName = match[1];
       const imageFile = match[2];
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${fullTransform}/${imageFile}`;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
     }
     return cleanPath;
   }
@@ -230,7 +212,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${fullTransform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
 function generateSrcSet(imagePath) {
