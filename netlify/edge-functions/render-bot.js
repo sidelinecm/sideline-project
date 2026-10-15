@@ -176,24 +176,51 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ 400x560
+  
+  let baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+  let watermarkTransform = "l_text:Arial_16_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_12,y_12";
 
+  // 🟢 1. รูปวงกลมสตอรี่ / Avatar (120x120): ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
   if (mode === "thumb" || mode <= 150) {
-    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // 2. สตอรี่/ไอคอน 120x120
-  } else if (mode === "og") {
-    transform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto"; // 3. รูปแชร์ LINE/Facebook 1200x630 เป๊ะ
-  } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    transform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // 4. รูปใหญ่หน้าโปรไฟล์ 600x800 (แก้บั๊กจุดนี้ให้แล้ว)
-  } else if (mode === "full" || mode >= 700) {
-    transform = "f_auto,q_auto:eco,w_800,c_limit"; // 5. รูปขยายเต็มจอ
+    baseTransform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
+    watermarkTransform = ""; 
+  }
+  // 🟢 2. รูปพรีวิวแชร์โซเชียล LINE / Facebook (1200x630)
+  else if (mode === "og") {
+    baseTransform = "f_auto,q_auto:eco,w_1200,h_630,c_fill,g_auto";
+    watermarkTransform = "l_text:Arial_28_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_24,y_24";
+  }
+  // 🟢 3. รูปขยายเต็มจอใน Lightbox (800px ขึ้นไป หรือโหมด full)
+  else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
+    baseTransform = "f_auto,q_auto:eco,w_800,c_limit";
+    watermarkTransform = "l_text:Arial_24_bold:FirstModelHub,co_rgb:ffffff,o_40,g_south_east,x_20,y_20";
+  }
+  // 🟢 4. รูปใหญ่หน้าโปรไฟล์เดี่ยว (600x800)
+  else if (mode === 600 || (typeof mode === "number" && mode >= 500 && mode < 700)) {
+    baseTransform = "f_auto,q_auto:eco,w_600,h_800,c_fill";
+    watermarkTransform = "l_text:Arial_20_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_16,y_16";
+  }
+  // 🟢 5. รูปน้องแนะนำขนาดเล็กด้านล่าง (300x400)
+  else if (typeof mode === "number" && mode >= 200 && mode < 400) {
+    baseTransform = "f_auto,q_auto:eco,w_300,h_400,c_fill";
+    watermarkTransform = "l_text:Arial_14_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_10,y_10";
+  }
+  // 🟢 6. การ์ดโปรไฟล์มาตรฐานหน้าแรก / หน้าจังหวัด (400x560)
+  else {
+    baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill";
+    watermarkTransform = "l_text:Arial_16_bold:FirstModelHub,co_rgb:ffffff,o_45,g_south_east,x_12,y_12";
   }
 
+  // รวมคำสั่งแปลงภาพ: สเกลขนาดก่อน แล้วค่อยประทับลายน้ำ (Chained Transformations)
+  const fullTransform = watermarkTransform ? `${baseTransform}/${watermarkTransform}` : baseTransform;
+
+  // ดึง Cloud Name และชื่อไฟล์จริง (ล้าง Transform เก่าออก ป้องกันลายน้ำซ้อนกัน)
   if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
+    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:.*\/)?(v\d+\/.*|images\/.*|[^\/]+\.[a-z0-9]+)$/i);
     if (match) {
       const cloudName = match[1];
       const imageFile = match[2];
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${fullTransform}/${imageFile}`;
     }
     return cleanPath;
   }
@@ -203,7 +230,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   let formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${fullTransform}/${formatted}`;
 }
 
 function generateSrcSet(imagePath) {
@@ -466,19 +493,31 @@ const pageTitle = `${displayName} (${primaryZone}) ไซด์ไลน์${pro
    
 const activeBreadcrumbText = `ไซด์ไลน์${provinceNameThai}`;
 
-// 🟢 2. สร้าง Schema Graph โดยมีเครื่องหมายจุลภาคคั่นถูกต้อง 100%
+// 🟢 สร้าง FAQ Data เฉพาะตัวของน้องคนนั้นเพื่อทำ FAQPage Rich Snippet
+const profileFaqs = [
+  {
+    q: `นัดพบน้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")} ในย่าน${primaryZone} มีสถานที่หรือต้องเดินทางอย่างไร?`,
+    a: `น้องพักและสแตนด์บายอยู่ในโซน${primaryZone} มีห้องพักส่วนตัวที่สะอาด มิดชิด ปลอดภัย หรือสะดวกนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรมที่พักในจังหวัด${provinceNameThai} ได้อย่างสะดวกรวดเร็วภายใน 15-30 นาทีค่ะ`
+  },
+  {
+    q: `อัตราค่าบริการและการชำระเงินของน้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")} เป็นอย่างไร?`,
+    a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} ต่อ 1 ชม. สำหรับการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ มั่นใจได้ 100% ด้วยนโยบายนัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีค่ะ`
+  }
+];
+
+// 🟢 2. สร้าง Schema Graph ฉบับสมบูรณ์แบบ (ProfilePage + Person + Offer + FAQPage + Breadcrumbs)
 const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
     {
-     "@type": "ProfilePage",
-    "@id": `${canonicalUrl}#webpage`,
-    "url": canonicalUrl,
-    "name": stripHTML(pageTitle),
-    "description": stripHTML(metaDescription),
-    "inLanguage": "th-TH",
-    "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
-    "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+      "@type": "ProfilePage",
+      "@id": `${canonicalUrl}#webpage`,
+      "url": canonicalUrl,
+      "name": stripHTML(pageTitle),
+      "description": stripHTML(metaDescription),
+      "inLanguage": "th-TH",
+      "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
+      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
       "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
@@ -506,16 +545,25 @@ const schemaGraph = {
         "unitCode": "KGM"
       },
       "homeLocation": {
-  "@type": "Place",
-  "name": `${primaryZone} ${provinceNameThai}`,
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": primaryZone,
-    "addressLocality": primaryZone,
-    "addressRegion": provinceNameThai,
-    "addressCountry": "TH"
-  }
-}
+        "@type": "Place",
+        "name": `${primaryZone} ${provinceNameThai}`,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": primaryZone,
+          "addressLocality": primaryZone,
+          "addressRegion": provinceNameThai,
+          "addressCountry": "TH"
+        }
+      },
+      // 🟢 เติม Offer Schema เพื่อให้ Google ดึงราคา 1,500 บาท ขึ้นโชว์เป็นป้ายราคา
+      "makesOffer": {
+        "@type": "Offer",
+        "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${displayName}`,
+        "price": String(rateNumber),
+        "priceCurrency": "THB",
+        "availability": "https://schema.org/InStock",
+        "validFrom": new Date().toISOString().split("T")[0]
+      }
     },
     {
       "@type": "BreadcrumbList",
@@ -532,7 +580,7 @@ const schemaGraph = {
           "position": 2, 
           "name": stripHTML(activeBreadcrumbText), 
           "item": provinceHubUrl 
-        }, // 👈 ใส่เครื่องหมายจุลภาคตรงนี้แล้ว
+        },
         { 
           "@type": "ListItem", 
           "position": 3, 
@@ -540,6 +588,20 @@ const schemaGraph = {
           "item": canonicalUrl 
         }
       ]
+    },
+    // 🟢 เติม FAQPage Schema เพิ่มเติมในหน้ารายบุคคล ให้ขยายช่องผลการค้นหาบน Google
+    {
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "isPartOf": { "@id": `${canonicalUrl}#webpage` },
+      "mainEntity": profileFaqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
+        }
+      }))
     }
   ]
 };
@@ -826,18 +888,19 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
 </body>
 </html>`;
 
-    const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=600, stale-while-revalidate=3600",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
-      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "X-XSS-Protection": "1; mode=block",
-      "Referrer-Policy": "strict-origin-when-cross-origin"
-    };
+ 
+const responseHeaders = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+  "ETag": `"${GLOBAL_PROFILE_VERSION}"`, // 👈 จุดที่ต่างกันคือคำนี้ครับ
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin"
+};
 
     setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
     return new Response(htmlResponse, { headers: responseHeaders });
