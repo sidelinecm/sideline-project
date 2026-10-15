@@ -472,11 +472,12 @@ async function getSupabaseClient() {
 
   const cleanPath = imagePath.trim();
   
-  // 🟢 รวมศูนย์การแปลงรูปภาพเหลือเพียง 3 Preset มาตรฐาน
-  let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
+let transform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
   
   if (mode === "thumb" || mode <= 150) {
     transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
+  } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
+    transform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // รูปโปรไฟล์ขนาดกลาง
   } else if (mode === "full" || mode >= 700 || mode === "og") {
     transform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
   }
@@ -549,21 +550,26 @@ async function getSupabaseClient() {
       images.push({ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG });
     }
 
-    let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
-    
-  
-    const fullText = `${raw.location || ''} ${raw.provinceThai || ''} ${raw.description || ''} ${raw.name || ''}`.toLowerCase();
-    if (fullText.includes("ขอนแก่น") || fullText.includes("กังสดาล") || fullText.includes("มข") || fullText.includes("โนนม่วง") || fullText.includes("ม.ภาค") || fullText.includes("ศิลา")) pKey = "khonkaen";
-    else if (fullText.includes("กรุงเทพ") || fullText.includes("กทม") || fullText.includes("สุขุมวิท") || fullText.includes("รัชดา") || fullText.includes("ห้วยขวาง") || fullText.includes("ทองหล่อ") || fullText.includes("ลาดพร้าว")) pKey = "bangkok";
-    else if (fullText.includes("ชลบุรี") || fullText.includes("พัทยา") || fullText.includes("บางแสน") || fullText.includes("ศรีราชา") || fullText.includes("จอมเทียน")) pKey = "chonburi";
-    else if (fullText.includes("ภูเก็ต") || fullText.includes("ป่าตอง") || fullText.includes("กะทู้") || fullText.includes("บางเทา") || fullText.includes("เชิงทะเล") || fullText.includes("ฉลอง") || fullText.includes("ราไวย์")) pKey = "phuket";
-    else if (fullText.includes("เชียงราย") || fullText.includes("บ้านดู่") || fullText.includes("มฟล") || fullText.includes("แม่ฟ้าหลวง") || fullText.includes("หอนาฬิกา") || fullText.includes("แม่สาย")) pKey = "chiangrai";
-    else if (fullText.includes("ลำปาง") || fullText.includes("สวนดอก") || fullText.includes("สบตุ๋ย") || fullText.includes("ม.ราชภัฏลำปาง") || fullText.includes("เซ็นทรัลลำปาง")) pKey = "lampang";
-    else if (fullText.includes("ลำพูน") || fullText.includes("นิคมลำพูน")) pKey = "lamphun";
-    else if (fullText.includes("พิษณุโลก") || fullText.includes("มน.") || fullText.includes("ม.นเรศวร")) pKey = "phitsanulok";
-    else if (fullText.includes("อุดร") || fullText.includes("ud town") || fullText.includes("หนองประจักษ์") || fullText.includes("โพศรี") || fullText.includes("เซ็นทรัลอุดร") || fullText.includes("บ้านจาน")) pKey = "udonthani";
-    else if (fullText.includes("เชียงใหม่") || fullText.includes("นิมมาน") || fullText.includes("เจ็ดยอด") || fullText.includes("สันติธรรม") || fullText.includes("ช้างเผือก") || fullText.includes("หลัง มช") || fullText.includes("แม่โจ้") || fullText.includes("พายัพ") || fullText.includes("สันทราย") || fullText.includes("ท่าแพ") || fullText.includes("แม่ริม") || fullText.includes("หางดง")) pKey = "chiangmai";
-    else if (!pKey || pKey === "no_province") pKey = "chiangmai";
+   let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
+    if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
+    if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
+
+    const INVALID_KEYS = ["", "no_province", "other", "undefined", "null", "none"];
+    // 🔒 ถ้าในฐานข้อมูลมี provinceKey อยู่แล้ว ให้ใช้ค่านั้น ห้ามสแกนข้อความมาเขียนทับ
+    if (!pKey || INVALID_KEYS.includes(pKey)) {
+      const fullText = `${raw.location || ''} ${raw.provinceThai || ''} ${raw.description || ''} ${raw.name || ''}`.toLowerCase();
+      if (fullText.includes("ขอนแก่น") || fullText.includes("กังสดาล") || fullText.includes("มข") || fullText.includes("โนนม่วง") || fullText.includes("ม.ภาค") || fullText.includes("ศิลา")) pKey = "khon-kaen";
+      else if (fullText.includes("กรุงเทพ") || fullText.includes("กทม") || fullText.includes("สุขุมวิท") || fullText.includes("รัชดา") || fullText.includes("ห้วยขวาง") || fullText.includes("ทองหล่อ") || fullText.includes("ลาดพร้าว")) pKey = "bangkok";
+      else if (fullText.includes("ชลบุรี") || fullText.includes("พัทยา") || fullText.includes("บางแสน") || fullText.includes("ศรีราชา") || fullText.includes("จอมเทียน")) pKey = "chonburi";
+      else if (fullText.includes("ภูเก็ต") || fullText.includes("ป่าตอง") || fullText.includes("กะทู้") || fullText.includes("บางเทา") || fullText.includes("เชิงทะเล") || fullText.includes("ฉลอง") || fullText.includes("ราไวย์")) pKey = "phuket";
+      else if (fullText.includes("เชียงราย") || fullText.includes("บ้านดู่") || fullText.includes("มฟล") || fullText.includes("แม่ฟ้าหลวง") || fullText.includes("หอนาฬิกา") || fullText.includes("แม่สาย")) pKey = "chiangrai";
+      else if (fullText.includes("ลำปาง") || fullText.includes("สวนดอก") || fullText.includes("สบตุ๋ย") || fullText.includes("ม.ราชภัฏลำปาง") || fullText.includes("เซ็นทรัลลำปาง")) pKey = "lampang";
+      else if (fullText.includes("ลำพูน") || fullText.includes("นิคมลำพูน")) pKey = "lamphun";
+      else if (fullText.includes("พิษณุโลก") || fullText.includes("มน.") || fullText.includes("ม.นเรศวร")) pKey = "phitsanulok";
+      else if (fullText.includes("อุดร") || fullText.includes("ud town") || fullText.includes("หนองประจักษ์") || fullText.includes("โพศรี") || fullText.includes("เซ็นทรัลอุดร") || fullText.includes("บ้านจาน")) pKey = "udonthani";
+      else if (fullText.includes("เชียงใหม่") || fullText.includes("นิมมาน") || fullText.includes("เจ็ดยอด") || fullText.includes("สันติธรรม") || fullText.includes("ช้างเผือก") || fullText.includes("หลัง มช") || fullText.includes("แม่โจ้") || fullText.includes("พายัพ") || fullText.includes("สันทราย") || fullText.includes("ท่าแพ") || fullText.includes("แม่ริม") || fullText.includes("หางดง")) pKey = "chiangmai";
+      else pKey = "chiangmai";
+    }
 
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
     if (pKey === "khonkaen") pKey = "khon-kaen";
@@ -2008,14 +2014,14 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         
        targetTitle = isEN 
   ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-  : "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
+  : "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
 
         const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
         const liveProvinces = appState.provincesMap?.size || 6;
 
         targetDesc = isEN
           ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
-          : `รวม ${liveCount}+ โปรไฟล์เพื่อนเที่ยวและไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟน (GFE) ครอบคลุม ${liveProvinces} จังหวัด การันตีตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้กังวลเรื่องโอนมัดจำล่วงหน้า`;
+          : `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveCount}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${liveProvinces} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`;
      
         if (domCache.provinceSelect) domCache.provinceSelect.value = "";
       }
