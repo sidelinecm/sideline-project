@@ -1815,31 +1815,61 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       `;
     }
 
-    // 💬 11. FAQ คำถามพบบ่อย 3 ข้อ
+    // 💬 11. FAQ ฉบับ Dynamic Contextual: ดึงข้อมูลเฉพาะตัวของน้องแต่ละคนมาสร้างคำถาม-คำตอบ ไม่ซ้ำกัน
     const faqTitle = document.getElementById("lightboxFaqTitle");
-    if (faqTitle) faqTitle.textContent = isEn ? `Frequently Asked Questions about ${displayName}` : `คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
+    if (faqTitle) faqTitle.textContent = isEn ? `FAQ & Service Info: ${displayName}` : `คำถามที่พบบ่อยเกี่ยวกับการนัดหมาย ${displayName}`;
+    
     const faqList = document.getElementById("lightboxFaqList");
     if (faqList) {
-      const ageNum = profile.safeAge && profile.safeAge !== "-" ? profile.safeAge : "22";
-      const heightNum = profile.height && String(profile.height).trim() !== "-" ? String(profile.height).replace(/\D/g, "") : "162";
-      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
+      const rawTags = (Array.isArray(profile.styleTags) ? profile.styleTags : []).join(" ").toLowerCase();
+      const descText = (profile.description || "").toLowerCase();
+      
+      const hasRoom = descText.includes("ห้อง") || rawTags.includes("พร้อมห้อง");
+      const canTravel = descText.includes("เดินทาง") || rawTags.includes("เดินทางได้");
+
+      // 1. คำถามเรื่องสถานที่นัดหมาย (แยกตามกรณี มีห้องส่วนตัว vs เดินทางไปหา Outcall)
+      let qLocation = `Q: นัดพบ ${displayName} ในย่าน ${primaryZone} มีสถานที่หรือต้องเดินทางอย่างไร?`;
+      let aLocation = "";
+      if (hasRoom && canTravel) {
+        aLocation = `${displayName} มีห้องพักส่วนตัวย่าน ${primaryZone} ที่สะอาด มิดชิด ปลอดภัย หรือสะดวกนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรม/ที่พักส่วนตัวของคุณในพื้นที่ได้เช่นกันค่ะ`;
+      } else if (hasRoom) {
+        aLocation = `${displayName} สแตนด์บายพร้อมดูแลที่ห้องพักส่วนตัวย่าน ${primaryZone} บรรยากาศเงียบสงบ เป็นส่วนตัว สะอาด ปลอดภัย และมีที่จอดรถสะดวกค่ะ`;
+      } else {
+        aLocation = `${displayName} พร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวของคุณในย่าน ${primaryZone} และพื้นที่ใกล้เคียงใน${pProvText} เดินทางรวดเร็วใน 15-30 นาทีค่ะ`;
+      }
+
+      // 2. คำถามเรื่องสไตล์การเทคแคร์ (สกัดจาก Style Tags จริงของน้อง)
+      let qStyle = `Q: สไตล์การดูแลและการเทคแคร์ของ ${displayName} เป็นอย่างไร?`;
+      let aStyle = "";
+      if (rawTags.includes("เอาใจเก่ง") || rawTags.includes("ขี้อ้อน")) {
+        aStyle = `${displayName} เน้นการดูแลเอาใจใส่ ออดอ้อน พูดจาไพเราะ ยิ้มแย้ม ให้ความรู้สึกสนิทสนมเสมือนอยู่กับแฟนตัวจริง ไม่เร่งรอบค่ะ`;
+      } else if (rawTags.includes("คุยสนุก")) {
+        aStyle = `${displayName} อัธยาศัยดี ชวนคุยเก่ง เป็นกันเอง ไม่มีช่วงเงียบเกร็ง เหมาะสำหรับไปเป็นเพื่อนทานข้าว ดินเนอร์ นั่งคาเฟ่ หรือพักผ่อนคลายเหงาค่ะ`;
+      } else if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก")) {
+        aStyle = `${displayName} สไตล์น่ารัก สดใส ไซส์มินิ ให้บริการด้วยความสุภาพ อ่อนโยน ให้เกียรติลูกค้า และให้เวลาเต็มที่ตลอดการนัดหมายค่ะ`;
+      } else {
+        aStyle = `${displayName} ให้บริการสไตล์ฟิวแฟน (GFE) แท้ๆ มีความเป็นมืออาชีพ สุภาพ อ่อนหวาน และรักษาความเป็นส่วนตัวของลูกค้าสูงสุดค่ะ`;
+      }
+
+      // 3. คำถามเรื่องความปลอดภัยและการชำระเงิน (เน้นการันตีตัวจริงตรงปก 100%)
+      let qSafety = `Q: เรียกใช้บริการ ${displayName} มั่นใจได้อย่างไรว่าจะตรงปกและไม่โดนโกงมัดจำ?`;
+      let aSafety = `ทางระบบ FirstModelHub การันตีรูปจริงตรงปก 100% ค่ะ นัดพบเจอ ${displayName} ตัวจริงหน้างาน ตรวจสอบความถูกต้องเรียบร้อยแล้วจึงค่อยชำระเงิน ${rateNum.toLocaleString()}.- โดยตรงกับน้อง ปราศจากความเสี่ยงเรื่องการโอนมัดจำล่วงหน้าทุกกรณีค่ะ`;
 
       faqList.innerHTML = `
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: ${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${displayName} อายุ ${ageNum} ปี สัดส่วน ${safeStats} ส่วนสูง ${heightNum} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${pLocText} ในจังหวัด${pProvText} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;">
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qLocation}</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aLocation}</p>
+        </div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;">
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qStyle}</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aStyle}</p>
         </div>
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">อัตราค่าบริการเริ่มต้น ${rateNum.toLocaleString()}.- นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
-        </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">สามารถกดปุ่ม '${lineBtnText}' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qSafety}</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aSafety}</p>
         </div>
       `;
     }
-
     
 
     // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
