@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261015_clean`;
+let GLOBAL_VERSION = `v_20261016_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -357,24 +357,23 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
     const cleanZ = sanitizeThaiText(z);
     if (!cleanZ) return "";
 
-    // 1. โซนพิเศษนิมมาน ให้ชี้ไปหน้า /nimman เสมอ
+   
     if (cleanZ.includes("นิมมาน")) {
       return `<a href="/nimman" class="kw-zone" title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
     }
 
-    // 2. 🔒 ถ้าเป็นหน้า "ทั่วไทย"
+   
     if (isNation) {
       const targetSlug = PROV_SLUG_MAP[cleanZ];
       if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
-        // จังหวัดที่มีน้อง ให้เปิดลิงก์ไปหน้าจังหวัด
-        return `<a href="/location/${targetSlug}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+return `<a href="/location/${targetSlug}" class="kw-zone" style="color: #6D28D9; font-weight: 800; text-decoration: underline;" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
       } else {
-        // จังหวัดที่ยังไม่มีน้อง (เช่น กรุงเทพ) ให้ปิดลิงก์ไว้ ป้องกัน 404
+
         return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
       }
     }
 
-    // 3. 🟢 REPLACEMENT (กฎข้อ 3): ถ้าอยู่ในหน้าจังหวัดแล้ว ให้เปลี่ยน <span> ของย่านต่างๆ เป็นแท็ก <a> เพื่อให้บอทเดินทะลุเก็บคีย์เวิร์ดย่อยได้ (Micro-Location Silo)
+    
     return `<a href="/location/${cleanSlug}?zone=${encodeURIComponent(cleanZ)}" class="kw-zone" title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
   }).filter(Boolean);
 
@@ -1298,25 +1297,29 @@ const popularLocationsFooter = `
   const ssrH1Html = isNational ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างานเท่านั้น</span>` : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์ในตัวเมือง</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างาน ไร้มัดจำ</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
-    // 🟢 2. รายชื่อย่านธรรมชาติ (คั่นด้วยจุลภาค อ่านลื่นไหล ไม่ติดกันเป็นพืด)
+    // 🟢 2. รายชื่อย่านธรรมชาติ (ใช้ cleanZonesList เดิมตรงๆ ปลอดภัย 100%)
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
       ? cleanZonesList.slice(0, 5).join(", ") 
       : "ในตัวเมือง";
 
-    // 🟢 ใหม่: ปลดล็อก .slice() ออก แสดงครบทุกย่านในเชียงใหม่ (นิมมาน, เจ็ดยอด, สันติธรรม, มช. ฯลฯ)
-const pills = cleanZonesList.map(z => {
-  const cleanZ = escapeHTML(z);
-  const href = z.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(z)}`;
-  return `<a href="${href}" style="background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 4px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-block;">📍 โซน${cleanZ}</a>`;
-}).join(" ");
+    // 🟢 3. เม็ดยาโซนย่าน (Pills): ใช้ cleanZonesList เดิม + ปรับสี Contrast เข้มขึ้นผ่านเกณฑ์ AAA
+    const pills = (cleanZonesList || []).map(z => {
+      const cleanZ = escapeHTML(String(z).trim());
+      const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
+      return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
+    }).join(" ");
 
-    // 🟢 4. คำโปรยธรรมชาติสไตล์คนจริง (ลบ [จังหวัด] หลุด และตัดภาษา AI แปลอังกฤษทิ้ง 100%)
+    // 🟢 4. แก้ไขจุดตายสำคัญ: ประกาศชื่อ zonePillsHtml ให้ตรงกับตัวที่เรียกใช้ด้านล่าง (แก้ปัญหาแครช)
+    const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
+
+    // 🟢 5. คำโปรยส่วนหัว (เรียกใช้ ${zonePillsHtml} ที่ประกาศไว้ข้างบนได้อย่างถูกต้อง)
     const dynamicHeroDesc = isNational
       ? `<p class="hero-subtitle-p">FirstModelHub ศูนย์รวมสาวรับงานและน้องๆ ไซด์ไลน์ทั่วไทย คัดเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน น่ารัก เอาใจเก่ง เทคแคร์ดุจคนรัก ปลอดภัยกว่าด้วยระบบนัดพบจ่ายหน้างาน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ</p>`
       : `<p class="hero-subtitle-p">รวมน้องๆ สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} สไตล์ฟิวแฟนน่ารักๆ ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% สุภาพ เป็นกันเอง ไม่เร่งเวลา สบายใจ นัดเจอตัวจริงแล้วค่อยจ่ายเงินหน้างาน ไร้มัดจำค่ะ</p>${zonePillsHtml}`;
+  
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
-
-    // 🟢 5. H2 หัวข้อแนะนำที่น่าคลิกขึ้น
+    
+   
     const ssrFeaturedH2 = isNational 
       ? `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span> (จ่ายหน้างาน)`
       : `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span> (ตัวจริงตรงปก)`;
@@ -1330,16 +1333,16 @@ const pills = cleanZonesList.map(z => {
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
       finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?(?=<!--\s*SEO Information Section)/i, "");
       finalHtml = finalHtml.replace(/<!--\s*Editorial Digest\s*-->\s*<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
-      // 🔒 ตัดกล่องศูนย์รับเรื่องร้องเรียนและโปรโตคอลความปลอดภัยพร้อมคอมเมนต์
+
       finalHtml = finalHtml.replace(/<!--\s*Trust & Safety Reporting Center\s*-->[\s\S]*?<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
       finalHtml = finalHtml.replace(/<!--\s*Safety Protocol & Maps\s*-->\s*<section id="verification-process"[\s\S]*?<\/section>/i, "");
-    } // 👈 🟢 ต้องมีปีกกาปิดตรงนี้ครับ!
+    }
 
-    // 🟢 2 บรรทัดนี้ต้องอยู่นอก if เพราะต้องแสดงผลทั้งหน้าแรก และหน้ารายจังหวัด
+    
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
-    // 🟢 6. สตอรี่ด้านบน (ใส่ Alt Text ระบุชื่อ + จังหวัด เพื่อดันอันดับ Google Image Search)
+    
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p, idx) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
@@ -1384,7 +1387,7 @@ const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-
     finalHtml = finalHtml.replace(/<div class="seo-drawer-fade"><\/div>/gi, '');
     // ลบทั้ง div ที่ครอบปุ่มออกทั้งหมด ไม่เหลือแท็กว่างทิ้งไว้
     finalHtml = finalHtml.replace(/<div[^>]*style=["'][^"']*margin-top:\s*-6px[^"']*["']>[\s\S]*?<\/div>/gi, '');
-    finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${freshnessBox}${linkedIntro}</div>`);
+finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">${freshnessBox}${linkedIntro}</div>`);
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     finalHtml = finalHtml.replace(/<div id="reviews-wrapper-block">[\s\S]*?<\/div>\s*<\/div>/i, "");
     

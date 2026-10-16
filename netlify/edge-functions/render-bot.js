@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -750,7 +750,10 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                 </section>
 
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
-                   <h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">${escapeHTML(cleanHeading)}</h1>
+                 
+<h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">
+  ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})
+</h1>
                    
                   
 
