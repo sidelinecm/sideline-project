@@ -551,20 +551,39 @@
   <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none; pointer-events: none;" aria-hidden="true">
     <div id="lightbox-content-wrapper-el">
       <div class="sheet-drag-pill-bar" id="lightbox-drag-bar" aria-hidden="true"></div>
-      <div class="lightbox-top-brand">
-        <span class="brand-luxe-logo is-compact">
-          <span class="luxe-star-crest" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-              <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
-            </svg>
-          </span>
-          <span class="luxe-brand-text">
-            <span class="txt-first" style="color:#FFFFFF !important;">First</span>
-            <span class="txt-model">Model</span>
-          </span>
-          <span class="luxe-hub-badge">HUB</span>
-        </span>
-      </div>
+     <!-- 🟢 ใหม่: ล็อคความกว้างให้พอดีตัว (width: fit-content) + กระจกฝ้า Smoke-Glass ลอยเฉพาะมุมซ้ายบน -->
+<div class="lightbox-top-brand" style="position: absolute !important; top: 12px !important; left: 12px !important; right: auto !important; width: fit-content !important; max-width: fit-content !important; z-index: 60 !important; background: transparent !important; padding: 0 !important; margin: 0 !important;">
+  
+  <span class="brand-luxe-logo is-compact" style="
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 12px 5px 8px !important;
+    border-radius: 100px !important;
+    background: rgba(18, 12, 34, 0.65) !important; /* กระจกฝ้าฟิล์มควันบุหรี่ ขับตัวหนังสือให้เด่น */
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important; /* ขอบกระจกสะท้อนแสง */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important; /* มิติเงาลอยตัว */
+  ">
+    <!-- ไอคอนดาวทองประกาย -->
+    <span class="luxe-star-crest" aria-hidden="true" style="display: flex; align-items: center; filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none">
+        <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
+      </svg>
+    </span>
+
+    <!-- ตัวหนังสือ First (ขาวสว่าง) + Model (ชมพูสด) คมกริบ -->
+    <span class="luxe-brand-text" style="font-size: 11.5px !important; font-weight: 900 !important; display: inline-flex !important; gap: 2px !important; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+      <span style="color: #FFFFFF !important; letter-spacing: -0.2px;">First</span>
+      <span style="color: #FB7185 !important; letter-spacing: -0.2px;">Model</span>
+    </span>
+
+    <!-- ป้าย HUB สีม่วงสดใส -->
+    <span class="luxe-hub-badge" style="background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%) !important; color: #FFFFFF !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 1.5px 5px !important; border-radius: 4px !important; letter-spacing: 0.5px; box-shadow: 0 1px 4px rgba(124, 58, 237, 0.4);">HUB</span>
+  </span>
+
+</div>
       <button id="closeLightboxBtn" type="button" class="lightbox-close-circle-btn" aria-label="ปิดหน้าต่างโปรไฟล์">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>

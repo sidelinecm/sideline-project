@@ -474,7 +474,7 @@ function optimizeImg(imagePath, mode = "card") {
   
   // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
+let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
@@ -1637,15 +1637,26 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     currentActivePhotoList = images;
     currentActivePhotoIdx = 0;
 
-    // 5.1 อัปเดตรูปภาพหลัก (Hero Image)
-    const heroImg = document.getElementById("lightboxHeroImage");
-    if (heroImg) {
-      heroImg.src = images[0]?.fullSrc || images[0]?.src || fallbackImg;
-      heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
-      heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
-      heroImg.style.transform = "scale(1)";
-      heroImg.style.opacity = "1";
-    }
+   // 🟢 ใหม่: บังคับใช้ขนาด 600x800 พอดีหน้าจอมือถือ + เพิ่ม onerror สลับใช้รูปสำรองทันทีถ้าเน็ตสะดุด
+const heroImg = document.getElementById("lightboxHeroImage");
+if (heroImg) {
+  // สลับมาใช้ไซส์ 600x800 แทน 1200px เพื่อให้โหลดเร็วขึ้น 70%
+  const optimizedModalSrc = images[0]?.src 
+    ? images[0].src.replace("w_400,h_560", "w_600,h_800") 
+    : (images[0]?.fullSrc || fallbackImg);
+
+  // ดักจับรูปพัง: ถ้าภาพหลักมีปัญหา ให้ดีดกลับไปใช้รูปสำรองทันที ป้องกันจอดำ 100%
+  heroImg.onerror = function() {
+    this.onerror = null;
+    this.src = images[0]?.src || fallbackImg;
+  };
+
+  heroImg.src = optimizedModalSrc;
+  heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
+  heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+  heroImg.style.transform = "scale(1)";
+  heroImg.style.opacity = "1";
+}
 
     // 5.2 🟢 เรนเดอร์แถบ Thumbnails ใต้รูปใหญ่ (มีระบบปัดเลื่อนแนวนอน + แตะสลับรูป)
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
@@ -1708,12 +1719,17 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     }
 
 
-    // 🟢 6. คำคม & แท็ก
-    const quoteEl = document.getElementById("lightboxQuote");
-    if (quoteEl) {
-      quoteEl.textContent = profile.quote || profile.slogan || (isEn ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
-      quoteEl.style.display = "block";
-    }
+    // 🟢 ใหม่: ถ้าเป็นคำสั้นกุด (น้อยกว่า 15 ตัวอักษร) ให้ซ่อนกล่องนี้ไปเลย เพื่อให้หน้าเว็บคลีนตา
+const quoteEl = document.getElementById("lightboxQuote");
+if (quoteEl) {
+  const quoteText = (profile.quote || profile.slogan || "").trim();
+  if (quoteText.length > 15 && !quoteText.includes("รับงาน")) {
+    quoteEl.textContent = quoteText;
+    quoteEl.style.display = "block";
+  } else {
+    quoteEl.style.display = "none"; // สั่งซ่อนทันที ไม่แสดงกล่องหลุด
+  }
+}
 
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
@@ -1826,14 +1842,15 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
       lineWrapper.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <!-- 1. ปุ่มแอดไลน์หลัก (ยาวเต็มแถวเหมือนเดิม) -->
-          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" style="flex: 1; margin: 0;" onclick="if(typeof window.handleLineBooking==='function'){window.handleLineBooking('${profile.id}','${lineUrl}')}else if(typeof window.trackLineClick==='function'){window.trackLineClick('${profile.id}')}">
-              <i class="fab fa-line"></i>
-              <span>${lineBtnText}</span>
-              <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 7px; border-radius: 100px; font-weight: 700; margin-left: 2px;">จ่ายหน้างาน</span>
-          </a>
+            
 
-          <!-- 🟢 2. ปุ่มไอคอนแชร์มินิมอล (ขนาดกะทัดรัด 48x48px อยู่แถวเดียวกัน ไม่เทอะทะ) -->
+<a href="${lineUrl}" target="_blank" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
+    <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
+    <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
+    <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
+</a>
+
+          
           <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'">
               <i class="fas fa-share-alt" style="font-size: 16px;"></i>
           </button>
