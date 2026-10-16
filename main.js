@@ -472,31 +472,29 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   
-  // 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ทั่วไป (ฟอนต์ 16 เท่าเดิม / ขอบ x_12,y_12 เท่าเดิม)
+  // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   
-  if (mode === "thumb" || mode <= 150) {
+  if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = ""; // รูปสตอรี่วงกลมเล็ก ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
-  } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
+    watermark = ""; // ไม่ใส่ลายน้ำบนรูปวงกลมสตอรี่
+  } else if (mode === 400 || mode === "card") {
+    baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
+  } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-    // 2. การ์ดขนาดกลาง (ฟอนต์ 20 เท่าเดิม / ขอบ x_16,y_16 เท่าเดิม)
     watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
-  } else if (mode === "full" || mode >= 700 || mode === "og") {
+  } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
     baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
-    // 3. รูปใหญ่ / Lightbox (ฟอนต์ 24 เท่าเดิม / คมชัดระดับ HD / โปร่งใส 65% ไม่บังเนื้อรูป)
     watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
-  // รวมคำสั่ง: สเกลรูป + ประทับลายน้ำมุมขวาล่าง
   const transform = `${baseTransform}${watermark}`;
 
-  // 🔒 บังคับใช้ Cloud Name dyynjlbuj บัญชีเดียว 100% (ตัดบัญชีเก่าทิ้งอัตโนมัติ)
   if (cleanPath.includes("res.cloudinary.com")) {
     const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
     if (match) {
-      // ตัดขีดทับด้านหน้าออก ป้องกัน URL เบิ้ล //
       const imageFile = (match[2] || "").replace(/^\/+/, "");
       if (imageFile) {
         return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
@@ -1639,6 +1637,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     currentActivePhotoList = images;
     currentActivePhotoIdx = 0;
 
+    // 5.1 อัปเดตรูปภาพหลัก (Hero Image)
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
       heroImg.src = images[0]?.fullSrc || images[0]?.src || fallbackImg;
@@ -1648,7 +1647,35 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       heroImg.style.opacity = "1";
     }
 
-    // สร้างจุดไข่ปลา (Dots Indicator) เหนือรูปภาพ
+    // 5.2 🟢 เรนเดอร์แถบ Thumbnails ใต้รูปใหญ่ (มีระบบปัดเลื่อนแนวนอน + แตะสลับรูป)
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+    if (thumbStrip) {
+      if (images.length > 1) {
+        thumbStrip.style.cssText = "display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding: 2px 2px 6px 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none;";
+        thumbStrip.innerHTML = images.map((img, i) => `
+          <div class="lightbox-thumb-item ${i === 0 ? "active" : ""}" data-thumb-idx="${i}" style="width: 58px; height: 76px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: border-color 0.2s ease, transform 0.15s ease;">
+            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${i + 1}" width="58" height="76" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+          </div>
+        `).join("");
+
+        // ผูก Event แตะที่รูปย่อยเพื่อเปลี่ยนรูปใหญ่
+        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
+          item.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const idx = parseInt(this.getAttribute("data-thumb-idx"), 10);
+            if (typeof updateLightboxPhoto === "function") {
+              updateLightboxPhoto(idx);
+            }
+          });
+        });
+      } else {
+        // หากมีเพียงรูปเดียว ไม่ต้องแสดงแถบรูปย่อย
+        thumbStrip.innerHTML = "";
+        thumbStrip.style.display = "none";
+      }
+    }
+
+    // 5.3 สร้างจุดไข่ปลา (Dots Indicator) ซ้อนเหนือรูปภาพสไตล์ Instagram
     const heroContainer = document.querySelector(".lightbox-hero-container");
     let dotsContainer = document.getElementById("lightbox-dots-indicator");
     if (heroContainer) {
@@ -1665,19 +1692,21 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="gallery-dot ${i === 0 ? "active" : ""}" data-idx="${i}" aria-label="ดูรูปที่ ${i + 1}"></span>
         `).join("");
 
-        // 🟢 กดแตะที่จุดไข่ปลาเพื่อเปลี่ยนรูปได้ทันที
+        // กดแตะที่จุดไข่ปลาเพื่อเปลี่ยนรูปได้ทันที
         dotsContainer.querySelectorAll(".gallery-dot").forEach((dot) => {
           dot.addEventListener("click", (e) => {
             e.stopPropagation();
             const idx = parseInt(dot.getAttribute("data-idx"), 10);
-            updateLightboxPhoto(idx);
+            if (typeof updateLightboxPhoto === "function") {
+              updateLightboxPhoto(idx);
+            }
           });
         });
       } else {
-        // หากมีรูปเดียว ให้ซ่อนแคปซูลจุดไข่ปลาออก
         dotsContainer.style.setProperty("display", "none", "important");
       }
     }
+
 
     // 🟢 6. คำคม & แท็ก
     const quoteEl = document.getElementById("lightboxQuote");
