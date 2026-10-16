@@ -1454,12 +1454,14 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       heroImg.style.transform = "scale(1)";
     }, 110);
 
-    // ปรับสถานะ Active บน Thumbnail Strip (ถ้ามี)
+    // 🟢 ปรับสถานะ Active บน Thumbnail Strip (แก้ไขให้ปลอดภัย ไม่ฟ้อง Error)
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
       thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach((t, i) => {
-        t.classList.toggle("active", i === idx);
-        if (i === idx) {
+        const isActive = (i === idx);
+        t.classList.toggle("active", isActive);
+        t.style.borderColor = isActive ? "#7C3AED" : "transparent";
+        if (isActive) {
           t.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
         }
       });

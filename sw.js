@@ -3,7 +3,7 @@
  * Year: 2026 High-Performance Cache & PWA Manager (Production Ready)
  */
 
-const CACHE_NAME = 'firstmodelhub-fx-20261010_prod-light';
+const CACHE_NAME = 'firstmodelhub-fx-v_20261016_clean';
 const STATIC_ASSETS = [
   '/',
   '/styles.css',
