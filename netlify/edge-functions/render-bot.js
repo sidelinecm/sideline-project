@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -488,9 +488,8 @@ const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
 // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    // 🟢 ใหม่: สูตรทองคำ ดักคนค้นหาครบทุกคำ ปลอดภัยจากคำต้องห้าม ไม่โดนจุดไข่ปลาตัดทิ้ง
-const pageTitle = `${displayName} สาวรับงานไซด์ไลน์เมือง${provinceNameThai} (${primaryZone}) ฟิวแฟน จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
-const metaDescription = `${displayName} สาวรับงานไซด์ไลน์ในตัวเมือง${provinceNameThai} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟนแท้ ตรงปก 100% พร้อมห้อง เรท ${priceDisplay}/1น้ำ ไร้มัดจำ จ่ายหน้างานเท่านั้น`;
+    const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${provinceNameThai} (${primaryZone}) ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+const metaDescription = `${displayName} สาวรับงานไซด์ไลน์ในตัวเมือง${provinceNameThai} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟนแท้ ตรงปก 100% มีห้องพร้อม เรทเริ่มต้น ${priceDisplay} (1 ชม.) ไม่ต้องโอนมัดจำ เจอตัวจริงค่อยจ่ายหน้างาน`;
 
     // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;

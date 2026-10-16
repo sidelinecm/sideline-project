@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261016_clean`;
+let GLOBAL_VERSION = `v_20261015_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -949,14 +949,13 @@ const nameSig = `${cleanName}_${realProvince}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-  const metaTitle = isNational ? `สาวรับงาน ไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟนแท้ ตรงปก ไม่มีมัดจำ จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` : `สาวรับงานไซด์ไลน์ ในตัวเมือง${provinceNameThai} ฟิวแฟนตรงปก พร้อมห้อง จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
-    
-      
-    const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
+  const metaTitle = isNational 
+    ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
+    : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ | ${CONFIG.BRAND_NAME}`;
 
-    const metaDescription = isNational
-      ? `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveTotalProfiles}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${activeProvincesCount} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`
-      : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! ${countText}ไซด์ไลน์${provinceNameThai} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
+  const metaDescription = isNational
+    ? `แหล่งรวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟน คัดตัวจริงตรงปก 100% มีห้องพร้อมและนอกสถานที่ นัดเจอจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ เจอจ่ายจบ ปลอดภัย`
+    : `รวมสาวรับงานและสาวไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ เจอจ่ายจบ`;
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -1294,30 +1293,32 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-  const ssrH1Html = isNational ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างานเท่านั้น</span>` : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์ในตัวเมือง</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างาน ไร้มัดจำ</span>`;
-    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
-
-    // 🟢 2. รายชื่อย่านธรรมชาติ (ใช้ cleanZonesList เดิมตรงๆ ปลอดภัย 100%)
-    const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
-      ? cleanZonesList.slice(0, 5).join(", ") 
-      : "ในตัวเมือง";
-
-    // 🟢 3. เม็ดยาโซนย่าน (Pills): ใช้ cleanZonesList เดิม + ปรับสี Contrast เข้มขึ้นผ่านเกณฑ์ AAA
-    const pills = (cleanZonesList || []).map(z => {
-      const cleanZ = escapeHTML(String(z).trim());
-      const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
-      return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
-    }).join(" ");
-
-    // 🟢 4. แก้ไขจุดตายสำคัญ: ประกาศชื่อ zonePillsHtml ให้ตรงกับตัวที่เรียกใช้ด้านล่าง (แก้ปัญหาแครช)
-    const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
-
-    // 🟢 5. คำโปรยส่วนหัว (เรียกใช้ ${zonePillsHtml} ที่ประกาศไว้ข้างบนได้อย่างถูกต้อง)
-    const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p">FirstModelHub ศูนย์รวมสาวรับงานและน้องๆ ไซด์ไลน์ทั่วไทย คัดเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน น่ารัก เอาใจเก่ง เทคแคร์ดุจคนรัก ปลอดภัยกว่าด้วยระบบนัดพบจ่ายหน้างาน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ</p>`
-      : `<p class="hero-subtitle-p">รวมน้องๆ สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} สไตล์ฟิวแฟนน่ารักๆ ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% สุภาพ เป็นกันเอง ไม่เร่งเวลา สบายใจ นัดเจอตัวจริงแล้วค่อยจ่ายเงินหน้างาน ไร้มัดจำค่ะ</p>${zonePillsHtml}`;
+ // 1. หัวเรื่อง H1 (ซิงค์ตรงกับหน้าแรก และหน้าจังหวัด 100%)
+  const ssrH1Html = isNational 
+    ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่</span>` 
+    : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>`;
   
-    finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
+  finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+
+  // 2. คำนวณรายชื่อย่านและเม็ดยา (Pills) ก่อนนำไปใช้
+  const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
+    ? cleanZonesList.slice(0, 5).join(", ") 
+    : "ในตัวเมือง";
+
+  const pills = (cleanZonesList || []).map(z => {
+    const cleanZ = escapeHTML(String(z).trim());
+    const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
+    return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
+  }).join(" ");
+
+  const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
+
+  // 3. ประกอบคำโปรย Hero Description (ประกาศตัวแปรเพียงครั้งเดียวอย่างถูกต้อง)
+  const dynamicHeroDesc = isNational
+    ? `<p class="hero-subtitle-p"><strong>FirstModelHub</strong> รวมโปรไฟล์สาวรับงานและสาวไซด์ไลน์ สไตล์ฟิวแฟนดูแลดี มีให้เลือกทั้งแบบมีห้องส่วนตัวพร้อมรับ และเดินทางไปหานอกสถานที่ (โรงแรม/คอนโด) คุยเรทราคากับน้องโดยตรง <strong>เจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้า เจอจ่ายจบ สบายใจทั้งสองฝ่าย</strong></p>`
+    : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ สบายใจ ปลอดภัยค่ะ</p>${zonePillsHtml}`;
+
+  finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
     
    
     const ssrFeaturedH2 = isNational 
