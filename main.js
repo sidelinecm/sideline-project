@@ -472,32 +472,35 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   
-  // 1. กำหนดขนาดรูปภาพพื้นฐาน (Base Transform)
-  let baseTransform = "f_auto,q_auto:eco,w_400,h_560,c_fill"; // ค่าเริ่มต้น: การ์ดโปรไฟล์
-  // 2. คำสั่งใส่ลายน้ำ Cloudinary ที่ถูกต้อง (มี /fl_layer_apply ปิดท้าย)
-  let watermark = "/co_rgb:ffffff,l_text:Arial_16_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_12,y_12";
+  // 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ทั่วไป (ฟอนต์ 16 เท่าเดิม / ขอบ x_12,y_12 เท่าเดิม)
+  let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   
   if (mode === "thumb" || mode <= 150) {
-    baseTransform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face"; // Story / Avatar
-    watermark = ""; // รูปวงกลมเล็ก ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
+    baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
+    watermark = ""; // รูปสตอรี่วงกลมเล็ก ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
   } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
-    baseTransform = "f_auto,q_auto:eco,w_600,h_800,c_fill"; // รูปโปรไฟล์ขนาดกลาง
-    watermark = "/co_rgb:ffffff,l_text:Arial_20_bold:FirstModelHub/fl_layer_apply,g_south_east,o_45,x_16,y_16";
+    baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+    // 2. การ์ดขนาดกลาง (ฟอนต์ 20 เท่าเดิม / ขอบ x_16,y_16 เท่าเดิม)
+    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
   } else if (mode === "full" || mode >= 700 || mode === "og") {
-    baseTransform = "f_auto,q_auto:eco,w_800,c_limit"; // Lightbox / Social Share
-    watermark = "/co_rgb:ffffff,l_text:Arial_24_bold:FirstModelHub/fl_layer_apply,g_south_east,o_40,x_20,y_20";
+    baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
+    // 3. รูปใหญ่ / Lightbox (ฟอนต์ 24 เท่าเดิม / คมชัดระดับ HD / โปร่งใส 65% ไม่บังเนื้อรูป)
+    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
   // รวมคำสั่ง: สเกลรูป + ประทับลายน้ำมุมขวาล่าง
   const transform = `${baseTransform}${watermark}`;
 
-  // ดึง Cloud Name ต้นทางจริง ไม่ฮาร์ดโค้ดทับ (คงเดิม 100%)
+  // 🔒 บังคับใช้ Cloud Name dyynjlbuj บัญชีเดียว 100% (ตัดบัญชีเก่าทิ้งอัตโนมัติ)
   if (cleanPath.includes("res.cloudinary.com")) {
     const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
     if (match) {
-      const cloudName = match[1];
-      const imageFile = match[2];
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${imageFile}`;
+      // ตัดขีดทับด้านหน้าออก ป้องกัน URL เบิ้ล //
+      const imageFile = (match[2] || "").replace(/^\/+/, "");
+      if (imageFile) {
+        return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
+      }
     }
     return cleanPath;
   }
@@ -506,7 +509,7 @@ function optimizeImg(imagePath, mode = "card") {
     return cleanPath;
   }
 
-  let formatted = cleanPath.replace(/^\/+/, "");
+  const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
@@ -550,7 +553,7 @@ function optimizeImg(imagePath, mode = "card") {
 
       return {
         src: optimizeImg(srcUrl, 400, 560),
-        fullSrc: optimizeImg(fullSrcUrl, 1000, null)
+        fullSrc: optimizeImg(fullSrcUrl, "full")
       };
     });
 
