@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -364,19 +364,29 @@ export default async (req, context) => {
     let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
     
  
-if (provinceKey) {
-      // 🟢 ดึงข้อมูลทั้งหมดโดยไม่จำกัด limit และเลือกเฉพาะฟิลด์ที่ต้องใช้
-      const { data: related } = await supabase
-        .from("profiles")
-        .select("id, slug, name, imagePath, image_url, provinceKey, province_key")
-        .eq("active", true)
-        .neq("id", profile.id);
+// 🟢 ดึงน้องๆ แนะนำในโซนเดียวกัน พร้อม Fallback กรณีคนในโซนน้อย
+    const { data: allActiveProfiles } = await supabase
+      .from("profiles")
+      .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
+      .eq("active", true)
+      .neq("id", profile.id)
+      .order("isfeatured", { ascending: false })
+      .limit(12);
 
-      // กรองจังหวัดใน JavaScript
-      relatedProfiles = (related || []).filter(p => {
-        const k = (p.provinceKey || p.province_key || "").toLowerCase();
-        return k.includes(cleanProvinceKey) || k.includes(provinceKey);
-      }).slice(0, 3);
+    if (allActiveProfiles && allActiveProfiles.length > 0) {
+      // 1. ลองหาในจังหวัดเดียวกันก่อน
+      const sameProvince = allActiveProfiles.filter(p => {
+        const k = (p.provinceKey || p.province_key || "").toLowerCase().replace(/[-_]/g, "");
+        return k.includes(cleanProvinceKey) || cleanProvinceKey.includes(k);
+      });
+
+      if (sameProvince.length >= 3) {
+        relatedProfiles = sameProvince.slice(0, 3);
+      } else {
+        // 2. ถ้าในจังหวัดมีไม่ถึง 3 คน ให้ดึงน้องยอดนิยมคนอื่นมาเสริมจนครบ 3 คนเสมอ
+        const others = allActiveProfiles.filter(p => !sameProvince.some(sp => sp.id === p.id));
+        relatedProfiles = [...sameProvince, ...others].slice(0, 3);
+      }
     }
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
@@ -392,6 +402,24 @@ if (provinceKey) {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
+    // 🟢 [วางท่อนนี้ต่อท้ายตรงนี้ได้เลยครับ] ดึงรูปภาพทั้งหมดในอัลบั้ม
+    let rawGallery = profile.galleryPaths || profile.gallery_paths || profile.gallery || [];
+    if (typeof rawGallery === "string") {
+      try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
+    }
+    const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])].filter(Boolean);
+    const uniqueGallery = [...new Set(allGalleryImages)];
+
+    const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
+      <div class="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
+        ${uniqueGallery.map((imgUrl, i) => `
+          <div class="thumb-slot ${i === 0 ? 'active' : ''}" onclick="document.querySelectorAll('.profile-gallery-strip .thumb-slot').forEach(el=>el.style.borderColor='transparent'); this.style.borderColor='#7C3AED'; const mainImg=document.getElementById('main-profile-img'); mainImg.src='${optimizeImg(imgUrl, 600, 800)}';" style="width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+          </div>
+        `).join("")}
+      </div>
+    ` : "";
+    
    // 🟢 ปรับปรุงใหม่: รองรับ Universal Link มาตรฐาน LINE สำหรับ iOS & Android 100%
     const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
@@ -706,14 +734,15 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
 
         <main class="main-content">
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 22px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); box-shadow: 0 15px 35px rgba(124, 58, 237, 0.06);">
-                <section class="hero-section" style="padding: 0; margin-bottom: 1rem;">
+               <section class="hero-section" style="padding: 0; margin-bottom: 1rem;">
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
-                       <img src="${heroImageSmall}" 
+                       <img id="main-profile-img" src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
                              class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
-                             width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+                             width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: opacity 0.2s ease;">
                     </div>
+                    ${galleryThumbnailsHtml}
                 </section>
 
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">

@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261015_clean`;
+let GLOBAL_VERSION = `v_20261016_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -624,8 +624,14 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
   if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
- const vibeTagsHtml = Array.isArray(rawTags) && rawTags.length > 0
-    ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#+/, ""))}</span>`).join("")
+
+  // 🟢 กรองคำว่า "รับงาน" และ "ไซด์ไลน์" ทิ้ง และตัดแท็กที่ยาวเกิน 8 ตัวอักษรออก
+  const cleanTags = (Array.isArray(rawTags) ? rawTags : [])
+    .map(t => String(t).replace(/^#+/, "").trim())
+    .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8);
+
+  const vibeTagsHtml = cleanTags.length > 0
+    ? cleanTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t)}</span>`).join("")
     : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
 
   const isFiwFan = Array.isArray(rawTags) && rawTags.some(t => {
