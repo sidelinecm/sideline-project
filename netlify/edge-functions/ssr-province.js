@@ -293,7 +293,7 @@ function optimizeImg(imagePath, mode = "card") {
   
   // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
+let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
@@ -950,9 +950,7 @@ const nameSig = `${cleanName}_${realProvince}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-   const metaTitle = isNational 
-  ? "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub" 
-  : `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub`;
+  const metaTitle = isNational ? `สาวรับงาน ไซด์ไลน์ทั่วไทย สไตล์ฟิวแฟนแท้ ตรงปก ไม่มีมัดจำ จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` : `สาวรับงานไซด์ไลน์ ในตัวเมือง${provinceNameThai} ฟิวแฟนตรงปก พร้อมห้อง จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
     
       
     const countText = totalCount > 0 ? `รวม ${totalCount}+ โปรไฟล์ ` : "ศูนย์รวม";    
@@ -1297,9 +1295,7 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-  const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">ไซด์ไลน์ทั่วไทย • สาวรับงาน</span>\n<span class="h1-line-2">เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน</span>` 
-  : `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} • รับงาน${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน 100%</span>`;
+  const ssrH1Html = isNational ? `<span class="h1-line-1">สาวรับงาน • ไซด์ไลน์ทั่วไทย</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างานเท่านั้น</span>` : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์ในตัวเมือง</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก 100% พร้อมห้อง จ่ายหน้างาน ไร้มัดจำ</span>`;
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     // 🟢 2. รายชื่อย่านธรรมชาติ (คั่นด้วยจุลภาค อ่านลื่นไหล ไม่ติดกันเป็นพืด)
@@ -1307,16 +1303,12 @@ const popularLocationsFooter = `
       ? cleanZonesList.slice(0, 5).join(", ") 
       : "ในตัวเมือง";
 
-    // 🟢 3. แถบปุ่มลัดย่านย่อย (Sub-zone Pills) ฝังดัก Sitelink Cards ให้ Google ดึงไปทำเป็นการ์ดใต้ผลค้นหา
-    let zonePillsHtml = "";
-    if (!isNational && cleanZonesList && cleanZonesList.length > 0) {
-      const pills = cleanZonesList.slice(0, 5).map(z => {
-        const cleanZ = escapeHTML(z);
-        const href = z.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(z)}`;
-        return `<a href="${href}" style="background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 4px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-block;">• ${cleanZ}</a>`;
-      }).join(" ");
-      zonePillsHtml = `<div class="hero-zones-quickbar" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">${pills}</div>`;
-    }
+    // 🟢 ใหม่: ปลดล็อก .slice() ออก แสดงครบทุกย่านในเชียงใหม่ (นิมมาน, เจ็ดยอด, สันติธรรม, มช. ฯลฯ)
+const pills = cleanZonesList.map(z => {
+  const cleanZ = escapeHTML(z);
+  const href = z.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(z)}`;
+  return `<a href="${href}" style="background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 4px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-block;">📍 โซน${cleanZ}</a>`;
+}).join(" ");
 
     // 🟢 4. คำโปรยธรรมชาติสไตล์คนจริง (ลบ [จังหวัด] หลุด และตัดภาษา AI แปลอังกฤษทิ้ง 100%)
     const dynamicHeroDesc = isNational

@@ -179,7 +179,7 @@ function optimizeImg(imagePath, mode = "card") {
   
   // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
+let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
@@ -408,12 +408,13 @@ export default async (req, context) => {
     const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])].filter(Boolean);
     const uniqueGallery = [...new Set(allGalleryImages)];
 
-    const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
-  <div class="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
+   // 🟢 ใหม่: เปลี่ยนเป็นแท็ก <button> ที่ไม่มีสคริปต์กวนใจ เบาหวิว ลื่นไหลระดับ 60 FPS
+const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
+  <div class="profile-gallery-strip" id="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
     ${uniqueGallery.map((imgUrl, i) => `
-      <div class="thumb-slot ${i === 0 ? 'active' : ''}" onclick="document.querySelectorAll('.profile-gallery-strip .thumb-slot').forEach(el=>el.style.borderColor='transparent'); this.style.borderColor='#7C3AED'; const mainImg=document.getElementById('main-profile-img'); if(mainImg){ mainImg.removeAttribute('srcset'); mainImg.src='${optimizeImg(imgUrl, 600, 800)}'; }" style="width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
-      </div>
+      <button type="button" class="thumb-slot ${i === 0 ? 'active' : ''}" data-full-src="${optimizeImg(imgUrl, 600, 800)}" style="padding: 0; width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: none;">
+        <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+      </button>
     `).join("")}
   </div>
 ` : "";
@@ -487,11 +488,9 @@ const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
 // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    const cleanHeading = `${displayName} (${primaryZone}) สไตล์ฟิวแฟน ตัวจริงตรงปก 100%`;
-const pageTitle = `${displayName} (${primaryZone}) ไซด์ไลน์${provinceNameThai} รับงานฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
-   
-    // 🟢 Meta คำบรรยายใต้ลิงก์ Google: โฟกัสฟิวแฟนและพิกัดย่าน ไม่ยัดคำซ้ำ
-    const metaDescription = `🟢 ${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน โซน${escapeHTML(primaryZone)} จ.${provinceNameThai} สัดส่วน ${escapeHTML(stats)} อายุ ${age} ปี การันตีตัวจริงตรงปก ปลอดภัยนัดพบจ่ายหน้างาน ${priceDisplay} ไร้มัดจำ ทักไลน์เช็กคิวได้เลย`;
+    // 🟢 ใหม่: สูตรทองคำ ดักคนค้นหาครบทุกคำ ปลอดภัยจากคำต้องห้าม ไม่โดนจุดไข่ปลาตัดทิ้ง
+const pageTitle = `${displayName} สาวรับงานไซด์ไลน์เมือง${provinceNameThai} (${primaryZone}) ฟิวแฟน จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+const metaDescription = `${displayName} สาวรับงานไซด์ไลน์ในตัวเมือง${provinceNameThai} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟนแท้ ตรงปก 100% พร้อมห้อง เรท ${priceDisplay}/1น้ำ ไร้มัดจำ จ่ายหน้างานเท่านั้น`;
 
     // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
