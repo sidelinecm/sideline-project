@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -177,31 +177,29 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   
-  // 1. ค่าเริ่มต้น: การ์ดโปรไฟล์ทั่วไป (ฟอนต์ 16 เท่าเดิม / ขอบ x_12,y_12 เท่าเดิม)
+  // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   let watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   
-  if (mode === "thumb" || mode <= 150) {
+  if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = ""; // รูปสตอรี่วงกลมเล็ก ไม่ใส่ลายน้ำ เพื่อไม่ให้บังหน้าน้อง
-  } else if (mode === 600 || (typeof mode === "number" && mode >= 400 && mode < 700)) {
+    watermark = ""; // ไม่ใส่ลายน้ำบนรูปวงกลมสตอรี่
+  } else if (mode === 400 || mode === "card") {
+    baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
+  } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-    // 2. การ์ดขนาดกลาง (ฟอนต์ 20 เท่าเดิม / ขอบ x_16,y_16 เท่าเดิม)
     watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
-  } else if (mode === "full" || mode >= 700 || mode === "og") {
+  } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
     baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
-    // 3. รูปใหญ่ / Lightbox (ฟอนต์ 24 เท่าเดิม / คมชัดระดับ HD / โปร่งใส 65% ไม่บังเนื้อรูป)
     watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
-  // รวมคำสั่ง: สเกลรูป + ประทับลายน้ำมุมขวาล่าง
   const transform = `${baseTransform}${watermark}`;
 
-  // 🔒 บังคับใช้ Cloud Name dyynjlbuj บัญชีเดียว 100% (ตัดบัญชีเก่าทิ้งอัตโนมัติ)
   if (cleanPath.includes("res.cloudinary.com")) {
     const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
     if (match) {
-      // ตัดขีดทับด้านหน้าออก ป้องกัน URL เบิ้ล //
       const imageFile = (match[2] || "").replace(/^\/+/, "");
       if (imageFile) {
         return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
@@ -391,7 +389,7 @@ export default async (req, context) => {
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
-    const provinceHubUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
+   const provinceHubUrl = `/location/${provinceKey}`;
     
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
@@ -411,14 +409,14 @@ export default async (req, context) => {
     const uniqueGallery = [...new Set(allGalleryImages)];
 
     const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
-      <div class="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
-        ${uniqueGallery.map((imgUrl, i) => `
-          <div class="thumb-slot ${i === 0 ? 'active' : ''}" onclick="document.querySelectorAll('.profile-gallery-strip .thumb-slot').forEach(el=>el.style.borderColor='transparent'); this.style.borderColor='#7C3AED'; const mainImg=document.getElementById('main-profile-img'); mainImg.src='${optimizeImg(imgUrl, 600, 800)}';" style="width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-            <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
-          </div>
-        `).join("")}
+  <div class="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
+    ${uniqueGallery.map((imgUrl, i) => `
+      <div class="thumb-slot ${i === 0 ? 'active' : ''}" onclick="document.querySelectorAll('.profile-gallery-strip .thumb-slot').forEach(el=>el.style.borderColor='transparent'); this.style.borderColor='#7C3AED'; const mainImg=document.getElementById('main-profile-img'); if(mainImg){ mainImg.removeAttribute('srcset'); mainImg.src='${optimizeImg(imgUrl, 600, 800)}'; }" style="width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
       </div>
-    ` : "";
+    `).join("")}
+  </div>
+` : "";
     
    // 🟢 ปรับปรุงใหม่: รองรับ Universal Link มาตรฐาน LINE สำหรับ iOS & Android 100%
     const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
@@ -518,7 +516,7 @@ const profileFaqs = [
   }
 ];
 
-// 🟢 2. สร้าง Schema Graph ฉบับสมบูรณ์แบบ (ProfilePage + Person + Offer + FAQPage + Breadcrumbs)
+// 🟢 สร้าง Schema Graph ฉบับสมบูรณ์แบบ (ProfilePage + Person + Offer + FAQPage + Breadcrumbs)
 const schemaGraph = {
   "@context": "https://schema.org",
   "@graph": [
@@ -568,14 +566,21 @@ const schemaGraph = {
           "addressCountry": "TH"
         }
       },
-      // 🟢 เติม Offer Schema เพื่อให้ Google ดึงราคา 1,500 บาท ขึ้นโชว์เป็นป้ายราคา
+      // 🟢 เติม Offer Schema ครบชุด (ทำให้ Google ดึงราคาขึ้นเป็น Rich Badge ได้ 100%)
       "makesOffer": {
         "@type": "Offer",
-        "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${displayName}`,
+        "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
+        "url": canonicalUrl,
         "price": String(rateNumber),
         "priceCurrency": "THB",
         "availability": "https://schema.org/InStock",
-        "validFrom": new Date().toISOString().split("T")[0]
+        "validFrom": new Date().toISOString().split("T")[0],
+        "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        "itemOffered": {
+          "@type": "Service",
+          "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
+          "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${provinceNameThai} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`
+        }
       }
     },
     {
@@ -592,7 +597,7 @@ const schemaGraph = {
           "@type": "ListItem", 
           "position": 2, 
           "name": stripHTML(activeBreadcrumbText), 
-          "item": provinceHubUrl 
+          "item": `${CONFIG.DOMAIN}${provinceHubUrl.startsWith('/') ? '' : '/'}${provinceHubUrl}` // ✅ แก้เป็น Absolute URL เต็มรูปแบบ
         },
         { 
           "@type": "ListItem", 
@@ -609,10 +614,10 @@ const schemaGraph = {
       "isPartOf": { "@id": `${canonicalUrl}#webpage` },
       "mainEntity": profileFaqs.map(f => ({
         "@type": "Question",
-        "name": f.q,
+        "name": stripHTML(f.q),
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": f.a
+          "text": stripHTML(f.a)
         }
       }))
     }
@@ -812,9 +817,9 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
                     </a>
 
-                    <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-                    </button>
+                   <button type="button" onclick="if(typeof window.shareProfile==='function'){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else{if(navigator.share){navigator.share({title:document.title,url:window.location.href}).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!')}).catch(()=>{});}else{prompt('คัดลอกลิงก์โปรไฟล์:',window.location.href);}}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+</button>
                 </div>
 
              <!-- 🟢 4. กล่องเนื้อหาบรรยายเฉพาะตัว (แก้ปัญหา Thin Content ผ่าน Spintax) -->
@@ -884,9 +889,9 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
     <span>จองคิว${escapeHTML(displayName)}</span>
     <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
 </a>
-        <button type="button" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์โปรไฟล์เรียบร้อยค่ะ!')})}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-            <i class="fas fa-share-alt" style="font-size: 17px;"></i>
-        </button>
+        <button type="button" onclick="if(typeof window.shareProfile==='function'){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else{if(navigator.share){navigator.share({title:document.title,url:window.location.href}).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!')}).catch(()=>{});}else{prompt('คัดลอกลิงก์โปรไฟล์:',window.location.href);}}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+</button>
     </div>
 
     <!-- ลงทะเบียน Service Worker ให้เหมือน index.html -->
