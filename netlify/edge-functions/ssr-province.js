@@ -500,6 +500,9 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
   return `น้อง${cleanName} สาวรับงาน${provinceName}${zoneText} ไซด์ไลน์ตรงปก`;
 }
 
+// ==============================================================================
+// 1. ฟังก์ชัน Render Card: สะอาด ไร้ Inline onerror และปราศจาก Inline onclick
+// ==============================================================================
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
@@ -517,8 +520,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const statusClass = isAvail ? "status-online" : "status-busy";
   const luxuryPrice = formatLuxuryRate(p.rate);
 
-  // 🟢 จุดแก้ไข 1.3: ตรวจสอบรูปภาพจริง ถ้าเป็นโลโก้หรือค่าว่าง ให้ดึงจาก galleryPaths หรือใช้ภาพเบลอ
-  let rawImg = (p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "").trim();
+  let rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim();
   if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
     let gallery = p.galleryPaths || p.gallery_paths || p.gallery || [];
     if (typeof gallery === "string") {
@@ -552,21 +554,20 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
     : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
 
+  // 🛡️ ปลอดภัยเด็ดขาด: ตัด inline onerror ออก ใช้ Global Event ใน main.js แทน
   return `
     <div class="profile-card-new-container">
-      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}" style="aspect-ratio: 3/4.2; display: flex; flex-direction: column;">
+      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
         <img src="${cardImgSmall}" 
-              srcset="${cardSrcSet}" 
-              sizes="(max-width: 600px) 100vw, 400px"
-              alt="${generateNaturalAlt(cleanName, provinceName, loc)}"
-              width="400"
-              height="560"
-              class="profile-card-img"
-              style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;"
-              loading="${isPriorityLCP ? "eager" : "lazy"}"
-              fetchpriority="${isPriorityLCP ? "high" : "auto"}"
-              decoding="async"
-              onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
+             srcset="${cardSrcSet}" 
+             sizes="(max-width: 600px) 100vw, 400px"
+             alt="${generateNaturalAlt(cleanName, provinceName, loc)}"
+             width="400"
+             height="560"
+             class="profile-card-img"
+             loading="${isPriorityLCP ? "eager" : "lazy"}"
+             fetchpriority="${isPriorityLCP ? "high" : "auto"}"
+             decoding="async" />
                  
         <div class="profile-card-gradient-overlay"></div>
 
@@ -603,6 +604,10 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     </div>
   `;
 };
+
+
+
+
 
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
@@ -1391,43 +1396,30 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-    // 🟢 กู้คืนการฉีดข้อมูล JSON เข้าสู่ Client Script (window.profilesData) สำหรับค้นหาหน้าบ้าน
-    const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
-      let rawGallery = p.galleryPaths || p.gallery_paths || p.gallery || p.photos || p.images || [];
-      if (typeof rawGallery === "string") {
-        try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
-      }
-      return {
-        id: p.id,
-        slug: p.slug || String(p.id),
-        name: p.name || "น้อง",
-        imagePath: p.imagePath || p.image_url || p.imageUrl || "",
-        galleryPaths: Array.isArray(rawGallery) ? rawGallery.filter(Boolean) : [],
-        provinceKey: p.provinceKey || "chiangmai",
-        provinceThai: PROVINCE_SEO_DATA[p.provinceKey]?.name || "เชียงใหม่",
-        location: sanitizeThaiText(p.location || ""),
-        rate: p.rate || "1500",
-        age: p.age || "",
-        height: p.height || "",
-        weight: p.weight || "",
-        stats: p.stats || "",
-        description: sanitizeThaiText(p.description || "").slice(0, 500),
-        slogan: sanitizeThaiText(p.slogan || p.quote || ""),
-        quote: sanitizeThaiText(p.quote || p.slogan || ""),
-        line_id: p.line_id || p.line || p.lineId || p.line_url || CONFIG.SOCIAL_LINKS[0],
-        availability: p.availability || "รับงาน",
-        isfeatured: p.isfeatured === true || p.isFeatured === true,
-        verified: p.verified === true || p.isVerified === true,
-        styleTags: Array.isArray(p.styleTags || p.style_tags) ? (p.styleTags || p.style_tags).slice(0, 3) : []
-      };
-    })).replace(/</g, "\\u003c");
+    // 🟢 ย้ายมาวางตรงนี้ เพื่อให้มีตัวแปร profilesList และ allProvincesRes พร้อมใช้งาน ไม่เกิด 500 Error
+    const compactClientProfiles = profilesList.map(p => ({
+      id: p.id,
+      slug: p.slug || String(p.id),
+      n: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
+      img: p.imagePath || p.image_url || "",
+      pk: p.provinceKey || "chiangmai",
+      loc: sanitizeThaiText(p.location || ""),
+      r: extractCleanNumber(p.rate || p.price),
+      a: p.age || "",
+      st: p.stats || "",
+      av: p.availability || "รับงาน",
+      feat: p.isfeatured ? 1 : 0,
+      ver: p.verified ? 1 : 0,
+      t: Array.isArray(p.styleTags) ? p.styleTags.slice(0, 3) : []
+    }));
 
+    const serializedProfilesJson = JSON.stringify(compactClientProfiles).replace(/</g, "\\u003c");
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
     }));
 
-   const ssrDataScript = `
+    const ssrDataScript = `
       <script id="ssr-profiles-data">
         window.profilesData = ${serializedProfilesJson};
         window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
@@ -1436,7 +1428,6 @@ export default async (req, context) => {
         window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
       </script>
     `;
-    
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
