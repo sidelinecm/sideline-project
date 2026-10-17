@@ -2007,12 +2007,16 @@ if (descContent) {
     }
 
     if (relatedMore) {
-      relatedMore.innerHTML = `
-        <a href="/location/${profile.provinceKey || "chiangmai"}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
-          ${isEn ? "View all models in this area →" : `ดูน้องๆ รับงานโซน${pProvText} ทั้งหมด →`}
-        </a>
-      `;
-    }
+  const zoneLinkUrl = primaryZone.includes("นิมมาน")
+    ? "/nimman"
+    : `/location/${profile.provinceKey || "chiangmai"}/${encodeURIComponent(primaryZone)}`;
+
+  relatedMore.innerHTML = `
+    <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
+      ${isEn ? `View all models in ${primaryZone} →` : `ดูน้องๆ รับงานโซน${primaryZone} (${pProvText}) ทั้งหมด →`}
+    </a>
+  `;
+}
 
 
  
