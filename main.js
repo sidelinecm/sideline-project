@@ -846,7 +846,7 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
       if (activeProvince !== "all" && activeProvince !== "national") {
         const cleanActive = activeProvince.toLowerCase().replace(/[-_]/g, "");
         results = results.filter(p => {
-          const cleanK = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase().replace(/[-_]/g, "");
+        const cleanK = String(p.provinceKey || p.province_slug || p.province || "").toLowerCase().replace(/[-_]/g, "");
           return cleanK === cleanActive;
         });
       }
@@ -1497,9 +1497,8 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
   let currentActivePhotoIdx = 0;
   let currentActivePhotoList = [];
 
-  // ฟังก์ชันเปลี่ยนรูปภาพใหญ่พร้อมแอนิเมชันและปรับจุดไข่ปลา
   function updateLightboxPhoto(idx) {
-    if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
+    if (!currentActivePhotoList || currentActivePhotoList.length === 0) return;
 
     if (idx < 0) idx = currentActivePhotoList.length - 1;
     if (idx >= currentActivePhotoList.length) idx = 0;
@@ -1510,15 +1509,25 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
     if (typeof triggerHaptic === "function") triggerHaptic("light");
 
+    // ป้องกัน Error 100% ถ้า array ว่างหรือ object รูปไม่มีอยู่จริง
+    const photoObj = currentActivePhotoList[idx] || {};
+    const nextSrc = photoObj.fullSrc || photoObj.src || "https://firstmodelhub.com/images/firstmodelhub.webp";
+
     heroImg.style.opacity = "0.25";
     heroImg.style.transform = "scale(0.98)";
+    
+    // ตั้งค่า fallback เมื่อโหลดรูปผิดพลาด
+    heroImg.onerror = function() {
+      this.onerror = null;
+      this.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
+    };
+
     setTimeout(() => {
-      heroImg.src = currentActivePhotoList[idx].fullSrc || currentActivePhotoList[idx].src || "https://firstmodelhub.com/images/firstmodelhub.webp";
+      heroImg.src = nextSrc;
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
     }, 110);
 
-    // 🟢 ปรับสถานะ Active บน Thumbnail Strip (แก้ไขให้ปลอดภัย ไม่ฟ้อง Error)
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
       thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach((t, i) => {
@@ -1530,6 +1539,14 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
         }
       });
     }
+
+    const dotsContainer = document.getElementById("lightbox-dots-indicator");
+    if (dotsContainer) {
+      dotsContainer.querySelectorAll(".gallery-dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === idx);
+      });
+    }
+  }
 
     // ปรับสถานะจุดไข่ปลา (Dots Indicator)
     const dotsContainer = document.getElementById("lightbox-dots-indicator");
@@ -2483,13 +2500,15 @@ async function handleUrlRouting(isInitial = false) {
     }
 
     if (domCache.provinceSelect) {
+      if (domCache.provinceSelect) {
       domCache.provinceSelect.addEventListener("change", (e) => {
         const val = e.target.value;
-        if (isEN) {
-          executeFilterAndRender(true);
-        } else {
-          window.location.href = val && val !== "all" && val !== "national" ? `/location/${val}` : "/";
-        }
+        // 1. สั่งให้ Filter ทำงานและแสดงผลทันทีแบบ SPA (ไม่รีโหลดหน้า)
+        executeFilterAndRender(true);
+        
+        // 2. แอบเปลี่ยน URL ด้านบนให้ตรงกับจังหวัด เผื่อลูกค้านำลิงก์ไปแชร์ต่อ
+        const newUrl = (val && val !== "all" && val !== "national") ? `/location/${val}` : "/";
+        history.pushState(null, "", newUrl);
       });
     }
 
