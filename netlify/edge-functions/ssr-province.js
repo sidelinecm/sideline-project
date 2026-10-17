@@ -803,7 +803,7 @@ export default async (req, context) => {
       deduplicatedProfiles.push(p);
     }
 
-    // 🟢 2. แยกโปรไฟล์ตามจังหวัด และถ้าเปิดหน้าโซน ให้กรองเฉพาะน้องในโซนนั้น
+   // 🟢 2. แยกโปรไฟล์ตามจังหวัด และถ้าเปิดหน้าโซน ให้กรองเฉพาะน้องในโซนนั้น
     let profilesList = deduplicatedProfiles;
     if (!isNational && provinceSlug !== "national") {
       profilesList = deduplicatedProfiles.filter(p => {
@@ -811,7 +811,7 @@ export default async (req, context) => {
         return provinceKeyVariants.includes(pKey);
       });
 
-      // ⚡ ถ้าเปิดหน้าโซน ให้กรองเฉพาะน้องที่ปักหมุดอยู่ในย่านนั้น
+      // 🟢 กรองโปรไฟล์ตามโซนย่อย พร้อมระบบกันหน้าว่างเปล่า (Anti-Thin Content)
       if (zoneSlug) {
         const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
         const matchedZoneProfiles = profilesList.filter(p => {
@@ -820,11 +820,14 @@ export default async (req, context) => {
           return loc.includes(cleanZoneLower) || desc.includes(cleanZoneLower);
         });
 
-        if (matchedZoneProfiles.length > 0) {
-          profilesList = matchedZoneProfiles;
+        // 🛡️ ป้องกันหน้าเสีย 100%: ถ้าโซนนี้ไม่มีน้องเลยแม้แต่คนเดียว (0 คน)
+        if (matchedZoneProfiles.length === 0) {
+          return Response.redirect(`${primaryDomain}/location/${provinceSlug}`, 302);
         }
+
+        profilesList = matchedZoneProfiles;
       }
-    }
+    } // 👈 ใส่ปีกกาปิดตรงนี้ครับ!
 
     const totalCount = profilesList.length; 
     const liveTotalProfiles = deduplicatedProfiles.length;
@@ -1156,15 +1159,55 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1" style="text-align: center; margin: 10px 0;">${ssrH1Html}</h1>`);
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, `<span class="hero-subheadline">${dynamicSubheadline}</span>`);
 
-    // 🟢 ปรับลิงก์ปุ่มโซนด้านบน เป็น URL จริง 2 ชั้น
-    const pills = (cleanZonesList || []).map(z => {
+   // 🟢 1. คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน (Zero-Profile Pruning)
+    const zoneCountMap = {};
+    const baseProvProfiles = deduplicatedProfiles.filter(p => {
+      const pKey = (p.provinceKey || "").toLowerCase();
+      return provinceKeyVariants.includes(pKey);
+    });
+
+    // สแกนนับจำนวนคนจริงในแต่ละย่าน
+    (cleanZonesList || []).forEach(rawZ => {
+      const cleanZ = sanitizeThaiText(rawZ).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
+      if (!cleanZ || cleanZ === "ทั้งหมด") return;
+      const count = baseProvProfiles.filter(p => {
+        const loc = (p.location || "").toLowerCase();
+        const desc = (p.description || "").toLowerCase();
+        return loc.includes(cleanZ) || desc.includes(cleanZ);
+      }).length;
+      // 🛡️ สำคัญ: โซนไหนมีน้อง >= 1 คนขึ้นไปเท่านั้นถึงจะเก็บค่าไว้
+      if (count > 0) {
+        zoneCountMap[rawZ] = count;
+      }
+    });
+
+    // 🟢 2. สร้างปุ่มลิงก์เฉพาะโซนที่มีน้องจริง พร้อมตัวเลขบอกจำนวนคน
+    const activeZoneKeys = Object.keys(zoneCountMap);
+    const pills = activeZoneKeys.map(z => {
       const cleanZ = escapeHTML(String(z).trim());
+      const count = zoneCountMap[z];
       const href = cleanZ.includes("นิมมาน") 
         ? "/nimman" 
         : `/location/${provinceSlug}/${encodeURIComponent(cleanZ)}`;
-      return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
+
+      const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
+      const activeStyle = isActiveZone 
+        ? "background: #7C3AED; color: #FFFFFF; border: 1.5px solid #7C3AED;" 
+        : "background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87;";
+
+      return `<a href="${href}" style="${activeStyle} padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">
+        📍 โซน${cleanZ} <span style="font-size: 10px; opacity: 0.85;">(${count})</span>
+      </a>`;
     }).join(" ");
 
+    // 🟢 3. สั่งนำปุ่มโซนไปแทนที่แถบ Filter ในหน้าเว็บจริง
+    if (!isNational && pills) {
+      finalHtml = finalHtml.replace(
+        /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
+        `<div class="filter-pills-scroll-row" id="quick-filter-pills" style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 0; scrollbar-width: none;">${pills}</div>`
+      );
+    }
+    
     const trustBoxHtml = `
       <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
         <span style="color: #059669; font-size: 12px; font-weight: 800;">🛡️ ปลอดภัย 100%:</span>
@@ -1384,14 +1427,16 @@ export default async (req, context) => {
       nameThai: p.nameThai || p.name
     }));
 
-    const ssrDataScript = `
+   const ssrDataScript = `
       <script id="ssr-profiles-data">
         window.profilesData = ${serializedProfilesJson};
         window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
         window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
         window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
+        window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
       </script>
     `;
+    
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
