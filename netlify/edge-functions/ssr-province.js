@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261015_clean`;
+let GLOBAL_VERSION = `v_20261016_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -229,38 +229,40 @@ function getRealTimeAgo(dateInput) {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสีย, อิโมจิขยะวัยรุ่น (แยกจุด . ออกมา ไม่ลบทศนิยม 1.5)
-    .replace(/[\uD800-\uDFFF]/g, "")
-    .replace(/\uFFFD/g, "")
+    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม เช่น 1.5k)
+    .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
-    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลาซ้ำๆ เช่น ... แต่ไม่แตะ 1.5k
+    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
     
     // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // สระซ้ำ
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระซ้ำ (เช่น ดีีมาก -> ดีมาก)
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
-    .replace(/นิมาน|นิทาน/g, "นิมมาน")
+    .replace(/นิมาน/g, "นิมมาน")
+    .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
     .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%") // ดึงมาจาก render-bot ซิงค์ให้ครบ
+    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%")
     
-    // 3. กรองคำล่อแหลมแบบ Single-Pass (ไม่วนแก้ซ้ำซ้อน และไม่ตัดจนคำแหว่ง)
+    // 3. กรองคำล่อแหลมแบบ SafeSearch Compliant
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
     .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
-    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง") // ยุบรวมรอบเดียวจบ
-    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
     
-    // 4. ล้างคำซ้ำซ้อน และจัดระเบียบคำว่าฟิวแฟน
+    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (รองรับทั้งเลขอารบิกและเลขไทย + จัดระเบียบวงเล็บเวลา)
+    .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
+    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)") // ✅ แก้ให้รองรับทั้ง "/1ชม." และ "/ 1 ชม."
+    
+    // 4. จัดระเบียบคำซ้ำ
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
     
-    // 5. ล้างเศษเครื่องหมายวรรคตอนที่ตกค้างจากการตัดคำ
+    // 5. ล้างเศษเครื่องหมายวรรคตอนและช่องว่าง
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
-    .replace(/\s*([!*~_·\-\/])\s*(?=[!*~_·\-\/])/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -949,13 +951,14 @@ const nameSig = `${cleanName}_${realProvince}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     const activeReviews = getDynamicReviews(provinceNameThai);
 
-  const metaTitle = isNational 
-    ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-    : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ | ${CONFIG.BRAND_NAME}`;
+  // 🟢 ปรับให้เป็น V2 ดักคีย์เวิร์ด Exact-match ขึ้นหน้าสุด
+const metaTitle = isNational 
+  ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
+  : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ | ${CONFIG.BRAND_NAME}`;
 
-  const metaDescription = isNational
-    ? `แหล่งรวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟน คัดตัวจริงตรงปก 100% มีห้องพร้อมและนอกสถานที่ นัดเจอจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ เจอจ่ายจบ ปลอดภัย`
-    : `รวมสาวรับงานและสาวไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ เจอจ่ายจบ`;
+const metaDescription = isNational
+  ? `แหล่งรวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟน คัดตัวจริงตรงปก 100% มีห้องพร้อมและนอกสถานที่ นัดเจอจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ เจอจ่ายจบ ปลอดภัย`
+  : `รวมสาวรับงานและสาวไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ เจอจ่ายจบ`;
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -1293,48 +1296,33 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
- // 1. หัวเรื่อง H1 (ซิงค์ตรงกับหน้าแรก และหน้าจังหวัด 100%)
-  const ssrH1Html = isNational 
-    ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่</span>` 
-    : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>`;
+ // 🟢 ซิงค์ H1 ให้ตรงกับ V2 และตรงกับ main.js
+const ssrH1Html = isNational 
+  ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่</span>` 
+  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>`;
+    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+
+    // 🟢 2. รายชื่อย่านธรรมชาติ (ใช้ cleanZonesList เดิมตรงๆ ปลอดภัย 100%)
+    const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
+      ? cleanZonesList.slice(0, 5).join(", ") 
+      : "ในตัวเมือง";
+
+    // 🟢 3. เม็ดยาโซนย่าน (Pills): ใช้ cleanZonesList เดิม + ปรับสี Contrast เข้มขึ้นผ่านเกณฑ์ AAA
+    const pills = (cleanZonesList || []).map(z => {
+      const cleanZ = escapeHTML(String(z).trim());
+      const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
+      return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
+    }).join(" ");
+
+    // 🟢 4. แก้ไขจุดตายสำคัญ: ประกาศชื่อ zonePillsHtml ให้ตรงกับตัวที่เรียกใช้ด้านล่าง (แก้ปัญหาแครช)
+    const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
+
+   
+    const dynamicHeroDesc = isNational
+      ? `<p class="hero-subtitle-p"><strong>FirstModelHub</strong> รวมโปรไฟล์สาวรับงานและสาวไซด์ไลน์ สไตล์ฟิวแฟนดูแลดี มีให้เลือกทั้งแบบมีห้องส่วนตัวพร้อมรับ และเดินทางไปหานอกสถานที่ (โรงแรม/คอนโด) คุยเรทราคากับน้องโดยตรง <strong>เจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้า เจอจ่ายจบ สบายใจทั้งสองฝ่าย</strong></p>`
+      : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ สบายใจ ปลอดภัยค่ะ</p>${zonePillsHtml}`;
   
-  finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
-
-  // 2. คำนวณรายชื่อย่านและเม็ดยา (Pills) ก่อนนำไปใช้
-  // แยก directory โซนออกจากคำอธิบาย Hero: แสดงครบโดยไม่ทำให้ Hero สูง/แน่น
-  const zonePills = (cleanZonesList || []).map(z => {
-    const zoneText = String(z).trim();
-    const cleanZ = escapeHTML(zoneText);
-    const href = zoneText.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(zoneText)}`;
-    return `<a href="${href}" class="province-zone-pill" title="ดูโปรไฟล์โซน${cleanZ}">📍 <span>${cleanZ}</span></a>`;
-  }).join("");
-
-  const zoneSectionHtml = !isNational && zonePills
-    ? `<section class="province-zones-section" aria-labelledby="province-zones-heading">
-        <div class="province-zones-header">
-          <div><span class="province-zones-eyebrow">เลือกพื้นที่</span><h2 id="province-zones-heading">โซนให้บริการใน${escapeHTML(provinceNameThai)}</h2></div>
-          <span class="province-zones-count">${cleanZonesList.length} โซน</span>
-        </div>
-        <nav class="province-zones-list" aria-label="เลือกโซนใน${escapeHTML(provinceNameThai)}">${zonePills}</nav>
-      </section>`
-    : "";
-
-  // 3. ประกอบคำโปรย Hero Description (ประกาศตัวแปรเพียงครั้งเดียวอย่างถูกต้อง)
-  const dynamicHeroDesc = isNational
-    ? `<p class="hero-subtitle-p"><strong>FirstModelHub</strong> รวมโปรไฟล์สาวรับงานและสาวไซด์ไลน์ สไตล์ฟิวแฟนดูแลดี มีให้เลือกทั้งแบบมีห้องส่วนตัวพร้อมรับ และเดินทางไปหานอกสถานที่ (โรงแรม/คอนโด) คุยเรทราคากับน้องโดยตรง <strong>เจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้า เจอจ่ายจบ สบายใจทั้งสองฝ่าย</strong></p>`
-    : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ครอบคลุมพื้นที่ให้บริการ คัดตัวจริง มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ</p>`;
-
-  finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
-  if (zoneSectionHtml) {
-    // วางรายชื่อโซนหลัง Hero และก่อนโปรไฟล์ HOT; fallback ก่อน featured section
-    if (finalHtml.includes("<!-- Hot Swiper Section -->")) {
-      finalHtml = finalHtml.replace("<!-- Hot Swiper Section -->", `${zoneSectionHtml}\n    <!-- Hot Swiper Section -->`);
-    } else if (finalHtml.includes('<section id="hot-profiles-section"')) {
-      finalHtml = finalHtml.replace('<section id="hot-profiles-section"', `${zoneSectionHtml}\n    <section id="hot-profiles-section"`);
-    } else {
-      finalHtml = finalHtml.replace('<section id="featured-profiles"', `${zoneSectionHtml}\n    <section id="featured-profiles"`);
-    }
-  }
+    finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
     
    
     const ssrFeaturedH2 = isNational 

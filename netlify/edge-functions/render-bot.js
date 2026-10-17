@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261015_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -93,40 +93,43 @@ function getRealTimeAgo(dateInput) {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม 1.5k)
+    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม เช่น 1.5k)
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
     
     // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระซ้ำ (เช่น ดีีมาก -> ดีมาก)
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
-    .replace(/นิมาน|นิทาน/g, "นิมมาน")
+    .replace(/นิมาน/g, "นิมมาน")
+    .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
     .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
     .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%")
     
-    // 3. กรองคำล่อแหลมแบบไม่ทำให้ไวยากรณ์พัง
+    // 3. กรองคำล่อแหลมแบบ SafeSearch Compliant
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
     .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
     .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
-    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    
+    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (รองรับทั้งเลขอารบิกและเลขไทย + จัดระเบียบวงเล็บเวลา)
+    .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
+    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)") // ✅ แก้ให้รองรับทั้ง "/1ชม." และ "/ 1 ชม."
     
     // 4. จัดระเบียบคำซ้ำ
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
     
-    // 5. ล้างเศษเครื่องหมายวรรคตอน
+    // 5. ล้างเศษเครื่องหมายวรรคตอนและช่องว่าง
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
-
 function escapeHTML(str) {
   if (str == null) return "";
   return String(str).replace(/[&<>'"]/g, tag => ({
@@ -488,7 +491,8 @@ const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
 // 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
 const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
 
-    const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${provinceNameThai} (${primaryZone}) ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+    // 🟢 ปรับให้เป็น V2 แท้ ปลอดภัยจาก SafeSearch
+const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${provinceNameThai} (${primaryZone}) ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
 const metaDescription = `${displayName} สาวรับงานไซด์ไลน์ในตัวเมือง${provinceNameThai} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟนแท้ ตรงปก 100% มีห้องพร้อม เรทเริ่มต้น ${priceDisplay} (1 ชม.) ไม่ต้องโอนมัดจำ เจอตัวจริงค่อยจ่ายหน้างาน`;
 
     // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
@@ -731,7 +735,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
       </a>
     </li>
     <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-    <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+    <li aria-current="page"><span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
   </ol>
 </nav>
 
