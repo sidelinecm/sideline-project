@@ -515,8 +515,22 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
   const ageStr = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "";
   const statusClass = isAvail ? "status-online" : "status-busy";
-  const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
   const luxuryPrice = formatLuxuryRate(p.rate);
+
+  // 🟢 จุดแก้ไข 1.3: ตรวจสอบรูปภาพจริง ถ้าเป็นโลโก้หรือค่าว่าง ให้ดึงจาก galleryPaths หรือใช้ภาพเบลอ
+  let rawImg = (p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "").trim();
+  if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
+    let gallery = p.galleryPaths || p.gallery_paths || p.gallery || [];
+    if (typeof gallery === "string") {
+      try { gallery = JSON.parse(gallery); } catch (_) { gallery = gallery.split(",").map(s => s.trim()); }
+    }
+    const validFromGallery = Array.isArray(gallery) ? gallery.find(g => g && !g.includes("firstmodelhub.webp")) : null;
+    rawImg = validFromGallery || "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+  }
+
+  const cardImgSmall = optimizeImg(rawImg, 400);
+  const cardImgLarge = optimizeImg(rawImg, 600);
+  const cardSrcSet = `${cardImgSmall} 400w, ${cardImgLarge} 600w`;
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
   if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
@@ -537,10 +551,6 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const rightBadgeHtml = isFiwFan
     ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
     : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
-
-  const cardImgSmall = optimizeImg(rawImg, 400);
-  const cardImgLarge = optimizeImg(rawImg, 600);
-  const cardSrcSet = `${cardImgSmall} 400w, ${cardImgLarge} 600w`;
 
   return `
     <div class="profile-card-new-container">
@@ -648,14 +658,27 @@ export default async (req, context) => {
       return Response.redirect(`${primaryDomain}/`, 301);
     }
 
-    const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
-    const cacheKey = `${req.method}:${cleanPath}`;
-    const cachedPage = PAGE_CACHE.get(cacheKey);
-    if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
-      PAGE_CACHE.delete(cacheKey);
-      PAGE_CACHE.set(cacheKey, cachedPage);
-      return new Response(cachedPage.html, { headers: cachedPage.headers });
-    }
+   // แก้ไข: ทำ 301 Redirect ให้เป็น Clean URL และแยก Cache Key อย่างเด็ดขาด
+const rawZoneQuery = url.searchParams.get("zone")?.trim();
+const segments = url.pathname.split("/").filter(Boolean);
+
+// 1. ถ้ามีคนเข้าผ่าน ?zone= ให้ 301 Redirect ไปที่ URL โซนสะอาดระดับ Path ทันที
+if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
+  const currentProv = segments[1] || "chiangmai";
+  const cleanZoneTarget = encodeURIComponent(rawZoneQuery);
+  return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneTarget}`, 301);
+}
+
+const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
+
+// 2. Cache Key ต้องรวม Path และ Search Query ทั้งหมด ป้องกันหน้าโซนแคชทับหน้าจังหวัด
+const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
+const cachedPage = PAGE_CACHE.get(cacheKey);
+if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
+  PAGE_CACHE.delete(cacheKey);
+  PAGE_CACHE.set(cacheKey, cachedPage);
+  return new Response(cachedPage.html, { headers: cachedPage.headers });
+}
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     const segments = url.pathname.split("/").filter(Boolean);
@@ -1378,15 +1401,21 @@ export default async (req, context) => {
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
     finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
 
-    // 🟢 ลบ Preload เก่าทิ้งก่อนแทรกรูปแรก ป้องกัน LCP พัง
-    finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
-    if (profilesList.length > 0) {
-      const rawLcpImg = profilesList[0].imagePath || profilesList[0].image_url || "";
-      const lcpImgSmall = optimizeImg(rawLcpImg, 400);
-      const lcpImgLarge = optimizeImg(rawLcpImg, 600);
-      const preloadTag = `  <link rel="preload" as="image" href="${lcpImgSmall}" imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">\n</head>`;
-      finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
-    }
+   // แก้ไข: ค้นหาคนแรกที่มีรูปถ่ายจริงจาก Cloudinary ไม่ใช่โลโก้เว็บ
+finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
+
+const validLcpProfile = profilesList.find(p => {
+  const img = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
+  return img && !img.includes("firstmodelhub.webp");
+});
+
+if (validLcpProfile) {
+  const rawLcpImg = validLcpProfile.imagePath || validLcpProfile.image_url || validLcpProfile.imageUrl;
+  const lcpImgSmall = optimizeImg(rawLcpImg, 400);
+  const lcpImgLarge = optimizeImg(rawLcpImg, 600);
+  const preloadTag = `  <link rel="preload" as="image" href="${lcpImgSmall}" imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">\n</head>`;
+  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+}
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
