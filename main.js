@@ -10,10 +10,50 @@ function parseRateToNumber(rate) {
   if (isNaN(num) || num <= 0) return 1500;
   if (num < 10) return num * 1000;  // กรณีพิมพ์ 1 หรือ 2 ให้เป็น 1,000 หรือ 2,000
   if (num < 500) return num * 10;   // ✅ กรณีพิมพ์ 150 ให้เป็น 1,500 (ตรงกับ render-bot.js)
-  return num;
+ return num;
 }
 window.parseRateToNumber = parseRateToNumber;
 
+// 🟢 ดักจับรูปพังทั้งเว็บ (ตัดปัญหา syntax &#39; บน onerror ถาวร)
+document.addEventListener("error", (e) => {
+  if (e.target && e.target.tagName === "IMG") {
+    const fallback = "https://firstmodelhub.com/images/firstmodelhub.webp";
+    if (e.target.src !== fallback) {
+      e.target.onerror = null;
+      e.target.src = fallback;
+    }
+  }
+}, true);
+
+// 🟢 คำนวณเวลาสดฝั่ง Client (แก้ปัญหาเวลาค้างจาก CDN Cache)
+function updateLiveRelativeTimestamps() {
+  const elements = document.querySelectorAll("time.fmh-relative-time");
+  if (!elements || elements.length === 0) return;
+  const now = Date.now();
+  elements.forEach((el) => {
+    const dt = el.getAttribute("datetime");
+    if (!dt) return;
+    const time = new Date(dt).getTime();
+    if (isNaN(time)) return;
+    const diffMin = Math.floor((now - time) / (1000 * 60));
+    let text = "วันนี้";
+    if (diffMin < 5) text = "ออนไลน์เมื่อสักครู่";
+    else if (diffMin < 60) text = `อัปเดตเมื่อ ${diffMin} นาทีที่แล้ว`;
+    else {
+      const diffHours = Math.floor(diffMin / 60);
+      if (diffHours < 24) text = `อัปเดตเมื่อ ${diffHours} ชั่วโมงที่แล้ว`;
+      else {
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays === 1) text = "อัปเดตเมื่อวานนี้";
+        else if (diffDays < 7) text = `อัปเดตเมื่อ ${diffDays} วันที่แล้ว`;
+        else text = `อัปเดตเมื่อ ${new Date(time).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
+      }
+    }
+    el.textContent = text;
+  });
+}
+
+// 🟢 โหลด Supabase แบบ Dynamic Singleton
 
 // 🟢 โหลด Supabase แบบ Dynamic Singleton
 let supabaseClient = null;
@@ -526,8 +566,9 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
 
-    const displayName = formatDisplayName(raw.name || raw.displayName || raw.title || "Model");
-    const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
+    const rawName = raw.n || raw.name || raw.displayName || raw.title || "Model";
+    const displayName = formatDisplayName(rawName);
+    const mainImg = raw.img || raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
     
     // 🖼️ ดึงรูปอัลบั้มทั้งหมด และแปลง JSON String ให้เป็น Array อย่างปลอดภัย
     let gallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
@@ -571,7 +612,7 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
       images.push({ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG });
     }
 
-   let pKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
+  let pKey = (raw.pk || raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
     if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
 
@@ -597,7 +638,7 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
     
     // 🟢 แก้ไข: ใช้ parseRateToNumber ป้องกันบั๊กราคา 15.-
-    const rawRate = raw.rate || raw.price || raw.fee || raw.cost || 0;
+    const rawRate = raw.r || raw.rate || raw.price || raw.fee || raw.cost || 0;
     const numPrice = parseRateToNumber(rawRate);
     const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : (isEN ? "Inquire" : "สอบถาม");
 
@@ -609,11 +650,11 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
 
     if (bust && waist && hips) {
       statsStr = `${bust}${cup}-${waist}-${hips}`;
-    } else if (raw.stats || raw.proportion || raw.proportions) {
-      statsStr = String(raw.stats || raw.proportion || raw.proportions).trim();
+  } else if (raw.st || raw.stats || raw.proportion || raw.proportions) {
+      statsStr = String(raw.st || raw.stats || raw.proportion || raw.proportions).trim();
     }
 
-    const rawAge = raw.age || raw.profile_age;
+    const rawAge = raw.a || raw.age || raw.profile_age;
     const cleanAge = rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0" ? String(rawAge).replace(/\D/g, "") : null;
     const ageDisplay = cleanAge ? (isEN ? `${cleanAge} yrs` : `${cleanAge} ปี`) : (isEN ? "N/A" : "ไม่ระบุ");
 
@@ -923,7 +964,6 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
   if (!window.__logoClickRegistered) {
     window.__logoClickRegistered = true;
     document.addEventListener('click', (e) => {
-      // 🔒 ถ้าคลิกโดนดาว ให้ข้ามทันที เพื่อให้ระบบนับ 5 ครั้งทำงานได้
       if (e.target.closest('.luxe-star-crest, .star, .dancing-neon-star')) return;
 
       const logoEl = e.target.closest('.brand-luxe-logo');
@@ -2544,6 +2584,16 @@ async function handleUrlRouting(isInitial = false) {
 
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
+    // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
+    const shareBtn = e.target.closest('[data-action="share-profile"]');
+    if (shareBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
+      const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
+      window.shareProfile(name, url);
+      return;
+    }
       const searchInputEl = document.getElementById("search-keyword");
       const suggestionsEl = document.getElementById("search-suggestions");
       if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
@@ -2680,7 +2730,6 @@ async function handleUrlRouting(isInitial = false) {
       if (appState.isFetching) return false;
       appState.isFetching = true;
 
-      // 🛡️ ฟังก์ชันคัดกรองข้อมูลให้สะอาดสมบูรณ์แบบ
       function filterValidProfiles(list) {
         if (!list || !Array.isArray(list)) return [];
         const seenIds = new Set();
@@ -2691,35 +2740,31 @@ async function handleUrlRouting(isInitial = false) {
         for (const raw of list) {
           if (!raw) continue;
 
-          // 1. กรองทิ้งทันที ถ้าไม่มีชื่อ หรือเป็นชื่อว่าง/ขยะ
-          const rawName = (raw.name || "").trim();
+          // 🟢 แก้ไข: ให้อ่านได้ทั้ง raw.n (คีย์ย่อ) และ raw.name (คีย์เต็ม) ไม่ให้ตัดข้อมูลทิ้ง
+          const rawName = (raw.n || raw.name || "").trim();
           const cleanName = rawName.toLowerCase().replace(/^(น้อง|สาว|พี่)\s*/gi, "");
           if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") {
             continue;
           }
 
-          // 2. 🔒 กรองทิ้งทันที ถ้าไม่มีรูปจริง หรือใช้รูปโลโก้เว็บ
-          const rawImg = (raw.imagePath || raw.image_url || raw.imageUrl || "").trim().toLowerCase();
+          // 🟢 แก้ไข: ให้อ่านได้ทั้ง raw.img และ raw.imagePath
+          const rawImg = (raw.img || raw.imagePath || raw.image_url || raw.imageUrl || "").trim().toLowerCase();
           if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
-            continue; // ตัดคนไม่มีรูปทิ้ง
+            continue;
           }
 
-          // 3. กรอง ID ซ้ำ
           if (raw.id && seenIds.has(String(raw.id))) continue;
 
-          // 4. กรองชื่อซ้ำในจังหวัดเดียวกัน
-          const pKey = (raw.provinceKey || raw.province_slug || "").toLowerCase();
+          // 🟢 แก้ไข: ให้อ่านได้ทั้ง raw.pk และ raw.provinceKey
+          const pKey = (raw.pk || raw.provinceKey || raw.province_slug || "").toLowerCase();
           const nameSig = `${cleanName}_${pKey}`;
           if (seenNames.has(nameSig)) continue;
 
-          // 5. สร้างลายเซ็นรูปภาพเพื่อเช็ครูปซ้ำ
           let imgSig = "";
           const parts = rawImg.split("?")[0].split("/");
           imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
-
           if (imgSig && seenImgs.has(imgSig)) continue;
 
-          // บันทึกค่ากันซ้ำ
           if (raw.id) seenIds.add(String(raw.id));
           seenNames.add(nameSig);
           if (imgSig) seenImgs.add(imgSig);
@@ -3125,34 +3170,33 @@ async function handleUrlRouting(isInitial = false) {
 
         } catch (err) {
           window.location.reload();
-        }
-      } else {
-        pinInput.value = "";
-        pinInput.style.borderColor = "#FF1493";
-        if (typeof triggerHaptic === "function") triggerHaptic("medium");
-        pinInput.placeholder = "รหัสผิด!";
+         } 
+          } else {
+            pinInput.value = "";
+            pinInput.style.borderColor = "#FF1493";
+            if (typeof triggerHaptic === "function") triggerHaptic("medium");
+            pinInput.placeholder = "รหัสผิด!";
+          }
+        };
+
+        // 🟢 1. ผูกปุ่มกดยืนยัน และผูกปุ่ม Enter บนแป้นพิมพ์
+        submitBtn.onclick = executePurge;
+        pinInput.onkeydown = (e) => {
+          if (e.key === "Enter") executePurge();
+        };
       }
-    };
-
-    // 🟢 ท่อนที่ขาดหายไป: ผูกปุ่มกดยืนยัน และผูกปุ่ม Enter บนแป้นพิมพ์
-    submitBtn.onclick = executePurge;
-    pinInput.onkeydown = (e) => {
-      if (e.key === "Enter") executePurge();
-    };
-  } // 🟢 ปิดฟังก์ชัน openAdminPinDialog
-
-  // ==========================================================================
-  // 🟢 เริ่มต้นการทำงานของระบบ (พร้อมปุ่มลับแอดมิน)
-  // ==========================================================================
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      initApplication();
-      initLightboxSwipeDown();
-      initStealthAdminPurge();
-    });
-  } else {
-    initApplication();
-    initLightboxSwipeDown();
-    initStealthAdminPurge();
-  }
-})();
+      
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+          initApplication();
+          initLightboxSwipeDown();
+          initStealthAdminPurge();
+          updateLiveRelativeTimestamps(); // 👈 คำนวณเวลาสดทันที
+        });
+      } else {
+        initApplication();
+        initLightboxSwipeDown();
+        initStealthAdminPurge();
+        updateLiveRelativeTimestamps();
+      }
+    })();
