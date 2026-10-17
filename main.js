@@ -395,38 +395,40 @@ async function getSupabaseClient() {
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสีย, อิโมจิขยะวัยรุ่น (แยกจุด . ออกมา ไม่ลบทศนิยม 1.5)
-    .replace(/[\uD800-\uDFFF]/g, "")
-    .replace(/\uFFFD/g, "")
+    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม เช่น 1.5k)
+    .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
-    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลาซ้ำๆ เช่น ... แต่ไม่แตะ 1.5k
+    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
     
     // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // สระซ้ำ
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระซ้ำ (เช่น ดีีมาก -> ดีมาก)
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
-    .replace(/นิมาน|นิทาน/g, "นิมมาน")
+    .replace(/นิมาน/g, "นิมมาน")
+    .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
     .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
-    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%") // ดึงมาจาก render-bot ซิงค์ให้ครบ
+    .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%")
     
-    // 3. กรองคำล่อแหลมแบบ Single-Pass (ไม่วนแก้ซ้ำซ้อน และไม่ตัดจนคำแหว่ง)
+    // 3. กรองคำล่อแหลมแบบ SafeSearch Compliant
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
-    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น)/gi, "")
+    .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
     .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
-    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง") // ยุบรวมรอบเดียวจบ
-    .replace(/\d+\s*น้ำ\s*\/?\s*\d+\s*ชม\.?/gi, "1 ชม.")
+    .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
     
-    // 4. ล้างคำซ้ำซ้อน และจัดระเบียบคำว่าฟิวแฟน
+    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (รองรับทั้งเลขอารบิกและเลขไทย + จัดระเบียบวงเล็บเวลา)
+    .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
+    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)") // ✅ แก้ให้รองรับทั้ง "/1ชม." และ "/ 1 ชม."
+    
+    // 4. จัดระเบียบคำซ้ำ
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
     
-    // 5. ล้างเศษเครื่องหมายวรรคตอนที่ตกค้างจากการตัดคำ
+    // 5. ล้างเศษเครื่องหมายวรรคตอนและช่องว่าง
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
-    .replace(/\s*([!*~_·\-\/])\s*(?=[!*~_·\-\/])/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -1095,7 +1097,8 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-    // ✅ ซิงค์ตรงกับ H1 ตัวชนะเลิศของ SSR 100% (หยุดปัญหาข้อความกระตุกสลับคำ)
+    
+    // ✅ ซิงค์ H1 ให้ตรงกับ SSR V2 100% (หยุดปัญหาข้อความกระตุกเปลี่ยนรูป)
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
@@ -1105,12 +1108,12 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
         `;
       } else {
-      const line1 = isAllOrNational 
-          ? "ไซด์ไลน์ทั่วไทย • สาวรับงาน" 
-          : `ไซด์ไลน์${escapeHTML(targetName)} • รับงาน${escapeHTML(targetName)}`;
+        const line1 = isAllOrNational 
+          ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น" 
+          : `รับงาน${escapeHTML(targetName)} ไซด์ไลน์${escapeHTML(targetName)}`;
         const line2 = isAllOrNational 
-          ? "เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน" 
-          : "เด็กเอ็น ฟิวแฟนตรงปก ปลอดภัยจ่ายหน้างาน 100%";
+          ? "ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่" 
+          : "ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
@@ -2200,11 +2203,43 @@ function hideGlobalLoader() {
 async function handleUrlRouting(isInitial = false) {
   let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
-  const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
-if (isStandaloneProfile) {
-    hideGlobalLoader();
-    return; // ⛔ ออกจากการทำงานทันที ประหยัดเน็ต ประหยัด RAM 100%
-}
+  // 🟢 ตรวจสอบหน้าโปรไฟล์เดี่ยว (เปิดแกลเลอรีรูปภาพ + Dock แล้วจบการทำงาน)
+    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+    if (isStandaloneProfile) {
+        hideGlobalLoader();
+        initDockAutoHide();
+        
+        // ⚡ ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
+        const galleryStrip = document.getElementById('profile-gallery-strip');
+        const mainProfileImg = document.getElementById('main-profile-img');
+        if (galleryStrip && mainProfileImg) {
+            galleryStrip.addEventListener('click', (e) => {
+                const btn = e.target.closest('.thumb-slot');
+                if (!btn) return;
+                
+                if (typeof triggerHaptic === 'function') triggerHaptic('light');
+                const fullSrc = btn.getAttribute('data-full-src');
+                if (fullSrc) {
+                    mainProfileImg.style.opacity = '0.3';
+                    mainProfileImg.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        mainProfileImg.src = fullSrc;
+                        mainProfileImg.removeAttribute('srcset'); // ลบ srcset เพื่อให้เบราว์เซอร์แสดงรูปที่เลือกแน่นอน
+                        mainProfileImg.style.opacity = '1';
+                        mainProfileImg.style.transform = 'scale(1)';
+                    }, 120);
+
+                    galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
+                        b.classList.remove('active');
+                        b.style.borderColor = 'transparent';
+                    });
+                    btn.classList.add('active');
+                    btn.style.borderColor = '#7C3AED';
+                }
+            });
+        }
+        return; // ออกจากการทำงาน ไม่ต้องโหลด Database รายชื่อคนอื่น
+    }
 
   
   const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
@@ -2281,13 +2316,7 @@ if (isStandaloneProfile) {
       });
     });
 
-    // 🟢 1. ตรวจสอบทันที: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่สร้างจาก render-bot.js)
-    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
-    if (isStandaloneProfile) {
-        hideGlobalLoader();
-        initDockAutoHide(); // 👈 เพิ่มบรรทัดนี้ เพื่อให้แถบ Dock ด้านล่างทำงานได้
-        return; // ⛔ ข้ามการดึง Database 100+ คน ช่วยให้หน้าโปรไฟล์โหลดเร็ว
-    }
+    
 
     domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
