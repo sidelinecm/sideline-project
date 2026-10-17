@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
 let GLOBAL_PROFILE_VERSION = `v_20261020_clean`;
+
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -28,27 +29,6 @@ const CONFIG = {
   DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 
-const REVIEW_POOL = [
-  { name: "คุณชลสิทธิ์", text: "ตรงเวลามากครับ น้องน่ารัก อัธยาศัยดี พูดจาสุภาพ ดูแลสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ" },
-  { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" },
-  { name: "พี่โจ", text: "จองง่าย ไม่ต้องโอนมัดจำล่วงหน้า ไปเจอน้องตัวจริงแล้วค่อยจ่าย สบายใจและปลอดภัย 100% ครับ" },
-  { name: "คุณกอล์ฟ", text: "น้องน่ารักสไตล์ผู้ดี มารยาทดีมาก เทคแคร์เอาใจใส่เป็นธรรมชาติ แนะนำคนนี้เลยครับ" },
-  { name: "พี่ยอด", text: "ตรงปกไม่จกตาครับ น้องสุภาพ เรียบร้อย ไม่มีเร่งเวลาเลย นั่งทานข้าวด้วยกันเพลินมาก" },
-  { name: "คุณต้น", text: "บริการประทับใจมากครับ ให้เกียรติลูกค้า น่ารัก ยิ้มเก่ง คลายเหงาได้ดีเยี่ยมเลยครับ" },
-  { name: "พี่บอล", text: "ฟิวแฟนของแท้เลยครับ น้องเทคแคร์ดีมาก ขี้อ้อน น่ารัก ตรงตามรูปในโปรไฟล์ทุกอย่าง" },
-  { name: "คุณอภิชาติ", text: "ระบบจองสะดวกมาก น้องตรงเวลา สะอาด มารยาทการดูแลดีเยี่ยม ไร้กังวลเรื่องมัดจำครับ" },
-  { name: "พี่เมฆ", text: "น่ารักและเป็นกันเองมากครับ น้องคุยสนุก ไม่มีเกร็งเลย เหมือนได้ไปเดทกับแฟนจริงๆ" },
-  { name: "คุณวิทย์", text: "ตัวจริงสวยกว่าในรูปอีกครับ ผิวพรรณดี สุภาพเรียบร้อย เอาใจใส่ทุกรายละเอียด แนะนำครับ" },
-  { name: "พี่นัท", text: "จ่ายเงินหน้างานตรงกับน้อง มั่นใจในความปลอดภัยได้เต็มร้อย บริการด้วยความจริงใจมากครับ" },
-  { name: "คุณบอย", text: "น้องตรงต่อเวลามาก น่ารัก สดใส พูดเพราะ ให้ความรู้สึกอบอุ่นและผ่อนคลายสุดๆ ครับ" },
-  { name: "คุณป้อง", text: "เทคแคร์ดีมากครับ สุภาพ อารมณ์ดีตลอดเวลา คุ้มค่าและประทับใจมากครับ" },
-  { name: "พี่ยุทธ", text: "โปรไฟล์ยืนยันตัวตนจริง ตัวจริงตรงปก 100% สบายใจเรื่องความปลอดภัย แนะนำต่อเลยครับ" },
-  { name: "คุณอาร์ม", text: "น่ารัก ขี้อ้อน คุยเก่งมากครับ ชวนคุยเพลิน ไม่มีช่วงเงียบเลย ประทับใจมากครับ" },
-  { name: "พี่ก้อง", text: "รักษาเวลาดีเยี่ยม สุภาพ สะอาด ให้เกียรติซึ่งกันและกัน มีโอกาสจะนัดหมายอีกแน่นอนครับ" },
-  { name: "คุณเต้", text: "นัดหมายปลอดภัย ไม่มีความเสี่ยงทางการเงิน น้องน่ารัก มารยาทดี สมราคาครับ" },
-  { name: "คุณเจ", text: "บริการด้วยความจริงใจ ฟีลแฟนอบอุ่น ดูแลเอาใจใส่เป็นธรรมชาติ ไม่ผิดหวังครับ" }
-];
-
 const PROVINCE_NAME_MAP = {
   chiangmai: "เชียงใหม่",
   "chiang-mai": "เชียงใหม่",
@@ -66,8 +46,6 @@ const PROVINCE_NAME_MAP = {
   "phra-nakhon-si-ayutthaya": "อยุธยา"
 };
 
-
-// 🟢 เพิ่มฟังก์ชันคำนวณเวลาจริงจากฐานข้อมูล Supabase ตรงนี้
 function getRealTimeAgo(dateInput) {
   if (!dateInput) return "วันนี้";
   const updatedTime = typeof dateInput === "number" ? dateInput : new Date(dateInput).getTime();
@@ -89,47 +67,36 @@ function getRealTimeAgo(dateInput) {
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
 
-
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม เช่น 1.5k)
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
-    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
-    
-    // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระซ้ำ (เช่น ดีีมาก -> ดีมาก)
+    .replace(/\.{2,}/g, " ")
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน/g, "นิมมาน")
-    .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
+    .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/ไม่มีมีดจำ/g, "ไม่มีมัดจำ")
     .replace(/ฟิวแฟว|ฟิวเเฟน/g, "ฟิวแฟน")
     .replace(/ได้ค่ะได้ค่ะ/g, "ได้ค่ะ")
     .replace(/ตรงปก\s*💯?\s*%/g, "ตรงปก 100%")
-    
-    // 3. กรองคำล่อแหลมแบบ SafeSearch Compliant
     .replace(/ฟรีถุงยาง!?/gi, "")
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
     .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
     .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
     .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
-    
-    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (รองรับทั้งเลขอารบิกและเลขไทย + จัดระเบียบวงเล็บเวลา)
     .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
-    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)") // ✅ แก้ให้รองรับทั้ง "/1ชม." และ "/ 1 ชม."
-    
-    // 4. จัดระเบียบคำซ้ำ
+    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
-    
-    // 5. ล้างเศษเครื่องหมายวรรคตอนและช่องว่าง
     .replace(/([!*~_·\-\/])\s*\1+/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
+
 function escapeHTML(str) {
   if (str == null) return "";
   return String(str).replace(/[&<>'"]/g, tag => ({
@@ -144,17 +111,6 @@ function escapeHTML(str) {
 function stripHTML(str) {
   if (str == null) return "";
   return String(str).replace(/<\/(p|div|h\d)>|<br\s*\/?>/gi, " ").replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim();
-}
-
-function getDeterministicReviews(seedStr, count = 3) {
-  const hash = String(seedStr || "default").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const poolLen = REVIEW_POOL.length;
-  const result = [];
-  for (let i = 0; i < count; i++) {
-    const index = (hash + i * 2) % poolLen;
-    result.push(REVIEW_POOL[index]);
-  }
-  return result;
 }
 
 function extractCleanNumber(rate) {
@@ -179,14 +135,12 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  
-  // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
+  let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = ""; // ไม่ใส่ลายน้ำบนรูปวงกลมสตอรี่
+    watermark = "";
   } else if (mode === 400 || mode === "card") {
     baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
     watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
@@ -223,28 +177,25 @@ function generateSrcSet(imagePath) {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.includes("res.cloudinary.com")) {
     return "";
   }
-  const img400 = optimizeImg(imagePath, 400, 560);
-  const img600 = optimizeImg(imagePath, 600, 800);
+  const img400 = optimizeImg(imagePath, 400);
+  const img600 = optimizeImg(imagePath, 600);
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 ระบบ AI Persona Generator อัจฉริยะ: คำนวณจากสเปกจริง + พิกัดย่านจริง (ภาษาพูดคนจริง 100% ไร้คำซ้ำ)
-function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDisplay, stats, age, height, weight) {
-  // สกัดตัวเลขสเปกจริง
+// 🟢 ระบบ AI Persona Generator สำหรับเนื้อหาในหน้าโปรไฟล์
+function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   const hNum = parseInt(height, 10) || 160;
   const wNum = parseInt(weight, 10) || 48;
   const rawStats = String(stats || "").trim();
   const bustNum = parseInt(rawStats.split(/[-/]/)[0], 10) || 34;
   const pLocation = sanitizeThaiText(p.location || zone || provinceName);
 
-  // สกัดแท็กและคีย์เวิร์ด
   const rawTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
   const isTalkative = rawTags.includes("คุยสนุก") || rawTags.includes("อัธยาศัยดี");
   const isCaring = rawTags.includes("เอาใจเก่ง") || rawTags.includes("ฟิวแฟน") || rawTags.includes("ขี้อ้อน");
   const isRelaxed = rawTags.includes("ไม่เร่ง") || rawTags.includes("ตามใจ");
   const isWhiteSkin = rawTags.includes("ขาว") || rawTags.includes("ผิวขาว");
 
-  // 1. ประกอบประโยคท่อนที่ 1: แนะนำรูปร่างและตัวตนตามตัวเลขจริง
   let lookTrait = "รูปร่างสมส่วนกำลังดี";
   if (hNum <= 158 && wNum <= 46) lookTrait = "สาวสวยไซส์มินิ ตัวเล็กน่ารัก พกพาง่าย";
   else if (hNum >= 165) lookTrait = "สาวสวยหุ่นเพรียว สูงโปร่ง ขาเรียว บุคลิกภาพดี";
@@ -258,14 +209,12 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
 
   const p1 = `${displayName} ${lookTrait} สแตนด์บายใน${provinceName} วัย ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${skinTrait} ${personalityTrait} ไม่ตึงไม่เหวี่ยง การันตีตัวจริงสวยตรงปก 100% ค่ะ`;
 
-  // 2. ประกอบประโยคท่อนที่ 2: สไตล์การเทคแคร์และเวลา (ตามความเป็นจริง)
   let careStyle = "เน้นการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ คอยเทคแคร์ให้ผ่อนคลาย";
   if (isCaring && isRelaxed) careStyle = "เน้นฟิวแฟนแบบใกล้ชิด เอาใจเก่ง ไม่เร่งรอบ ให้เวลาเต็มที่เหมือนอยู่กับคนรู้ใจ";
   else if (isRelaxed) careStyle = "สไตล์การดูแลเป็นกันเอง สบายๆ ชิลล์ๆ ไม่เร่งงาน";
 
   const p2 = `สไตล์การดูแล: ${careStyle} ไม่ว่าจะนัดทานข้าว นั่งคาเฟ่ ดินเนอร์ หรือพักผ่อนส่วนตัวในที่พัก พร้อมดูแลด้วยความสุภาพ จริงใจ และให้เกียรติลูกค้าค่ะ`;
 
-  // 3. ประกอบประโยคท่อนที่ 3: พิกัดห้องจริง + นโยบายความปลอดภัย
   let roomContext = `พิกัดบริการ: มีห้องพักส่วนตัวย่าน${pLocation} สะอาด มิดชิด ปลอดภัย มีที่จอดรถสะดวก หรือนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรมในเมืองได้รวดเร็วภายใน 15-30 นาที`;
   if (pLocation.includes("นิมมาน") || pLocation.includes("เจ็ดยอด") || pLocation.includes("กังสดาล")) {
     roomContext = `พิกัดบริการ: พักอยู่ในโซน ${pLocation} เดินทางสะดวก มิดชิด นัดหมายเดินทางไปพบที่โรงแรมหรือคอนโดส่วนตัวในพื้นที่ได้อย่างสะดวกรวดเร็ว`;
@@ -273,7 +222,6 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
 
   const p3 = `${roomContext} • มั่นใจได้ 100% ด้วยมาตรฐานนัดพบเจอตัวจริง ตรวจสอบความถูกต้องหน้างานก่อน จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีมัดจำล่วงหน้าทุกกรณีค่ะ`;
 
-  // 4. สกัดข้อความจริงของน้อง (ถ้าแอดมินพิมพ์มาดี จะนำมาเสริมท้าย แต่ถ้าพิมพ์สแปมมา จะตัดทิ้งอัตโนมัติ)
   let bioText = "";
   if (p.description && p.description.trim().length > 10 && !/เรทราคา|ไม่รวมห้อง|•ㅅ•|1500\/1|มัดจำ/i.test(p.description)) {
     bioText = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(124, 58, 237, 0.15);"><strong style="color: #7C3AED;">ข้อความจากน้อง:</strong> "${sanitizeThaiText(p.description)}"</div>`;
@@ -282,7 +230,21 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, priceDis
   return `<p style="margin: 0 0 8px 0; line-height: 1.65;">${p1}</p><p style="margin: 0 0 8px 0; line-height: 1.65;">${p2}</p><p style="margin: 0; line-height: 1.65;">${p3}</p>${bioText}`;
 }
 
-    
+// 🟢 ระบบสุ่ม Meta Description 6 สูตรภาษาคนจริง (Deterministic Spintax ไม่ซ้ำซ้อน ไม่โดน Google แบน)
+function generateHumanMetaDesc(name, prov, city, zone, stats, price, id) {
+  const seed = (typeof id === "number" ? id : String(id || "1").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0));
+  
+  const humanTemplates = [
+    `${name} สาวรับงานไซด์ไลน์${prov} พิกัดโซน${zone} สัดส่วน ${stats} ตัวจริงตรงปก 100% ดูแลดี สไตล์ฟิวแฟนน่ารักเป็นกันเอง ไม่เร่งเวลา นัดเจอตัวจริงเช็คความตรงปกก่อนค่อยจ่ายหน้างาน ${price} ไร้มัดจำ สบายใจได้เลยค่ะ`,
+    `หาเพื่อนเที่ยว${prov} แนะนำ${name} โซน${zone} (${city}) สาวสวยหุ่นดี ${stats} เทคแคร์ดั่งแฟนคนพิเศษ อ้อนเก่ง คุยสนุก ไม่ตึงไม่เหวี่ยง มีห้องพร้อมรับและเดินทางไปหาที่พัก เรท ${price} นัดเจอจ่ายหน้างาน ปลอดภัย 100%`,
+    `${name} สแตนด์บายพร้อมดูแลโซน${zone} ${city} สัดส่วนสวย ${stats} ผิวพรรณดี สุภาพ ให้เกียรติลูกค้า นัดทานข้าว ดินเนอร์ หรือพักผ่อนส่วนตัว เดินทางถึงที่พักไว 15-30 นาที การันตีตรงปก เจอตัวจริงค่อยจ่ายเงินค่ะ`,
+    `นัดเจอน้อง${name.replace(/^(น้อง)+/, "")} ไซด์ไลน์${prov} ย่าน${zone} หมดกังวลเรื่องมิจฉาชีพ! ระบบจ่ายหน้างานตรงกับน้อง ไม่ต้องโอนมัดจำก่อนทุกกรณี ตัวจริงสวยตรงปก ${stats} สไตล์ฟิวแฟนแท้ ไม่เร่งรอบ เรทเริ่มต้น ${price} ทักคุยได้เลยค่ะ`,
+    `โปรไฟล์ตรงปก 100% ${name} รับงานไซด์ไลน์${city} พิกัด${zone} วัยใส สัดส่วน ${stats} น่ารัก ขี้อ้อน ชวนคุยเพลิน เหมือนไปเดตกับแฟนตัวจริง มีห้องส่วนตัวสะอาด ปลอดภัย นัดหมายจ่ายเงินหน้างาน ${price} ไร้กังวลเรื่องโอนก่อน`,
+    `${name} สาวรับงาน${prov} โซน${zone} สัดส่วนสะดุดตา ${stats} ดูแลสไตล์ฟิวแฟนแท้ๆ สุภาพ นุ่มนวล ไม่เร่งงาน เรทเริ่มต้น ${price} (1 ชม.) มีห้องพร้อมและนอกสถานที่ นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระเงินค่ะ`
+  ];
+
+  return humanTemplates[Math.abs(seed) % humanTemplates.length];
+}
 
 export default async (req, context) => {
   const url = new URL(req.url);
@@ -362,10 +324,12 @@ export default async (req, context) => {
     }
 
     let relatedProfiles = [];
-    let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
+    let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); 
+    if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; 
+    if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; 
+    const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
     
- 
-// 🟢 ดึงน้องๆ แนะนำในโซนเดียวกัน พร้อม Fallback กรณีคนในโซนน้อย
+    // ดึงน้องๆ แนะนำในโซนเดียวกัน
     const { data: allActiveProfiles } = await supabase
       .from("profiles")
       .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
@@ -375,7 +339,6 @@ export default async (req, context) => {
       .limit(12);
 
     if (allActiveProfiles && allActiveProfiles.length > 0) {
-      // 1. ลองหาในจังหวัดเดียวกันก่อน
       const sameProvince = allActiveProfiles.filter(p => {
         const k = (p.provinceKey || p.province_key || "").toLowerCase().replace(/[-_]/g, "");
         return k.includes(cleanProvinceKey) || cleanProvinceKey.includes(k);
@@ -384,7 +347,6 @@ export default async (req, context) => {
       if (sameProvince.length >= 3) {
         relatedProfiles = sameProvince.slice(0, 3);
       } else {
-        // 2. ถ้าในจังหวัดมีไม่ถึง 3 คน ให้ดึงน้องยอดนิยมคนอื่นมาเสริมจนครบ 3 คนเสมอ
         const others = allActiveProfiles.filter(p => !sameProvince.some(sp => sp.id === p.id));
         relatedProfiles = [...sameProvince, ...others].slice(0, 3);
       }
@@ -392,18 +354,18 @@ export default async (req, context) => {
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
-   const provinceHubUrl = `/location/${provinceKey}`;
+    const provinceHubUrl = `/location/${provinceKey}`;
     
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
     
     const rawImage = profile.imagePath || profile.image_url || "";
-    const heroImageLarge = optimizeImg(rawImage, 600, 800);
-    const heroImageSmall = optimizeImg(rawImage, 400, 560);
+    const heroImageLarge = optimizeImg(rawImage, 600);
+    const heroImageSmall = optimizeImg(rawImage, 400);
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // 🟢 [วางท่อนนี้ต่อท้ายตรงนี้ได้เลยครับ] ดึงรูปภาพทั้งหมดในอัลบั้ม
+    // ดึงรูปภาพทั้งหมดในอัลบั้ม
     let rawGallery = profile.galleryPaths || profile.gallery_paths || profile.gallery || [];
     if (typeof rawGallery === "string") {
       try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
@@ -411,18 +373,17 @@ export default async (req, context) => {
     const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])].filter(Boolean);
     const uniqueGallery = [...new Set(allGalleryImages)];
 
-   // 🟢 ใหม่: เปลี่ยนเป็นแท็ก <button> ที่ไม่มีสคริปต์กวนใจ เบาหวิว ลื่นไหลระดับ 60 FPS
-const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
-  <div class="profile-gallery-strip" id="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
-    ${uniqueGallery.map((imgUrl, i) => `
-      <button type="button" class="thumb-slot ${i === 0 ? 'active' : ''}" data-full-src="${optimizeImg(imgUrl, 600, 800)}" style="padding: 0; width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: none;">
-        <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-      </button>
-    `).join("")}
-  </div>
-` : "";
+    const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
+      <div class="profile-gallery-strip" id="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
+        ${uniqueGallery.map((imgUrl, i) => `
+          <button type="button" class="thumb-slot ${i === 0 ? 'active' : ''}" data-full-src="${optimizeImg(imgUrl, 600)}" style="padding: 0; width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? '#7C3AED' : 'transparent'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: none;">
+            <img src="${optimizeImg(imgUrl, 'thumb')}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+          </button>
+        `).join("")}
+      </div>
+    ` : "";
     
-   // 🟢 ปรับปรุงใหม่: รองรับ Universal Link มาตรฐาน LINE สำหรับ iOS & Android 100%
+    // Universal Link LINE
     const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
@@ -432,11 +393,9 @@ const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
     } else if (rawLineInput) {
       const cleanHandle = rawLineInput.trim();
       if (cleanHandle.startsWith("@")) {
-        // 1. ถ้ามี @ (LINE Official): ใช้ page.line.me (ตัด @ ออก) เปิดเข้าแอพได้ทันทีบน iOS/Android ไม่เออเร่อ
         const cleanOa = cleanHandle.replace(/^@+/, "").trim();
         if (cleanOa) lineId = `https://page.line.me/${cleanOa}`;
       } else {
-        // 2. ถ้าเป็น ID ส่วนตัว: ต้องมีเครื่องหมาย ~ นำหน้า เพื่อสั่งให้ LINE ทำการค้นหา User ID
         const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
         if (cleanPersonalId) lineId = `https://line.me/R/ti/p/~${cleanPersonalId}`;
       }
@@ -448,28 +407,24 @@ const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
     const age = cleanAge || "ไม่ระบุ";
     const ageDisplay = age !== "ไม่ระบุ" ? `${age} ปี` : "ไม่ระบุ";
 
-   const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
+    const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
       : "160";
     const heightDisplay = `${height} ซม.`;
 
-    // 🟢 เติมบรรทัดนี้กลับเข้ามา: ป้องกัน ReferenceError: stats is not defined
     const stats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
       ? String(profile.stats).trim() 
       : "36-25-35";
 
-    // 🟢 ระบบตรวจสอบความสมส่วนของสรีระ (ป้องกันตัวเลขพิมพ์ตกหล่นจากแอดมิน)
     const rawH = parseInt(height, 10) || 160;
     let rawW = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10) || 0;
     
-    // ดึงรอบเอวจากสัดส่วน เช่น "36-25-35" ➔ waist = 25
     let waistVal = 0;
     if (stats && typeof stats === "string") {
       const statsParts = stats.split(/[-/]/);
       if (statsParts.length >= 2) waistVal = parseInt(statsParts[1], 10) || 0;
     }
 
-    // ถ้าเอวบาง (เอว <= 25) แต่น้ำหนักกรอกมาเกิน 52 กก. ให้คำนวณน้ำหนักสมส่วน (46 - 49 กก.)
     if (waistVal > 0 && waistVal <= 25 && (rawW > 52 || rawW < 40)) {
       rawW = Math.max(45, Math.min(49, rawH - 112));
     } else if (rawW <= 0 || rawW > 70) {
@@ -479,163 +434,174 @@ const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
     const weight = String(rawW);
     const weightDisplay = `${weight} กก.`;
   
+    // 🟢 1. สกัดตัวแปรย่านและบริบทเมืองแบบแม่นยำ
+    const cleanProvince = escapeHTML(provinceNameThai);
+    let rawLoc = sanitizeThaiText(profile.location || "");
+    const primaryZone = rawLoc
+      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+      .split(/[,/]|และใกล้/)[0]
+      .trim() || cleanProvince;
+
+    const cityContext = cleanProvince.includes("กรุงเทพ") ? "กรุงเทพฯ" : `ตัวเมือง${cleanProvince}`;
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
-const naturalDesc = generateDynamicPersonaDesc(profile, displayName, provinceNameThai, localizedZone, priceDisplay, stats, age, height, weight);
+    const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-// 🟢 คำนวณเวลาจริงและสถานะจาก Database ก่อนนำไปใช้ใน HTML
-const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
-const isOnlineNow = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
-const realStatusText = profile.availability || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
-const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
+    // 🟢 2. ตั้ง H1 & Page Title ให้ตรงตามความต้องการ (Search Intent 100%)
+    // ตัวอย่าง: น้องบุ๋มบิ๋ม สาวรับงานไซด์ไลน์เชียงใหม่ ตัวเมืองเชียงใหม่ โซนเจ็ดยอด
+    const profileSeoH1 = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} ${cityContext} โซน${primaryZone}`;
+    const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} ${cityContext} โซน${primaryZone} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
 
-// 🟢 1. ตัวตัดเอาย่านหลัก (ห้ามลบเด็ดขาด ไม่งั้นข้างล่างจะ Error)
-const primaryZone = profile.location ? profile.location.split(/[,/]/)[0].trim() : provinceNameThai;
+    // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
+    const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
 
-    // 🟢 ปรับให้เป็น V2 แท้ ปลอดภัยจาก SafeSearch
-const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${provinceNameThai} (${primaryZone}) ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
-const metaDescription = `${displayName} สาวรับงานไซด์ไลน์ในตัวเมือง${provinceNameThai} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟนแท้ ตรงปก 100% มีห้องพร้อม เรทเริ่มต้น ${priceDisplay} (1 ชม.) ไม่ต้องโอนมัดจำ เจอตัวจริงค่อยจ่ายหน้างาน`;
+    // 🟢 4. ลิงก์หน้ารวมโซนจริง (ไม่ใช่ ?zone=)
+    const zoneHubUrl = primaryZone.includes("นิมมาน") 
+      ? "/nimman" 
+      : `/location/${provinceKey}/${encodeURIComponent(primaryZone)}`;
 
-    // 🟢 4. URL ประจำหน้าโปรไฟล์ (ปิดวงเล็บให้สมบูรณ์)
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
-
-    const reviewsList = getDeterministicReviews(rawSlug, 3);
+    const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
+    const isOnlineNow = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
+    const realStatusText = profile.availability || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
+    const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
 
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
+    const activeBreadcrumbText = `ไซด์ไลน์${cleanProvince}`;
 
-   
-const activeBreadcrumbText = `ไซด์ไลน์${provinceNameThai}`;
+    const profileFaqs = [
+      {
+        q: `นัดพบ${displayName} ในโซน${primaryZone} (${cleanProvince}) มีห้องหรือต้องเดินทางอย่างไร?`,
+        a: `${displayName} สแตนด์บายอยู่ในโซน${primaryZone} มีห้องพักส่วนตัวที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมที่พักใน${cityContext} ได้อย่างสะดวกรวดเร็วภายใน 15-30 นาทีค่ะ`
+      },
+      {
+        q: `อัตราค่าบริการและการชำระเงินของ${displayName} เป็นอย่างไร?`,
+        a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} ต่อ 1 ชม. สำหรับการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ มั่นใจได้ 100% ด้วยนโยบายนัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีค่ะ`
+      }
+    ];
 
-// 🟢 สร้าง FAQ Data เฉพาะตัวของน้องคนนั้นเพื่อทำ FAQPage Rich Snippet
-const profileFaqs = [
-  {
-    q: `นัดพบน้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")} ในย่าน${primaryZone} มีสถานที่หรือต้องเดินทางอย่างไร?`,
-    a: `น้องพักและสแตนด์บายอยู่ในโซน${primaryZone} มีห้องพักส่วนตัวที่สะอาด มิดชิด ปลอดภัย หรือสะดวกนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรมที่พักในจังหวัด${provinceNameThai} ได้อย่างสะดวกรวดเร็วภายใน 15-30 นาทีค่ะ`
-  },
-  {
-    q: `อัตราค่าบริการและการชำระเงินของน้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")} เป็นอย่างไร?`,
-    a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} ต่อ 1 ชม. สำหรับการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ มั่นใจได้ 100% ด้วยนโยบายนัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีค่ะ`
-  }
-];
-
-// 🟢 สร้าง Schema Graph ฉบับสมบูรณ์แบบ (ProfilePage + Person + Offer + FAQPage + Breadcrumbs)
-const schemaGraph = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "ProfilePage",
-      "@id": `${canonicalUrl}#webpage`,
-      "url": canonicalUrl,
-      "name": stripHTML(pageTitle),
-      "description": stripHTML(metaDescription),
-      "inLanguage": "th-TH",
-      "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
-      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      "mainEntity": { "@id": `${canonicalUrl}#person` }
-    },
-    {
-      "@type": "Person",
-      "@id": `${canonicalUrl}#person`,
-      "name": stripHTML(displayName),
-      "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
-      "gender": "https://schema.org/Female",
-      "jobTitle": "เพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน",
-      "description": stripHTML(naturalDesc),
-      "image": {
-        "@type": "ImageObject",
-        "@id": `${canonicalUrl}#image`,
-        "url": heroImageLarge
-      },
-      "url": canonicalUrl,
-      "height": {
-        "@type": "QuantitativeValue",
-        "value": cleanHeightNum,
-        "unitCode": "CMT"
-      },
-      "weight": {
-        "@type": "QuantitativeValue",
-        "value": cleanWeightNum,
-        "unitCode": "KGM"
-      },
-      "homeLocation": {
-        "@type": "Place",
-        "name": `${primaryZone} ${provinceNameThai}`,
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": primaryZone,
-          "addressLocality": primaryZone,
-          "addressRegion": provinceNameThai,
-          "addressCountry": "TH"
-        }
-      },
-     "makesOffer": {
-  "@type": "Offer",
-  "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
-  "url": canonicalUrl,
-  "price": String(rateNumber),
-  "priceCurrency": "THB",
-  "availability": "https://schema.org/InStock",
-  "validFrom": new Date().toISOString().split("T")[0],
-  "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-  "itemOffered": {
-    "@type": "Service",
-    "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
-    "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${provinceNameThai} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`,
-    // 🟢 เสริม Entity พื้นที่บริการเจาะจงระดับย่าน/จังหวัด
-    "areaServed": {
-      "@type": "AdministrativeArea",
-      "name": `${stripHTML(primaryZone)}, ${stripHTML(provinceNameThai)}`
-    }
-  }
-}
-    },
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}#breadcrumb`,
-      "itemListElement": [
-        { 
-          "@type": "ListItem", 
-          "position": 1, 
-          "name": "หน้าแรก", 
-          "item": `${CONFIG.DOMAIN}/` 
+    // 🟢 5. ปรับปรุง Schema Graph ระบุย่านและ Breadcrumb ลึกถึงระดับโซน
+    const schemaGraph = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ProfilePage",
+          "@id": `${canonicalUrl}#webpage`,
+          "url": canonicalUrl,
+          "name": stripHTML(pageTitle),
+          "description": stripHTML(metaDescription),
+          "inLanguage": "th-TH",
+          "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
+          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+          "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
-        { 
-          "@type": "ListItem", 
-          "position": 2, 
-          "name": stripHTML(activeBreadcrumbText), 
-          "item": `${CONFIG.DOMAIN}${provinceHubUrl.startsWith('/') ? '' : '/'}${provinceHubUrl}` // ✅ แก้เป็น Absolute URL เต็มรูปแบบ
+        {
+          "@type": "Person",
+          "@id": `${canonicalUrl}#person`,
+          "name": stripHTML(displayName),
+          "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
+          "gender": "https://schema.org/Female",
+          "jobTitle": "เพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน",
+          "description": stripHTML(naturalDesc),
+          "image": {
+            "@type": "ImageObject",
+            "@id": `${canonicalUrl}#image`,
+            "url": heroImageLarge
+          },
+          "url": canonicalUrl,
+          "height": {
+            "@type": "QuantitativeValue",
+            "value": cleanHeightNum,
+            "unitCode": "CMT"
+          },
+          "weight": {
+            "@type": "QuantitativeValue",
+            "value": cleanWeightNum,
+            "unitCode": "KGM"
+          },
+          "homeLocation": {
+            "@type": "Place",
+            "name": `โซน${primaryZone} ${cleanProvince}`,
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": primaryZone,
+              "addressLocality": primaryZone,
+              "addressRegion": cleanProvince,
+              "addressCountry": "TH"
+            }
+          },
+          "makesOffer": {
+            "@type": "Offer",
+            "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
+            "url": canonicalUrl,
+            "price": String(rateNumber),
+            "priceCurrency": "THB",
+            "availability": "https://schema.org/InStock",
+            "validFrom": new Date().toISOString().split("T")[0],
+            "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+            "itemOffered": {
+              "@type": "Service",
+              "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
+              "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${cleanProvince} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`,
+              "areaServed": {
+                "@type": "AdministrativeArea",
+                "name": `${stripHTML(primaryZone)}, ${stripHTML(cleanProvince)}`
+              }
+            }
+          }
         },
-        { 
-          "@type": "ListItem", 
-          "position": 3, 
-          "name": stripHTML(displayName), 
-          "item": canonicalUrl 
+        {
+          "@type": "BreadcrumbList",
+          "@id": `${canonicalUrl}#breadcrumb`,
+          "itemListElement": [
+            { 
+              "@type": "ListItem", 
+              "position": 1, 
+              "name": "หน้าแรก", 
+              "item": `${CONFIG.DOMAIN}/` 
+            },
+            { 
+              "@type": "ListItem", 
+              "position": 2, 
+              "name": stripHTML(activeBreadcrumbText), 
+              "item": `${CONFIG.DOMAIN}${provinceHubUrl}`
+            },
+            { 
+              "@type": "ListItem", 
+              "position": 3, 
+              "name": `โซน${stripHTML(primaryZone)}`, 
+              "item": `${CONFIG.DOMAIN}${zoneHubUrl}`
+            },
+            { 
+              "@type": "ListItem", 
+              "position": 4, 
+              "name": stripHTML(displayName), 
+              "item": canonicalUrl 
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": `${canonicalUrl}#faq`,
+          "isPartOf": { "@id": `${canonicalUrl}#webpage` },
+          "mainEntity": profileFaqs.map(f => ({
+            "@type": "Question",
+            "name": stripHTML(f.q),
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": stripHTML(f.a)
+            }
+          }))
         }
       ]
-    },
-    // 🟢 เติม FAQPage Schema เพิ่มเติมในหน้ารายบุคคล ให้ขยายช่องผลการค้นหาบน Google
-    {
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq`,
-      "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-      "mainEntity": profileFaqs.map(f => ({
-        "@type": "Question",
-        "name": stripHTML(f.q),
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": stripHTML(f.a)
-        }
-      }))
-    }
-  ]
-};
+    };
 
-const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
+    const robotsTag = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
 
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="light-theme">
 <head>
-    <!-- 1. Technical & Rendering Directives (ต้องอยู่อันดับแรกสุด) -->
+    <!-- 1. Technical & Rendering Directives -->
     <meta charset="utf-8">
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -651,11 +617,11 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
 
-    <!-- 3. Network Handshakes (เปิดท่อเชื่อมต่อ CDN ล่วงหน้าทันที) -->
+    <!-- 3. Network Handshakes -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
 
-    <!-- 4. Critical Asset Preloads (ดึงฟอนต์และรูป LCP เข้ามาก่อน เพื่อคะแนน Core Web Vitals) -->
+    <!-- 4. Critical Asset Preloads -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     ${heroSrcSet 
@@ -663,10 +629,10 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
-    <!-- 5. Render-Blocking Stylesheet -->
+    <!-- 5. Stylesheet -->
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
 
-    <!-- 6. Icons & Manifest -->
+    <!-- 6. Icons -->
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
@@ -691,9 +657,10 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
     <meta name="twitter:image" content="${ogImageSocial}">
     <meta name="twitter:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <!-- 9. Structured Data (JSON-LD) สำหรับ Rich Results & AI Overview -->
+    <!-- 9. Structured Data (JSON-LD) -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
-<!-- Google tag (gtag.js) -->
+
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -729,19 +696,26 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
           <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;"><i class="fas fa-arrow-left"></i> ย้อนกลับ</a>
         </header>
 
+        <!-- 🟢 Breadcrumb Navigation เจาะลึกระดับย่าน -->
         <nav aria-label="breadcrumb">
-  <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
-    <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
-    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-    <li>
-      <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
-        ${escapeHTML(activeBreadcrumbText)}
-      </a>
-    </li>
-    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-    <li aria-current="page"><span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
-  </ol>
-</nav>
+          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
+            <li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li>
+            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li>
+              <a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="${escapeHTML(activeBreadcrumbText)}">
+                ${escapeHTML(activeBreadcrumbText)}
+              </a>
+            </li>
+            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li>
+              <a href="${zoneHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;" title="สาวรับงานโซน${escapeHTML(primaryZone)}">
+                โซน${escapeHTML(primaryZone)}
+              </a>
+            </li>
+            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li aria-current="page"><span id="breadcrumb-current-page" style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+          </ol>
+        </nav>
 
         <main class="main-content">
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 22px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); box-shadow: 0 15px 35px rgba(124, 58, 237, 0.06);">
@@ -749,7 +723,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
                        <img id="main-profile-img" src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ย่าน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
+                             class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(cleanProvince)} ไซด์ไลน์${escapeHTML(cleanProvince)} ${escapeHTML(cityContext)} โซน${escapeHTML(primaryZone)} ตัวจริงตรงปก 100%"
                              loading="eager" fetchpriority="high" decoding="async" 
                              width="400" height="560" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: opacity 0.2s ease;">
                     </div>
@@ -757,28 +731,26 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                 </section>
 
                 <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
-                 
-<h1 style="font-size: 20px; font-weight: 900; color: #140F22; line-height: 1.3;">
-  ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})
-</h1>
+                  <!-- 🟢 H1 เจาะจงคีย์เวิร์ด Exact-match ตามที่คุณสั่ง -->
+                  <h1 style="font-size: 18px; font-weight: 900; color: #140F22; line-height: 1.4; margin: 0; text-align: center;">
+                    ${escapeHTML(profileSeoH1)}
+                  </h1>
                    
-                  
-
-<div style="display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
-    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 12px; border-radius: 100px;">
-        <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
-        <span style="color: #065F46; font-size: 11px; font-weight: 700;">ตรงปก 100%</span>
-    </div>
-    <div style="display: inline-flex; align-items: center; gap: 5px; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px;">
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor}; display: inline-block;"></span>
-        <span style="color: #140F22; font-size: 11px; font-weight: 800;">${escapeHTML(realStatusText)}</span>
-        <span style="color: #94A3B8; font-size: 10px;">•</span>
-        <span style="color: #64748B; font-size: 11px; font-weight: 600;">${realTimeText}</span>
-    </div>
-</div>
+                  <div style="display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
+                      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 12px; border-radius: 100px;">
+                          <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
+                          <span style="color: #065F46; font-size: 11px; font-weight: 700;">ตรงปก 100%</span>
+                      </div>
+                      <div style="display: inline-flex; align-items: center; gap: 5px; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px;">
+                          <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor}; display: inline-block;"></span>
+                          <span style="color: #140F22; font-size: 11px; font-weight: 800;">${escapeHTML(realStatusText)}</span>
+                          <span style="color: #94A3B8; font-size: 10px;">•</span>
+                          <span style="color: #64748B; font-size: 11px; font-weight: 600;">${realTimeText}</span>
+                      </div>
+                  </div>
                 </header>
 
-               <!-- 🟢 1. สเปกพื้นฐาน 4 ช่อง (สัดส่วน / ส่วนสูง / อายุ / พิกัด) -->
+                <!-- 🟢 1. สเปกพื้นฐาน 4 ช่อง -->
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">สัดส่วน</span>
@@ -792,18 +764,19 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">อายุ</span>
                         <strong style="color: #140F22; font-weight: 800;">${ageDisplay}</strong>
                     </div>
+                    <!-- ชี้ตรงไปที่ URL โซนจริง -->
                     <div class="spec-box" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: #64748B; font-size: 11.5px; font-weight: 700;">พิกัดบริการ</span>
-                        <a href="${provinceHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(provinceNameThai)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                          <span>รับงาน${escapeHTML(provinceNameThai)} (${escapeHTML(primaryZone)})</span>
+                        <a href="${zoneHubUrl}" title="ดูน้องๆ รับงาน${escapeHTML(cleanProvince)} โซน${escapeHTML(primaryZone)} ทั้งหมด" style="color: #7C3AED; font-weight: 800; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                          <span>รับงาน${escapeHTML(cleanProvince)} (${escapeHTML(primaryZone)})</span>
                           <i class="fas fa-chevron-right" style="font-size: 9px; opacity: 0.7;"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- 🟢 2. [ย้ายขึ้นมาตรงนี้] ตารางอัตราค่าบริการ (เห็นสเปกปุ๊บ เห็นราคาทันที ชนะ NavBoost 100%) -->
+                <!-- 🟢 2. ตารางอัตราค่าบริการ -->
                 <section style="margin-bottom: 1.25rem; background: #FFFFFF; border-radius: 16px; padding: 14px 16px; border: 1.5px solid rgba(124, 58, 237, 0.18); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.05);">
-                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(provinceNameThai)})</h2>
+                    <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0; letter-spacing: 0.5px;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(cleanProvince)})</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
                         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
                             <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
@@ -820,54 +793,54 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                     </div>
                 </section>
 
-                <!-- 🟢 3. [ย้ายมาต่อจากราคา] ปุ่มติดต่อ LINE CTA + ปุ่มแชร์ (เห็นราคาแล้วกดแอดไลน์ได้ทันที) -->
+                <!-- 🟢 3. ปุ่มติดต่อ LINE CTA + ปุ่มแชร์ -->
                 <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; width: 100%;">
                     <a href="${lineId}" class="sidebar-line-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);" rel="nofollow noopener" target="_blank">
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
                     </a>
 
-               <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-</button>
+                    <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+                    </button>
                 </div>
 
-             <!-- 🟢 4. กล่องเนื้อหาบรรยายเฉพาะตัว (แก้ปัญหา Thin Content ผ่าน Spintax) -->
-<div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
-    ${naturalDesc}
-</div>
+                <!-- 🟢 4. กล่องเนื้อหาบรรยายเฉพาะตัว -->
+                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #475569; font-size: 12.5px; line-height: 1.7; margin-bottom: 1.25rem;">
+                    ${naturalDesc}
+                </div>
 
                 <!-- 🟢 5. ข้อมูลและลักษณะเด่นเฉพาะตัว -->
                 <section style="margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);">
                     <h2 style="color: #140F22; font-size: 14px; font-weight: 900; margin-bottom: 12px;">✨ ข้อมูลและลักษณะเด่นเฉพาะตัวของ ${escapeHTML(displayName)}</h2>
                     <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; line-height: 1.65;">
                         <div><strong style="color: #7C3AED;">สไตล์การดูแล:</strong> ${Array.isArray(profile.styleTags) && profile.styleTags.length > 0 ? profile.styleTags.map(t => `#${escapeHTML(t)}`).join(" ") : "#ฟิวแฟน #เทคแคร์ดี #ตรงปก"}</div>
-                        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(provinceNameThai)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
+                        <div><strong style="color: #7C3AED;">ความพร้อมในการเดินทาง:</strong> สแตนด์บายพร้อมดูแลในพื้นที่ ${escapeHTML(localizedZone)} และโรงแรม/ที่พักในจังหวัด${escapeHTML(cleanProvince)} (เดินทางถึงที่พักใน 15-30 นาที)</div>
                         <div><strong style="color: #7C3AED;">ความประทับใจส่วนตัว:</strong> "${escapeHTML(profile.description || profile.slogan || profile.quote || "ฟิวแฟน อบอุ่น สุภาพ ไม่เร่งงาน ตัวจริงตรงปก 100%")}"</div>
                     </div>
                 </section>
 
                 ${relatedProfiles.length > 0 ? `
                 <section style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
-                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(provinceNameThai)}</h2>
+                    <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">เพื่อนเที่ยวฟิวแฟนแนะนำเพิ่มเติม โซน${escapeHTML(cleanProvince)}</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
                         ${relatedProfiles.map(p => {
                           const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
                           const relImg = p.imagePath || p.image_url || "";
                           return `
                             <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                                <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="300" height="400" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top center;">
+                                <img src="${optimizeImg(relImg, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(cleanProvince)} ไซด์ไลน์${escapeHTML(cleanProvince)} โซน${escapeHTML(primaryZone)} ฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_FALLBACK_IMAGE}';" width="400" height="560" style="width: 100%; aspect-ratio: 400/560; object-fit: cover; object-position: top center;">
                                 <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(relName)}</div>
                             </a>
                           `;
                         }).join("")}
                     </div>
                     <div style="text-align: center;">
-                        <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
+                        <a href="${zoneHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(primaryZone)} ทั้งหมด &rarr;</a>
                     </div>
                 </section>
                 ` : ""}
 
-              <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
+                <section style="margin-top: 2rem; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.5rem;">
                     <h2 style="color: #7C3AED; font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
                     <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; font-size: 11.5px; color: #64748B; line-height: 1.65;">
                         <p style="margin-bottom: 0.4rem;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
@@ -878,7 +851,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
             </article>
         </main>
         
-       <footer role="contentinfo" style="text-align: center; padding: 2rem 0 3rem 0; color: #64748B; font-size: 11px;">
+        <footer role="contentinfo" style="text-align: center; padding: 2rem 0 3rem 0; color: #64748B; font-size: 11px;">
             <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
                 <a href="/" style="color: #475569; text-decoration: none; font-weight: 600;">หน้าแรก</a>
                 <a href="/profiles" style="color: #475569; text-decoration: none; font-weight: 600;">รวมโปรไฟล์</a>
@@ -890,21 +863,18 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
        
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
-    <!-- Sticky Bottom CTA (รองรับ iPhone Safe Area + แชร์มี Fallback) -->
+    <!-- Sticky Bottom CTA -->
     <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); border-top: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 -4px 25px rgba(0,0,0,0.06); z-index: 9999; display: flex; gap: 10px; align-items: center;">
-       <!-- ✅ เติม Micro-Trust Badge จ่ายหน้างาน 100% ไร้มัดจำ -->
-<a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 12px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
-    <i class="fab fa-line" style="font-size: 20px;"></i>
-    <span>จองคิว${escapeHTML(displayName)}</span>
-    <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
-</a>
-      <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
-    <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-</button>
-
+        <a href="${lineId}" target="_blank" rel="noopener nofollow" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 12px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+            <i class="fab fa-line" style="font-size: 20px;"></i>
+            <span>จองคิว${escapeHTML(displayName)}</span>
+            <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
+        </a>
+        <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+            <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+        </button>
     </div>
 
-    <!-- ลงทะเบียน Service Worker ให้เหมือน index.html -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -917,19 +887,18 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
 </body>
 </html>`;
 
- 
-const responseHeaders = {
-  "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
-  "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
-  "ETag": `"${GLOBAL_PROFILE_VERSION}"`, // 👈 จุดที่ต่างกันคือคำนี้ครับ
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "X-XSS-Protection": "1; mode=block",
-  "Referrer-Policy": "strict-origin-when-cross-origin"
-};
+    const responseHeaders = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    };
 
     setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
     return new Response(htmlResponse, { headers: responseHeaders });
@@ -939,4 +908,3 @@ const responseHeaders = {
     return context.next();
   }
 };
-  
