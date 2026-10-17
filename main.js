@@ -1496,8 +1496,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
   let currentActivePhotoIdx = 0;
   let currentActivePhotoList = [];
-
-  function updateLightboxPhoto(idx) {
+function updateLightboxPhoto(idx) {
     if (!currentActivePhotoList || currentActivePhotoList.length === 0) return;
 
     if (idx < 0) idx = currentActivePhotoList.length - 1;
@@ -1547,16 +1546,6 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       });
     }
   }
-
-    // ปรับสถานะจุดไข่ปลา (Dots Indicator)
-    const dotsContainer = document.getElementById("lightbox-dots-indicator");
-    if (dotsContainer) {
-      dotsContainer.querySelectorAll(".gallery-dot").forEach((dot, i) => {
-        dot.classList.toggle("active", i === idx);
-      });
-    }
-  }
-
   // ระบบตรวจจับการปัดรูปซ้าย-ขวา และแตะรูปสไตล์ Instagram
   function initLightboxImageSwipe() {
     const heroContainer = document.querySelector(".lightbox-hero-container");
@@ -2500,7 +2489,6 @@ async function handleUrlRouting(isInitial = false) {
     }
 
     if (domCache.provinceSelect) {
-      if (domCache.provinceSelect) {
       domCache.provinceSelect.addEventListener("change", (e) => {
         const val = e.target.value;
         // 1. สั่งให้ Filter ทำงานและแสดงผลทันทีแบบ SPA (ไม่รีโหลดหน้า)
@@ -2511,6 +2499,7 @@ async function handleUrlRouting(isInitial = false) {
         history.pushState(null, "", newUrl);
       });
     }
+        
 
   // 🟢 1. ฟังก์ชันตัวช่วยสั่งเลื่อนหน้าจอวิ่งไปหาโซนรายชื่อน้องๆ
     function scrollToProfilesArea() {
