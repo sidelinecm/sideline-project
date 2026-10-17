@@ -1301,24 +1301,40 @@ const popularLocationsFooter = `
   finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
   // 2. คำนวณรายชื่อย่านและเม็ดยา (Pills) ก่อนนำไปใช้
-  const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
-    ? cleanZonesList.slice(0, 5).join(", ") 
-    : "ในตัวเมือง";
+  // แยก directory โซนออกจากคำอธิบาย Hero: แสดงครบโดยไม่ทำให้ Hero สูง/แน่น
+  const zonePills = (cleanZonesList || []).map(z => {
+    const zoneText = String(z).trim();
+    const cleanZ = escapeHTML(zoneText);
+    const href = zoneText.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(zoneText)}`;
+    return `<a href="${href}" class="province-zone-pill" title="ดูโปรไฟล์โซน${cleanZ}">📍 <span>${cleanZ}</span></a>`;
+  }).join("");
 
-  const pills = (cleanZonesList || []).map(z => {
-    const cleanZ = escapeHTML(String(z).trim());
-    const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
-    return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
-  }).join(" ");
-
-  const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
+  const zoneSectionHtml = !isNational && zonePills
+    ? `<section class="province-zones-section" aria-labelledby="province-zones-heading">
+        <div class="province-zones-header">
+          <div><span class="province-zones-eyebrow">เลือกพื้นที่</span><h2 id="province-zones-heading">โซนให้บริการใน${escapeHTML(provinceNameThai)}</h2></div>
+          <span class="province-zones-count">${cleanZonesList.length} โซน</span>
+        </div>
+        <nav class="province-zones-list" aria-label="เลือกโซนใน${escapeHTML(provinceNameThai)}">${zonePills}</nav>
+      </section>`
+    : "";
 
   // 3. ประกอบคำโปรย Hero Description (ประกาศตัวแปรเพียงครั้งเดียวอย่างถูกต้อง)
   const dynamicHeroDesc = isNational
     ? `<p class="hero-subtitle-p"><strong>FirstModelHub</strong> รวมโปรไฟล์สาวรับงานและสาวไซด์ไลน์ สไตล์ฟิวแฟนดูแลดี มีให้เลือกทั้งแบบมีห้องส่วนตัวพร้อมรับ และเดินทางไปหานอกสถานที่ (โรงแรม/คอนโด) คุยเรทราคากับน้องโดยตรง <strong>เจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้า เจอจ่ายจบ สบายใจทั้งสองฝ่าย</strong></p>`
-    : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ สบายใจ ปลอดภัยค่ะ</p>${zonePillsHtml}`;
+    : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ครอบคลุมพื้นที่ให้บริการ คัดตัวจริง มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ</p>`;
 
   finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
+  if (zoneSectionHtml) {
+    // วางรายชื่อโซนหลัง Hero และก่อนโปรไฟล์ HOT; fallback ก่อน featured section
+    if (finalHtml.includes("<!-- Hot Swiper Section -->")) {
+      finalHtml = finalHtml.replace("<!-- Hot Swiper Section -->", `${zoneSectionHtml}\n    <!-- Hot Swiper Section -->`);
+    } else if (finalHtml.includes('<section id="hot-profiles-section"')) {
+      finalHtml = finalHtml.replace('<section id="hot-profiles-section"', `${zoneSectionHtml}\n    <section id="hot-profiles-section"`);
+    } else {
+      finalHtml = finalHtml.replace('<section id="featured-profiles"', `${zoneSectionHtml}\n    <section id="featured-profiles"`);
+    }
+  }
     
    
     const ssrFeaturedH2 = isNational 
