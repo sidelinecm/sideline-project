@@ -347,27 +347,37 @@ async function getSupabaseClient() {
   }
   window.triggerHaptic = triggerHaptic;
 
-  // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันแชร์โปรไฟล์ (พร้อมใช้งาน 100%)
   window.shareProfile = async function (name, profileUrl) {
-    const shareData = {
-      title: `${name} | FirstModelHub`,
-      text: `ดูโปรไฟล์ ${name} เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ปลอดภัยจ่ายหน้างาน ไร้มัดจำ`,
-      url: profileUrl || window.location.href
-    };
-
-    if (typeof triggerHaptic === "function") triggerHaptic("light");
-
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (_) {}
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareData.url);
-        alert(`คัดลอกลิงก์โปรไฟล์ ${name} เรียบร้อยแล้วค่ะ!`);
-      } catch (_) {
-        prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareData.url);
-      }
-    }
+  const shareTargetUrl = profileUrl || window.location.href;
+  const shareData = {
+    title: `${name} | FirstModelHub`,
+    text: `ดูโปรไฟล์ ${name} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไร้มัดจำ`,
+    url: shareTargetUrl
   };
+
+  if (typeof triggerHaptic === "function") triggerHaptic("light");
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      return;
+    } catch (err) {
+      // 🟢 ไม่แสดงผลเออเร่อถ้าผู้ใช้กดยกเลิกหน้าจอแชร์ด้วยตัวเอง
+      if (err.name === "AbortError") return;
+    }
+  }
+
+  // Fallback สำหรับคอมพิวเตอร์ หรือกรณีคัดลอกผ่าน Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(shareTargetUrl);
+      alert(`คัดลอกลิงก์โปรไฟล์ ${name} เรียบร้อยแล้วค่ะ!`);
+      return;
+    } catch (_) {}
+  }
+
+  prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareTargetUrl);
+};
 
   // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันแทร็กการคลิก LINE
   window.trackLineClick = async function(profileId) {
@@ -1789,33 +1799,37 @@ if (quoteEl) {
     }
 
     
-    const descContainer = document.getElementById("lightboxDescriptionContainer");
-    const descContent = document.getElementById("lightboxDescriptionContent");
-    if (descContent) {
-      let rawDesc = (profile.description && profile.description.trim()) ? profile.description : "";
-      
-      const spamPatterns = [
-        /เรทราคา รายละเอียดค่ะ/i, /1500\/1 ชม\. ไม่รวมห้อง/i,
-        /ฟีลแฟน เอาใจเก่ง ไม่เร่ง ตรงปก/i, /1,500\/\s*1\s*ชม/i,
-        /\\ \(\\ \(\„•ㅅ•„\)/i, /╭ \/ づ♡/i
-      ];
+    // 🟢 ปรับปรุงกล่องข้อความใต้ราคา: ให้ดูเป็น Personal Note หรือซ่อนถ้าเป็นสแปม
+const descContainer = document.getElementById("lightboxDescriptionContainer");
+const descContent = document.getElementById("lightboxDescriptionContent");
 
-      const isSpam = spamPatterns.some(pattern => pattern.test(rawDesc));
+if (descContent) {
+  let rawDesc = (profile.description && profile.description.trim()) ? profile.description : "";
+  
+  // ล้างข้อความขยะ
+  rawDesc = rawDesc
+    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
+    .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
+    .trim();
 
-      if (isSpam || rawDesc.length < 10) {
-        // หากเจอคำซ้ำ ให้สุ่มคำบรรยายที่มีคุณภาพจากข้อมูลน้องๆ เพื่อให้ SEO มองว่าเป็นเนื้อหาใหม่
-        rawDesc = `น้อง${cleanName} สาวรับงาน${pProvText} พิกัดย่าน${primaryZone} วัย ${profile.safeAge || "22"} ปี สัดส่วน ${profile.safeStats || "36-24-35"} บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พูดเพราะ เอาใจเก่ง ไม่เร่งเวลา รับประกันตัวจริงสวยตรงปก 100% นัดเจออย่างปลอดภัย จ่ายเงินหน้างานไม่มีโอนมัดจำค่ะ`;
-      } else {
-        rawDesc = rawDesc
-          .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*){2,}/g, "บริการดูแลสไตล์ฟิวแฟน ")
-          .replace(/[ฃ͡➴˚˳*]+/g, "")
-          .trim();
-      }
-
-      descContent.innerHTML = escapeHTML(rawDesc).replace(/\n/g, "<br>");
-      descContent.style.cssText = "font-size: 12.5px; color: #334155; line-height: 1.6; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px;";
-    }
+  // 🔒 ถ้าข้อความสั้นเกินไป หรือว่างเปล่า ไม่ต้องสร้างเรียงความ ให้ซ่อนกล่องทิ้งทันที!
+  if (!rawDesc || rawDesc.length < 5) {
+    if (descContainer) descContainer.style.display = "none";
+  } else {
+    // แสดงเป็นข้อความทักทายสไตล์มินิมอล หรูหรา สะอาดตา
+    descContent.innerHTML = `
+      <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #334155; line-height: 1.6;">
+        <span style="font-size: 16px; line-height: 1;">💬</span>
+        <div>
+          <strong style="color: #7C3AED; font-size: 11.5px; display: block; margin-bottom: 2px;">ข้อความจากน้อง:</strong>
+          <span>"${escapeHTML(rawDesc)}"</span>
+        </div>
+      </div>
+    `;
+    descContent.style.cssText = "background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin: 10px 0;";
     if (descContainer) descContainer.style.display = "block";
+  }
+}
     
     // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (Universal Link สำหรับ iOS/Android ทุกเวอร์ชัน)
     const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
