@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261016_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261020_clean`;
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
@@ -568,22 +568,26 @@ const schemaGraph = {
           "addressCountry": "TH"
         }
       },
-      // 🟢 เติม Offer Schema ครบชุด (ทำให้ Google ดึงราคาขึ้นเป็น Rich Badge ได้ 100%)
-      "makesOffer": {
-        "@type": "Offer",
-        "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
-        "url": canonicalUrl,
-        "price": String(rateNumber),
-        "priceCurrency": "THB",
-        "availability": "https://schema.org/InStock",
-        "validFrom": new Date().toISOString().split("T")[0],
-        "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        "itemOffered": {
-          "@type": "Service",
-          "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
-          "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${provinceNameThai} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`
-        }
-      }
+     "makesOffer": {
+  "@type": "Offer",
+  "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
+  "url": canonicalUrl,
+  "price": String(rateNumber),
+  "priceCurrency": "THB",
+  "availability": "https://schema.org/InStock",
+  "validFrom": new Date().toISOString().split("T")[0],
+  "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+  "itemOffered": {
+    "@type": "Service",
+    "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
+    "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${provinceNameThai} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`,
+    // 🟢 เสริม Entity พื้นที่บริการเจาะจงระดับย่าน/จังหวัด
+    "areaServed": {
+      "@type": "AdministrativeArea",
+      "name": `${stripHTML(primaryZone)}, ${stripHTML(provinceNameThai)}`
+    }
+  }
+}
     },
     {
       "@type": "BreadcrumbList",
@@ -822,7 +826,7 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
                         <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
                     </a>
 
-                   <button type="button" onclick="if(typeof window.shareProfile==='function'){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else{if(navigator.share){navigator.share({title:document.title,url:window.location.href}).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!')}).catch(()=>{});}else{prompt('คัดลอกลิงก์โปรไฟล์:',window.location.href);}}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+               <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
     <i class="fas fa-share-alt" style="font-size: 16px;"></i>
 </button>
                 </div>
@@ -894,9 +898,10 @@ const robotsTag = '<meta name="robots" content="index, follow, max-image-preview
     <span>จองคิว${escapeHTML(displayName)}</span>
     <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
 </a>
-        <button type="button" onclick="if(typeof window.shareProfile==='function'){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else{if(navigator.share){navigator.share({title:document.title,url:window.location.href}).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>{alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!')}).catch(()=>{});}else{prompt('คัดลอกลิงก์โปรไฟล์:',window.location.href);}}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
+      <button type="button" onclick="if(window.shareProfile){window.shareProfile('${escapeHTML(displayName)}',window.location.href);}else if(navigator.clipboard){navigator.clipboard.writeText(window.location.href).then(()=>alert('คัดลอกลิงก์เรียบร้อยแล้วค่ะ!'));}" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.25); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);">
     <i class="fas fa-share-alt" style="font-size: 16px;"></i>
 </button>
+
     </div>
 
     <!-- ลงทะเบียน Service Worker ให้เหมือน index.html -->

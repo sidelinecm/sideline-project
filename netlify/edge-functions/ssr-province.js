@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261016_clean`;
+let GLOBAL_VERSION = `v_20261020_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
 function setSafePageCache(key, data) {
@@ -598,8 +598,10 @@ function formatLuxuryRate(rate) {
 }
 
 
+// 🟢 Alt Text ที่ดึงทั้งชื่อ, จังหวัด, และย่านพิกัดงาน ช่วยดันอันดับ Google Image Search
 function generateNaturalAlt(cleanName, provinceName, loc, index) {
-  return `น้อง${cleanName} (${provinceName})`;
+  const zoneText = loc && loc !== provinceName ? ` ย่าน${loc}` : "";
+  return `น้อง${cleanName} สาวรับงาน${provinceName}${zoneText} ไซด์ไลน์ตรงปก`;
 }
 
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", index = 0) => {
@@ -618,7 +620,6 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const ageStr = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "";
   const statusClass = isAvail ? "status-online" : "status-busy";
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
-  const cardImg = optimizeImg(rawImg, 400, 560);
   const luxuryPrice = formatLuxuryRate(p.rate);
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
@@ -642,10 +643,17 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
     : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
 
+  // 🟢 คำนวณ srcset สำหรับรูปการ์ดโปรไฟล์ให้ตรงกับ Preload ใน <head>
+  const cardImgSmall = optimizeImg(rawImg, 400, 560);
+  const cardImgLarge = optimizeImg(rawImg, 600, 800);
+  const cardSrcSet = `${cardImgSmall} 400w, ${cardImgLarge} 600w`;
+
   return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}" style="aspect-ratio: 3/4.2; display: flex; flex-direction: column;">
-       <img src="${cardImg}" 
+        <img src="${cardImgSmall}" 
+              srcset="${cardSrcSet}" 
+              sizes="(max-width: 600px) 100vw, 400px"
               alt="${generateNaturalAlt(cleanName, provinceName, loc, index)}"
               width="400"
               height="560"
@@ -655,38 +663,38 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
               fetchpriority="${isPriorityLCP ? "high" : "auto"}"
               decoding="async"
               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
-               
-          <div class="profile-card-gradient-overlay"></div>
+                 
+        <div class="profile-card-gradient-overlay"></div>
 
-          <div class="profile-card-badges-top">
-              <div class="badges-left">
-                  <span class="badge-status ${statusClass}">
-                      <span class="status-dot"></span>
-                      <span>${availStatus}</span>
-                  </span>
-              </div>
-              <div class="badges-right">
-                  ${rightBadgeHtml}
-              </div>
-          </div>
-          
-          <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+        <div class="profile-card-badges-top">
+            <div class="badges-left">
+                <span class="badge-status ${statusClass}">
+                    <span class="status-dot"></span>
+                    <span>${availStatus}</span>
+                </span>
+            </div>
+            <div class="badges-right">
+                ${rightBadgeHtml}
+            </div>
+        </div>
+        
+        <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
 
-          <div class="profile-card-info-content">
-              <div class="profile-card-tags-row">
-                  ${vibeTagsHtml}
-              </div>
-              <div class="profile-card-title-row">
-                  <h3 class="profile-card-name">น้อง${cleanName}</h3>
-                  ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
-              </div>
-             <div class="profile-card-bottom-row">
-                  <span class="profile-card-location">
-                      <i class="fas fa-map-marker-alt"></i> ${loc}
-                  </span>
-                  <span class="profile-card-price">${luxuryPrice}</span>
-              </div>
-          </div>
+        <div class="profile-card-info-content">
+            <div class="profile-card-tags-row">
+                ${vibeTagsHtml}
+            </div>
+            <div class="profile-card-title-row">
+                <h3 class="profile-card-name">น้อง${cleanName}</h3>
+                ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
+            </div>
+            <div class="profile-card-bottom-row">
+                <span class="profile-card-location">
+                    <i class="fas fa-map-marker-alt"></i> ${loc}
+                </span>
+                <span class="profile-card-price">${luxuryPrice}</span>
+            </div>
+        </div>
       </article>
     </div>
   `;
@@ -1296,33 +1304,54 @@ const popularLocationsFooter = `
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
- // 🟢 ซิงค์ H1 ให้ตรงกับ V2 และตรงกับ main.js
+// 🟢 ปรับ H1 ให้มี Hierarchy สวยงาม ไม่ใช้สีแดงสดแสบตา
 const ssrH1Html = isNational 
-  ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่</span>` 
-  : `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n<span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>`;
-    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+  ? `<span class="h1-line-1" style="display: block; font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; color: #140F22; line-height: 1.25; margin-bottom: 4px;">สาวรับงาน ไซด์ไลน์ เด็กเอ็น</span>
+     <span class="h1-line-2" style="display: block; font-size: clamp(14px, 4vw, 16px); font-weight: 800; background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่</span>` 
+  : `<span class="h1-line-1" style="display: block; font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; color: #140F22; line-height: 1.25; margin-bottom: 4px;">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+     <span class="h1-line-2" style="display: block; font-size: clamp(14px, 4vw, 16px); font-weight: 800; background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>`;
 
-    // 🟢 2. รายชื่อย่านธรรมชาติ (ใช้ cleanZonesList เดิมตรงๆ ปลอดภัย 100%)
+finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1" style="text-align: center; margin: 10px 0;">${ssrH1Html}</h1>`);
+
+    const dynamicSubheadline = isNational
+  ? `รวมสาวสวยรับงาน & ไซด์ไลน์ คัดตัวจริงตรงปก`
+  : `สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์ตัวจริงตรงปก 100%`;
+
+finalHtml = finalHtml.replace(
+  /<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i,
+  `<span class="hero-subheadline">${dynamicSubheadline}</span>`
+);
+
     const currentZonesText = (typeof cleanZonesList !== "undefined" && cleanZonesList.length > 0) 
       ? cleanZonesList.slice(0, 5).join(", ") 
       : "ในตัวเมือง";
 
-    // 🟢 3. เม็ดยาโซนย่าน (Pills): ใช้ cleanZonesList เดิม + ปรับสี Contrast เข้มขึ้นผ่านเกณฑ์ AAA
+    
     const pills = (cleanZonesList || []).map(z => {
       const cleanZ = escapeHTML(String(z).trim());
       const href = cleanZ.includes("นิมมาน") ? "/nimman" : `/location/${provinceSlug}?zone=${encodeURIComponent(cleanZ)}`;
       return `<a href="${href}" style="background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87; padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">📍 โซน${cleanZ}</a>`;
     }).join(" ");
 
-    // 🟢 4. แก้ไขจุดตายสำคัญ: ประกาศชื่อ zonePillsHtml ให้ตรงกับตัวที่เรียกใช้ด้านล่าง (แก้ปัญหาแครช)
+    
     const zonePillsHtml = pills ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center;">${pills}</div>` : "";
 
    
-    const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p"><strong>FirstModelHub</strong> รวมโปรไฟล์สาวรับงานและสาวไซด์ไลน์ สไตล์ฟิวแฟนดูแลดี มีให้เลือกทั้งแบบมีห้องส่วนตัวพร้อมรับ และเดินทางไปหานอกสถานที่ (โรงแรม/คอนโด) คุยเรทราคากับน้องโดยตรง <strong>เจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้า เจอจ่ายจบ สบายใจทั้งสองฝ่าย</strong></p>`
-      : `<p class="hero-subtitle-p">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} ในพื้นที่ ${escapeHTML(currentZonesText)} คัดตัวจริงตรงปก 100% มีทั้งแบบมีห้องพร้อมรับและเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ สบายใจ ปลอดภัยค่ะ</p>${zonePillsHtml}`;
-  
-    finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset">${dynamicHeroDesc}</div>`);
+   
+// 🟢 กล่องความปลอดภัยแบบกระชับ (Above the Fold)
+const trustBoxHtml = `
+  <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
+    <span style="color: #059669; font-size: 12px; font-weight: 800;">🛡️ ปลอดภัย 100%:</span>
+    <span style="color: #140F22; font-size: 12px; font-weight: 700;">นัดเจอตัวจริงก่อนค่อยจ่าย • ไร้มัดจำ</span>
+  </div>
+`;
+
+// 🟢 ตัด ${zonePillsHtml} ออกจาก Hero ทิ้งเด็ดขาด! เหลือเฉพาะข้อความกระชับ 3-4 บรรทัด
+const dynamicHeroDesc = isNational
+  ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน คัดตัวจริงตรงปก มีห้องพร้อมและนอกสถานที่ นัดเจอน้องตัวจริงก่อนค่อยชำระค่าบริการหน้างาน สบายใจ ไร้กังวลเรื่องมัดจำค่ะ</p>${trustBoxHtml}`
+  : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)} คัดตัวจริงตรงปก 100% สไตล์ฟิวแฟนดูแลดี มีห้องส่วนตัวและพร้อมเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่ต้องโอนมัดจำค่ะ</p>${trustBoxHtml}`;
+
+finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset" style="padding: 12px 14px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px; margin: 10px 0;">${dynamicHeroDesc}</div>`);
     
    
     const ssrFeaturedH2 = isNational 
@@ -1632,10 +1661,20 @@ finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S
     finalHtml = finalHtml.replace(/\/main\.js\?v=[^"'\s>]+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
     if (profilesList.length > 0) {
-      const lcpImgUrl = optimizeImg(profilesList[0].imagePath || profilesList[0].image_url || "", 400, 560);
-      finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="preload" as="image" href="${lcpImgUrl}" fetchpriority="high">\n</head>`);
-    }
-// 🟢 สั่งแทนที่ URL ไลน์เดิมทั้งหน้าให้เป็นค่าใหม่ล่าสุดจาก Supabase
+  const rawLcpImg = profilesList[0].imagePath || profilesList[0].image_url || "";
+  const lcpImgSmall = optimizeImg(rawLcpImg, 400, 560);
+  const lcpImgLarge = optimizeImg(rawLcpImg, 600, 800);
+  
+  const preloadTag = `
+  <link rel="preload" as="image" href="${lcpImgSmall}" 
+        imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" 
+        imagesizes="(max-width: 600px) 100vw, 400px" 
+        fetchpriority="high">
+</head>`;
+  
+  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+}
+
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     
 const responseHeaders = {
