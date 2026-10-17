@@ -659,33 +659,33 @@ export default async (req, context) => {
     }
 
    // แก้ไข: ทำ 301 Redirect ให้เป็น Clean URL และแยก Cache Key อย่างเด็ดขาด
-const rawZoneQuery = url.searchParams.get("zone")?.trim();
-const segments = url.pathname.split("/").filter(Boolean);
+   const rawZoneQuery = url.searchParams.get("zone")?.trim();
+   const segments = url.pathname.split("/").filter(Boolean);
 
-// 1. ถ้ามีคนเข้าผ่าน ?zone= ให้ 301 Redirect ไปที่ URL โซนสะอาดระดับ Path ทันที
-if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
-  const currentProv = segments[1] || "chiangmai";
-  const cleanZoneTarget = encodeURIComponent(rawZoneQuery);
-  return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneTarget}`, 301);
-}
+   // 1. ถ้ามีคนเข้าผ่าน ?zone= ให้ 301 Redirect ไปที่ URL โซนสะอาดระดับ Path ทันที
+   if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
+     const currentProv = segments[1] || "chiangmai";
+     const cleanZoneTarget = encodeURIComponent(rawZoneQuery);
+     return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneTarget}`, 301);
+   }
 
-const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
+   const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
 
-// 2. Cache Key ต้องรวม Path และ Search Query ทั้งหมด ป้องกันหน้าโซนแคชทับหน้าจังหวัด
-const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
-const cachedPage = PAGE_CACHE.get(cacheKey);
-if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
-  PAGE_CACHE.delete(cacheKey);
-  PAGE_CACHE.set(cacheKey, cachedPage);
-  return new Response(cachedPage.html, { headers: cachedPage.headers });
-}
+   // 2. Cache Key ต้องรวม Path และ Search Query ทั้งหมด ป้องกันหน้าโซนแคชทับหน้าจังหวัด
+   const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
+   const cachedPage = PAGE_CACHE.get(cacheKey);
+   if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
+     PAGE_CACHE.delete(cacheKey);
+     PAGE_CACHE.set(cacheKey, cachedPage);
+     return new Response(cachedPage.html, { headers: cachedPage.headers });
+   }
 
-    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    const segments = url.pathname.split("/").filter(Boolean);
-    
-    // 🟢 1. ระบบตรวจจับ Routing: รองรับทั้งหน้าแรก, หน้าจังหวัด, และหน้าโซนย่อยจริง (/location/:province/:zone)
-    let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
-    let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
+   const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+   // (ลบ const segments ออกแล้ว สามารถใช้ segments จากด้านบนต่อได้ทันที)
+   
+   // 🟢 1. ระบบตรวจจับ Routing: รองรับทั้งหน้าแรก, หน้าจังหวัด, และหน้าโซนย่อยจริง (/location/:province/:zone)
+   let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
+   let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
     if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
     if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
 
