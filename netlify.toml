@@ -68,10 +68,24 @@
   function = "render-bot"
   path = "/sideline/*"
 
-# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและหน้าหลัก
+# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดชั้นที่ 1 (เช่น /location/chiangmai)
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
+
+# 🟢 [จุดที่เพิ่มใหม่] ฟังก์ชันเรนเดอร์หน้ารายโซนย่อยชั้นที่ 2 (เช่น /location/chiangmai/เจ็ดยอด)
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/location/*/*"
+
+# 🟢 [จุดที่เพิ่มใหม่] รองรับ path /province/ ด้วยทั้ง 1 ชั้น และ 2 ชั้น
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/province/*"
+
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/province/*/*"
 
 [[edge_functions]]
   function = "ssr-province"
@@ -81,7 +95,7 @@
   function = "ssr-province"
   path = "/index.html"
 
-# 🟢 [เติมจุดที่ขาด] ให้ Edge Function เรนเดอร์หน้าภาษาอังกฤษด้วย
+# 🟢 ให้ Edge Function เรนเดอร์หน้าภาษาอังกฤษด้วย
 [[edge_functions]]
   function = "ssr-province"
   path = "/index-en"
@@ -121,7 +135,7 @@
   status = 301
   force = true
 
-# 🟢 [เติมจุดที่ขาด] บังคับตัดนามสกุล .html ทิ้งทั้งหมดเพื่อผลดีต่อ SEO สูงสุด (Canonical Clean URLs)
+# 🟢 บังคับตัดนามสกุล .html ทิ้งทั้งหมดเพื่อผลดีต่อ SEO สูงสุด (Canonical Clean URLs)
 [[redirects]]
   from = "/profiles.html"
   to = "/profiles"
@@ -176,7 +190,7 @@
   status = 301
   force = true
 
-# 🟢 [แก้ไขจุดที่ชนกัน] รวม URL ภาษาอังกฤษเข้า /index-en แบบเป็นมาตรฐาน
+# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en แบบเป็นมาตรฐาน
 [[redirects]]
   from = "/index-en.html"
   to = "/index-en"

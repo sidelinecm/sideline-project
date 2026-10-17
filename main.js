@@ -1093,13 +1093,26 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
-    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
-    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
 
+    // 🟢 1. อัปเดตตัวเลขจำนวนโปรไฟล์สด
     const liveCounterEl = document.getElementById("live-profile-count");
     if (liveCounterEl) {
       liveCounterEl.textContent = `${totalCount}`;
     }
+
+    // 🛡️ 2. ป้องกันหน้าโซนย่อย: ถ้ากำลังเปิดหน้าโซนย่อยอยู่ ห้าม JavaScript เขียนทับ H1 และแผนที่ของ SSR เด็ดขาด
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
+
+    if (isSubZone) {
+      const liveProvinceEl = document.getElementById("live-province-count");
+      if (liveProvinceEl) liveProvinceEl.textContent = "1";
+      return; // 👈 จบการทำงานตรงนี้ เพื่อรักษา H1 และแผนที่โซนย่อยที่ SSR เรนเดอร์ไว้ให้คงเดิม
+    }
+
+    // 🟢 3. ถ้าเป็นหน้าทั่วไป (หน้าแรก หรือ หน้ารายจังหวัดปกติ) ให้ทำงานตามปกติ
+    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
 
     const liveProvinceEl = document.getElementById("live-province-count");
     if (liveProvinceEl) {
@@ -1107,8 +1120,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
 
-    
-    // ✅ ซิงค์ H1 ให้ตรงกับ SSR V2 100% (หยุดปัญหาข้อความกระตุกเปลี่ยนรูป)
+    // ✅ ซิงค์ H1 ให้ตรงกับ SSR
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
@@ -1145,6 +1157,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       }
     }
 
+    // ✅ ปรับตำแหน่งแผนที่ Google Map
     const mapIframe = document.getElementById("google-map");
     if (mapIframe) {
       const zoom = isAllOrNational ? 6 : 12;
