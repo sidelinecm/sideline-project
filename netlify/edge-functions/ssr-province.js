@@ -272,7 +272,20 @@ function stripHTML(str) {
   if (str == null) return "";
   return String(str).replace(/<[^>]*>?/gm, "").trim();
 }
-
+function extractCleanNumber(rate) {
+  if (!rate) return 1500;
+  const str = String(rate).trim().toLowerCase();
+  if (str.includes("k")) {
+    const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
+    return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
+  }
+  const cleanDigits = str.replace(/\D/g, "");
+  const num = parseInt(cleanDigits, 10);
+  if (isNaN(num) || num <= 0) return 1500;
+  if (num < 10) return num * 1000;
+  if (num < 500) return num * 10;
+  return num;
+}
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
 function optimizeImg(imagePath, mode = "card") {
@@ -1011,7 +1024,7 @@ export default async (req, context) => {
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug, zoneSlug);
 
     const provinceCounts = deduplicatedProfiles.reduce((acc, p) => {
-      const k = (p.provinceKey || "").toLowerCase();
+     const k = String(p.provinceKey || "").toLowerCase();
       if (k) acc[k] = (acc[k] || 0) + 1;
       return acc;
     }, {});
@@ -1314,14 +1327,16 @@ export default async (req, context) => {
     }
 
     // 🟢 กู้คืน Display Area: ถ้าเป็นหน้าแรก ให้วนลูปแยกตามจังหวัดครบถ้วน
-    let displayAreaHtml = "";
-    if (isNational) {
-      const groupedByProvince = profilesList.reduce((acc, p) => {
-        const key = (p.provinceKey || p.province_slug || "no_province").toString().toLowerCase();
-        acc[key] = acc[key] || [];
-        acc[key].push(p);
-        return acc;
-      }, {});
+let displayAreaHtml = "";
+if (isNational) {
+  const groupedByProvince = profilesList.reduce((acc, p) => {
+    // แก้บรรทัดนี้บรรทัดเดียวครับ 👇
+    const key = String(p.provinceKey || p.province_slug || "no_province").toLowerCase();
+    
+    acc[key] = acc[key] || [];
+    acc[key].push(p);
+    return acc;
+  }, {});
 
       const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
         const nameA = String(PROVINCE_SEO_DATA[a]?.name || a || "");
