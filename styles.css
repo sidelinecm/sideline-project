@@ -2465,18 +2465,27 @@ footer.fmh-footer {
   }
 }
 
+
+/* 🟢 ใหม่: ล็อคให้อยู่แค่ฝั่งซ้ายเท่านั้น แยกอิสระจากปุ่ม [✕] ฝั่งขวาเด็ดขาด */
 .lightbox-top-brand {
   position: absolute !important;
-  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
-  left: 14px !important;
-  z-index: 999 !important;
-  background: rgba(15, 10, 26, 0.65) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  padding: 4px 12px !important;
-  border-radius: 100px !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  pointer-events: none !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: auto !important;          /* 👈 คำสั่งสำคัญ: ห้ามยืดไปทางขวา */
+  width: fit-content !important;   /* 👈 กว้างเท่าขนาดตัวหนังสือพอดี */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  z-index: 60 !important;
+}
+
+/* ปุ่มกากบาทปิด [✕] ฝั่งขวา ลอยเดี่ยวๆ เป็นวงกลมเข้าชุดกัน */
+#closeLightboxBtn {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+  z-index: 60 !important;
 }
 
 .lightbox-close-circle-btn {
@@ -3835,3 +3844,128 @@ body, body.fmh-app-page {
     height: 50px !important;
   }
 }
+
+/* 🔒 ป้องกันปุ่ม Floating / Dock ลอยทับ Lightbox */
+#lightbox {
+  z-index: 100000 !important;
+}
+
+/* ล็อก Body ไม่ให้ Scroll พื้นหลังทะลุ */
+body.lightbox-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* 📱 รองรับ Notch / Dynamic Island ของ iPhone ทุกรุ่น */
+#lightbox-content-wrapper-el {
+  padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+  max-height: 100dvh !important;
+}
+
+.lightbox-close-circle-btn {
+  top: max(14px, env(safe-area-inset-top, 14px)) !important;
+  z-index: 100002 !important;
+}
+
+
+
+/* Province zone directory: complete list, visually separated from the hero */
+.province-zones-section {
+  width: min(100%, 1040px);
+  margin: 14px auto 22px;
+  padding: clamp(14px, 2.4vw, 22px);
+  border: 1px solid rgba(124, 58, 237, .14);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(250,247,255,.96));
+  box-shadow: 0 10px 28px rgba(54, 31, 91, .055);
+}
+.province-zones-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:13px; }
+.province-zones-eyebrow { display:block; margin-bottom:3px; color:#7C3AED; font-size:10px; font-weight:800; letter-spacing:.08em; }
+.province-zones-header h2 { margin:0; color:#211735; font-size:clamp(15px, 2vw, 19px); line-height:1.35; font-weight:850; }
+.province-zones-count { flex:none; padding:5px 10px; border:1px solid #E9D5FF; border-radius:999px; background:#FAF5FF; color:#6D28D9; font-size:11px; font-weight:800; }
+.province-zones-list { display:flex; flex-wrap:wrap; gap:8px; }
+.province-zone-pill { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-height:36px; max-width:100%; padding:7px 12px; border:1px solid #E9D5FF; border-radius:999px; background:#fff; color:#5B21B6; text-decoration:none; font-size:12px; line-height:1.35; font-weight:750; transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+.province-zone-pill:hover,.province-zone-pill:focus-visible { background:#F5EDFF; border-color:#C084FC; transform:translateY(-1px); outline:none; }
+@media (max-width: 600px) {
+  .province-zones-section { margin:10px 0 18px; padding:14px; border-radius:16px; }
+  .province-zones-header { margin-bottom:11px; }
+  .province-zones-list { gap:7px; }
+  .province-zone-pill { min-height:34px; padding:6px 10px; font-size:11.5px; }
+}
+
+
+/* Home page hierarchy refresh: compact trust strip and balanced section rhythm */
+.home-trust-strip {
+  width: min(100% - 24px, 1050px);
+  margin: 8px auto 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  box-sizing: border-box;
+  border: 1px solid rgba(124, 58, 237, .14);
+  border-radius: 14px;
+  background: rgba(255,255,255,.88);
+  color: #332B45;
+  font: 700 12px/1.45 'Prompt', sans-serif;
+  box-shadow: 0 4px 14px rgba(15,10,26,.035);
+}
+.home-trust-strip span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.home-trust-strip i { color: #059669; }
+#quick-filter-pills { margin-top: 12px !important; margin-bottom: 12px !important; }
+#featured-profiles { margin-top: 8px !important; }
+#hot-profiles-section { margin-top: 24px !important; margin-bottom: 22px !important; }
+#profiles-display-area { margin-top: 8px; }
+#main-content { padding-top: 4px; }
+@media (max-width: 600px) {
+  .home-trust-strip { justify-content: flex-start; gap: 7px 14px; padding: 10px 12px; font-size: 11px; }
+  .home-trust-strip span { white-space: normal; }
+  #hot-profiles-section { margin-top: 18px !important; }
+}
+
+
+/* 2026 mobile-first visual refinement: prevent clipped hero copy and establish calmer hierarchy */
+@media (max-width: 600px) {
+  html body #main-content { padding-left: 12px !important; padding-right: 12px !important; }
+  html body .hero-section.celestial-hero-box {
+    width: 100% !important; max-width: 520px !important; padding: 20px 16px 18px !important;
+    margin: 12px auto 18px !important; gap: 12px !important; border-radius: 24px !important;
+    overflow: hidden !important; box-shadow: 0 16px 38px rgba(83, 53, 125, .11), inset 0 1px 0 #fff !important;
+  }
+  html body .kiss-master-brand-wrapper { margin: 0 auto 2px !important; }
+  html body .kiss-laser-inner { gap: 6px !important; padding: 7px 11px !important; }
+  html body .hero-headings-block { gap: 7px !important; }
+  html body .hero-subheadline { white-space: normal !important; max-width: 100% !important; font-size: 11px !important; line-height: 1.4 !important; padding: 5px 11px !important; }
+  html body .seo-h1-title { gap: 3px !important; line-height: 1.22 !important; }
+  html body .seo-h1-title .h1-line-1,
+  html body .seo-h1-title .h1-line-2 { white-space: normal !important; display: block !important; max-width: 100% !important; overflow-wrap: anywhere !important; text-align: center !important; }
+  html body .seo-h1-title .h1-line-1 { font-size: clamp(20px, 6vw, 27px) !important; letter-spacing: -.45px !important; }
+  html body .seo-h1-title .h1-line-2 { font-size: clamp(16px, 4.8vw, 21px) !important; line-height: 1.35 !important; }
+  html body .hero-description-inset { width: 100% !important; box-sizing: border-box !important; padding: 14px 15px !important; border-radius: 17px !important; margin: 2px auto !important; }
+  html body .hero-subtitle-p { font-size: 13px !important; line-height: 1.75 !important; text-align: left !important; }
+  html body .hero-metric-strip { gap: 8px !important; margin-top: 2px !important; }
+  html body .metric-pill.pill-safety { max-width: 100% !important; box-sizing: border-box !important; border-radius: 14px !important; padding: 9px 12px !important; justify-content: center !important; text-align: center !important; white-space: normal !important; }
+  html body .metric-pill.pill-stats { max-width: 100% !important; box-sizing: border-box !important; flex-wrap: wrap !important; justify-content: center !important; gap: 6px !important; padding: 8px 10px !important; border-radius: 14px !important; line-height: 1.5 !important; }
+  html body .home-trust-strip { width: 100% !important; margin: 0 auto 18px !important; border-radius: 16px !important; }
+  html body #quick-filter-pills { margin: 0 -2px 18px !important; padding: 5px 2px 10px !important; }
+  html body #featured-profiles { margin-top: 12px !important; }
+  html body .hot-header-bar-classic { gap: 8px !important; flex-wrap: wrap !important; }
+}
+@media (min-width: 601px) {
+  html body .hero-section.celestial-hero-box { padding: 28px 34px 24px !important; }
+  html body .seo-h1-title .h1-line-1, html body .seo-h1-title .h1-line-2 { white-space: normal !important; }
+}
+
+@media (max-width: 600px) {
+  html body .btn-concierge-line { box-sizing: border-box !important; max-width: 100% !important; }
+  html body .concierge-luxury-section, html body .luxury-bento-wrapper { min-width: 0 !important; max-width: 100% !important; }
+}
+
+@media (max-width: 600px) {
+  html body .btn-concierge-line { width: 100% !important; box-sizing: border-box !important; }
+}
+
+@media (max-width: 600px) { html body .concierge-luxury-section .btn-concierge-line { width: auto !important; flex: 1 1 100% !important; min-width: 0 !important; box-sizing: border-box !important; } }
