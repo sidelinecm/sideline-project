@@ -5,12 +5,14 @@ const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
 let GLOBAL_PROFILE_VERSION = `v_20261020_clean`;
 
+const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
+
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
     PROFILE_PAGE_CACHE.delete(oldestKey);
   }
-  PROFILE_PAGE_CACHE.set(key, data);
+  PROFILE_PAGE_CACHE.set(key, { ...data, cachedAt: Date.now() });
 }
 
 const CONFIG = {
@@ -120,7 +122,9 @@ function extractCleanNumber(rate) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  const cleanDigits = str.replace(/\D/g, "");
+  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข
+  const pricePart = str.split(/[\/\(\s]/)[0];
+  const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
   if (num < 10) return num * 1000;
@@ -155,12 +159,10 @@ function optimizeImg(imagePath, mode = "card") {
   const transform = `${baseTransform}${watermark}`;
 
   if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
-    if (match) {
-      const imageFile = (match[2] || "").replace(/^\/+/, "");
-      if (imageFile) {
-        return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
-      }
+    // ✅ สกัดเฉพาะโฟลเดอร์และชื่อไฟล์ภาพตัวจริง เช่น images/xxx.png ป้องกันเอาแท็กลายน้ำเดิมมาต่อท้าย
+    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
+    if (fileMatch && fileMatch[1]) {
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
@@ -303,11 +305,12 @@ export default async (req, context) => {
     return context.next();
   }
 
-  const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
+ const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
   const cacheKey = url.pathname.toLowerCase();
   const cachedPage = PROFILE_PAGE_CACHE.get(cacheKey);
+  const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS);
   
-  if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_PROFILE_VERSION) {
+  if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_PROFILE_VERSION) {
     PROFILE_PAGE_CACHE.delete(cacheKey);
     PROFILE_PAGE_CACHE.set(cacheKey, cachedPage);
     return new Response(cachedPage.html, { headers: cachedPage.headers });
@@ -328,29 +331,29 @@ export default async (req, context) => {
     if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; 
     if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; 
     const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
-    
-    // ดึงน้องๆ แนะนำในโซนเดียวกัน
-    const { data: allActiveProfiles } = await supabase
+
+    // 🟢 1. รวมชื่อ Key จังหวัดทุกรูปแบบที่อาจบันทึกไว้ใน DB (เช่น chiangmai, chiang-mai)
+    const provVariants = [provinceKey, cleanProvinceKey];
+    if (provinceKey === "chiangmai") provVariants.push("chiang-mai", "chiang_mai");
+    if (provinceKey === "khon-kaen" || provinceKey === "khonkaen") provVariants.push("khonkaen", "khon_kaen");
+
+    // 🟢 2. เช็กชื่อคอลัมน์ใน Supabase ว่าตารางนี้ตั้งชื่อว่า provinceKey หรือ province_key
+    const provCol = ("province_key" in profile && profile.province_key) ? "province_key" : "provinceKey";
+
+    // 🟢 3. คำสั่ง SQL Query กรองตรงเฉพาะจังหวัดเดียวกันตั้งแต่ระดับฐานข้อมูล
+    const { data: sameProvinceProfiles } = await supabase
       .from("profiles")
       .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
       .eq("active", true)
       .neq("id", profile.id)
+      .in(provCol, provVariants)
       .order("isfeatured", { ascending: false })
-      .limit(12);
+      .limit(6);
 
-    if (allActiveProfiles && allActiveProfiles.length > 0) {
-      const sameProvince = allActiveProfiles.filter(p => {
-        const k = (p.provinceKey || p.province_key || "").toLowerCase().replace(/[-_]/g, "");
-        return k.includes(cleanProvinceKey) || cleanProvinceKey.includes(k);
-      });
-
-      if (sameProvince.length >= 3) {
-        relatedProfiles = sameProvince.slice(0, 3);
-      } else {
-        const others = allActiveProfiles.filter(p => !sameProvince.some(sp => sp.id === p.id));
-        relatedProfiles = [...sameProvince, ...others].slice(0, 3);
-      }
-    }
+    // 🟢 4. ใช้น้องในจังหวัดเดียวกันเท่านั้น ไม่เอาน้องต่างจังหวัดมาปนเด็ดขาด
+    relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
+      ? sameProvinceProfiles.slice(0, 3)
+      : [];
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
@@ -491,7 +494,11 @@ export default async (req, context) => {
           "name": stripHTML(pageTitle),
           "description": stripHTML(metaDescription),
           "inLanguage": "th-TH",
-          "dateModified": new Date(profile.updated_at || profile.created_at || Date.now()).toISOString(),
+         "dateModified": (profile.updated_at && !isNaN(new Date(profile.updated_at).getTime()))
+            ? new Date(profile.updated_at).toISOString()
+            : ((profile.created_at && !isNaN(new Date(profile.created_at).getTime()))
+                ? new Date(profile.created_at).toISOString()
+                : new Date().toISOString()),
           "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
           "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
@@ -798,7 +805,7 @@ export default async (req, context) => {
         </main>
         
         <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #475569; font-size: 12px;">
-            © 2026 ${CONFIG.BRAND_NAME} - ปลอดภัย จ่ายหน้างาน 100%
+          © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ปลอดภัย จ่ายหน้างาน 100%
         </footer>
     </div>
        

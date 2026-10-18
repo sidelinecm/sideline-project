@@ -5,13 +5,18 @@ const MAX_PAGE_CACHE_ENTRIES = 80;
 let GLOBAL_VERSION = `v_20261020_clean`;
 let TEMPLATE_HTML_CACHE = null;
 
+const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
+
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
     const oldestKey = PAGE_CACHE.keys().next().value;
     PAGE_CACHE.delete(oldestKey);
   }
-  PAGE_CACHE.set(key, data);
+  PAGE_CACHE.set(key, { ...data, cachedAt: Date.now() }); // ✅ บันทึกเวลา
 }
+
+
+
 
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
 
@@ -279,7 +284,9 @@ function extractCleanNumber(rate) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  const cleanDigits = str.replace(/\D/g, "");
+  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข
+  const pricePart = str.split(/[\/\(\s]/)[0];
+  const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
   if (num < 10) return num * 1000;
@@ -314,11 +321,11 @@ function optimizeImg(imagePath, mode = "card") {
 
   const transform = `${baseTransform}${watermark}`;
 
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
-    if (match) {
-      const imageFile = (match[2] || "").replace(/^\/+/, "");
-      if (imageFile) return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
+ if (cleanPath.includes("res.cloudinary.com")) {
+    // ✅ สกัดเฉพาะโฟลเดอร์และชื่อไฟล์ภาพตัวจริง เช่น images/xxx.png ป้องกันเอาแท็กลายน้ำเดิมมาต่อท้าย
+    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
+    if (fileMatch && fileMatch[1]) {
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
@@ -692,11 +699,7 @@ export default async (req, context) => {
    // 2. Cache Key ต้องรวม Path และ Search Query ทั้งหมด ป้องกันหน้าโซนแคชทับหน้าจังหวัด
    const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
    const cachedPage = PAGE_CACHE.get(cacheKey);
-   if (!isForceRefresh && cachedPage && cachedPage.version === GLOBAL_VERSION) {
-     PAGE_CACHE.delete(cacheKey);
-     PAGE_CACHE.set(cacheKey, cachedPage);
-     return new Response(cachedPage.html, { headers: cachedPage.headers });
-   }
+   const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS); if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) { PAGE_CACHE.delete(cacheKey); PAGE_CACHE.set(cacheKey, cachedPage); return new Response(cachedPage.html, { headers: cachedPage.headers }); }
 
    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
    // (ลบ const segments ออกแล้ว สามารถใช้ segments จากด้านบนต่อได้ทันที)
@@ -812,14 +815,15 @@ export default async (req, context) => {
       p.provinceKey = realProvince;
       p.province_slug = realProvince;
 
-      const nameSig = `${cleanName}_${realProvince}`;
+      // ✅ เช็กความซ้ำซ้อนจาก Profile ID หรือรูปลายเซ็นเท่านั้น ป้องกันน้องชื่อซ้ำโดนลบ
+      const uniqueProfileId = String(p.id || "");
+      if (uniqueProfileId && seenNameKeys.has(uniqueProfileId)) continue;
       if (imgSig && seenImageKeys.has(imgSig)) continue;
-      if (cleanName && seenNameKeys.has(nameSig)) continue;
 
-      seenImageKeys.add(imgSig);
-      seenNameKeys.add(nameSig);
+      if (imgSig) seenImageKeys.add(imgSig);
+      if (uniqueProfileId) seenNameKeys.add(uniqueProfileId);
       deduplicatedProfiles.push(p);
-    }
+      }
 
    // 🟢 2. แยกโปรไฟล์ตามจังหวัด และถ้าเปิดหน้าโซน ให้กรองเฉพาะน้องในโซนนั้น
     let profilesList = deduplicatedProfiles;
@@ -882,10 +886,13 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    const latestUpdateMillis = profilesList.reduce((latest, p) => {
+   const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
-      return t > latest ? t : latest;
+      return (t > 0 && t > latest) ? t : latest;
     }, 0);
+    const latestActualIso = latestUpdateMillis > 0 
+      ? new Date(latestUpdateMillis).toISOString() 
+      : new Date().toISOString();
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
 
     // 🟢 4. โครงสร้าง Schema Breadcrumbs รองรับ 3 ชั้น
@@ -916,7 +923,9 @@ export default async (req, context) => {
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-      "dateModified": latestUpdateMillis > 0 ? new Date(latestUpdateMillis).toISOString() : new Date().toISOString(),
+     "dateModified": (latestUpdateMillis > 0 && !isNaN(new Date(latestUpdateMillis).getTime())) 
+        ? new Date(latestUpdateMillis).toISOString() 
+        : new Date().toISOString(),
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       "about": isNational
         ? { "@type": "Country", "name": "ประเทศไทย", "identifier": "TH" }
@@ -1402,7 +1411,7 @@ if (isNational) {
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ (${realProvinceTimeText}):</strong> มีน้องๆ สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวตนตรงปกแล้ว นัดเจอจ่ายหน้างาน ปลอดภัย 100% </div> `;
+    const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีน้องๆ สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวตนตรงปกแล้ว นัดเจอจ่ายหน้างาน ปลอดภัย 100% </div> `;
     finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">${freshnessBox}${linkedIntro}</div>`);
 
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
