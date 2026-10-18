@@ -570,8 +570,7 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
     const displayName = formatDisplayName(rawName);
     const mainImg = raw.img || raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
     
-    // 🖼️ ดึงรูปอัลบั้มทั้งหมด และแปลง JSON String ให้เป็น Array อย่างปลอดภัย
-    let gallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+   let gallery = raw.g || raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
     if (typeof gallery === "string") {
       const trimmed = gallery.trim();
       if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
