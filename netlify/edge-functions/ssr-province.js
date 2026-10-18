@@ -1420,22 +1420,28 @@ if (isNational) {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-    // 🟢 ย้ายมาวางตรงนี้ เพื่อให้มีตัวแปร profilesList และ allProvincesRes พร้อมใช้งาน ไม่เกิด 500 Error
-    const compactClientProfiles = profilesList.map(p => ({
-      id: p.id,
-      slug: p.slug || String(p.id),
-      n: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-      img: p.imagePath || p.image_url || "",
-      pk: p.provinceKey || "chiangmai",
-      loc: sanitizeThaiText(p.location || ""),
-      r: extractCleanNumber(p.rate || p.price),
-      a: p.age || "",
-      st: p.stats || "",
-      av: p.availability || "รับงาน",
-      feat: p.isfeatured ? 1 : 0,
-      ver: p.verified ? 1 : 0,
-      t: Array.isArray(p.styleTags) ? p.styleTags.slice(0, 3) : []
-    }));
+  const compactClientProfiles = profilesList.map(p => {
+      let rawGal = p.galleryPaths || p.gallery_paths || p.gallery || [];
+      if (typeof rawGal === "string") {
+        try { rawGal = JSON.parse(rawGal); } catch (_) { rawGal = rawGal.split(",").map(s => s.trim()); }
+      }
+      return {
+        id: p.id,
+        slug: p.slug || String(p.id),
+        n: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
+        img: p.imagePath || p.image_url || "",
+        g: Array.isArray(rawGal) ? rawGal.filter(Boolean) : [], // ✅ ส่งอัลบั้มรูปทั้งหมดไปด้วย
+        pk: p.provinceKey || "chiangmai",
+        loc: sanitizeThaiText(p.location || ""),
+        r: extractCleanNumber(p.rate || p.price),
+        a: p.age || "",
+        st: p.stats || "",
+        av: p.availability || "รับงาน",
+        feat: p.isfeatured ? 1 : 0,
+        ver: p.verified ? 1 : 0,
+        t: Array.isArray(p.styleTags) ? p.styleTags.slice(0, 3) : []
+      };
+    });
 
     const serializedProfilesJson = JSON.stringify(compactClientProfiles).replace(/</g, "\\u003c");
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
