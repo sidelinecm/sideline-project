@@ -51,8 +51,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
   <!-- 🟢 ปรับแก้ Asset Version ให้เป็นชุดเดียวกันทั้งหมด -->
-  <link rel="stylesheet" href="/styles.css?v=v_20261020_clean">
-  <link rel="modulepreload" href="/main.js?v=v_20261020_clean">
+  <link rel="stylesheet" href="/styles.css?v=v_20261020_01">
+  <link rel="modulepreload" href="/main.js?v=v_20261020_01">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -597,15 +597,16 @@
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
   <!-- 🟢 แก้ไข Asset Version ด้านล่างให้ตรงกับ <head> ป้องกัน Network Cache ทับซ้อน -->
-  <script type="module" src="/main.js?v=v_20261020_clean"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').catch(function(err) {
-          console.warn('SW Registration failed: ', err);
-        });
+  <script type="module" src="/main.js?v=v_20261020_01"></script>
+ <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      // 🟢 เติม ?v=v_20261020_01 ต่อท้ายตรงนี้
+      navigator.serviceWorker.register('/sw.js?v=v_20261020_01').catch(function(err) {
+        console.warn('SW Registration failed: ', err);
       });
-    }
-  </script>
+    });
+  }
+</script>
 </body>
 </html>

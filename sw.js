@@ -1,9 +1,13 @@
 /**
  * [ FIRST MODEL HUB - SERVICE WORKER ENGINE ]
- * Year: 2026 High-Performance Cache & PWA Manager (Production Ready)
+ * Auto-Sync Version & High-Performance Cache (Production Ready)
  */
 
-const CACHE_NAME = 'firstmodelhub-fx-v_20261016_clean';
+// 🟢 1. ดึงเลขเวอร์ชันจาก URL อัตโนมัติ (เช่น เรียกผ่าน /sw.js?v=v_20261020_01)
+const swUrl = new URL(self.location);
+const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261020_01';
+const CACHE_NAME = `firstmodelhub-fx-${CURRENT_VERSION}`;
+
 const STATIC_ASSETS = [
   '/',
   '/styles.css',
@@ -25,11 +29,15 @@ self.addEventListener('install', event => {
   );
 });
 
+// 🟢 2. เมื่อมีเวอร์ชันใหม่ ลบแคชเวอร์ชันเก่าทิ้งทันทีอัตโนมัติ
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE_NAME).map(key => {
+          console.log(`[SW] ลบแคชเก่าออก: ${key}`);
+          return caches.delete(key);
+        })
       );
     }).then(() => self.clients.claim())
   );
@@ -38,10 +46,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
+  // ข้าม API Supabase และคำขอที่ไม่ใช่ GET
   if (url.origin.includes('supabase.co') || event.request.method !== 'GET') {
     return;
   }
 
+  // รูปภาพจาก Cloudinary
   if (url.origin.includes('res.cloudinary.com')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
@@ -60,8 +70,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // 🟢 3. ใส่ { ignoreSearch: true } เพื่อให้ styles.css?v=... ดึงแคช styles.css ได้ถูกต้อง
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
+    caches.match(event.request, { ignoreSearch: true }).then(cachedResponse => {
       if (cachedResponse) {
         fetch(event.request).then(networkResponse => {
           if (networkResponse.status === 200) {

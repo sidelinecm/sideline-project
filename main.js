@@ -821,8 +821,14 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
 
   function executeFilterAndRender(isUserTriggered = true) {
     try {
-      const pathMatch = window.location.pathname.toLowerCase().match(/^\/(?:location|province)\/([^/]+)/);
-      const urlProvince = pathMatch ? decodeURIComponent(pathMatch[1]) : null;
+      const pathSegments = window.location.pathname.split("/").filter(Boolean);
+      let urlProvince = null;
+      let urlZone = null;
+
+      if (pathSegments[0] === "location" || pathSegments[0] === "province") {
+        urlProvince = pathSegments[1] ? decodeURIComponent(pathSegments[1]).toLowerCase() : null;
+        urlZone = pathSegments[2] ? decodeURIComponent(pathSegments[2]).trim() : null;
+      }
 
       let activeProvince = "all";
       if (urlProvince && urlProvince !== "profiles") {
@@ -832,8 +838,108 @@ let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer
       }
       if (activeProvince === "chiang_mai") activeProvince = "chiangmai";
 
+      // 🟢 ตารางจับคู่ Slug อังกฤษ -> ภาษาไทย ครบทุกโซนทุกจังหวัด 100% ไม่ตัดย่อ
+      const ZONE_SLUG_MAP = {
+        // --- 1. เชียงใหม่ ---
+        "nimman": "นิมมาน", "nimmanhaemin": "นิมมาน",
+        "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด",
+        "santitham": "สันติธรรม",
+        "changphueak": "ช้างเผือก", "changphuak": "ช้างเผือก",
+        "cmu": "หลัง มช.", "langmor": "หลัง มช.", "lang-mor": "หลัง มช.",
+        "namor": "หน้า มช.", "na-mor": "หน้า มช.",
+        "kumueang": "คูเมือง", "ku-mueang": "คูเมือง",
+        "thapae": "ท่าแพ", "tha-phae": "ท่าแพ",
+        "huaykaew": "ห้วยแก้ว", "huay-kaew": "ห้วยแก้ว",
+        "ruamchok": "รวมโชค", "ruam-chok": "รวมโชค",
+        "sansai": "สันทราย", "san-sai": "สันทราย",
+        "maejo": "แม่โจ้", "mae-jo": "แม่โจ้",
+        "payap": "พายัพ",
+        "centralfest": "เซ็นทรัลเฟส", "centralfestival": "เซ็นทรัลเฟส",
+        "airport-cnx": "สนามบินเชียงใหม่", "cnx-airport": "สนามบินเชียงใหม่",
+        "maerim": "แม่ริม", "mae-rim": "แม่ริม",
+        "hangdong": "หางดง", "hang-dong": "หางดง",
+
+        // --- 2. กรุงเทพฯ ---
+        "sukhumvit": "สุขุมวิท", "ratchada": "รัชดา", "huaikhwang": "ห้วยขวาง", "huai-khwang": "ห้วยขวาง",
+        "ladprao": "ลาดพร้าว", "thonglor": "ทองหล่อ", "thong-lor": "ทองหล่อ", "ekkamai": "เอกมัย", "ekamai": "เอกมัย",
+        "sathorn": "สาทร", "silom": "สีลม", "bangna": "บางนา", "bang-na": "บางนา",
+        "ramintra": "รามอินทรา", "rama9": "พระราม 9", "rama-9": "พระราม 9", "ari": "อารีย์",
+
+        // --- 3. ชลบุรี / พัทยา ---
+        "pattaya": "พัทยา", "pattaya-klang": "พัทยากลาง", "pattaya-tai": "พัทยาใต้",
+        "jomtien": "หาดจอมเทียน", "hat-jomtien": "หาดจอมเทียน", "bangsaen": "บางแสน", "bang-saen": "บางแสน",
+        "sriracha": "ศรีราชา", "sri-racha": "ศรีราชา", "mueang-chonburi": "ตัวเมืองชลบุรี",
+        "amata": "อมตะนคร", "amatanakorn": "อมตะนคร", "laemchabang": "แหลมฉบัง", "bowin": "บ่อวิน",
+
+        // --- 4. ภูเก็ต ---
+        "mueang-phuket": "ตัวเมืองภูเก็ต", "patong": "ป่าตอง", "kathu": "กะทู้", "chalong": "ฉลอง",
+        "karon": "กะรน", "kata": "กะตะ", "bangtao": "บางเทา", "bang-tao": "บางเทา",
+        "rawai": "ราไวย์", "cherngtalay": "เชิงทะเล", "choeng-thale": "เชิงทะเล",
+        "kamala": "กมลา", "phuket-airport": "สนามบินภูเก็ต",
+
+        // --- 5. ขอนแก่น ---
+        "mueang-khonkaen": "ในตัวเมืองขอนแก่น", "kangsadan": "กังสดาล",
+        "kku": "หลัง มข.", "langmor-kku": "หลัง มข.", "lang-mor-kku": "หลัง มข.",
+        "namor-kku": "หน้า มข.", "nonmuang": "โนนม่วง", "non-muang": "โนนม่วง",
+        "central-khonkaen": "เซ็นทรัลขอนแก่น", "buengkaennakhon": "บึงแก่นนคร",
+        "m-phak": "ม.ภาค", "mittraphap": "ถนนมิตรภาพ", "sila": "ศิลา",
+
+        // --- 6. เชียงราย ---
+        "mueang-chiangrai": "ตัวเมืองเชียงราย", "baandu": "บ้านดู่", "ban-du": "บ้านดู่",
+        "mfu": "หน้า มฟล.", "na-mfu": "หน้า มฟล.", "mae-fah-luang": "ม.แม่ฟ้าหลวง",
+        "clock-tower": "หอนาฬิกา", "hor-nalika": "หอนาฬิกา", "night-bazaar": "ไนท์บาซาร์",
+        "den-ha": "เด่นห้า", "rop-wiang": "รอบเวียง", "rim-kok": "ริมกก",
+        "chiangrai-airport": "สนามบินเชียงราย", "maesai": "แม่สาย", "mae-sai": "แม่สาย",
+
+        // --- 7. ลำปาง ---
+        "mueang-lampang": "ตัวเมืองลำปาง", "suan-dok": "สวนดอก", "rop-wiang-lampang": "รอบเวียง",
+        "lpru": "ม.ราชภัฏลำปาง", "rajabhat-lampang": "ม.ราชภัฏลำปาง", "sob-tui": "สบตุ๋ย", "sobtui": "สบตุ๋ย",
+        "central-lampang": "เซ็นทรัลลำปาง", "atsavin": "อัศวิน", "kad-kong-ta": "กาดกองต้า", "ko-kha": "เกาะคา",
+
+        // --- 8. ลำพูน ---
+        "mueang-lamphun": "ตัวเมืองลำพูน", "nikom-lamphun": "นิคมลำพูน", "wiang-yong": "เวียงยอง",
+        "pa-sang": "ป่าซาง", "mueang-nga": "เหมืองง่า", "ban-klang": "บ้านกลาง",
+
+        // --- 9. พิษณุโลก ---
+        "mueang-phitsanulok": "ตัวเมืองพิษณุโลก", "nu": "รอบ มน.", "rop-nu": "รอบ มน.",
+        "tha-pho": "ท่าโพธิ์", "samo-khae": "สมอแข", "topland": "ท็อปแลนด์", "central-phitsanulok": "เซ็นทรัลพิษณุโลก",
+
+        // --- 10. อุดรธานี ---
+        "mueang-udon": "ตัวเมืองอุดร", "udtown": "UD Town", "ud-town": "UD Town",
+        "nongprajak": "หนองประจักษ์", "nong-prajak": "หนองประจักษ์", "central-udon": "เซ็นทรัลอุดร",
+        "ban-chan": "บ้านจาน", "pho-si": "โพศรี", "thung-si-mueang": "ทุ่งศรีเมือง",
+        "nong-sim": "หนองสิม", "rangsina": "ตลาดรังษิณา", "high-tech": "สี่แยกไฮเทค",
+
+        // --- 11. อยุธยา ---
+        "rojana": "โรจนะ", "mueang-ayutthaya": "ตัวเมืองอยุธยา", "bang-pa-in": "บางปะอิน",
+        "pratu-chai": "ประตูชัย", "sena": "เสนา",
+
+        // --- 12. โคราช (นครราชสีมา) ---
+        "mueang-korat": "ในเมืองโคราช", "central-korat": "เซ็นทรัลโคราช", "themall-korat": "เดอะมอลล์โคราช",
+        "sut": "มทส.", "suranaree": "มทส.", "joho": "จอหอ", "pakchong": "ปากช่อง", "khaoyai": "เขาใหญ่",
+
+        // --- 13. สงขลา-หาดใหญ่ ---
+        "mueang-hatyai": "ตัวเมืองหาดใหญ่", "hat-yai": "ตัวเมืองหาดใหญ่", "kho-hong": "คอหงส์",
+        "psu": "ม.อ.หาดใหญ่", "lee-gardens": "ลีการ์เดนส์", "dannok": "ด่านนอก", "mueang-songkhla": "ตัวเมืองสงขลา",
+
+        // --- 14. สุราษฎร์ธานี / เกาะสมุย ---
+        "mueang-surat": "ตัวเมืองสุราษฎร์", "samui": "เกาะสมุย", "koh-samui": "เกาะสมุย",
+        "chaweng": "เฉวง", "lamai": "ละไม", "bophut": "บ่อผุด", "phangan": "เกาะพะงัน"
+      };
+
+      // 🟢 แปลงค่าโซนเป็นภาษาไทยเสมอ (ถ้าเข้าด้วย /jedyod จะกลายเป็น "เจ็ดยอด" ให้ตรงกับ DB)
+      let rawTargetZone = (urlZone || window.currentZoneSlug || "").trim();
+      let matchedZoneThai = ZONE_SLUG_MAP[rawTargetZone.toLowerCase()] || rawTargetZone;
+      matchedZoneThai = matchedZoneThai.replace(/^(โซน|ย่าน)/, "").trim();
+
+      // 🟢 ดึงค่าค้นหา: ถ้าในช่อง Input ยังว่าง ให้ใช้โซนย่อยภาษาไทยเป็นตัวกรองทันที
+      let searchText = (domCache.searchInput?.value || "").trim();
+      if (!searchText && matchedZoneThai) {
+        searchText = matchedZoneThai;
+      }
+
       const currentCriteria = {
-        text: (domCache.searchInput?.value || "").trim(),
+        text: searchText,
         province: activeProvince,
         avail: domCache.availabilitySelect?.value || "all",
         featured: domCache.featuredSelect?.value === "true",
@@ -2346,20 +2452,24 @@ async function handleUrlRouting(isInitial = false) {
       return;
     }
 
-    // 3. ตรวจสอบหน้ารายจังหวัด
-    const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
+   // 3. ตรวจสอบหน้ารายจังหวัด และ โซนย่อย (เช่น /location/chiangmai/เจ็ดยอด)
+    const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/i);
     if (locationMatch) {
       let locSlug = "";
+      let zoneSlug = "";
       try {
         locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
+        zoneSlug = locationMatch[2] ? decodeURIComponent(locationMatch[2]).trim() : "";
       } catch {
         locSlug = locationMatch[1].toLowerCase().trim();
+        zoneSlug = locationMatch[2] ? locationMatch[2].trim() : "";
       }
       if (locSlug === "chiang_mai") locSlug = "chiangmai";
 
       appState.currentProfileSlug = null;
       window.closeLightboxModal(false);
       window.currentProvinceSlug = locSlug;
+      window.currentZoneSlug = zoneSlug;
       if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
 
       executeFilterAndRender(false);
