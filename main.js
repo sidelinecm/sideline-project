@@ -526,26 +526,20 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  
-  // ค่าเริ่มต้น: รูปการ์ดโปรไฟล์มาตรฐาน 400x560
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = ""; // ไม่ใส่ลายน้ำบนรูปวงกลมสตอรี่
   } else if (mode === 400 || mode === "card") {
     baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
     baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
-  const transform = `${baseTransform}${watermark}`;
+  // 🔒 ถอดลายน้ำเนื้อภาพออก ป้องกันการอ้างสิทธิ์ละเมิดลิขสิทธิ์ถึงหน้าหลัก
+  const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
