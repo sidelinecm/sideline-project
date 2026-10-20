@@ -354,6 +354,26 @@ const { data: sameProvinceProfiles } = await supabase
 relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
   ? sameProvinceProfiles.slice(0, 3)
   : [];
+
+// 🟢 วางโค้ดชุดนี้ต่อท้ายลงไปได้เลยครับ:
+const relatedCardsHtml = relatedProfiles.length > 0 ? `
+  <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
+    <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+      ${relatedProfiles.map(rp => {
+        const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
+        const rpSlug = encodeURIComponent(rp.slug || rp.id);
+        const rpImg = optimizeImg(rp.imagePath || rp.image_url || "", 400);
+        return `
+          <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+            <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+            <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
+          </a>
+        `;
+      }).join("")}
+    </div>
+  </section>
+` : "";
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
@@ -788,14 +808,18 @@ relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
                     </button>
                 </div>
 
-                <!-- Bio Description -->
+               <!-- Bio Description -->
                 <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #334155; font-size: 13px; line-height: 1.7; margin-bottom: 1.25rem;">
                     ${naturalDesc}
                 </div>
 
+                <!-- Related Profiles -->
+                ${relatedCardsHtml}
+
                 <!-- Safety Protocol Box -->
                 <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
                     <h4>🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h4>
+               
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุ:</strong> ผู้ใช้บริการต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
                     <p style="margin: 0;"><strong style="color: #140F22;">✓ รักษาความลับ (Zero-Log):</strong> ข้อมูลการติดต่อปลอดภัยสูงสุด</p>
