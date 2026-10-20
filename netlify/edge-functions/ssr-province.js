@@ -934,10 +934,10 @@ export default async (req, context) => {
     const currentFreshness = getCurrentFreshnessText();
 
     const metaTitle = zoneSlug
-      ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} ฟิวแฟนตรงปก [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
-      : (isNational 
-          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
-          : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ [${currentFreshness}] | ${CONFIG.BRAND_NAME}`);
+  ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} ฟิวแฟนตรงปก [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
+  : (isNational 
+      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
+      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`);
 
     const metaDescription = zoneSlug
       ? `รวมน้องๆ สาวรับงานและไซด์ไลน์โซน${zoneSlug} ในจังหวัด${provinceNameThai} คัดตัวจริงตรงปก 100% สไตล์ฟิวแฟน อัปเดตล่าสุด ${currentFreshness} มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`
@@ -955,6 +955,7 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
+    // 🟢 1. คำนวณวันเวลาอัปเดตล่าสุดเพียงรอบเดียว (ลดความซ้ำซ้อน)
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
       return (t > 0 && t > latest) ? t : latest;
@@ -964,7 +965,7 @@ export default async (req, context) => {
       : new Date().toISOString();
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
 
-    // 🟢 Breadcrumbs รองรับ 3 ชั้น (ภาษาไทยตรงปก)
+    // 🟢 2. Breadcrumbs รองรับ 3 ชั้น (ภาษาไทยตรงปก URL ถูกต้องตามมาตรฐาน)
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
     ];
@@ -985,6 +986,7 @@ export default async (req, context) => {
       }
     }
 
+    // 🟢 3. WebPage Schema (CollectionPage)
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -992,9 +994,7 @@ export default async (req, context) => {
       "description": cleanMetaDesc,
       "url": canonicalUrl,
       "inLanguage": "th-TH",
-      "dateModified": (latestUpdateMillis > 0 && !isNaN(new Date(latestUpdateMillis).getTime())) 
-        ? new Date(latestUpdateMillis).toISOString() 
-        : new Date().toISOString(),
+      "dateModified": latestActualIso,
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       "about": isNational
         ? { "@type": "Country", "name": "ประเทศไทย", "identifier": "TH" }
@@ -1014,6 +1014,7 @@ export default async (req, context) => {
       webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
     }
 
+    // 🟢 4. โครงสร้าง Schema Graph หลัก
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -1057,6 +1058,7 @@ export default async (req, context) => {
       });
     }
 
+    // 🟢 5. ItemList Carousel Schema (จำกัดสูงสุด 12 โปรไฟล์เพื่อความเร็ว)
     if (profilesList.length > 0) {
       const carouselProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
@@ -1077,12 +1079,27 @@ export default async (req, context) => {
       });
     }
 
-    if (seoData.faqs && Array.isArray(seoData.faqs) && seoData.faqs.length > 0) {
+    // 🟢 6. ระบบ Adaptive FAQ (แยกคำถามระหว่าง "หน้าจังหวัด" กับ "หน้าโซนย่อย" ป้องกันเนื้อหาซ้ำ 100%)
+    const activeFaqs = zoneSlug
+      ? [
+          {
+            q: `นัดพบน้องๆ รับงานและไซด์ไลน์โซน${zoneSlug} (${provinceNameThai}) เดินทางสะดวกไหม?`,
+            a: `สะดวกมากครับ น้องๆ พักอาศัยและสแตนด์บายอยู่ในย่าน${zoneSlug} สามารถเดินทางไปดูแลถึงโรงแรม คอนโด หรือที่พักส่วนตัวในพื้นที่ได้อย่างรวดเร็วภายใน 15-30 นาทีครับ`
+          },
+          {
+            q: `การนัดหมายน้องๆ ในย่าน${zoneSlug} จ่ายเงินอย่างไร ปลอดภัยไหม?`,
+            a: `ปลอดภัย 100% ครับ ระบบ FirstModelHub ใช้ระบบนัดเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงค่อยชำระเงินตรงกับน้อง ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณีครับ`
+          }
+        ]
+      : (seoData.faqs || []);
+
+    // 🟢 7. ผูก FAQ เข้าสู่ Schema JSON-LD อย่างสมบูรณ์
+    if (activeFaqs && activeFaqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${canonicalUrl}#faq`,
         "isPartOf": { "@id": `${canonicalUrl}#webpage` },
-        "mainEntity": seoData.faqs.map(f => ({
+        "mainEntity": activeFaqs.map(f => ({
           "@type": "Question",
           "name": sanitizeThaiText(f.q),
           "acceptedAnswer": { "@type": "Answer", "text": sanitizeThaiText(f.a) }
@@ -1095,7 +1112,8 @@ export default async (req, context) => {
     const featuredProfilesList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : profilesList.slice(0, 6);
     const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
 
-    const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
+    // ✅ ต้องส่ง activeFaqs เข้าไป ไม่ใช่ seoData.faqs
+const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug, zoneSlug);
@@ -1208,10 +1226,10 @@ export default async (req, context) => {
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
-    // 🟢 1. คำนวณเงื่อนไข Robots Directives: ถ้าย่านย่อยมีน้องน้อยกว่า 2 คน สั่ง noindex ทันที เพื่อกันโดน Google แบน Doorway Spam
-    const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 2)
-      ? "noindex, follow"
-      : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+    // ✅ ต้องเป็น < 3 (ถ้ามีน้อง 1-2 คนให้ noindex กันโดนแบน Doorway Spam)
+const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 3)
+  ? "noindex, follow"
+  : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
 
     // 🟢 2. เขียนทับ Title, Description และล้าง Keywords เก่า
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);

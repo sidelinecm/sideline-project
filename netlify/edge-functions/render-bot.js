@@ -361,7 +361,12 @@ relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
   ? sameProvinceProfiles.slice(0, 3)
   : [];
 
-// 🟢 วางโค้ดชุดนี้ต่อท้ายลงไปได้เลยครับ:
+// ✅ 1. ประกาศตัวแปรเหล่านี้ก่อน
+const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
+const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
+const provinceHubUrl = `/location/${provinceKey}`;
+
+// ✅ 2. แล้วจึงสร้าง relatedCardsHtml
 const relatedCardsHtml = relatedProfiles.length > 0 ? `
   <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
     <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
@@ -380,10 +385,6 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
     </div>
   </section>
 ` : "";
-    
-    const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
-    const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
-    const provinceHubUrl = `/location/${provinceKey}`;
     
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
