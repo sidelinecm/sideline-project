@@ -1157,15 +1157,16 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
 
     // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
     if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
-      const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
-      const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
-      const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
-      const searchKeyword = domCache.searchInput?.value?.trim();
+     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/);
+const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
+const currentZoneParam = routeMatch && routeMatch[2] ? decodeURIComponent(routeMatch[2]).trim() : (window.currentZoneSlug || "");
+const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
+const zoneLabelText = currentZoneParam ? ` โซน${escapeHTML(currentZoneParam)}` : "";
+const searchKeyword = domCache.searchInput?.value?.trim();
 
-      let sectionTitle = isEN 
-        ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>` 
-        : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}</span>`;
-
+let sectionTitle = isEN 
+  ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>` 
+  : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`;
       if (searchKeyword) {
         sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
       } else if (appState.activePillTag && appState.activePillTag !== "all") {
@@ -2172,8 +2173,8 @@ if (descContent) {
 
     if (relatedMore) {
   const zoneLinkUrl = primaryZone.includes("นิมมาน")
-    ? "/nimman"
-    : `/location/${profile.provinceKey || "chiangmai"}/${encodeURIComponent(primaryZone)}`;
+  ? "/nimman"
+  : `/location/${profile.provinceKey || "chiangmai"}/${primaryZone.replace(/\s+/g, "%20")}`;
 
   relatedMore.innerHTML = `
     <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
@@ -2255,7 +2256,7 @@ if (descContent) {
      if (slug && slug !== "national" && slug !== "all") {
         // 🟢 ถ้าเปิดดูหน้ารายย่านอยู่ ให้รักษา URL ย่านเดิมไว้ ไม่ดีดกลับไปหน้าจังหวัดหลัก
         if (window.currentZoneSlug) {
-          targetUrl = `/location/${slug}/${encodeURIComponent(window.currentZoneSlug)}`;
+          targetUrl = `/location/${slug}/${window.currentZoneSlug}`;
         } else {
           targetUrl = `/location/${slug}`;
         }
