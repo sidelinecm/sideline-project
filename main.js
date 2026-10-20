@@ -1,3 +1,4 @@
+// 🟢 แก้ไขฟังก์ชันด้านบนสุดของ main.js (บรรทัด 1 - 15)
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
@@ -5,12 +6,14 @@ function parseRateToNumber(rate) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  const cleanDigits = str.replace(/\D/g, "");
+  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข ป้องกันกลายเป็น 15001
+  const pricePart = str.split(/[\/\(\s]/)[0];
+  const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 10) return num * 1000;  // กรณีพิมพ์ 1 หรือ 2 ให้เป็น 1,000 หรือ 2,000
-  if (num < 500) return num * 10;   // ✅ กรณีพิมพ์ 150 ให้เป็น 1,500 (ตรงกับ render-bot.js)
- return num;
+  if (num < 10) return num * 1000;
+  if (num < 500) return num * 10;
+  return num;
 }
 window.parseRateToNumber = parseRateToNumber;
 
@@ -2492,7 +2495,56 @@ async function handleUrlRouting(isInitial = false) {
   }
 
  async function initApplication() {
-    // 🟢 ดึง URL ไลน์แอดมินจาก Supabase มาอัปเดต 3 จุดติดต่อแอดมินอัตโนมัติ
+    // ⚡ 1. ตรวจสอบทันทีก่อนทำอย่างอื่น: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่เปิดตรงมาจาก render-bot.js)
+    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+    if (isStandaloneProfile) {
+      hideGlobalLoader();
+      initDockAutoHide();
+      
+      // ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
+      const galleryStrip = document.getElementById('profile-gallery-strip');
+      const mainProfileImg = document.getElementById('main-profile-img');
+      if (galleryStrip && mainProfileImg) {
+        galleryStrip.addEventListener('click', (e) => {
+          const btn = e.target.closest('.thumb-slot');
+          if (!btn) return;
+          if (typeof triggerHaptic === 'function') triggerHaptic('light');
+          const fullSrc = btn.getAttribute('data-full-src');
+          if (fullSrc) {
+            mainProfileImg.style.opacity = '0.3';
+            mainProfileImg.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+              mainProfileImg.src = fullSrc;
+              mainProfileImg.removeAttribute('srcset');
+              mainProfileImg.style.opacity = '1';
+              mainProfileImg.style.transform = 'scale(1)';
+            }, 120);
+
+            galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
+              b.classList.remove('active');
+              b.style.borderColor = 'transparent';
+            });
+            btn.classList.add('active');
+            btn.style.borderColor = '#7C3AED';
+          }
+        });
+      }
+
+      // ดักจับปุ่มแชร์โปรไฟล์ในหน้าเดี่ยว
+      document.body.addEventListener('click', (e) => {
+        const shareBtn = e.target.closest('[data-action="share-profile"]');
+        if (shareBtn) {
+          e.preventDefault();
+          const name = shareBtn.getAttribute('data-profile-name') || 'FirstModelHub';
+          const url = shareBtn.getAttribute('data-profile-url') || window.location.href;
+          window.shareProfile(name, url);
+        }
+      });
+
+      return; // 🛑 จบการทำงานตรงนี้ทันที! ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
+    }
+
+    // 🟢 2. ถ้าเป็นหน้าแรก / หน้ารายจังหวัด ให้ดึงไลน์แอดมินและทำงานต่อตามปกติ (โค้ดเดิมของคุณ):
     getSupabaseClient().then(client => {
       if (!client) return;
       client.from('site_settings').select('value').eq('key', 'admin_line_url').maybeSingle().then(({ data }) => {
