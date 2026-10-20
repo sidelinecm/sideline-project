@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261020_clean`;
+let GLOBAL_PROFILE_VERSION = `v_20261020_01`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -816,12 +816,23 @@ export default async (req, context) => {
         <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;">
             <i class="fab fa-line" style="font-size: 20px;"></i>
             <span>จองคิว${escapeHTML(displayName)}</span>
-            <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px;">จ่ายหน้างาน ไร้มัดจำ</span>
+            <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
         </a>
         <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
             <i class="fas fa-share-alt" style="font-size: 16px;"></i>
         </button>
     </div>
+
+    <!-- 🟢 ลงทะเบียน Service Worker พร้อมส่งเลขเวอร์ชันอัตโนมัติ -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js?v=${GLOBAL_PROFILE_VERSION}').catch(function(err) {
+            console.warn('SW Registration failed: ', err);
+          });
+        });
+      }
+    </script>
 </body>
 </html>`;
 
