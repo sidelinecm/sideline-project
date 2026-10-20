@@ -1256,14 +1256,23 @@ export default async (req, context) => {
       }
     });
 
-    // 🟢 2. สร้างปุ่มลิงก์เฉพาะโซนที่มีน้องจริง พร้อมตัวเลขบอกจำนวนคน
+    // 🟢 สร้างตารางแปลงกลับ (ไทย -> อังกฤษ) อัตโนมัติจาก ZONE_MAP ครบทุกจังหวัดใน 1 บรรทัด
+    const REVERSE_ZONE_MAP = Object.fromEntries(
+      Object.entries(ZONE_MAP).map(([slug, thai]) => [thai, slug])
+    );
+
+    // 🟢 2. สร้างปุ่มลิงก์เฉพาะโซนที่มีน้องจริง พร้อม URL ภาษาอังกฤษอัตโนมัติทุกจังหวัด
     const activeZoneKeys = Object.keys(zoneCountMap);
     const pills = activeZoneKeys.map(z => {
       const cleanZ = escapeHTML(String(z).trim());
       const count = zoneCountMap[z];
+
+      // แปลงเป็น Slug อังกฤษอัตโนมัติ (เช่น "เจ็ดยอด" -> "jedyod", "ป่าตอง" -> "patong", "หลัง มข." -> "kku")
+      const zoneSlugForUrl = REVERSE_ZONE_MAP[cleanZ] || encodeURIComponent(cleanZ);
+
       const href = cleanZ.includes("นิมมาน") 
         ? "/nimman" 
-        : `/location/${provinceSlug}/${encodeURIComponent(cleanZ)}`;
+        : `/location/${provinceSlug}/${zoneSlugForUrl}`;
 
       const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
       const activeStyle = isActiveZone 
