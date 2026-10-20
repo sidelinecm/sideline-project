@@ -340,20 +340,20 @@ export default async (req, context) => {
     // 🟢 2. เช็กชื่อคอลัมน์ใน Supabase ว่าตารางนี้ตั้งชื่อว่า provinceKey หรือ province_key
     const provCol = ("province_key" in profile && profile.province_key) ? "province_key" : "provinceKey";
 
-    // 🟢 3. คำสั่ง SQL Query กรองตรงเฉพาะจังหวัดเดียวกันตั้งแต่ระดับฐานข้อมูล
-    const { data: sameProvinceProfiles } = await supabase
-      .from("profiles")
-      .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
-      .eq("active", true)
-      .neq("id", profile.id)
-      .in(provCol, provVariants)
-      .order("isfeatured", { ascending: false })
-      .limit(6);
+   
 
-    // 🟢 4. ใช้น้องในจังหวัดเดียวกันเท่านั้น ไม่เอาน้องต่างจังหวัดมาปนเด็ดขาด
-    relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
-      ? sameProvinceProfiles.slice(0, 3)
-      : [];
+const { data: sameProvinceProfiles } = await supabase
+  .from("profiles")
+  .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
+  .eq("active", true)
+  .neq("id", profile.id)
+  .in(provCol, provVariants)
+  .order("isfeatured", { ascending: false })
+  .limit(6);
+
+relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
+  ? sameProvinceProfiles.slice(0, 3)
+  : [];
     
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
@@ -457,10 +457,9 @@ export default async (req, context) => {
     // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
     const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
 
-    // 🟢 4. ลิงก์หน้ารวมโซนจริง (ไม่ใช่ ?zone=)
-    const zoneHubUrl = primaryZone.includes("นิมมาน") 
-      ? "/nimman" 
-      : `/location/${provinceKey}/${encodeURIComponent(primaryZone)}`;
+   const zoneHubUrl = primaryZone.includes("นิมมาน") 
+  ? "/nimman" 
+  : `/location/${provinceKey}/${primaryZone.replace(/\s+/g, "%20")}`;
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
