@@ -69,6 +69,16 @@ function getRealTimeAgo(dateInput) {
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
 
+// 🟢 [โค้ดใหม่ที่เพิ่มเข้าไป] ฟังก์ชันคำนวณเดือน-ปีปัจจุบันสำหรับหน้ารายคน
+function getCurrentFreshnessText() {
+  const now = new Date();
+  const thaiMonths = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+  return `${thaiMonths[now.getMonth()]} ${now.getFullYear()}`;
+}
+
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
@@ -140,23 +150,19 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = "";
   } else if (mode === 400 || mode === "card") {
     baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
     baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
-  const transform = `${baseTransform}${watermark}`;
+  // 🔒 ถอดลายน้ำเนื้อภาพออก ป้องกันการอ้างสิทธิ์ละเมิดลิขสิทธิ์ถึงหน้าหลัก
+  const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     // ✅ สกัดเฉพาะโฟลเดอร์และชื่อไฟล์ภาพตัวจริง เช่น images/xxx.png ป้องกันเอาแท็กลายน้ำเดิมมาต่อท้าย
@@ -469,10 +475,10 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-    // 🟢 2. ตั้ง H1 & Page Title ให้ตรงตามความต้องการ (Search Intent 100%)
-    // ตัวอย่าง: น้องบุ๋มบิ๋ม สาวรับงานไซด์ไลน์เชียงใหม่ ตัวเมืองเชียงใหม่ โซนเจ็ดยอด
+    const currentFreshness = getCurrentFreshnessText();
     const profileSeoH1 = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} ${cityContext} โซน${primaryZone}`;
-    const pageTitle = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} ${cityContext} โซน${primaryZone} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+    // 🟢 ใส่เดือน-ปีล่าสุด คนค้นหาเห็นแล้วอยากคลิกเพราะรู้ว่าน้องยังรับงานอยู่ปัจจุบัน
+    const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
     // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
     const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
@@ -827,8 +833,11 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
             </article>
         </main>
         
-        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: #475569; font-size: 12px;">
-          © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ปลอดภัย จ่ายหน้างาน 100%
+       <footer role="contentinfo" style="text-align: center; padding: 2rem 1rem; color: #64748B; font-size: 11.5px; line-height: 1.6;">
+          <p style="margin: 0 0 6px 0;">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ศูนย์รวมเพื่อนเที่ยวฟิวแฟน ปลอดภัย จ่ายหน้างาน 100%</p>
+          <div style="font-size: 10px; color: #94A3B8; max-width: 580px; margin: 8px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px;">
+            <strong>DMCA & Content Disclaimer:</strong> FirstModelHub operates strictly as an interactive computer service and intermediary platform. All profile images, rates, and materials are submitted by independent advertisers. FirstModelHub does not claim ownership of user-uploaded media. For copyright inquiries or takedown requests, contact: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.
+          </div>
         </footer>
     </div>
        

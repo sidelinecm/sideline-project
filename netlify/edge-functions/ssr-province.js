@@ -232,6 +232,17 @@ function getRealTimeAgo(dateInput) {
 
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
+// 🟢 [โค้ดใหม่ที่เพิ่มเข้าไป] ฟังก์ชันคำนวณเดือน-ปีไทยแบบไดนามิก
+function getCurrentFreshnessText() {
+  const now = new Date();
+  const thaiMonths = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+  const month = thaiMonths[now.getMonth()];
+  const year = now.getFullYear(); // ใช้ ค.ศ. (เช่น 2026) ตามพฤติกรรมการค้นหาจริงของผู้ใช้
+  return `${month} ${year}`;
+}
 
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -300,23 +311,19 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
   let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  let watermark = "/co_rgb:ffffff,l_text:Arial_13_bold:FirstModelHub,o_35/fl_layer_apply,g_south_east,x_14,y_14";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-    watermark = "";
   } else if (mode === 400 || mode === "card") {
     baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_16_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_12,y_12";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_20_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_38,x_16,y_16";
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
     baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
-    watermark = "/b_rgb:e11d48,bo_1px_solid_white,r_max,co_rgb:fff0f5,l_text:Arial_24_bold:%20FirstModelHub%20/fl_layer_apply,g_south_east,o_35,x_20,y_20";
   }
 
-  const transform = `${baseTransform}${watermark}`;
+  // 🔒 ไม่ฝังลายน้ำลงเนื้อไฟล์ภาพ เพื่อป้องกันการโดนยิง Fake DMCA ใส่หน้า Page URL
+  const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
@@ -888,14 +895,18 @@ export default async (req, context) => {
       if (zoneSlug) {
         const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
         const matchedZoneProfiles = profilesList.filter(p => {
-          const loc = (p.location || "").toLowerCase();
-          const desc = (p.description || "").toLowerCase();
+          const rawLoc = (p.location || "").toLowerCase();
+          // ตัดเอาจุดปักหมุดหลักแรกสุดของน้อง (แยกด้วยเครื่องหมาย , หรือ / หรือ และ)
+          const primaryLoc = rawLoc.split(/[,/]|และ/)[0].trim();
           const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-          return loc.includes(cleanZoneLower) || desc.includes(cleanZoneLower) || tags.includes(cleanZoneLower);
+          
+          // ต้องตรงกับย่านหลัก หรือมีแท็กโซนนั้นโดยตรงเท่านั้น ป้องกันน้องคนเดิมโผล่ทุกย่าน
+          return primaryLoc.includes(cleanZoneLower) || tags.includes(cleanZoneLower);
         });
 
+        // ถ้าย่านนั้นไม่มีน้องที่เป็นย่านหลัก ให้ดีด 301 กลับหน้าหลักจังหวัดทันที
         if (matchedZoneProfiles.length === 0) {
-          return Response.redirect(`${primaryDomain}/location/${provinceSlug}`, 302);
+          return Response.redirect(`${primaryDomain}/location/${provinceSlug}`, 301);
         }
 
         profilesList = matchedZoneProfiles;
@@ -919,17 +930,22 @@ export default async (req, context) => {
     // รักษาภาษาไทยไว้ แต่แก้เฉพาะเคาะเว้นวรรค (เช่น "หลัง มช." -> "หลัง%20มช.") เพื่อให้ถูกต้องตามมาตรฐาน URL
     const canonicalUrl = rawCanonicalUrl.replace(/\s+/g, "%20");
 
+    // 🟢 ดึงเดือน-ปีปัจจุบันเข้ามาใส่ใน Title & Description อัตโนมัติ
+    const currentFreshness = getCurrentFreshnessText();
+
     const metaTitle = zoneSlug
-      ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+      ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} ฟิวแฟนตรงปก [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
       : (isNational 
-          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-          : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ | ${CONFIG.BRAND_NAME}`);
+          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
+          : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟนตรงปก มีห้อง-นอกสถานที่ [${currentFreshness}] | ${CONFIG.BRAND_NAME}`);
 
     const metaDescription = zoneSlug
-      ? `รวมน้องๆ สาวรับงานและไซด์ไลน์โซน${zoneSlug} ในจังหวัด${provinceNameThai} คัดตัวจริงตรงปก 100% สไตล์ฟิวแฟน มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`
+      ? `รวมน้องๆ สาวรับงานและไซด์ไลน์โซน${zoneSlug} ในจังหวัด${provinceNameThai} คัดตัวจริงตรงปก 100% สไตล์ฟิวแฟน อัปเดตล่าสุด ${currentFreshness} มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`
       : (isNational
-          ? `แหล่งรวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟน คัดตัวจริงตรงปก 100% มีห้องพร้อมและนอกสถานที่ นัดเจอจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ เจอจ่ายจบ ปลอดภัย`
-          : `รวมสาวรับงานและสาวไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ เจอจ่ายจบ`);
+          ? `แหล่งรวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟน คัดตัวจริงตรงปก 100% อัปเดตประจำเดือน ${currentFreshness} นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ เจอจ่ายจบ ปลอดภัย`
+          : `รวมสาวรับงานและสาวไซด์ไลน์${provinceNameThai} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% อัปเดตล่าสุด ${currentFreshness} มีห้องส่วนตัวและนอกสถานที่ นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`);
+
+    
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
@@ -1192,23 +1208,36 @@ export default async (req, context) => {
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
+    // 🟢 1. คำนวณเงื่อนไข Robots Directives: ถ้าย่านย่อยมีน้องน้อยกว่า 2 คน สั่ง noindex ทันที เพื่อกันโดน Google แบน Doorway Spam
+    const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 2)
+      ? "noindex, follow"
+      : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+
+    // 🟢 2. เขียนทับ Title, Description และล้าง Keywords เก่า
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["'][^>]*\/?>/gi, "");
 
+    // 🟢 3. เขียนทับ Meta Robots Tag ให้เปลี่ยนเป็น noindex อัตโนมัติเมื่อเจอย่านที่ไม่มีน้อง
+    finalHtml = finalHtml.replace(/<meta\s+name=["']robots["'][^>]*>/i, `<meta name="robots" content="${robotsDirectives}">`);
+
+    // 🟢 4. เขียนทับ Social Meta (Open Graph & Twitter Cards)
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
+    // 🟢 5. จัดการ Canonical URL และ Open Graph URL
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "");
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*>/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="canonical" id="canonical-link" href="${canonicalUrl}">\n  <meta property="og:url" content="${canonicalUrl}">\n</head>`);
     
+    // 🟢 6. จัดการรูปภาพพรีวิว Social (OG Image & Twitter Image)
     const cleanOgImageBlock = `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n  <meta property="og:image:alt" content="${escapeHTML(CONFIG.BRAND_NAME)} ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน${escapeHTML(provinceNameThai)}">`;
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:alt["'][^>]*>/i, cleanOgImageBlock);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
+    // 🟢 7. จัดการแท็กภาษา Hreflang
     const hreflangBlock = isNational
       ? `<link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />`
       : `<link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />`;
