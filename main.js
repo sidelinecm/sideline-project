@@ -2252,8 +2252,13 @@ if (descContent) {
       let targetTitle = "";
       let targetDesc = "";
 
-      if (slug && slug !== "national" && slug !== "all") {
-        targetUrl = `/location/${slug}`;
+     if (slug && slug !== "national" && slug !== "all") {
+        // 🟢 ถ้าเปิดดูหน้ารายย่านอยู่ ให้รักษา URL ย่านเดิมไว้ ไม่ดีดกลับไปหน้าจังหวัดหลัก
+        if (window.currentZoneSlug) {
+          targetUrl = `/location/${slug}/${encodeURIComponent(window.currentZoneSlug)}`;
+        } else {
+          targetUrl = `/location/${slug}`;
+        }
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
         targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `ไซด์ไลน์${provName} สาวรับงาน${provName} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
