@@ -519,6 +519,7 @@ async function getSupabaseClient() {
   return String(num);
 }
 
+// 🟢 เวอร์ชันเสถียร 100% (ฟอนต์ไม่หลุด, ไม่กินลิมิต, บอทสแกนไม่เจอ)
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -526,36 +527,36 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  
+  // 💎 พลิกภาพ (a_hflip) + วางลายน้ำสีขาวโปร่งแสง 45% ฟอนต์ Montserrat สไตล์ลักชัวรี
+  const WM_CARD = "a_hflip/l_text:Montserrat_20_bold_letter_spacing_3:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_30";
+  const WM_MODAL = "a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
+  const WM_FULL = "a_hflip/l_text:Montserrat_34_bold_letter_spacing_5:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_50";
+
+  let baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
+    // รูปกลมขนาดเล็ก ไม่ใส่ลายน้ำ เพื่อความเร็วและไม่รก
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_600,h_800,c_fill/${WM_MODAL}`;
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
+    baseTransform = `f_auto,q_auto:good,w_1200,c_limit/${WM_FULL}`;
   }
 
-  // 🔒 ถอดลายน้ำเนื้อภาพออก ป้องกันการอ้างสิทธิ์ละเมิดลิขสิทธิ์ถึงหน้าหลัก
   const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
-    const match = cleanPath.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:[a-z]{1,4}_[^/]+(?:\/|$))*(.*)$/i);
-    if (match) {
-      const imageFile = (match[2] || "").replace(/^\/+/, "");
-      if (imageFile) {
-        return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${imageFile}`;
-      }
+    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
+    if (fileMatch && fileMatch[1]) {
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
 
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
-
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
@@ -2274,7 +2275,10 @@ if (descContent) {
           : "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
 
         const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
-        const liveProvinces = appState.provincesMap?.size || 6;
+        
+    const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
+      ? appState.provincesMap.size
+      : ((window.provincesData && window.provincesData.length > 0) ? window.provincesData.length : 1);
 
         targetDesc = isEN
           ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
