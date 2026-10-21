@@ -52,27 +52,46 @@ const safeGetIsoDate = (dateStr, fallbackIso) => {
 
 const getProfileMainImage = (p) => {
   if (!p) return null;
-  if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
-  if (p.image_path && typeof p.image_path === "string" && p.image_path.trim()) return p.image_path.trim();
-  const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
-  if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return String(gallery[0]).trim();
-  if (typeof gallery === "string" && gallery.trim()) return gallery.split(",")[0].trim();
-  if (p.image_url && typeof p.image_url === "string" && p.image_url.trim()) return p.image_url.trim();
-  if (p.imageUrl && typeof p.imageUrl === "string" && p.imageUrl.trim()) return p.imageUrl.trim();
-  return null;
+  let img = p.imagePath || p.image_path || p.image_url || p.imageUrl;
+  if (!img) {
+    const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
+    if (Array.isArray(gallery) && gallery.length > 0) img = gallery[0];
+    else if (typeof gallery === "string" && gallery.trim()) img = gallery.split(",")[0].trim();
+  }
+  if (!img || typeof img !== "string" || img.includes("firstmodelhub.webp")) return null;
+  return img.trim();
 };
 
+// 🟢 แก้ไข: บังคับใส่ลายน้ำและพลิกภาพ (a_hflip) ป้องกันบอท DMCA สแกนรูปจาก Sitemap
 const optimizeImgForXml = (path) => {
   if (!path || typeof path !== "string" || !path.trim()) return null;
   const cleanPath = path.trim();
+  
+  const WM_TRANSFORM = "f_auto,q_auto:good,w_600,h_800,c_fill/a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
+
   if (cleanPath.includes("res.cloudinary.com")) {
-    return cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
-  }
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
+    if (fileMatch && fileMatch[1]) {
+      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${WM_TRANSFORM}/${fileMatch[1]}`;
+    }
     return cleanPath;
   }
-  return `${CONFIG.SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/profile-images/${encodeURIComponent(cleanPath)}`;
+  return cleanPath;
 };
+
+// 🟢 รายชื่อย่านสำคัญหลักที่ต้องดึงเข้า Sitemap
+const TARGET_SUB_ZONES = [
+  { province: "chiangmai", zone: "เจ็ดยอด" },
+  { province: "chiangmai", zone: "สันติธรรม" },
+  { province: "chiangmai", zone: "ช้างเผือก" },
+  { province: "chiangmai", zone: "แม่โจ้" },
+  { province: "chiangmai", zone: "หลัง มช." },
+  { province: "chiangrai", zone: "บ้านดู่" },
+  { province: "khon-kaen", zone: "กังสดาล" },
+  { province: "khon-kaen", zone: "หลัง มข." },
+  { province: "udonthani", zone: "UD Town" },
+  { province: "udonthani", zone: "หนองประจักษ์" }
+];
 
 export default async (request, _context) => {
   const domain = CONFIG.PRIMARY_DOMAIN;
@@ -83,22 +102,35 @@ export default async (request, _context) => {
 
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
-      supabase.from("profiles").select("*").eq("active", true)
+      supabase.from("profiles").select("*").eq("active", true).limit(2000)
     ]);
 
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    // 🟢 สร้าง Map วันที่อัปเดตล่าสุดของแต่ละจังหวัด โดยอิงจากน้องที่อัปเดตล่าสุดในจังหวัดนั้นจริง
+    // 🟢 สร้าง Map วันที่อัปเดตล่าสุดของแต่ละจังหวัด
     const provinceLatestDateMap = new Map();
+    const zoneLatestDateMap = new Map();
+
     profiles.forEach(p => {
       const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+      const pLoc = (p.location || "").toLowerCase();
       const pDateStr = p.lastUpdated || p.last_updated || p.updated_at || p.created_at;
-      if (pKey && pDateStr) {
+      
+      if (pDateStr) {
         const pTime = new Date(pDateStr).getTime();
-        const curLatest = provinceLatestDateMap.get(pKey) || 0;
-        if (!isNaN(pTime) && pTime > curLatest) {
-          provinceLatestDateMap.set(pKey, pTime);
+        if (!isNaN(pTime)) {
+          if (pKey) {
+            const curProv = provinceLatestDateMap.get(pKey) || 0;
+            if (pTime > curProv) provinceLatestDateMap.set(pKey, pTime);
+          }
+          TARGET_SUB_ZONES.forEach(sz => {
+            if (pKey.includes(sz.province) && pLoc.includes(sz.zone.toLowerCase())) {
+              const zoneKey = `${sz.province}_${sz.zone}`;
+              const curZone = zoneLatestDateMap.get(zoneKey) || 0;
+              if (pTime > curZone) zoneLatestDateMap.set(zoneKey, pTime);
+            }
+          });
         }
       }
     });
@@ -107,19 +139,19 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าสถิติหลักและคอนเทนต์สำคัญ (Core & High-Value Landing Pages)
+    // 1. หน้าสถิติหลักและคอนเทนต์สำคัญ (แก้ path: "/" ให้ตรงกับ Canonical)
     const staticPages = [
-      { path: "", priority: "1.0", changefreq: "daily" },
+      { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
       { path: "/locations", priority: "0.9", changefreq: "daily" },
-      { path: "/nimman", priority: "0.9", changefreq: "daily" }, // 🟢 เพิ่มโซนยอดฮิต
-      { path: "/blog", priority: "0.8", changefreq: "weekly" }, // 🟢 เพิ่มสารบัญบทความ
-      { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความฟิวแฟน
-      { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความกันโกง
-      { path: "/blog/vip-etiquette-how-to-book-companion", priority: "0.8", changefreq: "monthly" }, // 🟢 เพิ่มบทความ VIP
+      { path: "/nimman", priority: "0.9", changefreq: "daily" },
+      { path: "/blog", priority: "0.8", changefreq: "weekly" },
+      { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" },
+      { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" },
+      { path: "/blog/vip-etiquette-how-to-book-companion", priority: "0.8", changefreq: "monthly" },
       { path: "/about", priority: "0.5", changefreq: "monthly" },
       { path: "/faq", priority: "0.5", changefreq: "monthly" },
-      { path: "/privacy-policy", priority: "0.3", changefreq: "monthly" } // 🟢 เพิ่มนโยบาย
+      { path: "/privacy-policy", priority: "0.3", changefreq: "monthly" }
     ];
 
     staticPages.forEach(p => {
@@ -131,13 +163,11 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 2. หมวดจังหวัด (Provinces Section) - แก้ไขบั๊กปี 2025 ให้ดึงวันที่อัปเดตล่าสุดของโปรไฟล์ในจังหวัดนั้น
+    // 2. หมวดจังหวัด (Provinces Section)
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
           const cleanKey = String(p.key).trim().toLowerCase();
-          
-          // ตรวจสอบว่าจังหวัดนี้มีน้องคนไหนอัปเดตล่าสุดเมื่อไหร่ ถ้าไม่มีให้ใช้วันนี้ (nowIso)
           let provIsoDate = nowIso;
           const latestTimestamp = provinceLatestDateMap.get(cleanKey);
           if (latestTimestamp && latestTimestamp > 0) {
@@ -154,7 +184,22 @@ export default async (request, _context) => {
       });
     }
 
-    // 3. หมวดโปรไฟล์น้องๆ (Profiles Section with Image Metadata)
+    // 3. 🟢 หมวดหน้ารายย่านทำเงิน (Sub-zones Section) - เพิ่มใหม่เข้าระบบ 100%
+    TARGET_SUB_ZONES.forEach(sz => {
+      const zoneKey = `${sz.province}_${sz.zone}`;
+      const latestTimestamp = zoneLatestDateMap.get(zoneKey);
+      const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
+      const zoneUrl = encodeURI(`${domain}/location/${sz.province}/${sz.zone}`);
+
+      xml += `  <url>\n`;
+      xml += `    <loc>${zoneUrl}</loc>\n`;
+      xml += `    <lastmod>${zoneIsoDate}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.9</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    // 4. หมวดโปรไฟล์น้องๆ (Profiles Section พร้อมรูปภาพลายน้ำกัน DMCA)
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
