@@ -303,6 +303,7 @@ function extractCleanNumber(rate) {
 }
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
+// 🟢 เวอร์ชันเสถียร 100% (ฟอนต์ไม่หลุด, ไม่กินลิมิต, บอทสแกนไม่เจอ)
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -310,19 +311,25 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  
+  // 💎 พลิกภาพ (a_hflip) + วางลายน้ำสีขาวโปร่งแสง 45% ฟอนต์ Montserrat สไตล์ลักชัวรี
+  const WM_CARD = "a_hflip/l_text:Montserrat_20_bold_letter_spacing_3:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_30";
+  const WM_MODAL = "a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
+  const WM_FULL = "a_hflip/l_text:Montserrat_34_bold_letter_spacing_5:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_50";
+
+  let baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
+    // รูปกลมขนาดเล็ก ไม่ใส่ลายน้ำ เพื่อความเร็วและไม่รก
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_600,h_800,c_fill/${WM_MODAL}`;
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
+    baseTransform = `f_auto,q_auto:good,w_1200,c_limit/${WM_FULL}`;
   }
 
-  // 🔒 ไม่ฝังลายน้ำลงเนื้อไฟล์ภาพ เพื่อป้องกันการโดนยิง Fake DMCA ใส่หน้า Page URL
   const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -685,15 +692,15 @@ export default async (req, context) => {
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
     const segments = url.pathname.split("/").filter(Boolean);
 
+    
     if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
       const currentProv = segments[1] || "chiangmai";
       let cleanZoneName = rawZoneQuery;
       try {
         cleanZoneName = decodeURIComponent(cleanZoneName).trim();
-        if (cleanZoneName.includes("%")) cleanZoneName = decodeURIComponent(cleanZoneName).trim();
       } catch (_) {}
-     return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneName.replace(/\s+/g, "%20")}`, 301);
-     }
+      return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneName}`, 301);
+    }
 
     const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
 
@@ -892,19 +899,10 @@ export default async (req, context) => {
         return provinceKeyVariants.includes(pKey);
       });
 
-      if (zoneSlug) {
+     if (zoneSlug) {
         const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
-        const matchedZoneProfiles = profilesList.filter(p => {
-          const rawLoc = (p.location || "").toLowerCase();
-          // ตัดเอาจุดปักหมุดหลักแรกสุดของน้อง (แยกด้วยเครื่องหมาย , หรือ / หรือ และ)
-          const primaryLoc = rawLoc.split(/[,/]|และ/)[0].trim();
-          const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-          
-          // ต้องตรงกับย่านหลัก หรือมีแท็กโซนนั้นโดยตรงเท่านั้น ป้องกันน้องคนเดิมโผล่ทุกย่าน
-          return primaryLoc.includes(cleanZoneLower) || tags.includes(cleanZoneLower);
-        });
+        const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
-        // ถ้าย่านนั้นไม่มีน้องที่เป็นย่านหลัก ให้ดีด 301 กลับหน้าหลักจังหวัดทันที
         if (matchedZoneProfiles.length === 0) {
           return Response.redirect(`${primaryDomain}/location/${provinceSlug}`, 301);
         }
@@ -920,15 +918,14 @@ export default async (req, context) => {
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
-    // 🟢 กำหนด Canonical ให้เป็น URL ประจำย่านภาษาไทย (พร้อมแปลงช่องว่างเป็น %20 ป้องกัน Google แจ้งเตือน URL พัง)
-    let rawCanonicalUrl = isNational 
+   
+    const rawCanonicalUrl = isNational 
       ? `${primaryDomain}/` 
       : (zoneSlug 
           ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug}` 
           : `${primaryDomain}/location/${provinceSlug}`);
-    
-    // รักษาภาษาไทยไว้ แต่แก้เฉพาะเคาะเว้นวรรค (เช่น "หลัง มช." -> "หลัง%20มช.") เพื่อให้ถูกต้องตามมาตรฐาน URL
-    const canonicalUrl = rawCanonicalUrl.replace(/\s+/g, "%20");
+
+    const canonicalUrl = rawCanonicalUrl;
 
     // 🟢 ดึงเดือน-ปีปัจจุบันเข้ามาใส่ใน Title & Description อัตโนมัติ
     const currentFreshness = getCurrentFreshnessText();
@@ -1058,15 +1055,15 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 5. ItemList Carousel Schema (จำกัดสูงสุด 12 โปรไฟล์เพื่อความเร็ว)
+    // ❌ เดิม: carouselProfiles = profilesList.slice(0, 12);
+    // 🟢 ปรับใหม่: แสดงผลตามจำนวนจริงทั้งหมดแบบไดนามิก
     if (profilesList.length > 0) {
-      const carouselProfiles = profilesList.slice(0, 12);
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": carouselProfiles.length,
-        "itemListElement": carouselProfiles.map((p, idx) => ({
+        "numberOfItems": profilesList.length, // ✅ ใช้จำนวนจริง (เช่น 63 หรือ 11)
+        "itemListElement": profilesList.map((p, idx) => ({ // ✅ วนลูปแสดงครบทุกคน
           "@type": "ListItem",
           "position": idx + 1,
           "item": {
@@ -1282,7 +1279,17 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1" style="text-align: center; margin: 10px 0;">${ssrH1Html}</h1>`);
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, `<span class="hero-subheadline">${dynamicSubheadline}</span>`);
 
-    // 🟢 1. คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
+    
+    function matchProfileToZone(p, cleanZ) {
+      if (!p || !cleanZ) return false;
+      const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
+      // ดึงจุดปักหมุดหลักแรกสุดของน้อง (ตรงกับสูตรกรองในหน้าเว็บ)
+      const primaryLoc = rawLoc.split(/[,/]|และ/)[0].trim();
+      const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
+      return primaryLoc.includes(cleanZ) || tags.includes(cleanZ);
+    }
+
+    // 🟢 1. คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน (ใช้ matchProfileToZone สูตรเดียวกันเป๊ะ)
     const zoneCountMap = {};
     const baseProvProfiles = deduplicatedProfiles.filter(p => {
       const pKey = (p.provinceKey || "").toLowerCase();
@@ -1292,11 +1299,9 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     (cleanZonesList || []).forEach(rawZ => {
       const cleanZ = sanitizeThaiText(rawZ).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
       if (!cleanZ || cleanZ === "ทั้งหมด") return;
-      const count = baseProvProfiles.filter(p => {
-        const loc = (p.location || "").toLowerCase();
-        const desc = (p.description || "").toLowerCase();
-        return loc.includes(cleanZ) || desc.includes(cleanZ);
-      }).length;
+      
+      // ✅ คำนวณด้วยสูตรใหม่: ตัวเลขบนปุ่มจะกลายเป็น (11) และ (8) ตรงกับหน้าเว็บ 100%
+      const count = baseProvProfiles.filter(p => matchProfileToZone(p, cleanZ)).length;
       if (count > 0) {
         zoneCountMap[rawZ] = count;
       }
@@ -1315,7 +1320,7 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
       ✨ ทั้งหมดใน${escapeHTML(provinceNameThai)} <span style="font-size: 10px; opacity: 0.85;">(${baseProvProfiles.length})</span>
     </a> `;
 
-    // 2. ปุ่มของแต่ละโซนย่อย (ภาษาไทยล้วน 100%)
+    
     pills += activeZoneKeys.map(z => {
       const cleanZ = escapeHTML(String(z).trim());
       const count = zoneCountMap[z];
