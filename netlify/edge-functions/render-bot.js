@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261020_01`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_01`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -142,6 +142,7 @@ function extractCleanNumber(rate) {
   return num;
 }
 
+// 🟢 เวอร์ชันเสถียร 100% (ฟอนต์ไม่หลุด, ไม่กินลิมิต, บอทสแกนไม่เจอ)
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -149,23 +150,28 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  let baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  
+  // 💎 พลิกภาพ (a_hflip) + วางลายน้ำสีขาวโปร่งแสง 45% ฟอนต์ Montserrat สไตล์ลักชัวรี
+  const WM_CARD = "a_hflip/l_text:Montserrat_20_bold_letter_spacing_3:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_30";
+  const WM_MODAL = "a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
+  const WM_FULL = "a_hflip/l_text:Montserrat_34_bold_letter_spacing_5:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_50";
+
+  let baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
+    // รูปกลมขนาดเล็ก ไม่ใส่ลายน้ำ เพื่อความเร็วและไม่รก
     baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    baseTransform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    baseTransform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+    baseTransform = `f_auto,q_auto:good,w_600,h_800,c_fill/${WM_MODAL}`;
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    baseTransform = "f_auto,q_auto:good,w_1200,c_limit";
+    baseTransform = `f_auto,q_auto:good,w_1200,c_limit/${WM_FULL}`;
   }
 
-  // 🔒 ถอดลายน้ำเนื้อภาพออก ป้องกันการอ้างสิทธิ์ละเมิดลิขสิทธิ์ถึงหน้าหลัก
   const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
-    // ✅ สกัดเฉพาะโฟลเดอร์และชื่อไฟล์ภาพตัวจริง เช่น images/xxx.png ป้องกันเอาแท็กลายน้ำเดิมมาต่อท้าย
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
@@ -173,10 +179,7 @@ function optimizeImg(imagePath, mode = "card") {
     return cleanPath;
   }
 
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
-
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
@@ -435,7 +438,9 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
       ? String(profile.age).replace(/\D/g, "") 
       : null;
     const age = cleanAge || "ไม่ระบุ";
-    const ageDisplay = age !== "ไม่ระบุ" ? `${age} ปี` : "ไม่ระบุ";
+
+    // 🟢 แก้ไขบรรทัดนี้ได้เลยครับ:
+    const ageDisplay = (age && age !== "ไม่ระบุ") ? `${age} ปี` : "";
 
     const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
@@ -484,9 +489,10 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
     // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
     const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
 
-   const zoneHubUrl = primaryZone.includes("นิมมาน") 
+   // ✅ แก้ไขให้เข้ารหัส URL ถูกต้อง
+const zoneHubUrl = primaryZone.includes("นิมมาน") 
   ? "/nimman" 
-  : `/location/${provinceKey}/${primaryZone.replace(/\s+/g, "%20")}`;
+  : encodeURI(`/location/${provinceKey}/${primaryZone}`);
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
