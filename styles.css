@@ -4116,3 +4116,414 @@ img:not([src]) {
     transform: translateY(-3px) scale(1.05) !important;
   }
 }
+
+/* ==========================================================================
+   👑 GOD-TIER LUXURY REDESIGN: PRISMATIC AURORA HERO EDITION (2026)
+   - วางทับบล็อกเดิมได้ทันที ไม่แตะต้องสีพื้นหลังหน้าเว็บ (Body/HTML) 100%
+   - ใส่ลูกเล่นพื้นหลัง Hero สวยจัดเต็ม + ยุบความสูงให้กระชับระดับพรีเมียม
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. VIP LIVE STORIES (วงแหวนไฟหมุน 360° + เรดาร์คลื่นสด)
+   -------------------------------------------------------------------------- */
+.luxury-stories-wrapper {
+  margin: 10px auto 6px auto !important;
+  padding: 0 8px !important;
+}
+
+.luxury-glass-stories-box {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 24px !important;
+  padding: 8px 12px 10px 12px !important;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.08), inset 0 1px 1.5px #FFFFFF !important;
+}
+
+.stories-micro-title {
+  color: #140F22 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.stories-micro-hint {
+  color: #7C3AED !important;
+  font-weight: 700 !important;
+}
+
+/* วงแหวนหมุนเรดาร์แบบไฮเปอร์เทค */
+.story-ring-glow {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  padding: 2.5px !important;
+  background: conic-gradient(from 0deg, #FF1493, #7C3AED, #00E676, #F59E0B, #FF1493) !important;
+  box-shadow: 0 0 14px rgba(225, 29, 72, 0.35) !important;
+  animation: radarSpin 4s linear infinite !important;
+}
+
+@keyframes radarSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.story-ring-glow img {
+  border: 2px solid #FFFFFF !important;
+}
+
+/* จุดเขียวกะพริบสดแบบ Live Beacon */
+.story-status-dot.online {
+  background: #00E676 !important;
+  box-shadow: 0 0 10px #00E676, 0 0 18px #00E676 !important;
+  border: 2px solid #FFFFFF !important;
+  animation: liveRadarPulse 1.5s infinite ease-out !important;
+}
+
+@keyframes liveRadarPulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.8); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+}
+
+.story-label {
+  color: #140F22 !important;
+  font-weight: 800 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. HERO HUD PANEL: พื้นหลังกระจกออโรร่า 4K + ลำแสงเพชรพาดผ่าน (จัดเต็ม)
+   -------------------------------------------------------------------------- */
+.hero-section.celestial-hero-box {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  
+  /* กระจกแก้วคริสตัลโปร่งแสง ผสานแสงนวล */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(250, 246, 255, 0.86) 100%) !important;
+  backdrop-filter: blur(35px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(35px) saturate(190%) !important;
+  
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 26px !important;
+  padding: 14px 14px 16px 14px !important;
+  margin: 6px auto 12px auto !important;
+  
+  /* เงาลอย 3 มิติ (Dual Ambient Shadow) */
+  box-shadow: 
+    0 20px 45px -10px rgba(124, 58, 237, 0.16),
+    0 8px 24px -4px rgba(225, 29, 72, 0.08),
+    inset 0 1.5px 2px #FFFFFF,
+    inset 0 -1.5px 2px rgba(124, 58, 237, 0.06) !important;
+  gap: 8px !important;
+}
+
+/* 🟢 ลูกเล่นพิเศษที่ 1: แสงออโรร่าพริ้วไหวเคลื่อนที่อยู่ภายในตัวกล่อง Hero (Aurora Mesh) */
+.hero-section.celestial-hero-box::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -40% !important;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 20, 147, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 75% 25%, rgba(124, 58, 237, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 10% 80%, rgba(0, 230, 118, 0.14) 0%, transparent 40%) !important;
+  filter: blur(35px) !important;
+  z-index: -2 !important;
+  pointer-events: none !important;
+  animation: auroraMeshFloat 10s ease-in-out infinite alternate !important;
+}
+
+@keyframes auroraMeshFloat {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(5deg) translate(2%, 2%); }
+  100% { transform: scale(0.96) rotate(-4deg) translate(-2%, -2%); }
+}
+
+/* 🟢 ลูกเล่นพิเศษที่ 2: ประกายลำแสงเพชรสะท้อนเฉียงผ่านผิวกระจก (Diamond Light Sweep) */
+.hero-section.celestial-hero-box::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -150% !important;
+  width: 75% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%) !important;
+  transform: skewX(-25deg) !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  animation: diamondLightSweep 7s ease-in-out infinite !important;
+}
+
+@keyframes diamondLightSweep {
+  0%, 35% { left: -150%; }
+  65%, 100% { left: 220%; }
+}
+
+/* --------------------------------------------------------------------------
+   3. ป้าย KISS MODEL✦ HOLOGRAPHIC (แสงไฟนีออนหมุนวน)
+   -------------------------------------------------------------------------- */
+.kiss-master-brand-wrapper {
+  margin: 0 auto 4px auto !important;
+}
+
+.kiss-laser-badge {
+  box-shadow: 0 4px 18px rgba(225, 29, 72, 0.28) !important;
+}
+
+.kiss-laser-inner {
+  background: rgba(18, 12, 30, 0.94) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  padding: 4px 14px !important;
+  gap: 7px !important;
+}
+
+.kiss-txt-main {
+  font-size: 11px !important;
+  letter-spacing: 1.5px !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. TYPOGRAPHY: หัวข้อฟอนต์โลหะสะท้อนแสง (METALLIC CHROME)
+   -------------------------------------------------------------------------- */
+.hero-subheadline {
+  background: rgba(124, 58, 237, 0.08) !important;
+  border: 1px solid rgba(124, 58, 237, 0.22) !important;
+  color: #6D28D9 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  padding: 3px 12px !important;
+  border-radius: 100px !important;
+  margin-bottom: 3px !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06) !important;
+}
+
+.seo-h1-title {
+  margin: 2px 0 !important;
+  gap: 2px !important;
+}
+
+.seo-h1-title .h1-line-1 {
+  font-size: clamp(18px, 5.2vw, 24px) !important;
+  font-weight: 900 !important;
+  color: #0F0B1A !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.3px !important;
+}
+
+.seo-h1-title .h1-line-2 {
+  font-size: clamp(15px, 4.2vw, 20px) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(110deg, #FF1493 0%, #E11D48 35%, #7C3AED 70%, #FF1493 100%) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: liquidChromeSweep 4.5s linear infinite !important;
+  filter: drop-shadow(0 2px 10px rgba(225, 29, 72, 0.35)) !important;
+  line-height: 1.28 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. กล่องคำอธิบาย: ปรับเป็น FROSTED PRIVACY TICKER (กะทัดรัด คลีน ไม่รกตา)
+   -------------------------------------------------------------------------- */
+.hero-description-inset {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(124, 58, 237, 0.16) !important;
+  border-left: 3.5px solid #FF1493 !important;
+  border-radius: 16px !important;
+  padding: 8px 14px !important;
+  margin: 4px auto !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+  max-width: 95% !important;
+}
+
+.hero-subtitle-p {
+  font-size: 11.5px !important;
+  line-height: 1.6 !important;
+  color: #334155 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important; /* ย่อเหลือ 2 บรรทัดคมๆ (Google ยังเก็บ SEO ครบ) */
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.hero-subtitle-p strong {
+  color: #0F0B1A !important;
+  font-weight: 900 !important;
+}
+
+/* ซ่อนกล่องมัดจำซ้ำซ้อนภายในตัวอธิบาย */
+.hero-description-inset > div[style*="background: rgba(255,255,255,0.9)"] {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. METRIC STRIP: จัดเรียงชิปคู่แนวนอน (DUAL-CHIP DASHBOARD)
+   -------------------------------------------------------------------------- */
+.hero-metric-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 6px !important;
+  width: 100% !important;
+}
+
+/* ชิปความปลอดภัย (มรกตนวลตา) */
+.metric-pill.pill-safety {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%) !important;
+  border: 1.5px solid #34D399 !important;
+  border-radius: 100px !important;
+  padding: 5px 12px !important;
+  font-size: 11px !important;
+  color: #065F46 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.16), inset 0 1px 1px #FFFFFF !important;
+  gap: 6px !important;
+}
+
+.metric-pill.pill-safety strong {
+  background: #DCFCE7 !important;
+  color: #047857 !important;
+  padding: 1.5px 7px !important;
+  border-radius: 100px !important;
+  border: 1px solid #A7F3D0 !important;
+  font-size: 10.5px !important;
+}
+
+.metric-pill.pill-safety .icon-emerald,
+.metric-pill.pill-safety i {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 9px !important;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* ชิปสถิติสด (กระจกแก้วลาเวนเดอร์) */
+.metric-pill.pill-stats {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.25) !important;
+  border-radius: 100px !important;
+  padding: 5px 14px !important;
+  font-size: 11px !important;
+  color: #475569 !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.1), inset 0 1px 1px #FFFFFF !important;
+  gap: 7px !important;
+}
+
+.metric-pill.pill-stats .live-dot {
+  width: 6.5px !important;
+  height: 6.5px !important;
+  background-color: #00E676 !important;
+  box-shadow: 0 0 8px #00E676 !important;
+}
+
+.metric-pill.pill-stats #live-profile-count {
+  color: #7C3AED !important;
+  font-size: 12.5px !important;
+}
+
+.metric-pill.pill-stats #live-province-count {
+  color: #E11D48 !important;
+  font-size: 12px !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. HOT SECTION & VIP CARDS (มิติ 3D เงานุ่ม ไม่ทื่อ)
+   -------------------------------------------------------------------------- */
+.hot-swiper-section {
+  margin: 14px auto 10px auto !important;
+}
+
+.hot-header-bar-classic {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(225, 29, 72, 0.25) !important;
+  border-radius: 16px !important;
+  padding: 7px 12px !important;
+  box-shadow: 0 4px 18px rgba(225, 29, 72, 0.08) !important;
+}
+
+.hot-main-title {
+  color: #0F0B1A !important;
+}
+
+/* การ์ด VIP Swiper สไตล์แผ่นคริสตัล */
+.vip-card-item {
+  border-radius: 20px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 16px 35px -8px rgba(225, 29, 72, 0.18), 0 8px 18px -4px rgba(124, 58, 237, 0.12) !important;
+}
+
+.vip-card-item:hover, .vip-card-item:active {
+  transform: translateY(-5px) scale(1.02) !important;
+  border-color: #FF1493 !important;
+  box-shadow: 0 22px 45px -8px rgba(225, 29, 72, 0.28), 0 10px 22px -4px rgba(124, 58, 237, 0.16) !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. QUICK FILTER CHIPS (ปุ่มแคปซูลนีออนแตะมันส์มือ)
+   -------------------------------------------------------------------------- */
+.filter-pills-scroll-row {
+  margin: 8px 0 12px 0 !important;
+  padding: 4px 4px 10px 4px !important;
+}
+
+.filter-pill-tab {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
+  color: #332B45 !important;
+  font-weight: 800 !important;
+  padding: 7px 16px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+}
+
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 50%, #7C3AED 100%) !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+  transform: scale(1.04) !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. DYNAMIC ISLAND FLOATING DOCK (เมนูล่างลอยแบบกระจก Apple Vision)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .floating-app-dock {
+    height: 60px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(30px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    border-radius: 100px !important;
+    box-shadow: 0 14px 40px rgba(225, 29, 72, 0.14), 0 4px 14px rgba(124, 58, 237, 0.08) !important;
+    padding: 0 8px !important;
+  }
+
+  .dock-item {
+    color: #64748B !important;
+  }
+
+  .dock-item.active {
+    color: #E11D48 !important;
+  }
+
+  /* ปุ่มจองคิว LINE สีเขียวสดใสพร้อมเงาออร่า */
+  nav.floating-app-dock a.dock-item.dock-item-line {
+    background: linear-gradient(135deg, #057A38 0%, #06C755 100%) !important;
+    box-shadow: 0 4px 16px rgba(6, 199, 85, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    border: none !important;
+    height: 44px !important;
+  }
+
+  nav.floating-app-dock a.dock-item.dock-item-line span,
+  nav.floating-app-dock a.dock-item.dock-item-line i {
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
+  }
+}
