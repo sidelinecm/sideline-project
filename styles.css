@@ -4527,3 +4527,103 @@ img:not([src]) {
     font-weight: 900 !important;
   }
 }
+/* การ์ดเลือกจังหวัดยอดนิยมบนหน้าแรก */
+.city-hub-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.city-hub-card:hover {
+  transform: translateY(-2px);
+  border-color: #7C3AED !important;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.12) !important;
+}
+@media (max-width: 600px) {
+  .national-city-hubs-section div[style*="grid-template-columns"] {
+    grid-template-columns: repeat(2, 1fr) !important; /* จัด 2 คอลัมน์บนจอมือถือ พอดีนิ้วสัมผัส */
+  }
+}
+
+/* ==========================================================================
+   ✨ LUXURY ZONE PILLS (แก้ปัญหาปุ่มบวมกลม ตกบรรทัด ให้เป็นแคปซูลหรู)
+   ========================================================================== */
+#quick-filter-pills {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 8px 4px 14px 4px !important;
+  margin: 10px 0 14px 0 !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#quick-filter-pills::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* ล็อกทรงปุ่มโซนทุกปุ่ม: ห้ามบีบ ห้ามตกบรรทัด เป็นทรงแคปซูลพอดีนิ้ว */
+#quick-filter-pills a,
+#quick-filter-pills button,
+.filter-pill-tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;              /* 👈 สำคัญที่สุด: ห้ามโดนบีบเป็นวงกลม */
+  white-space: nowrap !important;        /* 👈 สำคัญที่สุด: ห้ามตัวหนังสือตัดขึ้นบรรทัดใหม่ */
+  height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 100px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  letter-spacing: -0.2px !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06), inset 0 1px 1px #FFFFFF !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ปุ่มโซนปกติที่ยังไม่ได้กด (กระจกขาว ขอบม่วงพาสเทล) */
+#quick-filter-pills a:not(.active),
+#quick-filter-pills button:not(.active) {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.2) !important;
+  color: #1E152A !important;
+}
+
+/* ปุ่มโซนที่ถูกเลือกอยู่ หรือ ปุ่ม 'ทั้งหมด' (สีม่วงประกายออร่า) */
+#quick-filter-pills a.active,
+#quick-filter-pills button.active {
+  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.38) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+}
+
+/* ตัวเลขจำนวนคนในปุ่ม เช่น (17), (11) ให้เป็นเม็ดคริสตัลเด่นชัด */
+.pill-count-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  padding: 1.5px 6.5px !important;
+  border-radius: 100px !important;
+  margin-left: 5px !important;
+  line-height: 1 !important;
+}
+
+/* ป้ายตัวเลขบนปุ่มสีขาว */
+#quick-filter-pills a:not(.active) .pill-count-badge,
+#quick-filter-pills button:not(.active) .pill-count-badge {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7C3AED !important;
+  border: 0.5px solid rgba(124, 58, 237, 0.2) !important;
+}
+
+/* ป้ายตัวเลขบนปุ่ม Active */
+#quick-filter-pills a.active .pill-count-badge,
+#quick-filter-pills button.active .pill-count-badge {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+}

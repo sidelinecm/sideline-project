@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="FirstModelHub">
 
-  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดตล่าสุด] | FirstModelHub</title>
+   <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดตล่าสุด] | FirstModelHub</title>
   <meta name="description" content="รวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟนทั่วไทย คัดโปรไฟล์ตัวจริงตรงปก 100% มีห้องพร้อมรับและนอกสถานที่ คุยตรงไม่ผ่านนายหน้า ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
@@ -31,6 +31,7 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FirstModelHub ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟนทั่วไทย">
+  
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub">
@@ -39,7 +40,7 @@
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=5">
+  <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp?v=4">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
@@ -51,8 +52,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
   <!-- 🟢 ปรับแก้ให้เป็นเลขเวอร์ชันเดียวกันทั้งหมด -->
-<link rel="stylesheet" href="/styles.css?v=v_20261022_03">
-<link rel="modulepreload" href="/main.js?v=v_20261022_03">
+<link rel="stylesheet" href="/styles.css?v=v_20261022_04">
+<link rel="modulepreload" href="/main.js?v=v_20261022_04">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -226,9 +227,13 @@
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
     </section>
 
-    <!-- Quick Filter Pills -->
+    <!-- Quick Filter Pills สไตล์ Aggregator (รวมปุ่มจังหวัด + แท็กสไตล์ ในแถวเลื่อนเดียว) -->
     <div class="filter-pills-scroll-row" id="quick-filter-pills">
-      <button class="filter-pill-tab active" type="button" data-tag="all">✨ น้องๆทั้งหมด</button>
+      <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั่วประเทศ</button>
+      <a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;">📍 เชียงใหม่</a>
+      <a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;">📍 ขอนแก่น</a>
+      <a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;">📍 ภูเก็ต</a>
+      <a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;">📍 อุดรธานี</a>
       <button class="filter-pill-tab tag-fiwfan" type="button" data-tag="ฟิวแฟน">💖 สไตล์ฟิวแฟน</button>
       <button class="filter-pill-tab tag-verified" type="button" data-tag="ตรงปก">💎 การันตีตรงปก</button>
       <button class="filter-pill-tab tag-cute" type="button" data-tag="ตัวเล็ก">🎀 สวยตัวเล็ก</button>
@@ -605,13 +610,35 @@
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
   <!-- 🟢 แก้ไข Asset Version ด้านล่างให้ตรงกับ <head> ป้องกัน Network Cache ทับซ้อน -->
- <script type="module" src="/main.js?v=v_20261022_03"></script>
+ <script type="module" src="/main.js?v=v_20261022_04"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js?v=v_20261020_01').catch(function(err) {
-        console.warn('SW Registration failed: ', err);
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          // สั่งอัปเดต Service Worker ทันที ไม่ให้เกิดอาการสแตก
+          registration.update();
+        }
       });
+
+      // ลงทะเบียน Service Worker พร้อมเลขเวอร์ชันใหม่ล่าสุด
+      navigator.serviceWorker.register('/sw.js?v=v_20261023_01')
+        .then(function(reg) {
+          reg.onupdatefound = function() {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = function() {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // ถ้าตรวจพบเวอร์ชันใหม่ ให้เคลียร์แคชและรีเฟรชหน้าเว็บอัตโนมัติ
+                  window.location.reload();
+                }
+              };
+            }
+          };
+        })
+        .catch(function(err) {
+          console.warn('SW Error bypassed:', err);
+        });
     });
   }
 </script>

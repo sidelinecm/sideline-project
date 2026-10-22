@@ -1329,45 +1329,49 @@ let sectionTitle = isEN
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
 
-    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (แสดงแยกตามจังหวัด)
+    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (คัดเฉพาะน้องๆ สาย #ฟิวแฟน 40 คน)
     } else {
-      const groupedByProvince = profiles.reduce((acc, p) => {
-        const k = p.provinceKey || "no_province";
-        acc[k] = acc[k] || [];
-        acc[k].push(p);
-        return acc;
-      }, {});
-
-      const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
-        const nameA = String(appState.provincesMap.get(a) || a || "");
-        const nameB = String(appState.provincesMap.get(b) || b || "");
-        return nameA.localeCompare(nameB, "th");
+      let fiwfanProfiles = profiles.filter(p => {
+        const rawTags = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
+        const hasTag = rawTags.some(t => {
+          const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
+          return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
+        });
+        if (hasTag) return true;
+        const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
+        return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
       });
 
-      if (sortedProvinceKeys.length > 0) {
-        domCache.profilesDisplayArea.innerHTML = "";
-        for (const pKey of sortedProvinceKeys) {
-          if (appState.renderId !== activeRenderId) return;
-          const provName = isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : (appState.provincesMap.get(pKey) || pKey);
-          const sectionEl = createProvinceSectionDOM(pKey, provName, groupedByProvince[pKey]);
-          domCache.profilesDisplayArea.appendChild(sectionEl);
-          const gridEl = sectionEl.querySelector(".profile-grid");
-          await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
-        }
-      } else {
-        domCache.profilesDisplayArea.innerHTML = "";
-        if (domCache.noResultsMessage) {
-          domCache.noResultsMessage.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-              <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
-              <p style="font-size: 14px; font-weight: 700; color: #140F22; margin: 0 0 6px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
-              <p style="font-size: 12px; color: #64748B; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
-            </div>
-          `;
-          domCache.noResultsMessage.classList.remove("hidden");
-          domCache.noResultsMessage.style.display = "block";
-        }
+      if (fiwfanProfiles.length < 40) {
+        const others = profiles.filter(p => !fiwfanProfiles.some(f => f.id === p.id));
+        fiwfanProfiles = [...fiwfanProfiles, ...others];
       }
+
+      // แสดงผล 40 คน
+      const feedProfiles = fiwfanProfiles.slice(0, 40);
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "section-content-wrapper";
+      wrapper.style.cssText = "margin-top: 16px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
+      wrapper.innerHTML = `
+        <div class="province-header-row">
+            <h2 class="province-clean-title">
+                <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
+                <span class="province-prefix">สาวรับงาน & ไซด์ไลน์</span>
+                <span class="province-name-highlight">สไตล์ฟิวแฟน ยอดนิยมทั่วไทย</span>
+            </h2>
+            <span class="province-count-pill">
+                <span class="pulse-dot-el"></span>
+                <span>#ฟิวแฟนแท้ (${feedProfiles.length} คน)</span>
+            </span>
+        </div>
+        <div class="profile-grid profiles-grid-row"></div>
+      `;
+
+      domCache.profilesDisplayArea.innerHTML = "";
+      domCache.profilesDisplayArea.appendChild(wrapper);
+      const gridContainer = wrapper.querySelector(".profile-grid");
+      await renderProfilesBatch(gridContainer, feedProfiles, activeRenderId);
     }
   }
 
@@ -2878,14 +2882,18 @@ async function handleUrlRouting(isInitial = false) {
       });
     }
 
+    // 🟢 ตัวดักคลิก Quick Filter Pills (ชั้นเดียว ปล่อยให้แท็ก <a> เปลี่ยนหน้าได้ตามปกติ)
     document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       pill.addEventListener("click", function (e) {
+        // 1. ถ้าเป็นแท็ก <a> ที่มีลิงก์ปลายทาง (เช่น ปุ่มจังหวัด) ให้เบราว์เซอร์เปลี่ยนหน้าตามปกติ ไม่ต้องสกัด
+        if (this.tagName === "A" && this.getAttribute("href")) return;
+
+        // 2. ถ้าเป็นปุ่มแท็กทั่วไป (<button>) ให้กรองแบบไม่ต้องรีโหลดหน้า
         e.preventDefault();
-        triggerHaptic("light"); // 👈 เติมบรรทัดนี้: สั่นคลิกเบาๆ 12ms
+        triggerHaptic("light");
         document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
         this.classList.add("active");
- 
-        
+
         const selectedTag = this.getAttribute("data-tag") || "all";
         appState.activePillTag = selectedTag;
         executeFilterAndRender(true);
@@ -2894,16 +2902,17 @@ async function handleUrlRouting(isInitial = false) {
 
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
-    // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
-    const shareBtn = e.target.closest('[data-action="share-profile"]');
-    if (shareBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
-      const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
-      window.shareProfile(name, url);
-      return;
-    }
+      // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
+      const shareBtn = e.target.closest('[data-action="share-profile"]');
+      if (shareBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
+        const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
+        window.shareProfile(name, url);
+        return;
+      }
+
       const searchInputEl = document.getElementById("search-keyword");
       const suggestionsEl = document.getElementById("search-suggestions");
       if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
