@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_01`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_02`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -482,7 +482,7 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
     const currentFreshness = getCurrentFreshnessText();
-    const profileSeoH1 = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} ${cityContext} โซน${primaryZone}`;
+    const profileSeoH1 = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100%`;
     // 🟢 ใส่เดือน-ปีล่าสุด คนค้นหาเห็นแล้วอยากคลิกเพราะรู้ว่าน้องยังรับงานอยู่ปัจจุบัน
     const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
@@ -506,12 +506,16 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
 
     const profileFaqs = [
       {
-        q: `นัดพบ${displayName} ในโซน${primaryZone} (${cleanProvince}) มีห้องหรือต้องเดินทางอย่างไร?`,
-        a: `${displayName} สแตนด์บายอยู่ในโซน${primaryZone} มีห้องพักส่วนตัวที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมที่พักใน${cityContext} ได้อย่างสะดวกรวดเร็วภายใน 15-30 นาทีค่ะ`
+        q: `นัดพบ${displayName} ในโซน${primaryZone} (${cleanProvince}) มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`,
+        a: `${displayName} มีห้องพักส่วนตัวย่าน${primaryZone} ที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวในพื้นที่ได้อย่างรวดเร็วภายใน 15-30 นาทีค่ะ`
       },
       {
-        q: `อัตราค่าบริการและการชำระเงินของ${displayName} เป็นอย่างไร?`,
-        a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} ต่อ 1 ชม. สำหรับการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ มั่นใจได้ 100% ด้วยนโยบายนัดพบเจอตัวจริง ตรวจสอบความถูกต้องตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีค่ะ`
+        q: `อัตราค่าบริการและการชำระเงินของ${displayName} จ่ายอย่างไร ต้องโอนมัดจำไหม?`,
+        a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} (1 ชม.) สำหรับงานฟิวแฟน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ นัดเจอตัวจริงหน้างาน เช็คความตรงปกเรียบร้อยแล้วจึงค่อยชำระเงินโดยตรงกับน้องค่ะ`
+      },
+      {
+        q: `หากเจอตัวจริงแล้ว${displayName}ไม่ตรงปก สามารถยกเลิกได้ไหม?`,
+        a: `สามารถปฏิเสธและยกเลิกได้ทันทีหน้างานโดยไม่มีค่าใช้จ่ายค่ะ FirstModelHub การันตีโปรไฟล์ตัวจริงตรงปก 100% เพื่อความสบายใจสูงสุดของผู้ใช้บริการค่ะ`
       }
     ];
 
