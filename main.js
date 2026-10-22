@@ -2311,9 +2311,7 @@ if (descContent) {
     }
 
     if (relatedMore) {
-  const zoneLinkUrl = primaryZone.includes("นิมมาน")
-  ? "/nimman"
-  : `/location/${profile.provinceKey || "chiangmai"}/${primaryZone.replace(/\s+/g, "%20")}`;
+ const zoneLinkUrl = primaryZone.includes("นิมมาน") ? "/nimman" : `/location/${profile.provinceKey || "chiangmai"}/${primaryZone}`;
 
   relatedMore.innerHTML = `
     <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">

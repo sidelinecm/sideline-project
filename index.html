@@ -52,8 +52,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
   <!-- 🟢 ปรับแก้ให้เป็นเลขเวอร์ชันเดียวกันทั้งหมด -->
-<link rel="stylesheet" href="/styles.css?v=v_20261022_04">
-<link rel="modulepreload" href="/main.js?v=v_20261022_04">
+<link rel="stylesheet" href="/styles.css?v=v_20261022_05">
+<link rel="modulepreload" href="/main.js?v=v_20261022_05">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -610,27 +610,33 @@
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
   <!-- 🟢 แก้ไข Asset Version ด้านล่างให้ตรงกับ <head> ป้องกัน Network Cache ทับซ้อน -->
- <script type="module" src="/main.js?v=v_20261022_04"></script>
+ <script type="module" src="/main.js?v=v_20261022_05"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
+      // 🟢 กำหนดเลขเวอร์ชันตรงนี้จุดเดียว
+      const CURRENT_SW_VER = 'v_20261022_05';
+
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
-          // สั่งอัปเดต Service Worker ทันที ไม่ให้เกิดอาการสแตก
           registration.update();
         }
       });
 
-      // ลงทะเบียน Service Worker พร้อมเลขเวอร์ชันใหม่ล่าสุด
-      navigator.serviceWorker.register('/sw.js?v=v_20261023_01')
+      // ลงทะเบียน Service Worker พร้อมเวอร์ชัน
+      navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
             const installingWorker = reg.installing;
             if (installingWorker) {
               installingWorker.onstatechange = function() {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // ถ้าตรวจพบเวอร์ชันใหม่ ให้เคลียร์แคชและรีเฟรชหน้าเว็บอัตโนมัติ
-                  window.location.reload();
+                  // 🟢 ผูกชื่อคีย์เข้ากับเวอร์ชันปัจจุบัน: จะรีโหลดแค่ 1 ครั้งต่อเวอร์ชันใหม่ ไม่ติดลูป และไม่อั้นเวอร์ชันถัดไป
+                  const sessionKey = 'sw_reloaded_' + CURRENT_SW_VER;
+                  if (!sessionStorage.getItem(sessionKey)) {
+                    sessionStorage.setItem(sessionKey, '1');
+                    window.location.reload();
+                  }
                 }
               };
             }
