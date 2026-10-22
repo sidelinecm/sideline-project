@@ -62,7 +62,7 @@ const getProfileMainImage = (p) => {
   return img.trim();
 };
 
-// 🟢 แก้ไข: บังคับใส่ลายน้ำและพลิกภาพ (a_hflip) ป้องกันบอท DMCA สแกนรูปจาก Sitemap
+
 const optimizeImgForXml = (path) => {
   if (!path || typeof path !== "string" || !path.trim()) return null;
   const cleanPath = path.trim();
@@ -79,18 +79,154 @@ const optimizeImgForXml = (path) => {
   return cleanPath;
 };
 
-// 🟢 รายชื่อย่านสำคัญหลักที่ต้องดึงเข้า Sitemap
+
 const TARGET_SUB_ZONES = [
+  
   { province: "chiangmai", zone: "เจ็ดยอด" },
   { province: "chiangmai", zone: "สันติธรรม" },
   { province: "chiangmai", zone: "ช้างเผือก" },
   { province: "chiangmai", zone: "แม่โจ้" },
   { province: "chiangmai", zone: "หลัง มช." },
-  { province: "chiangrai", zone: "บ้านดู่" },
+  { province: "chiangmai", zone: "หน้า มช." },
+  { province: "chiangmai", zone: "สันทราย" },
+  { province: "chiangmai", zone: "หางดง" },
+  { province: "chiangmai", zone: "แม่ริม" },
+  { province: "chiangmai", zone: "คูเมือง" },
+  { province: "chiangmai", zone: "ท่าแพ" },
+  { province: "chiangmai", zone: "ห้วยแก้ว" },
+  { province: "chiangmai", zone: "รวมโชค" },
+  { province: "chiangmai", zone: "พายัพ" },
+  { province: "chiangmai", zone: "เซ็นทรัลเฟส" },
+  { province: "chiangmai", zone: "สนามบินเชียงใหม่" },
+
+  
+  { province: "bangkok", zone: "สุขุมวิท" },
+  { province: "bangkok", zone: "รัชดา" },
+  { province: "bangkok", zone: "ห้วยขวาง" },
+  { province: "bangkok", zone: "ลาดพร้าว" },
+  { province: "bangkok", zone: "ทองหล่อ" },
+  { province: "bangkok", zone: "เอกมัย" },
+  { province: "bangkok", zone: "สาทร" },
+  { province: "bangkok", zone: "สีลม" },
+  { province: "bangkok", zone: "บางนา" },
+  { province: "bangkok", zone: "รามอินทรา" },
+  { province: "bangkok", zone: "พระราม 9" },
+  { province: "bangkok", zone: "อารีย์" },
+
+  
+  { province: "chonburi", zone: "พัทยา" },
+  { province: "chonburi", zone: "พัทยากลาง" },
+  { province: "chonburi", zone: "พัทยาใต้" },
+  { province: "chonburi", zone: "หาดจอมเทียน" },
+  { province: "chonburi", zone: "บางแสน" },
+  { province: "chonburi", zone: "ศรีราชา" },
+  { province: "chonburi", zone: "ตัวเมืองชลบุรี" },
+  { province: "chonburi", zone: "อมตะนคร" },
+  { province: "chonburi", zone: "แหลมฉบัง" },
+  { province: "chonburi", zone: "บ่อวิน" },
+
+  
+  { province: "phuket", zone: "ป่าตอง" },
+  { province: "phuket", zone: "ตัวเมืองภูเก็ต" },
+  { province: "phuket", zone: "กะทู้" },
+  { province: "phuket", zone: "ฉลอง" },
+  { province: "phuket", zone: "กะรน" },
+  { province: "phuket", zone: "กะตะ" },
+  { province: "phuket", zone: "บางเทา" },
+  { province: "phuket", zone: "ราไวย์" },
+  { province: "phuket", zone: "เชิงทะเล" },
+  { province: "phuket", zone: "กมลา" },
+  { province: "phuket", zone: "สนามบินภูเก็ต" },
+
+  
   { province: "khon-kaen", zone: "กังสดาล" },
   { province: "khon-kaen", zone: "หลัง มข." },
+  { province: "khon-kaen", zone: "หน้า มข." },
+  { province: "khon-kaen", zone: "โนนม่วง" },
+  { province: "khon-kaen", zone: "เซ็นทรัลขอนแก่น" },
+  { province: "khon-kaen", zone: "บึงแก่นนคร" },
+  { province: "khon-kaen", zone: "ในตัวเมืองขอนแก่น" },
+  { province: "khon-kaen", zone: "ม.ภาค" },
+  { province: "khon-kaen", zone: "ถนนมิตรภาพ" },
+  { province: "khon-kaen", zone: "ศิลา" },
+
+  
+  { province: "chiangrai", zone: "บ้านดู่" },
+  { province: "chiangrai", zone: "หน้า มฟล." },
+  { province: "chiangrai", zone: "ตัวเมืองเชียงราย" },
+  { province: "chiangrai", zone: "หอนาฬิกา" },
+  { province: "chiangrai", zone: "ไนท์บาซาร์" },
+  { province: "chiangrai", zone: "เด่นห้า" },
+  { province: "chiangrai", zone: "รอบเวียง" },
+  { province: "chiangrai", zone: "ริมกก" },
+  { province: "chiangrai", zone: "แม่สาย" },
+
+  
   { province: "udonthani", zone: "UD Town" },
-  { province: "udonthani", zone: "หนองประจักษ์" }
+  { province: "udonthani", zone: "หนองประจักษ์" },
+  { province: "udonthani", zone: "เซ็นทรัลอุดร" },
+  { province: "udonthani", zone: "ตัวเมืองอุดร" },
+  { province: "udonthani", zone: "บ้านจาน" },
+  { province: "udonthani", zone: "โพศรี" },
+  { province: "udonthani", zone: "ทุ่งศรีเมือง" },
+  { province: "udonthani", zone: "ตลาดรังษิณา" },
+  { province: "udonthani", zone: "สี่แยกไฮเทค" },
+
+  
+  { province: "lampang", zone: "ตัวเมืองลำปาง" },
+  { province: "lampang", zone: "สวนดอก" },
+  { province: "lampang", zone: "ม.ราชภัฏลำปาง" },
+  { province: "lampang", zone: "สบตุ๋ย" },
+  { province: "lampang", zone: "เซ็นทรัลลำปาง" },
+  { province: "lampang", zone: "รอบเวียง" },
+  { province: "lampang", zone: "กาดกองต้า" },
+  { province: "lampang", zone: "เกาะคา" },
+
+  
+  { province: "lamphun", zone: "ตัวเมืองลำพูน" },
+  { province: "lamphun", zone: "นิคมลำพูน" },
+  { province: "lamphun", zone: "เวียงยอง" },
+  { province: "lamphun", zone: "ป่าซาง" },
+  { province: "lamphun", zone: "เหมืองง่า" },
+
+  
+  { province: "phitsanulok", zone: "ตัวเมืองพิษณุโลก" },
+  { province: "phitsanulok", zone: "รอบ มน." },
+  { province: "phitsanulok", zone: "ท่าโพธิ์" },
+  { province: "phitsanulok", zone: "สมอแข" },
+  { province: "phitsanulok", zone: "เซ็นทรัลพิษณุโลก" },
+
+  
+  { province: "ayutthaya", zone: "โรจนะ" },
+  { province: "ayutthaya", zone: "ตัวเมืองอยุธยา" },
+  { province: "ayutthaya", zone: "บางปะอิน" },
+  { province: "ayutthaya", zone: "ประตูชัย" },
+  { province: "ayutthaya", zone: "เสนา" },
+
+  
+  { province: "korat", zone: "ในเมืองโคราช" },
+  { province: "korat", zone: "เซ็นทรัลโคราช" },
+  { province: "korat", zone: "เดอะมอลล์โคราช" },
+  { province: "korat", zone: "มทส." },
+  { province: "korat", zone: "จอหอ" },
+  { province: "korat", zone: "ปากช่อง" },
+  { province: "korat", zone: "เขาใหญ่" },
+
+  
+  { province: "songkhla", zone: "ตัวเมืองหาดใหญ่" },
+  { province: "songkhla", zone: "คอหงส์" },
+  { province: "songkhla", zone: "ม.อ.หาดใหญ่" },
+  { province: "songkhla", zone: "ลีการ์เดนส์" },
+  { province: "songkhla", zone: "ด่านนอก" },
+  { province: "songkhla", zone: "ตัวเมืองสงขลา" },
+
+  
+  { province: "suratthani", zone: "ตัวเมืองสุราษฎร์" },
+  { province: "suratthani", zone: "เกาะสมุย" },
+  { province: "suratthani", zone: "เฉวง" },
+  { province: "suratthani", zone: "ละไม" },
+  { province: "suratthani", zone: "บ่อผุด" },
+  { province: "suratthani", zone: "เกาะพะงัน" }
 ];
 
 export default async (request, _context) => {
@@ -108,7 +244,7 @@ export default async (request, _context) => {
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    // 🟢 สร้าง Map วันที่อัปเดตล่าสุดของแต่ละจังหวัด
+    
     const provinceLatestDateMap = new Map();
     const zoneLatestDateMap = new Map();
 
@@ -139,7 +275,7 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าสถิติหลักและคอนเทนต์สำคัญ (แก้ path: "/" ให้ตรงกับ Canonical)
+    
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
@@ -163,7 +299,7 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 2. หมวดจังหวัด (Provinces Section)
+    
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
@@ -184,8 +320,24 @@ export default async (request, _context) => {
       });
     }
 
-    // 3. 🟢 หมวดหน้ารายย่านทำเงิน (Sub-zones Section) - เพิ่มใหม่เข้าระบบ 100%
+   
     TARGET_SUB_ZONES.forEach(sz => {
+      
+      const hasActiveProfiles = profiles.some(p => {
+        const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+        const pLoc = (p.location || "").toLowerCase();
+        const pDesc = (p.description || "").toLowerCase();
+        const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
+        const cleanZ = sz.zone.toLowerCase();
+
+        const isSameProv = pKey.includes(sz.province.toLowerCase());
+        const isMatchZone = pLoc.includes(cleanZ) || pTags.includes(cleanZ) || pDesc.includes(cleanZ);
+        return isSameProv && isMatchZone;
+      });
+
+      
+      if (!hasActiveProfiles) return;
+
       const zoneKey = `${sz.province}_${sz.zone}`;
       const latestTimestamp = zoneLatestDateMap.get(zoneKey);
       const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
@@ -199,7 +351,7 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 4. หมวดโปรไฟล์น้องๆ (Profiles Section พร้อมรูปภาพลายน้ำกัน DMCA)
+    
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {

@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_02`;
+let GLOBAL_VERSION = `v_20261022_03`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1122,17 +1122,29 @@ const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     }, {});
 
     const REGION_CONFIG = [
-      {
-        name: "ภาคเหนือ",
-        icon: "📍",
-        provinces: [
-          { key: "chiangmai", name: "ไซด์ไลน์เชียงใหม่", zones: ["โซนนิมมานเหมินท์", "โซนเจ็ดยอด - สันติธรรม - ช้างเผือก", "โซนหลัง มช. - แม่โจ้ - สันทราย"] },
-          { key: "chiangrai", name: "ไซด์ไลน์เชียงราย", zones: ["โซนบ้านดู่ - หน้า มฟล. - หอนาฬิกา"] },
-          { key: "lampang", name: "ไซด์ไลน์ลำปาง", zones: ["โซนในเมือง - สวนดอก - ม.ราชภัฏ"] },
-          { key: "lamphun", name: "ไซด์ไลน์ลำพูน", zones: ["โซนนิคมลำพูน - ตัวเมือง"] },
-          { key: "phitsanulok", name: "ไซด์ไลน์พิษณุโลก", zones: ["โซนรอบ มน. - ตัวเมือง"] }
-        ]
-      },
+    {
+  name: "ภาคเหนือ",
+  icon: "📍",
+  provinces: [
+    { 
+      key: "chiangmai", 
+      name: "ไซด์ไลน์เชียงใหม่", 
+      zones: [
+        "โซนนิมมานเหมินท์", 
+        "โซนเจ็ดยอด", 
+        "โซนสันติธรรม", 
+        "โซนช้างเผือก", 
+        "โซนหลัง มช.", 
+        "โซนแม่โจ้", 
+        "โซนสันทราย"
+      ] 
+    },
+    { key: "chiangrai", name: "ไซด์ไลน์เชียงราย", zones: ["โซนบ้านดู่", "โซนหน้า มฟล.", "โซนหอนาฬิกา"] },
+    { key: "lampang", name: "ไซด์ไลน์ลำปาง", zones: ["โซนในเมือง", "โซนสวนดอก", "โซน ม.ราชภัฏ"] },
+    { key: "lamphun", name: "ไซด์ไลน์ลำพูน", zones: ["โซนนิคมลำพูน", "โซนตัวเมือง"] },
+    { key: "phitsanulok", name: "ไซด์ไลน์พิษณุโลก", zones: ["โซนรอบ มน.", "โซนตัวเมือง"] }
+  ]
+},
       {
         name: "ภาคอีสาน",
         icon: "📍",
@@ -1223,8 +1235,8 @@ const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
-    // ✅ ต้องเป็น < 3 (ถ้ามีน้อง 1-2 คนให้ noindex กันโดนแบน Doorway Spam)
-const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 3)
+  // 🟢 แก้ไข: มีน้องตั้งแต่ 1 คนขึ้นไป ให้ Google เก็บเข้า Index ได้ทันที (ไม่บล็อก)
+const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 1)
   ? "noindex, follow"
   : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
 
@@ -1280,14 +1292,14 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, `<span class="hero-subheadline">${dynamicSubheadline}</span>`);
 
     
-    function matchProfileToZone(p, cleanZ) {
-      if (!p || !cleanZ) return false;
-      const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
-      // ดึงจุดปักหมุดหลักแรกสุดของน้อง (ตรงกับสูตรกรองในหน้าเว็บ)
-      const primaryLoc = rawLoc.split(/[,/]|และ/)[0].trim();
-      const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-      return primaryLoc.includes(cleanZ) || tags.includes(cleanZ);
-    }
+   // 🟢 แก้ไข: ค้นหาจากทั้งประโยค ไม่หั่นคำทิ้ง นับจำนวนคนได้ครบ 100%
+function matchProfileToZone(p, cleanZ) {
+  if (!p || !cleanZ) return false;
+  const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
+  const desc = sanitizeThaiText(p.description || "").toLowerCase();
+  const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
+  return rawLoc.includes(cleanZ) || tags.includes(cleanZ) || desc.includes(cleanZ);
+}
 
     // 🟢 1. คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน (ใช้ matchProfileToZone สูตรเดียวกันเป๊ะ)
     const zoneCountMap = {};
