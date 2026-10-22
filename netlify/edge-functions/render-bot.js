@@ -741,11 +741,7 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
             <article class="interactive-card fmh-bento-card">
                <section class="hero-section" style="padding: 0; margin-bottom: 1rem;">
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15);">
-                       <img id="main-profile-img" src="${heroImageSmall}" 
-                             ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
-                             class="hero-img" alt="${escapeHTML(displayName)} ตัวจริงตรงปก 100%"
-                             loading="eager" fetchpriority="high" decoding="async" 
-                             width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
+                   <img id="main-profile-img" src="${heroImageSmall}" ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""} class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone} ตรงปก 100% - FirstModelHub" loading="eager" fetchpriority="high" decoding="async" width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     ${galleryThumbnailsHtml}
                 </section>
@@ -834,7 +830,7 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
 <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
     <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>
                
-                    <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุ:</strong> ผู้ใช้บริการต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
+                   <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ เกณฑ์อายุผู้ใช้งาน:</strong> แพลตฟอร์ม FirstModelHub กำหนดให้ผู้ขอรับบริการและผู้ลงประกาศต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปอย่างเข้มงวด</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
                     <p style="margin: 0;"><strong style="color: #140F22;">✓ รักษาความลับ (Zero-Log):</strong> ข้อมูลการติดต่อปลอดภัยสูงสุด</p>
                 </section>
@@ -844,8 +840,8 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
        <footer role="contentinfo" style="text-align: center; padding: 2rem 1rem; color: #64748B; font-size: 11.5px; line-height: 1.6;">
           <p style="margin: 0 0 6px 0;">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ศูนย์รวมเพื่อนเที่ยวฟิวแฟน ปลอดภัย จ่ายหน้างาน 100%</p>
           <div style="font-size: 10px; color: #94A3B8; max-width: 580px; margin: 8px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px;">
-            <strong>DMCA & Content Disclaimer:</strong> FirstModelHub operates strictly as an interactive computer service and intermediary platform. All profile images, rates, and materials are submitted by independent advertisers. FirstModelHub does not claim ownership of user-uploaded media. For copyright inquiries or takedown requests, contact: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.
-          </div>
+  <strong>Content & Copyright Notice:</strong> FirstModelHub operates purely as an online directory and information service. All promotional listings, profiles, and associated images are provided and updated independently by individual third-party advertisers. We do not claim ownership, control, or responsibility for any user-generated content. For immediate copyright verification or removal requests, please officially reach out to us at: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.
+</div>
         </footer>
     </div>
        
