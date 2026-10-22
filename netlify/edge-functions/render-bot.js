@@ -489,10 +489,7 @@ const relatedCardsHtml = relatedProfiles.length > 0 ? `
     // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
     const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
 
-   // ✅ แก้ไขให้เข้ารหัส URL ถูกต้อง
-const zoneHubUrl = primaryZone.includes("นิมมาน") 
-  ? "/nimman" 
-  : encodeURI(`/location/${provinceKey}/${primaryZone}`);
+  const zoneHubUrl = primaryZone.includes("นิมมาน") ? "/nimman" : `/location/${provinceKey}/${primaryZone}`;
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
@@ -833,9 +830,9 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
                 <!-- Related Profiles -->
                 ${relatedCardsHtml}
 
-                <!-- Safety Protocol Box -->
-                <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
-                    <h4>🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h4>
+              
+<section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
+    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>
                
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ ข้อกำหนดอายุ:</strong> ผู้ใช้บริการต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
@@ -869,23 +866,27 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
    <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
+     const CURRENT_SW_VER = '${GLOBAL_PROFILE_VERSION}';
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
-          // สั่งอัปเดต Service Worker ทันที ไม่ให้เกิดอาการสแตก
           registration.update();
         }
       });
 
-      // ลงทะเบียน Service Worker พร้อมเลขเวอร์ชันใหม่ล่าสุด
-      navigator.serviceWorker.register('/sw.js?v=v_20261023_01')
+      // ลงทะเบียน Service Worker พร้อมเวอร์ชัน
+      navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
             const installingWorker = reg.installing;
             if (installingWorker) {
               installingWorker.onstatechange = function() {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // ถ้าตรวจพบเวอร์ชันใหม่ ให้เคลียร์แคชและรีเฟรชหน้าเว็บอัตโนมัติ
-                  window.location.reload();
+                  // 🟢 ผูกชื่อคีย์เข้ากับเวอร์ชันปัจจุบัน: จะรีโหลดแค่ 1 ครั้งต่อเวอร์ชันใหม่ ไม่ติดลูป และไม่อั้นเวอร์ชันถัดไป
+                  const sessionKey = 'sw_reloaded_' + CURRENT_SW_VER;
+                  if (!sessionStorage.getItem(sessionKey)) {
+                    sessionStorage.setItem(sessionKey, '1');
+                    window.location.reload();
+                  }
                 }
               };
             }
