@@ -3,7 +3,7 @@
  * Auto-Sync Version & High-Performance Cache (Production Ready)
  */
 
-// 🟢 1. ดึงเลขเวอร์ชันจาก URL อัตโนมัติ (เช่น เรียกผ่าน /sw.js?v=v_20261022_01)
+// 🟢 1. ดึงเลขเวอร์ชันจาก URL อัตโนมัติ (เช่น เรียกผ่าน /sw.js?v=v_20261022_02)
 const swUrl = new URL(self.location);
 const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261020_01';
 const CACHE_NAME = `firstmodelhub-fx-${CURRENT_VERSION}`;
