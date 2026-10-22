@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_03`;
+let GLOBAL_VERSION = `v_20261022_04`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1319,20 +1319,22 @@ function matchProfileToZone(p, cleanZ) {
       }
     });
 
-    // 🟢 สร้างปุ่มลิงก์โซนภาษาไทย พร้อมปุ่ม "ทั้งหมดในจังหวัด" ให้นำทางย้อนกลับได้ง่าย
+    // 🟢 สร้างปุ่มลิงก์โซนภาษาไทย ทรงแคปซูลหรูหรา สไตล์แอปมือถือ (ล็อกไม่ให้ตกบรรทัด 100%)
     const activeZoneKeys = Object.keys(zoneCountMap);
     
     // 1. ปุ่ม "ทั้งหมดในจังหวัด"
     const isAllActive = !zoneSlug;
+    const allCls = isAllActive ? "filter-pill-tab active" : "filter-pill-tab";
     const allBtnStyle = isAllActive
-      ? "background: #7C3AED; color: #FFFFFF; border: 1.5px solid #7C3AED;"
-      : "background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87;";
-    
-    let pills = `<a href="/location/${provinceSlug}" style="${allBtnStyle} padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      ✨ ทั้งหมดใน${escapeHTML(provinceNameThai)} <span style="font-size: 10px; opacity: 0.85;">(${baseProvProfiles.length})</span>
+      ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);"
+      : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A;";
+
+    let pills = `<a href="/location/${provinceSlug}" class="${allCls}" style="${allBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);">
+      <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
+      <span style="${isAllActive ? 'background: rgba(255,255,255,0.25); color: #FFF;' : 'background: rgba(124,58,237,0.1); color: #7C3AED;'} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${baseProvProfiles.length}</span>
     </a> `;
 
-    
+    // 2. วนลูปสร้างปุ่มโซน (เช่น นิมมาน, เจ็ดยอด)
     pills += activeZoneKeys.map(z => {
       const cleanZ = escapeHTML(String(z).trim());
       const count = zoneCountMap[z];
@@ -1342,19 +1344,25 @@ function matchProfileToZone(p, cleanZ) {
         : `/location/${provinceSlug}/${cleanZ}`;
 
       const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
-      const activeStyle = isActiveZone 
-        ? "background: #7C3AED; color: #FFFFFF; border: 1.5px solid #7C3AED;" 
-        : "background: #F3E8FF; border: 1.5px solid #C084FC; color: #581C87;";
+      const zoneCls = isActiveZone ? "filter-pill-tab active" : "filter-pill-tab";
+      const zoneBtnStyle = isActiveZone
+        ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38);"
+        : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A;";
 
-      return `<a href="${href}" style="${activeStyle} padding: 5px 14px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; line-height: 1.4; margin: 2px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" title="สาวรับงานโซน${cleanZ}">
-        📍 โซน${cleanZ} <span style="font-size: 10px; opacity: 0.85;">(${count})</span>
+      const badgeStyle = isActiveZone
+        ? "background: rgba(255,255,255,0.25); color: #FFFFFF;"
+        : "background: rgba(124,58,237,0.1); color: #7C3AED;";
+
+      return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);" title="สาวรับงานโซน${cleanZ}">
+        <span>📍 โซน${cleanZ}</span>
+        <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
       </a>`;
     }).join(" ");
 
     if (!isNational && pills) {
       finalHtml = finalHtml.replace(
         /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
-        `<div class="filter-pills-scroll-row" id="quick-filter-pills" style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 0; scrollbar-width: none;">${pills}</div>`
+        `<div class="filter-pills-scroll-row" id="quick-filter-pills" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 8px !important; overflow-x: auto !important; padding: 6px 4px 14px 4px !important; scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important;">${pills}</div>`
       );
     }
     
@@ -1456,53 +1464,107 @@ function matchProfileToZone(p, cleanZ) {
 
     let displayAreaHtml = "";
     if (isNational) {
-      const groupedByProvince = profilesList.reduce((acc, p) => {
-        const key = String(p.provinceKey || p.province_slug || "no_province").toLowerCase();
-        acc[key] = acc[key] || [];
-        acc[key].push(p);
-        return acc;
-      }, {});
+      // 1. ฟังก์ชันตรวจจับเฉพาะน้องๆ สาย #ฟิวแฟน (เช็กทั้งแท็ก, คำโปรย และข้อความแนะนำตัว)
+      function isFiwfanProfile(p) {
+        if (!p) return false;
+        let rawTags = p.style_tags || p.styleTags || p.tags || [];
+        if (typeof rawTags === "string") {
+          try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
+        }
+        const tagList = Array.isArray(rawTags) ? rawTags : [];
+        const hasTag = tagList.some(t => {
+          const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
+          return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
+        });
+        if (hasTag) return true;
 
-      const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
-        const nameA = String(PROVINCE_SEO_DATA[a]?.name || a || "");
-        const nameB = String(PROVINCE_SEO_DATA[b]?.name || b || "");
-        return nameA.localeCompare(nameB, "th");
-      });
-
-      for (const pKey of sortedProvinceKeys) {
-        const pName = PROVINCE_SEO_DATA[pKey]?.name || pKey;
-        const allCardsInProv = groupedByProvince[pKey];
-        const pCount = allCardsInProv.length;
-        const topCards = allCardsInProv.slice(0, 4);
-        const pCards = topCards.map(p => renderCardHtml(p, false, pName)).join("");
-
-        displayAreaHtml += `
-          <div class="section-content-wrapper province-section" id="province-${pKey}">
-            <div class="province-header-row">
-                <a href="/location/${pKey}" class="province-title-link">
-                    <h2 class="province-clean-title">
-                        <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
-                        <span class="province-prefix">น้องๆ ในจังหวัด</span>
-                        <span class="province-name-highlight">${escapeHTML(pName)}</span>
-                    </h2>
-                </a>
-                <a href="/location/${pKey}" class="province-count-pill">
-                    <span class="pulse-dot-el"></span>
-                    <span>${pCount} โปรไฟล์</span>
-                    <i class="fas fa-chevron-right arrow-mini"></i>
-                </a>
-            </div>
-            <div class="profile-grid profiles-grid-row">${pCards}</div>
-            ${pCount > 4 ? `
-              <div style="text-align: center; margin-top: 12px;">
-                <a href="/location/${pKey}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; padding: 7px 18px; border-radius: 100px; font-size: 11.5px; font-weight: 800; text-decoration: none;">
-                  ดูน้องๆ รับงานโซน${escapeHTML(pName)} ทั้งหมด (${pCount} คน) <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            ` : ""}
-          </div>
-        `;
+        const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
+        return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
       }
+
+      // 2. คัดกรองน้องๆ #ฟิวแฟน
+      let fiwfanProfiles = profilesList.filter(isFiwfanProfile);
+
+      // 🛡️ ระบบ Fallback: ถ้าน้องสายฟิวแฟนมีไม่ถึง 40 คน ให้ดึงน้องคนอื่นมาเติมให้ครบ 40 คน หน้าเว็บจะได้ไม่แหว่ง
+      if (fiwfanProfiles.length < 40) {
+        const others = profilesList.filter(p => !fiwfanProfiles.some(f => f.id === p.id));
+        fiwfanProfiles = [...fiwfanProfiles, ...others];
+      }
+
+      // ดึง 40 คนแรกมาเรนเดอร์ในฟีดหน้าแรก
+      const nationalFeedProfiles = fiwfanProfiles.slice(0, 40);
+      const feedCardsHtml = nationalFeedProfiles.map((p, i) => {
+        const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
+        return renderCardHtml(p, i === 0, pName);
+      }).join("");
+
+      // 3. กล่องทางลัดเลือกจังหวัดยอดนิยม (City Hub Navigation)
+      const popularProvinces = [
+        { key: "chiangmai", name: "เชียงใหม่", tag: "ภาคเหนือ" },
+        { key: "khon-kaen", name: "ขอนแก่น", tag: "ภาคอีสาน" },
+        { key: "phuket", name: "ภูเก็ต", tag: "ภาคใต้" },
+        { key: "udonthani", name: "อุดรธานี", tag: "ภาคอีสาน" },
+        { key: "chiangrai", name: "เชียงราย", tag: "ภาคเหนือ" },
+        { key: "lampang", name: "ลำปาง", tag: "ภาคเหนือ" },
+        { key: "bangkok", name: "กรุงเทพฯ", tag: "เร็วๆ นี้" }
+      ];
+
+      const cityHubCardsHtml = popularProvinces.map(cp => {
+        const count = provinceCounts[cp.key] || 0;
+        const isComingSoon = cp.key === "bangkok" && count === 0;
+        const linkHref = isComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${cp.key}`;
+        const countBadge = isComingSoon 
+          ? `<span style="background: rgba(225, 29, 72, 0.1); color: #E11D48; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">เปิดรับสมัคร</span>`
+          : `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>`;
+
+        return `
+          <a href="${linkHref}" class="city-hub-card interactive-card" style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">📍</span>
+              <div>
+                <strong style="color: #140F22; font-size: 13.5px; font-weight: 900; display: block;">ไซด์ไลน์${escapeHTML(cp.name)}</strong>
+                <span style="color: #94A3B8; font-size: 10.5px;">${cp.tag}</span>
+              </div>
+            </div>
+            ${countBadge}
+          </a>
+        `;
+      }).join("");
+
+      displayAreaHtml = `
+        <!-- ส่วนที่ 1: หมวดหมู่จังหวัดยอดนิยม -->
+        <section class="national-city-hubs-section" style="margin-top: 20px; margin-bottom: 26px;">
+          <div class="featured-header-clean-row" style="margin-bottom: 12px;">
+            <div class="featured-title-flex">
+              <span class="section-tag-mini"><i class="fas fa-map-marked-alt"></i> พื้นที่หลัก</span>
+              <h2 class="clean-section-h2" style="font-size: 16px; margin: 0;">เลือกพื้นที่บริการ <span class="province-name-highlight">ครอบคลุมทั่วไทย</span></h2>
+            </div>
+            <a href="/locations" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูทั้งหมด &rarr;</a>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;">
+            ${cityHubCardsHtml}
+          </div>
+        </section>
+
+        <!-- ส่วนที่ 2: ฟีด 40 โปรไฟล์เน้นสเปกฟิวแฟน ตรงคีย์เวิร์ดระดับชาติ -->
+        <section class="section-content-wrapper" style="margin-top: 10px;">
+          <div class="province-header-row">
+            <h2 class="province-clean-title">
+              <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
+              <span class="province-prefix">สาวรับงาน &amp; ไซด์ไลน์</span>
+              <span class="province-name-highlight">สไตล์ฟิวแฟน ยอดนิยมทั่วไทย</span>
+            </h2>
+            <span class="province-count-pill">
+              <span class="pulse-dot-el"></span>
+              <span>#ฟิวแฟนแท้ (${nationalFeedProfiles.length} โปรไฟล์)</span>
+            </span>
+          </div>
+          <div class="profile-grid profiles-grid-row">
+            ${feedCardsHtml}
+          </div>
+        </section>
+      `;
+    // 🟢 [จุดสำคัญที่กู้คืนมา]: บล็อก else สำหรับหน้ารายจังหวัดและโซนย่อยทั้งหมด!
     } else {
       displayAreaHtml = `
         <div class="section-content-wrapper">

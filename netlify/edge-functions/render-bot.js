@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_03`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_04`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -866,16 +866,37 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
         </button>
     </div>
 
-    <!-- 🟢 ลงทะเบียน Service Worker พร้อมส่งเลขเวอร์ชันอัตโนมัติ -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js?v=${GLOBAL_PROFILE_VERSION}').catch(function(err) {
-            console.warn('SW Registration failed: ', err);
-          });
+   <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          // สั่งอัปเดต Service Worker ทันที ไม่ให้เกิดอาการสแตก
+          registration.update();
+        }
+      });
+
+      // ลงทะเบียน Service Worker พร้อมเลขเวอร์ชันใหม่ล่าสุด
+      navigator.serviceWorker.register('/sw.js?v=v_20261023_01')
+        .then(function(reg) {
+          reg.onupdatefound = function() {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = function() {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // ถ้าตรวจพบเวอร์ชันใหม่ ให้เคลียร์แคชและรีเฟรชหน้าเว็บอัตโนมัติ
+                  window.location.reload();
+                }
+              };
+            }
+          };
+        })
+        .catch(function(err) {
+          console.warn('SW Error bypassed:', err);
         });
-      }
-    </script>
+    });
+  }
+</script>
 </body>
 </html>`;
 
