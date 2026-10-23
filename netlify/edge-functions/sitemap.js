@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - DYNAMIC XML SITEMAP ENGINE (sitemap.js)
- * Production-Ready Ultra-Defensive Version (FIXED 2026)
+ * Production-Ready Ultra-Defensive Version (FIXED 2026 - ZERO ERRORS)
  * ==============================================================================
  */
 
@@ -25,6 +25,9 @@ const CONFIG = {
   PRIMARY_DOMAIN: "https://firstmodelhub.com"
 };
 
+/**
+ * 🔒 ป้องกัน XML Syntax Error 100%
+ */
 const escapeXml = (str) => {
   if (!str) return "";
   return String(str).replace(/[<>&'"]/g, (c) => {
@@ -39,6 +42,9 @@ const escapeXml = (str) => {
   });
 };
 
+/**
+ * ⏰ แปลงวันที่ให้อยู่ในฟอร์แมต ISO 8601 ตามมาตรฐาน Sitemaps.org
+ */
 const safeGetIsoDate = (dateStr, fallbackIso) => {
   if (!dateStr) return fallbackIso;
   try {
@@ -50,6 +56,20 @@ const safeGetIsoDate = (dateStr, fallbackIso) => {
   }
 };
 
+/**
+ * 🛡️ ฟังก์ชันสร้าง URL ที่ปลอดภัย 100% (ตัดช่องว่าง %20 + เข้ารหัส Percent-encoded)
+ */
+const buildSafeUrl = (baseDomain, path) => {
+  const cleanPath = path
+    .trim()
+    .replace(/\s+/g, "-") // แทนที่ช่องว่างด้วยขีดกลาง ป้องกัน %20
+    .replace(/\/+/g, "/"); // ป้องกัน double slash
+  return encodeURI(`${baseDomain}${cleanPath}`);
+};
+
+/**
+ * 📸 ดึงรูปภาพหลักของโปรไฟล์
+ */
 const getProfileMainImage = (p) => {
   if (!p) return null;
   let img = p.imagePath || p.image_path || p.image_url || p.imageUrl;
@@ -62,11 +82,12 @@ const getProfileMainImage = (p) => {
   return img.trim();
 };
 
-
+/**
+ * 💎 ปรับแต่ง URL รูปภาพสำหรับ Google Image Sitemap
+ */
 const optimizeImgForXml = (path) => {
   if (!path || typeof path !== "string" || !path.trim()) return null;
   const cleanPath = path.trim();
-  
   const WM_TRANSFORM = "f_auto,q_auto:good,w_600,h_800,c_fill/a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
 
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -79,154 +100,93 @@ const optimizeImgForXml = (path) => {
   return cleanPath;
 };
 
-
+// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (แก้คำเว้นวรรคเป็นขีดกลางเพื่อความปลอดภัย)
 const TARGET_SUB_ZONES = [
-  
-  { province: "chiangmai", zone: "เจ็ดยอด" },
-  { province: "chiangmai", zone: "สันติธรรม" },
-  { province: "chiangmai", zone: "ช้างเผือก" },
-  { province: "chiangmai", zone: "แม่โจ้" },
-  { province: "chiangmai", zone: "หลัง มช." },
-  { province: "chiangmai", zone: "หน้า มช." },
-  { province: "chiangmai", zone: "สันทราย" },
-  { province: "chiangmai", zone: "หางดง" },
-  { province: "chiangmai", zone: "แม่ริม" },
-  { province: "chiangmai", zone: "คูเมือง" },
-  { province: "chiangmai", zone: "ท่าแพ" },
-  { province: "chiangmai", zone: "ห้วยแก้ว" },
-  { province: "chiangmai", zone: "รวมโชค" },
-  { province: "chiangmai", zone: "พายัพ" },
-  { province: "chiangmai", zone: "เซ็นทรัลเฟส" },
-  { province: "chiangmai", zone: "สนามบินเชียงใหม่" },
+  // 1. เชียงใหม่
+  { province: "chiangmai", zone: "เจ็ดยอด", matchWords: ["เจ็ดยอด"] },
+  { province: "chiangmai", zone: "สันติธรรม", matchWords: ["สันติธรรม"] },
+  { province: "chiangmai", zone: "ช้างเผือก", matchWords: ["ช้างเผือก"] },
+  { province: "chiangmai", zone: "แม่โจ้", matchWords: ["แม่โจ้"] },
+  { province: "chiangmai", zone: "หลัง-มช.", matchWords: ["หลัง มช", "หลังมอ", "หลัง มช."] },
+  { province: "chiangmai", zone: "หน้า-มช.", matchWords: ["หน้า มช", "หน้ามอ", "หน้า มช."] },
+  { province: "chiangmai", zone: "สันทราย", matchWords: ["สันทราย"] },
+  { province: "chiangmai", zone: "หางดง", matchWords: ["หางดง"] },
+  { province: "chiangmai", zone: "แม่ริม", matchWords: ["แม่ริม"] },
+  { province: "chiangmai", zone: "คูเมือง", matchWords: ["คูเมือง"] },
+  { province: "chiangmai", zone: "ท่าแพ", matchWords: ["ท่าแพ"] },
+  { province: "chiangmai", zone: "ห้วยแก้ว", matchWords: ["ห้วยแก้ว"] },
+  { province: "chiangmai", zone: "รวมโชค", matchWords: ["รวมโชค"] },
+  { province: "chiangmai", zone: "พายัพ", matchWords: ["พายัพ"] },
+  { province: "chiangmai", zone: "เซ็นทรัลเฟส", matchWords: ["เซ็นทรัลเฟส", "เซ็นทรัลเฟสติวัล"] },
+  { province: "chiangmai", zone: "สนามบินเชียงใหม่", matchWords: ["สนามบิน"] },
 
-  
-  { province: "bangkok", zone: "สุขุมวิท" },
-  { province: "bangkok", zone: "รัชดา" },
-  { province: "bangkok", zone: "ห้วยขวาง" },
-  { province: "bangkok", zone: "ลาดพร้าว" },
-  { province: "bangkok", zone: "ทองหล่อ" },
-  { province: "bangkok", zone: "เอกมัย" },
-  { province: "bangkok", zone: "สาทร" },
-  { province: "bangkok", zone: "สีลม" },
-  { province: "bangkok", zone: "บางนา" },
-  { province: "bangkok", zone: "รามอินทรา" },
-  { province: "bangkok", zone: "พระราม 9" },
-  { province: "bangkok", zone: "อารีย์" },
+  // 2. กรุงเทพมหานคร
+  { province: "bangkok", zone: "สุขุมวิท", matchWords: ["สุขุมวิท"] },
+  { province: "bangkok", zone: "รัชดา", matchWords: ["รัชดา"] },
+  { province: "bangkok", zone: "ห้วยขวาง", matchWords: ["ห้วยขวาง"] },
+  { province: "bangkok", zone: "ลาดพร้าว", matchWords: ["ลาดพร้าว"] },
+  { province: "bangkok", zone: "ทองหล่อ", matchWords: ["ทองหล่อ"] },
+  { province: "bangkok", zone: "เอกมัย", matchWords: ["เอกมัย"] },
+  { province: "bangkok", zone: "สาทร", matchWords: ["สาทร"] },
+  { province: "bangkok", zone: "สีลม", matchWords: ["สีลม"] },
+  { province: "bangkok", zone: "บางนา", matchWords: ["บางนา"] },
+  { province: "bangkok", zone: "รามอินทรา", matchWords: ["รามอินทรา"] },
+  { province: "bangkok", zone: "พระราม-9", matchWords: ["พระราม 9", "พระราม9"] },
+  { province: "bangkok", zone: "อารีย์", matchWords: ["อารีย์"] },
 
-  
-  { province: "chonburi", zone: "พัทยา" },
-  { province: "chonburi", zone: "พัทยากลาง" },
-  { province: "chonburi", zone: "พัทยาใต้" },
-  { province: "chonburi", zone: "หาดจอมเทียน" },
-  { province: "chonburi", zone: "บางแสน" },
-  { province: "chonburi", zone: "ศรีราชา" },
-  { province: "chonburi", zone: "ตัวเมืองชลบุรี" },
-  { province: "chonburi", zone: "อมตะนคร" },
-  { province: "chonburi", zone: "แหลมฉบัง" },
-  { province: "chonburi", zone: "บ่อวิน" },
+  // 3. ชลบุรี / พัทยา
+  { province: "chonburi", zone: "พัทยา", matchWords: ["พัทยา"] },
+  { province: "chonburi", zone: "พัทยากลาง", matchWords: ["พัทยากลาง"] },
+  { province: "chonburi", zone: "พัทยาใต้", matchWords: ["พัทยาใต้"] },
+  { province: "chonburi", zone: "หาดจอมเทียน", matchWords: ["จอมเทียน"] },
+  { province: "chonburi", zone: "บางแสน", matchWords: ["บางแสน"] },
+  { province: "chonburi", zone: "ศรีราชา", matchWords: ["ศรีราชา"] },
+  { province: "chonburi", zone: "ตัวเมืองชลบุรี", matchWords: ["ตัวเมืองชลบุรี", "เมืองชล"] },
+  { province: "chonburi", zone: "อมตะนคร", matchWords: ["อมตะ"] },
+  { province: "chonburi", zone: "แหลมฉบัง", matchWords: ["แหลมฉบัง"] },
+  { province: "chonburi", zone: "บ่อวิน", matchWords: ["บ่อวิน"] },
 
-  
-  { province: "phuket", zone: "ป่าตอง" },
-  { province: "phuket", zone: "ตัวเมืองภูเก็ต" },
-  { province: "phuket", zone: "กะทู้" },
-  { province: "phuket", zone: "ฉลอง" },
-  { province: "phuket", zone: "กะรน" },
-  { province: "phuket", zone: "กะตะ" },
-  { province: "phuket", zone: "บางเทา" },
-  { province: "phuket", zone: "ราไวย์" },
-  { province: "phuket", zone: "เชิงทะเล" },
-  { province: "phuket", zone: "กมลา" },
-  { province: "phuket", zone: "สนามบินภูเก็ต" },
+  // 4. ภูเก็ต
+  { province: "phuket", zone: "ป่าตอง", matchWords: ["ป่าตอง"] },
+  { province: "phuket", zone: "ตัวเมืองภูเก็ต", matchWords: ["ตัวเมืองภูเก็ต", "เมืองภูเก็ต"] },
+  { province: "phuket", zone: "กะทู้", matchWords: ["กะทู้"] },
+  { province: "phuket", zone: "ฉลอง", matchWords: ["ฉลอง"] },
+  { province: "phuket", zone: "กะรน", matchWords: ["กะรน"] },
+  { province: "phuket", zone: "กะตะ", matchWords: ["กะตะ"] },
+  { province: "phuket", zone: "บางเทา", matchWords: ["บางเทา"] },
+  { province: "phuket", zone: "ราไวย์", matchWords: ["ราไวย์"] },
+  { province: "phuket", zone: "เชิงทะเล", matchWords: ["เชิงทะเล"] },
+  { province: "phuket", zone: "กมลา", matchWords: ["กมลา"] },
 
-  
-  { province: "khon-kaen", zone: "กังสดาล" },
-  { province: "khon-kaen", zone: "หลัง มข." },
-  { province: "khon-kaen", zone: "หน้า มข." },
-  { province: "khon-kaen", zone: "โนนม่วง" },
-  { province: "khon-kaen", zone: "เซ็นทรัลขอนแก่น" },
-  { province: "khon-kaen", zone: "บึงแก่นนคร" },
-  { province: "khon-kaen", zone: "ในตัวเมืองขอนแก่น" },
-  { province: "khon-kaen", zone: "ม.ภาค" },
-  { province: "khon-kaen", zone: "ถนนมิตรภาพ" },
-  { province: "khon-kaen", zone: "ศิลา" },
+  // 5. ขอนแก่น
+  { province: "khon-kaen", zone: "กังสดาล", matchWords: ["กังสดาล"] },
+  { province: "khon-kaen", zone: "หลัง-มข.", matchWords: ["หลัง มข", "หลัง มข."] },
+  { province: "khon-kaen", zone: "หน้า-มข.", matchWords: ["หน้า มข", "หน้า มข."] },
+  { province: "khon-kaen", zone: "โนนม่วง", matchWords: ["โนนม่วง"] },
+  { province: "khon-kaen", zone: "เซ็นทรัลขอนแก่น", matchWords: ["เซ็นทรัลขอนแก่น"] },
+  { province: "khon-kaen", zone: "บึงแก่นนคร", matchWords: ["บึงแก่นนคร"] },
+  { province: "khon-kaen", zone: "ในตัวเมืองขอนแก่น", matchWords: ["ในตัวเมือง", "ในเมือง"] },
+  { province: "khon-kaen", zone: "ม.ภาค", matchWords: ["ม.ภาค"] },
 
-  
-  { province: "chiangrai", zone: "บ้านดู่" },
-  { province: "chiangrai", zone: "หน้า มฟล." },
-  { province: "chiangrai", zone: "ตัวเมืองเชียงราย" },
-  { province: "chiangrai", zone: "หอนาฬิกา" },
-  { province: "chiangrai", zone: "ไนท์บาซาร์" },
-  { province: "chiangrai", zone: "เด่นห้า" },
-  { province: "chiangrai", zone: "รอบเวียง" },
-  { province: "chiangrai", zone: "ริมกก" },
-  { province: "chiangrai", zone: "แม่สาย" },
+  // 6. เชียงราย
+  { province: "chiangrai", zone: "บ้านดู่", matchWords: ["บ้านดู่"] },
+  { province: "chiangrai", zone: "หน้า-มฟล.", matchWords: ["หน้า มฟล", "มฟล", "แม่ฟ้าหลวง"] },
+  { province: "chiangrai", zone: "ตัวเมืองเชียงราย", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "chiangrai", zone: "หอนาฬิกา", matchWords: ["หอนาฬิกา"] },
+  { province: "chiangrai", zone: "แม่สาย", matchWords: ["แม่สาย"] },
 
-  
-  { province: "udonthani", zone: "UD Town" },
-  { province: "udonthani", zone: "หนองประจักษ์" },
-  { province: "udonthani", zone: "เซ็นทรัลอุดร" },
-  { province: "udonthani", zone: "ตัวเมืองอุดร" },
-  { province: "udonthani", zone: "บ้านจาน" },
-  { province: "udonthani", zone: "โพศรี" },
-  { province: "udonthani", zone: "ทุ่งศรีเมือง" },
-  { province: "udonthani", zone: "ตลาดรังษิณา" },
-  { province: "udonthani", zone: "สี่แยกไฮเทค" },
+  // 7. อุดรธานี
+  { province: "udonthani", zone: "UD-Town", matchWords: ["ud town", "ยูดีทาวน์", "udtown"] },
+  { province: "udonthani", zone: "หนองประจักษ์", matchWords: ["หนองประจักษ์"] },
+  { province: "udonthani", zone: "เซ็นทรัลอุดร", matchWords: ["เซ็นทรัลอุดร"] },
+  { province: "udonthani", zone: "ตัวเมืองอุดร", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "udonthani", zone: "ตลาดรังษิณา", matchWords: ["รังษิณา"] },
 
-  
-  { province: "lampang", zone: "ตัวเมืองลำปาง" },
-  { province: "lampang", zone: "สวนดอก" },
-  { province: "lampang", zone: "ม.ราชภัฏลำปาง" },
-  { province: "lampang", zone: "สบตุ๋ย" },
-  { province: "lampang", zone: "เซ็นทรัลลำปาง" },
-  { province: "lampang", zone: "รอบเวียง" },
-  { province: "lampang", zone: "กาดกองต้า" },
-  { province: "lampang", zone: "เกาะคา" },
-
-  
-  { province: "lamphun", zone: "ตัวเมืองลำพูน" },
-  { province: "lamphun", zone: "นิคมลำพูน" },
-  { province: "lamphun", zone: "เวียงยอง" },
-  { province: "lamphun", zone: "ป่าซาง" },
-  { province: "lamphun", zone: "เหมืองง่า" },
-
-  
-  { province: "phitsanulok", zone: "ตัวเมืองพิษณุโลก" },
-  { province: "phitsanulok", zone: "รอบ มน." },
-  { province: "phitsanulok", zone: "ท่าโพธิ์" },
-  { province: "phitsanulok", zone: "สมอแข" },
-  { province: "phitsanulok", zone: "เซ็นทรัลพิษณุโลก" },
-
-  
-  { province: "ayutthaya", zone: "โรจนะ" },
-  { province: "ayutthaya", zone: "ตัวเมืองอยุธยา" },
-  { province: "ayutthaya", zone: "บางปะอิน" },
-  { province: "ayutthaya", zone: "ประตูชัย" },
-  { province: "ayutthaya", zone: "เสนา" },
-
-  
-  { province: "korat", zone: "ในเมืองโคราช" },
-  { province: "korat", zone: "เซ็นทรัลโคราช" },
-  { province: "korat", zone: "เดอะมอลล์โคราช" },
-  { province: "korat", zone: "มทส." },
-  { province: "korat", zone: "จอหอ" },
-  { province: "korat", zone: "ปากช่อง" },
-  { province: "korat", zone: "เขาใหญ่" },
-
-  
-  { province: "songkhla", zone: "ตัวเมืองหาดใหญ่" },
-  { province: "songkhla", zone: "คอหงส์" },
-  { province: "songkhla", zone: "ม.อ.หาดใหญ่" },
-  { province: "songkhla", zone: "ลีการ์เดนส์" },
-  { province: "songkhla", zone: "ด่านนอก" },
-  { province: "songkhla", zone: "ตัวเมืองสงขลา" },
-
-  
-  { province: "suratthani", zone: "ตัวเมืองสุราษฎร์" },
-  { province: "suratthani", zone: "เกาะสมุย" },
-  { province: "suratthani", zone: "เฉวง" },
-  { province: "suratthani", zone: "ละไม" },
-  { province: "suratthani", zone: "บ่อผุด" },
-  { province: "suratthani", zone: "เกาะพะงัน" }
+  // 8. ลำปาง
+  { province: "lampang", zone: "ตัวเมืองลำปาง", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "lampang", zone: "สวนดอก", matchWords: ["สวนดอก"] },
+  { province: "lampang", zone: "ม.ราชภัฏลำปาง", matchWords: ["ราชภัฏลำปาง"] },
+  { province: "lampang", zone: "สบตุ๋ย", matchWords: ["สบตุ๋ย"] }
 ];
 
 export default async (request, _context) => {
@@ -236,21 +196,25 @@ export default async (request, _context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
+    // ดึงข้อมูลจังหวัดและโปรไฟล์ที่ Active พร้อมกัน
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
-      supabase.from("profiles").select("*").eq("active", true).limit(2000)
+      supabase.from("profiles").select("*").eq("active", true).limit(3000)
     ]);
 
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    
+    // แผนที่เก็บเวลาอัปเดตล่าสุดของแต่ละจังหวัดและโซน
     const provinceLatestDateMap = new Map();
     const zoneLatestDateMap = new Map();
 
     profiles.forEach(p => {
       const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
       const pLoc = (p.location || "").toLowerCase();
+      const pDesc = (p.description || "").toLowerCase();
+      const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
+      const fullText = `${pLoc} ${pDesc} ${pTags}`;
       const pDateStr = p.lastUpdated || p.last_updated || p.updated_at || p.created_at;
       
       if (pDateStr) {
@@ -261,10 +225,13 @@ export default async (request, _context) => {
             if (pTime > curProv) provinceLatestDateMap.set(pKey, pTime);
           }
           TARGET_SUB_ZONES.forEach(sz => {
-            if (pKey.includes(sz.province) && pLoc.includes(sz.zone.toLowerCase())) {
-              const zoneKey = `${sz.province}_${sz.zone}`;
-              const curZone = zoneLatestDateMap.get(zoneKey) || 0;
-              if (pTime > curZone) zoneLatestDateMap.set(zoneKey, pTime);
+            if (pKey.includes(sz.province)) {
+              const isMatch = sz.matchWords.some(w => fullText.includes(w.toLowerCase()));
+              if (isMatch) {
+                const zoneKey = `${sz.province}_${sz.zone}`;
+                const curZone = zoneLatestDateMap.get(zoneKey) || 0;
+                if (pTime > curZone) zoneLatestDateMap.set(zoneKey, pTime);
+              }
             }
           });
         }
@@ -275,7 +242,7 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    
+    // 1. หน้าหลักและหน้าคงที่ (Static Core Pages)
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
@@ -292,26 +259,24 @@ export default async (request, _context) => {
 
     staticPages.forEach(p => {
       xml += `  <url>\n`;
-      xml += `    <loc>${domain}${p.path}</loc>\n`;
+      xml += `    <loc>${escapeXml(domain + p.path)}</loc>\n`;
       xml += `    <lastmod>${nowIso}</lastmod>\n`;
       xml += `    <changefreq>${p.changefreq}</changefreq>\n`;
       xml += `    <priority>${p.priority}</priority>\n`;
       xml += `  </url>\n`;
     });
 
-    
+    // 2. หน้ารายจังหวัด (Province Hubs)
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
           const cleanKey = String(p.key).trim().toLowerCase();
-          let provIsoDate = nowIso;
           const latestTimestamp = provinceLatestDateMap.get(cleanKey);
-          if (latestTimestamp && latestTimestamp > 0) {
-            provIsoDate = new Date(latestTimestamp).toISOString();
-          }
+          const provIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
+          const provUrl = buildSafeUrl(domain, `/location/${cleanKey}`);
 
           xml += `  <url>\n`;
-          xml += `    <loc>${domain}/location/${encodeURIComponent(cleanKey)}</loc>\n`;
+          xml += `    <loc>${escapeXml(provUrl)}</loc>\n`;
           xml += `    <lastmod>${provIsoDate}</lastmod>\n`;
           xml += `    <changefreq>daily</changefreq>\n`;
           xml += `    <priority>0.9</priority>\n`;
@@ -320,43 +285,44 @@ export default async (request, _context) => {
       });
     }
 
-   
+    // 3. หน้าโซนย่อย (Sub-zones) - คัดกรองเฉพาะโซนที่มีน้องรับงานจริงเท่านั้น
     TARGET_SUB_ZONES.forEach(sz => {
-      
       const hasActiveProfiles = profiles.some(p => {
         const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
         const pLoc = (p.location || "").toLowerCase();
         const pDesc = (p.description || "").toLowerCase();
         const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-        const cleanZ = sz.zone.toLowerCase();
+        const fullText = `${pLoc} ${pDesc} ${pTags}`;
 
         const isSameProv = pKey.includes(sz.province.toLowerCase());
-        const isMatchZone = pLoc.includes(cleanZ) || pTags.includes(cleanZ) || pDesc.includes(cleanZ);
+        const isMatchZone = sz.matchWords.some(w => fullText.includes(w.toLowerCase()));
         return isSameProv && isMatchZone;
       });
 
-      
+      // 🛑 ถ้าไม่มีน้องสแตนด์บายในโซนนั้น ไม่ต้องใส่ลง Sitemap ป้องกันปัญหา Thin Content
       if (!hasActiveProfiles) return;
 
       const zoneKey = `${sz.province}_${sz.zone}`;
       const latestTimestamp = zoneLatestDateMap.get(zoneKey);
       const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
-      const zoneUrl = encodeURI(`${domain}/location/${sz.province}/${sz.zone}`);
+      
+      // ✅ สร้าง URL ที่แปลงขีดกลางเรียบร้อย และ Encoded สมบูรณ์ 100%
+      const zoneUrl = buildSafeUrl(domain, `/location/${sz.province}/${sz.zone}`);
 
       xml += `  <url>\n`;
-      xml += `    <loc>${zoneUrl}</loc>\n`;
+      xml += `    <loc>${escapeXml(zoneUrl)}</loc>\n`;
       xml += `    <lastmod>${zoneIsoDate}</lastmod>\n`;
       xml += `    <changefreq>daily</changefreq>\n`;
       xml += `    <priority>0.9</priority>\n`;
       xml += `  </url>\n`;
     });
 
-    
+    // 4. หน้าโปรไฟล์เดี่ยว (Profile Detail Pages + Image Sitemap)
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
           const rawSlug = String(p.slug || p.id).trim();
-          const safeSlugUrl = `${domain}/sideline/${encodeURIComponent(rawSlug)}`;
+          const safeProfileUrl = buildSafeUrl(domain, `/sideline/${rawSlug}`);
           const modDate = safeGetIsoDate(p.lastUpdated || p.last_updated || p.updated_at || p.created_at, nowIso);
 
           let imageXml = "";
@@ -366,11 +332,11 @@ export default async (request, _context) => {
             if (imgUrl) {
               const rawName = p.name ? String(p.name).trim().replace(/^(น้อง\s?)+/gi, "") : "สาวสวย";
               const displayName = `น้อง${rawName}`;
-              imageXml = `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>รูปโปรไฟล์${escapeXml(displayName)}</image:title>\n    </image:image>`;
+              imageXml = `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>${escapeXml(displayName)}</image:title>\n    </image:image>`;
             }
           }
 
-          xml += `  <url>\n    <loc>${safeSlugUrl}</loc>\n    <lastmod>${modDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>${imageXml}\n  </url>\n`;
+          xml += `  <url>\n    <loc>${escapeXml(safeProfileUrl)}</loc>\n    <lastmod>${modDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>${imageXml}\n  </url>\n`;
         }
       });
     }
@@ -380,13 +346,14 @@ export default async (request, _context) => {
     return new Response(xml, {
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=86400",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
         "X-Content-Type-Options": "nosniff"
       }
     });
 
   } catch (err) {
-    console.error("Sitemap generation error:", err);
+    console.error("Sitemap generation critical error:", err);
+    // Fallback ปลอดภัยหากฐานข้อมูลขัดข้อง (ยังส่ง XML ที่ถูกต้อง ไม่ตอบ Error 500)
     return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${domain}/</loc><lastmod>${nowIso}</lastmod></url></urlset>`, {
       status: 200,
       headers: { "Content-Type": "application/xml; charset=utf-8" }

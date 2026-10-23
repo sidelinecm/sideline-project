@@ -5,7 +5,7 @@ const MAX_PAGE_CACHE_ENTRIES = 80;
 let GLOBAL_VERSION = `v_20261022_06`;
 let TEMPLATE_HTML_CACHE = null;
 
-const ONE_DAY_MS = 86400 * 1000;
+const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
 
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
@@ -997,19 +997,22 @@ export default async (req, context) => {
       return Response.redirect(`${primaryDomain}/`, 301);
     }
 
-    // 🟢 แก้ไขจุดที่ 2: ทำ 301 Redirect ให้เป็น URL ภาษาไทยตรงๆ ไม่แปลงเป็น %xx
+   
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
-    const segments = url.pathname.split("/").filter(Boolean);
+const segments = url.pathname.split("/").filter(Boolean);
 
-    
-    if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
-      const currentProv = segments[1] || "chiangmai";
-      let cleanZoneName = rawZoneQuery;
-      try {
-        cleanZoneName = decodeURIComponent(cleanZoneName).trim();
-      } catch (_) {}
-      return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${cleanZoneName}`, 301);
-    }
+// ✅ แก้ไขให้มีคำว่า if
+if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
+  const currentProv = segments[1] || "chiangmai";
+  let cleanZoneName = rawZoneQuery;
+  try {
+    cleanZoneName = decodeURIComponent(cleanZoneName).trim();
+  } catch (_) {}
+  
+  const safeZone = cleanZoneName.replace(/\s+/g, "-");
+  const targetRedirectUrl = encodeURI(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${safeZone}`);
+  return Response.redirect(targetRedirectUrl, 301);
+}
 
     const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
 
@@ -1228,15 +1231,16 @@ export default async (req, context) => {
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
    
-    const rawCanonicalUrl = isNational 
-      ? `${primaryDomain}/` 
-      : (zoneSlug 
-          ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug}` 
-          : `${primaryDomain}/location/${provinceSlug}`);
+    
+const rawCanonicalUrl = isNational 
+  ? `${primaryDomain}/` 
+  : (zoneSlug 
+      ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug}` 
+      : `${primaryDomain}/location/${provinceSlug}`);
 
-    const canonicalUrl = rawCanonicalUrl;
+const canonicalUrl = encodeURI(rawCanonicalUrl);
 
-    // 🟢 ดึงเดือน-ปีปัจจุบันเข้ามาใส่ใน Title & Description อัตโนมัติ
+  
     const currentFreshness = getCurrentFreshnessText();
 
     const metaTitle = zoneSlug
@@ -1633,13 +1637,19 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, `<span class="hero-subheadline">${dynamicSubheadline}</span>`);
 
     
-   // 🟢 แก้ไข: ค้นหาจากทั้งประโยค ไม่หั่นคำทิ้ง นับจำนวนคนได้ครบ 100%
-function matchProfileToZone(p, cleanZ) {
+  function matchProfileToZone(p, cleanZ) {
   if (!p || !cleanZ) return false;
   const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
   const desc = sanitizeThaiText(p.description || "").toLowerCase();
   const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-  return rawLoc.includes(cleanZ) || tags.includes(cleanZ) || desc.includes(cleanZ);
+  const combined = `${rawLoc} ${desc} ${tags}`;
+
+  const zoneWithSpace = cleanZ.replace(/-/g, " ");
+  const zoneWithoutDash = cleanZ.replace(/-/g, "");
+
+  return combined.includes(cleanZ) || 
+         combined.includes(zoneWithSpace) || 
+         combined.includes(zoneWithoutDash);
 }
 
     // 🟢 1. คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน (ใช้ matchProfileToZone สูตรเดียวกันเป๊ะ)
@@ -1680,10 +1690,10 @@ function matchProfileToZone(p, cleanZ) {
       const cleanZ = escapeHTML(String(z).trim());
       const count = zoneCountMap[z];
 
-      const href = cleanZ.includes("นิมมาน") 
-        ? "/nimman" 
-        : `/location/${provinceSlug}/${cleanZ}`;
-
+      const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
+const href = cleanZ.includes("นิมมาน") 
+  ? "/nimman" 
+  : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
       const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
       const zoneCls = isActiveZone ? "filter-pill-tab active" : "filter-pill-tab";
       const zoneBtnStyle = isActiveZone
