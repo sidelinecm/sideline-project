@@ -5,7 +5,7 @@ const MAX_PAGE_CACHE_ENTRIES = 80;
 let GLOBAL_VERSION = `v_20261022_06`;
 let TEMPLATE_HTML_CACHE = null;
 
-const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
+const ONE_DAY_MS = 86400 * 1000;
 
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
@@ -1364,15 +1364,47 @@ export default async (req, context) => {
       });
     }
 
-    // ❌ เดิม: carouselProfiles = profilesList.slice(0, 12);
-    // 🟢 ปรับใหม่: แสดงผลตามจำนวนจริงทั้งหมดแบบไดนามิก
-    if (profilesList.length > 0) {
+    // 🟢 แก้ไขเป็น (คัดกรองจำนวนคนที่จะโชว์จริงก่อน แล้วผูก Schema ให้ตรงกันอัตโนมัติ):
+    // 1. ตั้งลิมิตหน้าแรกตรงนี้ (ถ้าวันหน้าอยากโชว์ 45 หรือ 50 แค่เปลี่ยนเลข 40 ตรงนี้จุดเดียว!)
+    const HOME_PAGE_LIMIT = 40;
+
+    function isFiwfanProfile(p) {
+      if (!p) return false;
+      let rawTags = p.style_tags || p.styleTags || p.tags || [];
+      if (typeof rawTags === "string") {
+        try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
+      }
+      const tagList = Array.isArray(rawTags) ? rawTags : [];
+      const hasTag = tagList.some(t => {
+        const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
+        return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
+      });
+      if (hasTag) return true;
+      const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
+      return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
+    }
+
+    let nationalFeedProfiles = [];
+    if (isNational) {
+      let fiwfanProfiles = profilesList.filter(isFiwfanProfile);
+      if (fiwfanProfiles.length < HOME_PAGE_LIMIT) {
+        const others = profilesList.filter(p => !fiwfanProfiles.some(f => f.id === p.id));
+        fiwfanProfiles = [...fiwfanProfiles, ...others];
+      }
+      nationalFeedProfiles = fiwfanProfiles.slice(0, HOME_PAGE_LIMIT);
+    }
+
+    // รายชื่อที่จะแสดงผลจริง (หน้าแรก = 40 คน / หน้ารายจังหวัด = ทุกคน)
+    const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
+
+    // 2. สร้าง Schema ItemList วิ่งตามจำนวนจริงที่แสดงผลบนหน้าจอแบบอัตโนมัติ
+    if (actualVisibleProfiles.length > 0) {
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": profilesList.length, // ✅ ใช้จำนวนจริง (เช่น 63 หรือ 11)
-        "itemListElement": profilesList.map((p, idx) => ({ // ✅ วนลูปแสดงครบทุกคน
+        "numberOfItems": actualVisibleProfiles.length, // 👈 วิ่งตามจำนวนจริง (40 หรือ 45) อัตโนมัติ
+        "itemListElement": actualVisibleProfiles.map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
           "item": {
@@ -1773,41 +1805,13 @@ function matchProfileToZone(p, cleanZ) {
 
     let displayAreaHtml = "";
     if (isNational) {
-      // 1. ฟังก์ชันตรวจจับเฉพาะน้องๆ สาย #ฟิวแฟน (เช็กทั้งแท็ก, คำโปรย และข้อความแนะนำตัว)
-      function isFiwfanProfile(p) {
-        if (!p) return false;
-        let rawTags = p.style_tags || p.styleTags || p.tags || [];
-        if (typeof rawTags === "string") {
-          try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
-        }
-        const tagList = Array.isArray(rawTags) ? rawTags : [];
-        const hasTag = tagList.some(t => {
-          const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
-          return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
-        });
-        if (hasTag) return true;
-
-        const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-        return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
-      }
-
-      // 2. คัดกรองน้องๆ #ฟิวแฟน
-      let fiwfanProfiles = profilesList.filter(isFiwfanProfile);
-
-      // 🛡️ ระบบ Fallback: ถ้าน้องสายฟิวแฟนมีไม่ถึง 40 คน ให้ดึงน้องคนอื่นมาเติมให้ครบ 40 คน หน้าเว็บจะได้ไม่แหว่ง
-      if (fiwfanProfiles.length < 40) {
-        const others = profilesList.filter(p => !fiwfanProfiles.some(f => f.id === p.id));
-        fiwfanProfiles = [...fiwfanProfiles, ...others];
-      }
-
-      // ดึง 40 คนแรกมาเรนเดอร์ในฟีดหน้าแรก
-      const nationalFeedProfiles = fiwfanProfiles.slice(0, 40);
+      // 🟢 ดึงรายชื่อที่คัดกรองและตัดลิมิตไว้จากด้านบนมาเรนเดอร์การ์ดทันที (อัตโนมัติ ไม่ต้องคำนวณซ้ำ)
       const feedCardsHtml = nationalFeedProfiles.map((p, i) => {
         const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
         return renderCardHtml(p, i === 0, pName);
       }).join("");
 
-      // 3. กล่องทางลัดเลือกจังหวัดยอดนิยม (City Hub Navigation)
+      
       const popularProvinces = [
         { key: "chiangmai", name: "เชียงใหม่", tag: "ภาคเหนือ" },
         { key: "khon-kaen", name: "ขอนแก่น", tag: "ภาคอีสาน" },
