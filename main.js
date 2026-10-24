@@ -584,13 +584,15 @@ async function getSupabaseClient() {
   function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    // 1. ล้างรหัส Unicode เสีย, อีโมจิขยะ (แยกจุด . ออก ไม่ให้กระทบทศนิยม เช่น 1.5k)
+   
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
-    .replace(/\.{2,}/g, " ") // ล้างเฉพาะจุดไข่ปลา เช่น ... แต่ไม่แตะ 1.5k
-    
-    // 2. แก้คำสะกดผิดยอดฮิต + ปรับคำเพี้ยน
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระซ้ำ (เช่น ดีีมาก -> ดีมาก)
+    .replace(/\.{2,}/g, " ")
+    .replace(/ฟิลแฟน|ฟีลแฟน|ฟิวเเฟน|ฟิวแฟว/g, "ฟิวแฟน")
+  
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+   
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน/g, "นิมมาน")
     .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
@@ -866,28 +868,7 @@ function optimizeImg(imagePath, mode = "card") {
     }
     
     initAgencyStories();
-    // 🟢 สร้างปุ่มลัด [ 📍 เมือง... ] แทรกอัตโนมัติตามจังหวัดที่เปิดอยู่
-    const pillsRow = document.getElementById("quick-filter-pills");
-    const provName = window.currentProvinceName;
-    if (pillsRow && provName && provName !== "ทั่วไทย" && !provName.includes("กรุงเทพ")) {
-      const mName = provName.startsWith("เมือง") ? provName : `เมือง${provName}`;
-      if (!pillsRow.querySelector(`[data-tag="${mName}"]`)) {
-        const btn = document.createElement("button");
-        btn.className = "filter-pill-tab";
-        btn.type = "button";
-        btn.setAttribute("data-tag", mName);
-        btn.innerHTML = `📍 ${mName}`;
-        btn.onclick = function(e) {
-          e.preventDefault();
-          if (typeof triggerHaptic === "function") triggerHaptic("light");
-          document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-          this.classList.add("active");
-          appState.activePillTag = mName;
-          executeFilterAndRender(true);
-        };
-        pillsRow.insertBefore(btn, pillsRow.children[1]); // แทรกเป็นปุ่มที่ 2 ต่อจาก 'น้องๆทั้งหมด'
-      }
-    }
+    
 
     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
     const activeProvinceSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
@@ -1586,12 +1567,18 @@ let sectionTitle = isEN
       ? (isEN ? `${String(ageVal).replace(/\D/g, "")} yrs` : `${String(ageVal).replace(/\D/g, "")} ปี`) 
       : "";
     
-    let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
-    let locName = rawLoc
-      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-      .split(/[,/]|และใกล้/)[0]
-      .trim();
-    if (!locName) locName = rawLoc;
+   let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
+    let locName = "";
+    const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
+    if (activeZone && rawLoc.includes(activeZone)) {
+      locName = activeZone;
+    } else {
+      locName = rawLoc
+        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+        .split(/[,/]|และใกล้/)[0]
+        .trim();
+      if (!locName) locName = rawLoc;
+    }
 
     const isOnline = p.isAvailable !== undefined 
       ? Boolean(p.isAvailable) 
