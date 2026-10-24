@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_06`;
+let GLOBAL_VERSION = `v_20261022_07`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -247,6 +247,11 @@ function getCurrentFreshnessText() {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // แปลงทุกรูปแบบให้เป็น "ฟิวแฟน" ตัวสะกดเดียวทั้งระบบ
+    .replace(/ฟิลแฟน|ฟีลแฟน|ฟิวเเฟน|ฟิวแฟว/g, "ฟิวแฟน")
+    
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ")
@@ -377,10 +382,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       return `<span class="kw-zone">${escapeHTML(cleanZ)}</span>`;
     }
 
-    return `<a href="/location/${provinceSlug}/${cleanZ}" class="kw-zone" title="สาวรับงานโซน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
+    const safeZoneSlug = cleanZ.replace(/\s+/g, "-");
+    return `<a href="${encodeURI(`/location/${provinceSlug}/${safeZoneSlug}`)}" class="kw-zone" title="สาวรับงานโซน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
   }).filter(Boolean);
 
-  const zoneText = zoneLinks.length > 0 ? ` เช่น ย่าน ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
+  const zoneText = zoneLinks.length > 0 ? ` อาทิ ${zoneLinks.join(", ")}` : " บริเวณใจกลางเมืองและแหล่งที่พักชั้นนำ";
 
   // 🟢 2. ฐานข้อมูลอัตลักษณ์พื้นที่เจาะลึกเฉพาะโซน (Local Entity Database) ป้องกัน Doorway Pages 100%
   const ZONE_CUSTOM_DETAILS = {
@@ -699,7 +705,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     chiangmai: {
       headline: customZone ? customZone.headline : (zoneSlug ? `รับงานเชียงใหม่ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตัวจริงตรงปก 100%` : `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ตัวจริงตรงปก นัดเจอง่าย จ่ายหน้างาน`),
       intro: customZone ? customZone.intro : (zoneSlug ? `รวมน้องๆ สาวรับงานเชียงใหม่ และสาวไซด์ไลน์โซน${zoneSlug} วัยใสน่ารัก นักศึกษาและสาวสวยหุ่นดี พักและสแตนด์บายอยู่ในพื้นที่${zoneSlug} ดูแลใกล้ชิดสไตล์ฟิวแฟน (GFE) นัดเจอตัวจริงเช็คความตรงปกหน้างานก่อนค่อยจ่ายเงิน ไร้มัดจำค่ะ` : `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา มช. และสาวสวยหุ่นดี คัดสรรเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจปลอดภัยด้วยมาตรฐานจ่ายหน้างาน นัดเจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระเงิน หมดกังวลเรื่องการโดนหลอกโอนมัดจำล่วงหน้า 100% ค่ะ`),
-      convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่วเชียงใหม่ เช่น โซนโรงแรมเลิฟโบ๊ต, มูฟเม้นท์, 3Q, ไซน่าชิก ตลอดจนที่พักย่าน${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
+     convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceNameThai} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
     },
     bangkok: {
       headline: customZone ? customZone.headline : (zoneSlug ? `สาวรับงานกรุงเทพฯ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตรงปก จ่ายหน้างาน` : `สาวรับงานกรุงเทพฯ • ไซด์ไลน์ กทม. เพื่อนเที่ยวฟิวแฟน VIP ตัวท็อป`),
@@ -839,18 +845,21 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
   return `น้อง${cleanName}${zoneText} ${provinceName} - FirstModelHub`;
 }
 
-// ==============================================================================
-// 1. ฟังก์ชัน Render Card
-// ==============================================================================
-const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่") => {
+const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
-  let loc = escapeHTML(
-    rawLoc
-      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-      .split(/[,/]/)[0]
-      .trim() || rawLoc
-  );
+  
+  let loc = "";
+  if (currentZone && rawLoc.includes(currentZone)) {
+    loc = escapeHTML(currentZone);
+  } else {
+    loc = escapeHTML(
+      rawLoc
+        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+        .split(/[,/]/)[0]
+        .trim() || rawLoc
+    );
+  }
 
   const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
@@ -886,12 +895,18 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 
   const isFiwFan = Array.isArray(rawTags) && rawTags.some(t => {
     const cleanTag = String(t).replace(/^#/, "").trim().toLowerCase();
-    return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
+    return cleanTag === "ฟิวแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
   });
 
-  const rightBadgeHtml = isFiwFan
-    ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`
-    : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
+  const isVerifiedModel = p.verified === true || p.isVerified === true || p.is_verified === true;
+  let rightBadgeHtml = "";
+  if (isFiwFan) {
+    rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
+  } else if (isVerifiedModel) {
+    rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
+  } else {
+    rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
+  }
 
   return `
     <div class="profile-card-new-container">
@@ -899,7 +914,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
         <img src="${cardImgSmall}" 
              srcset="${cardSrcSet}" 
              sizes="(max-width: 600px) 100vw, 400px"
-             alt="${generateNaturalAlt(cleanName, provinceName, loc)}"
+             alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
              width="400"
              height="560"
              class="profile-card-img"
@@ -942,6 +957,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     </div>
   `;
 };
+
+
 
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
@@ -1449,7 +1466,7 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       });
     }
 
-    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
+    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
     const rawFeatured = profilesList.filter(p => p.isfeatured || p.is_featured);
     const featuredProfilesList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : profilesList.slice(0, 6);
     const featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
@@ -1676,39 +1693,39 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     // 1. ปุ่ม "ทั้งหมดในจังหวัด"
     const isAllActive = !zoneSlug;
     const allCls = isAllActive ? "filter-pill-tab active" : "filter-pill-tab";
-    const allBtnStyle = isAllActive
-      ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);"
-      : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A;";
+   const allBtnStyle = isAllActive
+  ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);"
+  : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);";
 
-    let pills = `<a href="/location/${provinceSlug}" class="${allCls}" style="${allBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);">
-      <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
-      <span style="${isAllActive ? 'background: rgba(255,255,255,0.25); color: #FFF;' : 'background: rgba(124,58,237,0.1); color: #7C3AED;'} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${baseProvProfiles.length}</span>
-    </a> `;
+let pills = `<a href="/location/${provinceSlug}" class="${allCls}" style="${allBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">
+  <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
+  <span style="${isAllActive ? 'background: rgba(255,255,255,0.25); color: #FFF;' : 'background: rgba(124,58,237,0.1); color: #7C3AED;'} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${baseProvProfiles.length}</span>
+</a> `;
 
-    // 2. วนลูปสร้างปุ่มโซน (เช่น นิมมาน, เจ็ดยอด)
-    pills += activeZoneKeys.map(z => {
-      const cleanZ = escapeHTML(String(z).trim());
-      const count = zoneCountMap[z];
+pills += activeZoneKeys.map(z => {
+  const cleanZ = escapeHTML(String(z).trim());
+  const count = zoneCountMap[z];
+  const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
+  const href = cleanZ.includes("นิมมาน") 
+    ? "/nimman" 
+    : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
+  
+  const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
+  const zoneCls = isActiveZone ? "filter-pill-tab active" : "filter-pill-tab";
+  const zoneBtnStyle = isActiveZone
+    ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38);"
+    : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);";
 
-      const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
-const href = cleanZ.includes("นิมมาน") 
-  ? "/nimman" 
-  : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
-      const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
-      const zoneCls = isActiveZone ? "filter-pill-tab active" : "filter-pill-tab";
-      const zoneBtnStyle = isActiveZone
-        ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38);"
-        : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A;";
+  const badgeStyle = isActiveZone
+    ? "background: rgba(255,255,255,0.25); color: #FFFFFF;"
+    : "background: rgba(124,58,237,0.1); color: #7C3AED;";
 
-      const badgeStyle = isActiveZone
-        ? "background: rgba(255,255,255,0.25); color: #FFFFFF;"
-        : "background: rgba(124,58,237,0.1); color: #7C3AED;";
-
-      return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);" title="สาวรับงานโซน${cleanZ}">
-        <span>📍 โซน${cleanZ}</span>
-        <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
-      </a>`;
-    }).join(" ");
+  // ✅ ลบ box-shadow ที่ซ้ำออก
+  return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;" title="สาวรับงานโซน${cleanZ}">
+    <span>📍 โซน${cleanZ}</span>
+    <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
+  </a>`;
+}).join(" ");
 
     if (!isNational && pills) {
       finalHtml = finalHtml.replace(
@@ -1913,7 +1930,14 @@ const href = cleanZ.includes("นิมมาน")
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
     const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีน้องๆ สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวตนตรงปกแล้ว นัดเจอจ่ายหน้างาน ปลอดภัย 100% </div> `;
-    finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">${freshnessBox}${linkedIntro}</div>`);
+   finalHtml = finalHtml.replace(
+  /<div id="seo-drawer-wrapper"[^>]*>[\s\S]*?<!-- FAQ Block -->/i, 
+  `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px;">
+      <div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">
+          ${freshnessBox}${linkedIntro}
+      </div>
+   </div>\n        <!-- FAQ Block -->`
+);
 
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
 

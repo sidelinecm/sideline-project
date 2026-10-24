@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_06`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_07`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -82,6 +82,11 @@ function getCurrentFreshnessText() {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
+    // แปลงทุกรูปแบบให้เป็น "ฟิวแฟน" ตัวสะกดเดียวทั้งระบบ
+    .replace(/ฟิลแฟน|ฟีลแฟน|ฟิวเเฟน|ฟิวแฟว/g, "ฟิวแฟน")
+   
+    .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
+   
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ")
@@ -335,59 +340,72 @@ export default async (req, context) => {
       return context.next();
     }
 
-    let relatedProfiles = [];
-    let provinceKey = (profile.provinceKey || profile.province_key || "chiangmai").toString().trim().toLowerCase(); 
+    let provinceKey = (profile.provinceKey || profile.province_slug || profile.province_key || "chiangmai").toString().trim().toLowerCase(); 
     if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; 
     if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; 
     const cleanProvinceKey = provinceKey.replace(/[-_]/g, "");
 
-    // 🟢 1. รวมชื่อ Key จังหวัดทุกรูปแบบที่อาจบันทึกไว้ใน DB (เช่น chiangmai, chiang-mai)
     const provVariants = [provinceKey, cleanProvinceKey];
     if (provinceKey === "chiangmai") provVariants.push("chiang-mai", "chiang_mai");
     if (provinceKey === "khon-kaen" || provinceKey === "khonkaen") provVariants.push("khonkaen", "khon_kaen");
 
-    // 🟢 2. เช็กชื่อคอลัมน์ใน Supabase ว่าตารางนี้ตั้งชื่อว่า provinceKey หรือ province_key
-    const provCol = ("province_key" in profile && profile.province_key) ? "province_key" : "provinceKey";
+    const provCol = ("provinceKey" in profile && profile.provinceKey) ? "provinceKey"
+      : ("province_slug" in profile && profile.province_slug) ? "province_slug"
+      : ("province_key" in profile && profile.province_key) ? "province_key"
+      : "provinceKey";
 
-   
+    let relatedProfiles = [];
+    try {
+      const { data: sameProvinceProfiles } = await supabase
+        .from("profiles")
+        .select("id, slug, name, imagePath, image_url, isfeatured")
+        .eq("active", true)
+        .neq("id", profile.id)
+        .in(provCol, provVariants)
+        .order("isfeatured", { ascending: false })
+        .limit(6);
 
-const { data: sameProvinceProfiles } = await supabase
-  .from("profiles")
-  .select("id, slug, name, imagePath, image_url, provinceKey, province_key, isfeatured")
-  .eq("active", true)
-  .neq("id", profile.id)
-  .in(provCol, provVariants)
-  .order("isfeatured", { ascending: false })
-  .limit(6);
+      if (sameProvinceProfiles && sameProvinceProfiles.length > 0) {
+        relatedProfiles = sameProvinceProfiles.slice(0, 3);
+      }
+    } catch (err) {
+      console.warn("Related profiles fetch error:", err);
+    }
 
-relatedProfiles = (sameProvinceProfiles && sameProvinceProfiles.length > 0)
-  ? sameProvinceProfiles.slice(0, 3)
-  : [];
+    if (relatedProfiles.length === 0) {
+      try {
+        const { data: fallbackProfiles } = await supabase
+          .from("profiles")
+          .select("id, slug, name, imagePath, image_url, isfeatured")
+          .eq("active", true)
+          .neq("id", profile.id)
+          .limit(3);
+        relatedProfiles = fallbackProfiles || [];
+      } catch (_) {}
+    }
 
-// ✅ 1. ประกาศตัวแปรเหล่านี้ก่อน
-const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
-const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
-const provinceHubUrl = `/location/${provinceKey}`;
+    const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
+    const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
+    const provinceHubUrl = `/location/${provinceKey}`;
 
-// ✅ 2. แล้วจึงสร้าง relatedCardsHtml
-const relatedCardsHtml = relatedProfiles.length > 0 ? `
-  <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
-    <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-      ${relatedProfiles.map(rp => {
-        const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
-        const rpSlug = encodeURIComponent(rp.slug || rp.id);
-        const rpImg = optimizeImg(rp.imagePath || rp.image_url || "", 400);
-        return `
-          <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-            <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
-            <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
-          </a>
-        `;
-      }).join("")}
-    </div>
-  </section>
-` : "";
+    const relatedCardsHtml = relatedProfiles.length > 0 ? `
+      <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
+        <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          ${relatedProfiles.map(rp => {
+            const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
+            const rpSlug = encodeURIComponent(rp.slug || rp.id);
+            const rpImg = optimizeImg(rp.imagePath || rp.image_url || "", 400);
+            return `
+              <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
+              </a>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    ` : "";
     
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
@@ -850,8 +868,9 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
        
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
-    <!-- Sticky Bottom CTA (แก้ onclick เป็น data-action) -->
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); padding: 10px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); z-index: 9999; display: flex; gap: 10px; align-items: center;">
+  
+   <!-- ปรับ padding-bottom ให้คำนวณ safe-area อัตโนมัติ -->
+<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(124, 58, 237, 0.15); z-index: 9999; display: flex; gap: 10px; align-items: center; box-sizing: border-box;">
         <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;">
             <i class="fab fa-line" style="font-size: 20px;"></i>
             <span>จองคิว${escapeHTML(displayName)}</span>
