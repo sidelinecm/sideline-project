@@ -1277,6 +1277,88 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
       }
     }
 
+    // ==========================================
+    // 🟢 นำบล็อกนี้มาวางไว้ตรงนี้ (ก่อนบรรทัด 1125)
+    // ==========================================
+    let hotSwiperCardsHtml = "";
+    let featuredCardsHtml = "";
+    const HOME_PAGE_LIMIT = 40;
+
+    function isFiwfanProfile(p) {
+      if (!p) return false;
+      let rawTags = p.style_tags || p.styleTags || p.tags || [];
+      if (typeof rawTags === "string") {
+        try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
+      }
+      const tagList = Array.isArray(rawTags) ? rawTags : [];
+      const hasTag = tagList.some(t => {
+        const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
+        return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
+      });
+      if (hasTag) return true;
+      const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
+      return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
+    }
+
+    const nationalFeedProfiles = isNational ? (() => {
+      let hotCandidate = profilesList.filter(p => {
+        const combinedKeywords = `${(Array.isArray(p.style_tags) ? p.style_tags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
+        return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
+      });
+      if (hotCandidate.length === 0) hotCandidate = profilesList;
+
+      const seenHotNames = new Set();
+      const hotProfiles = [];
+      for (const p of hotCandidate) {
+        const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+        if (seenHotNames.has(cleanName)) continue;
+        seenHotNames.add(cleanName);
+        hotProfiles.push(p);
+        if (hotProfiles.length >= 8) break;
+      }
+      const hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
+
+      hotSwiperCardsHtml = hotProfiles.map((p, i) => {
+        const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
+        const loc = escapeHTML(sanitizeThaiText(p.location) || "ทั่วไทย");
+        const slug = encodeURIComponent(p.slug || p.id);
+        const img = optimizeImg(p.imagePath || p.image_url || "", 400);
+        const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
+        return `
+          <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
+            <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
+            <span class="hot-rank-badge">#${i + 1} HOT</span>
+            <img src="${img}" alt="น้อง${cleanName} (ทั่วไทย)" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+            <div class="vip-card-overlay"></div>
+            <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+            <div class="vip-card-info">
+              <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
+              <div class="vip-location">${loc}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const rawFeatured = profilesList.filter(p => (p.isfeatured || p.is_featured) && !hotProfileIds.has(String(p.id)));
+      const featuredProfilesList = rawFeatured.length > 0 
+        ? rawFeatured.slice(0, 8) 
+        : profilesList.filter(p => !hotProfileIds.has(String(p.id))).slice(0, 6);
+      const featuredProfileIds = new Set(featuredProfilesList.map(p => String(p.id)));
+      
+      const pNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
+      featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, pNameThai)).join("");
+
+      const excludedGlobalIds = new Set([...hotProfileIds, ...featuredProfileIds]);
+      let fiwfanProfiles = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && isFiwfanProfile(p));
+      
+      if (fiwfanProfiles.length < HOME_PAGE_LIMIT) {
+        const others = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && !fiwfanProfiles.some(f => f.id === p.id));
+        fiwfanProfiles = [...fiwfanProfiles, ...others];
+      }
+      return fiwfanProfiles.slice(0, HOME_PAGE_LIMIT);
+    })() : [];
+   
+
     const totalCount = profilesList.length; 
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
@@ -1422,29 +1504,11 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       });
     }
 
-    // 🟢 แก้ไขเป็น (คัดกรองจำนวนคนที่จะโชว์จริงก่อน แล้วผูก Schema ให้ตรงกันอัตโนมัติ):
-    // 1. ตั้งลิมิตหน้าแรกตรงนี้ (ถ้าวันหน้าอยากโชว์ 45 หรือ 50 แค่เปลี่ยนเลข 40 ตรงนี้จุดเดียว!)
-    const HOME_PAGE_LIMIT = 40;
-
-    function isFiwfanProfile(p) {
-      if (!p) return false;
-      let rawTags = p.style_tags || p.styleTags || p.tags || [];
-      if (typeof rawTags === "string") {
-        try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
-      }
-      const tagList = Array.isArray(rawTags) ? rawTags : [];
-      const hasTag = tagList.some(t => {
-        const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
-        return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
-      });
-      if (hasTag) return true;
-      const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-      return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
-    }
+    
 
     
 
-    // รายชื่อที่จะแสดงผลจริง (หน้าแรก = 40 คน / หน้ารายจังหวัด = ทุกคน)
+    
     const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
 
     // 2. สร้าง Schema ItemList วิ่งตามจำนวนจริงที่แสดงผลบนหน้าจอแบบอัตโนมัติ
@@ -1825,66 +1889,7 @@ pills += activeZoneKeys.map(z => {
     const primaryStories = topStoryProfiles.map(p => renderStoryItem(p)).join("");
     finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${primaryStories}</div>`);
 
-    let hotSwiperCardsHtml = "";
-    let featuredCardsHtml = "";
-
-    // 🟢 แก้ไขใหม่ 100%: ใช้ const และ IIFE กำหนดค่า nationalFeedProfiles ทันที ป้องกัน Temporal Dead Zone
-    const nationalFeedProfiles = isNational ? (() => {
-      let hotCandidate = profilesList.filter(p => {
-        const combinedKeywords = `${(Array.isArray(p.style_tags) ? p.style_tags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-        return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
-      });
-      if (hotCandidate.length === 0) hotCandidate = profilesList;
-
-      const seenHotNames = new Set();
-      const hotProfiles = [];
-      for (const p of hotCandidate) {
-        const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-        if (seenHotNames.has(cleanName)) continue;
-        seenHotNames.add(cleanName);
-        hotProfiles.push(p);
-        if (hotProfiles.length >= 8) break;
-      }
-      const hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
-
-      hotSwiperCardsHtml = hotProfiles.map((p, i) => {
-        const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
-        const loc = escapeHTML(sanitizeThaiText(p.location) || "ทั่วไทย");
-        const slug = encodeURIComponent(p.slug || p.id);
-        const img = optimizeImg(p.imagePath || p.image_url || "", 400);
-        const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
-        return `
-          <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
-            <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
-            <span class="hot-rank-badge">#${i + 1} HOT</span>
-            <img src="${img}" alt="น้อง${cleanName} (ทั่วไทย)" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-            <div class="vip-card-overlay"></div>
-            <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-            <div class="vip-card-info">
-              <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
-              <div class="vip-location">${loc}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      const rawFeatured = profilesList.filter(p => (p.isfeatured || p.is_featured) && !hotProfileIds.has(String(p.id)));
-      const featuredProfilesList = rawFeatured.length > 0 
-        ? rawFeatured.slice(0, 8) 
-        : profilesList.filter(p => !hotProfileIds.has(String(p.id))).slice(0, 6);
-      const featuredProfileIds = new Set(featuredProfilesList.map(p => String(p.id)));
-      
-      featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
-
-      const excludedGlobalIds = new Set([...hotProfileIds, ...featuredProfileIds]);
-      let fiwfanProfiles = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && isFiwfanProfile(p));
-      
-      if (fiwfanProfiles.length < HOME_PAGE_LIMIT) {
-        const others = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && !fiwfanProfiles.some(f => f.id === p.id));
-        fiwfanProfiles = [...fiwfanProfiles, ...others];
-      }
-      return fiwfanProfiles.slice(0, HOME_PAGE_LIMIT);
-    })() : [];
+    
 
     if (hotSwiperCardsHtml) {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
