@@ -108,369 +108,18 @@ async function getSupabaseClient() {
     national: "Nationwide (Thailand)"
   };
 
+  // 🟢 ลดขนาดไฟล์ JS ลง 20KB: ใช้เฉพาะรายการโซนย่อสำหรับช่องค้นหา ส่วนเนื้อหา SEO ปล่อยให้ Server SSR แสดงผล
   const SEO_PROVINCES_DATA = {
-    bangkok: {
-      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "สีลม", "บางนา", "รามอินทรา", "พระราม 9", "อารีย์"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานกรุงเทพฯ ไซด์ไลน์กรุงเทพ ตรงปก จ่ายหน้างาน</h3>
-          <p style="margin-bottom: 8px;">ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong>, <strong>ไซด์ไลน์ กทม.</strong> และเด็กเอ็น (EN VIP) ตามแนวรถไฟฟ้า BTS และ MRT คัดเฉพาะโปรไฟล์ตัวจริง ดูแลสไตล์ฟิวแฟนอย่างสุภาพ ให้เกียรติลูกค้า นัดเจอง่าย ปลอดภัย ไม่ต้องโอนมัดจำล่วงหน้า</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการยอดนิยมในกรุงเทพฯ</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนห้วยขวาง - รัชดา - ลาดพร้าว:</strong> พิกัดยอดฮิต สแตนด์บายพร้อมรับงานตลอด 24 ชม. เดินทางไว</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนสุขุมวิท - ทองหล่อ - สาทร:</strong> สาวสวยระดับพรีเมียม ดูแลสุภาพ เหมาะสำหรับไปดินเนอร์หรือร่วมงานเลี้ยง</span></li>
-          </ul>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานกรุงเทพฯ โซนไหนนัดหมายสะดวกที่สุด?", a: "โซนห้วยขวาง รัชดา สุขุมวิท และลาดพร้าว เป็นย่านยอดนิยมที่มีน้องๆ ประจำอยู่เยอะที่สุด เดินทางไปหาที่โรงแรมหรือคอนโดได้สะดวกรวดเร็วครับ" },
-        { q: "เรียกใช้บริการใน กทม. ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำทุกกรณีครับ เจอน้องตัวจริง เช็คความตรงปกหน้างานแล้วค่อยจ่ายเงินโดยตรงกับน้องครับ" },
-        { q: "มีน้องที่รับงานค้างคืน (Overnight) ในกรุงเทพไหม?", a: "มีครับ สามารถเช็กเรทราคาค้างคืนได้ที่กล่องอัตราค่าบริการบนหน้าโปรไฟล์ของน้องแต่ละคนได้เลยครับ" }
-      ]
-    },
-
-    chonburi: {
-      zones: ["ทั้งหมด", "พัทยา", "พัทยากลาง", "พัทยาใต้", "หาดจอมเทียน", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "อมตะนคร", "แหลมฉบัง", "บ่อวิน"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานชลบุรี ไซด์ไลน์พัทยา-บางแสน ตรงปก 100%</h3>
-          <p style="margin-bottom: 8px;">รวมโปรไฟล์ <strong>สาวรับงานชลบุรี</strong>, <strong>ไซด์ไลน์พัทยา</strong> และน้องๆ โซนบางแสน ศรีราชา มีทั้งน้องสไตล์วัยใสน่ารัก และสายปาร์ตี้เอ็นเตอร์เทนพูลวิลล่า นัดเจอจ่ายเงินหน้างาน ไร้กังวลเรื่องโดนหลอก</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในชลบุรีและพัทยา</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>พัทยา - หาดจอมเทียน:</strong> สายปาร์ตี้ ชงเหล้า พูลวิลล่า น้องๆ พร้อมเดินทางไปหาถึงที่พัก</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>บางแสน - ศรีราชา:</strong> วัยใสน่ารัก เป็นกันเอง เหมาะสำหรับทานข้าว เดินเล่นริมหาดสไตล์ฟิวแฟน</span></li>
-          </ul>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "หาไซด์ไลน์พัทยา ไปพูลวิลล่าได้ไหม?", a: "ได้ครับ มีน้องๆ สายปาร์ตี้และเด็กเอ็นที่พร้อมรับงานดูแลที่พูลวิลล่าและโรงแรมริมหาดครับ" },
-        { q: "นัดหมายในชลบุรี ต้องจ่ายเงินอย่างไร?", a: "พบเจอน้องตัวจริงก่อน แล้วจึงชำระเงินค่าบริการตรงกับน้องหน้างานครับ" },
-        { q: "แถวนิคมอมตะนคร หรือแหลมฉบัง มีน้องไปหาไหม?", a: "มีน้องๆ สแตนด์บายพร้อมเดินทางไปดูแลตามโรงแรมและที่พักในย่านนิคมอุตสาหกรรมครับ" }
-      ]
-    },
-
-    chiangmai: {
-      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "หน้า มช.", "คูเมือง", "ท่าแพ", "ห้วยแก้ว", "รวมโชค", "สันทราย", "แม่โจ้", "พายัพ", "เซ็นทรัลเฟส", "แม่ริม", "หางดง"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวมสาวรับงานเชียงใหม่ อันดับ 1 ตรงปก ไม่มัดจำ</h3>
-          <p style="margin-bottom: 8px;">หากคุณกำลังมองหา <strong>ไซด์ไลน์เชียงใหม่</strong>, <strong>เพื่อนเที่ยวกลางคืน</strong> หรือ <strong>เด็กเอ็นเชียงใหม่ (EN VIP)</strong> ที่การันตีความปลอดภัยสูงสุด เราคือแพลตฟอร์มที่คัดสรรน้องๆ สาวสวยระดับพรีเมียม สไตล์ฟิวแฟน (Girlfriend Experience) แท้ๆ ดูแลเอาใจใส่ ไม่เร่งเวลา ให้ความรู้สึกอบอุ่นเหมือนแฟนตัวจริง</p>
-          <p style="margin-bottom: 8px;">หมดปัญหาโดนหลอกโอนมัดจำ เพราะระบบของเรายึดหลัก <strong>"เจอน้องตัวจริงตรงปกก่อน ค่อยชำระเงินหน้างาน 100%"</strong></p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดยอดฮิต สแตนด์บายพร้อมดูแล</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนนิมมานเหมินท์:</strong> แหล่งรวมร้านชิลและโรงแรมหรู น้องๆ พร้อมเดินทางไปหาภายใน 15-30 นาที</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนเจ็ดยอด - สันติธรรม:</strong> พิกัดฮิตสำหรับน้องๆ นักศึกษา วัยใส ตัวเล็ก สเปคยอดนิยม</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - หลัง มช. - แม่โจ้:</strong> บริการเพื่อนเที่ยว หาคนกินข้าว คลายเหงาในวันหยุดพักผ่อน</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">บริการครอบคลุม (ชั่วคราว / ค้างคืน)</h3>
-          <p>ให้บริการตอบโจทย์ทุกไลฟ์สไตล์ ทั้งนัดพบส่วนตัวแบบชั่วคราว (Short Time) หรือต้องการคนดูแลยาวๆ แบบค้างคืน (Long Time / Overnight) เรทเริ่มต้นเพียง 1,500 บาท ข้อมูลสัดส่วนและราคาแสดงชัดเจนบนหน้าโปรไฟล์</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "นัดหมายสาวรับงานเชียงใหม่ โซนไหนเดินทางสะดวกที่สุด?", a: "ย่านนิมมานเหมินท์, สันติธรรม, ช้างเผือก และเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายเยอะที่สุด เดินทางไปหาที่โรงแรมได้รวดเร็วภายใน 20-30 นาทีครับ" },
-        { q: "เรทราคาเริ่มต้น 1,500 บาท ได้รับบริการแบบไหนบ้าง?", a: "เริ่มต้น 1,500.- บาท คุณจะได้รับการดูแลเทคแคร์สไตล์ฟิวแฟน (GFE) อย่างสุภาพเรียบร้อย เป็นกันเอง ให้เกียรติลูกค้า และไม่เร่งเวลาครับ" },
-        { q: "มีน้องๆ รับงานค้างคืน (Overnight) ไหม?", a: "มีครับ น้องๆ ไซด์ไลน์หลายคนรับงานแบบค้างคืน (Long Time) สามารถเช็คเรทราคาเหมาคืนได้ที่กล่องอัตราค่าบริการในหน้าโปรไฟล์" },
-        { q: "หากต้องการเด็กเอ็น (EN) ไปนั่งดื่มชงเหล้า มีบริการไหม?", a: "มีบริการเด็กเอ็นเตอร์เทน (EN VIP) สำหรับชงเหล้า คุยสนุก นั่งเป็นเพื่อนที่ร้านอาหารหรือร้านเหล้าในเชียงใหม่ครับ" },
-        { q: "เรียกใช้บริการ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีการเก็บเงินโอนมัดจำล่วงหน้าทุกกรณีครับ ระบบเราคือ 'นัดพบเจอตัวจริง ตรวจสอบความตรงปก แล้วจึงชำระเงินโดยตรงกับน้องหน้างาน'" }
-      ]
-    },
-
-    chiangrai: {
-      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "หน้า มฟล.", "หอนาฬิกา", "ไนท์บาซาร์", "เด่นห้า", "รอบเวียง", "ริมกก", "แม่สาย"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานเชียงราย ไซด์ไลน์ตรงปก ไม่โอนมัดจำ</h3>
-          <p style="margin-bottom: 8px;">หากคุณพักอยู่เชียงรายและต้องการหา <strong>เพื่อนเที่ยวเชียงราย</strong> หรือ <strong>เด็กเอ็นเชียงราย</strong> เราคัดสรรน้องๆ วัยใส นักศึกษา และสาวสวยสไตล์ฟิวแฟน ที่พร้อมดูแลคุณถึงที่พัก ไม่ว่าจะเป็นโรงแรมหรือรีสอร์ทส่วนตัว</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการยอดนิยมในเชียงราย</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนหน้า มฟล. และ บ้านดู่:</strong> แหล่งรวมน้องๆ นักศึกษา น่ารัก เฟรนด์ลี่ บริการสไตล์ฟิวแฟนแท้ๆ</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมืองเชียงราย (หอนาฬิกา - รอบเวียง):</strong> สะดวกสบาย น้องเดินทางไว เหมาะสำหรับการพักผ่อนแบบชั่วคราวและค้างคืน</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">นัดง่าย ปลอดภัย จ่ายหน้างาน</h3>
-          <p>เรารับประกันความปลอดภัยของลูกค้าเป็นอันดับหนึ่ง นัดเจอน้องๆ ชำระเงินหน้างาน (Pay on Arrival) ไร้ความเสี่ยงจากการโดนหลอกมัดจำ พร้อมบริการทั้งเพื่อนเที่ยวกลางคืน งานเอนเตอร์เทน และดูแลส่วนตัว</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานเชียงราย โซนบ้านดู่ และ มฟล. นัดหมายสะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนบ้านดู่ หน้ามหาวิทยาลัยแม่ฟ้าหลวง และใจกลางเมืองเชียงราย พร้อมเดินทางไปดูแลที่พักของท่านรวดเร็ว" },
-        { q: "ไซด์ไลน์เชียงราย การันตีตรงปกและปลอดภัยอย่างไร?", a: "โปรไฟล์ของน้องๆ ทุกคนผ่านการยืนยันตัวตน 100% ปลอดภัยด้วยระบบนัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระค่าบริการ" },
-        { q: "มีบริการรับงานแบบค้างคืน (Long Time) ในเชียงรายหรือไม่?", a: "มีครับ น้องๆ หลายท่านรับงานแบบค้างคืน ดูแลยาวๆ จนถึงเช้า สามารถตกลงเรทราคาที่หน้าโปรไฟล์ได้เลย" },
-        { q: "ต้องการเด็กเอ็นไปร้านเหล้าแถวหอนาฬิกา มีไหม?", a: "มีครับ เรามีน้องๆ สายปาร์ตี้ EN VIP ที่สามารถไปชงเหล้า เอ็นเตอร์เทนที่ร้านอาหารหรือผับในตัวเมืองได้ครับ" }
-      ]
-    },
-
-    lampang: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง", "อัศวิน", "กาดกองต้า", "เกาะคา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ไซด์ไลน์ลำปาง สาวรับงานลำปาง ตัวท็อป ฟิวแฟน</h3>
-          <p style="margin-bottom: 8px;">พบกับ <strong>สาวรับงานลำปาง</strong> โปรไฟล์คุณภาพที่ผ่านการคัดกรองมาแล้ว ไม่ว่าคุณจะต้องการ <strong>เพื่อนเที่ยวลำปาง</strong>, เด็กเอ็น (EN) สำหรับงานปาร์ตี้ หรือฟิวแฟนส่วนตัว เรามีน้องๆ พร้อมสแตนด์บายให้บริการอย่างมืออาชีพ</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในลำปาง</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - สวนดอก - สบตุ๋ย:</strong> ศูนย์กลางที่น้องๆ สามารถเรียกใช้บริการได้ตลอด 24 ชม.</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซน ม.ราชภัฏลำปาง:</strong> น้องนักศึกษา วัยใส เอาใจเก่ง พร้อมดูแลสไตล์ฟิวแฟนแบบใกล้ชิด</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ความเป็นส่วนตัวสูงสุด ไม่ต้องมัดจำ</h3>
-          <p>หมดความกังวลเรื่องข้อมูลหลุด นัดเจอที่พักส่วนตัว จ่ายเงินสดหรือโอนหน้างานเท่านั้น รับประกันตรงปก 100%</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "นัดพบสาวรับงานลำปาง ในตัวเมืองหรือแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมืองลำปาง, ย่านสวนดอก, ถนนรอบเวียง และละแวก ม.ราชภัฏลำปาง เดินทางสะดวกและเป็นส่วนตัวครับ" },
-        { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการ" },
-        { q: "มีน้องเด็กเอ็น (EN) ไปนั่งทานข้าวเป็นเพื่อนไหม?", a: "มีครับ บริการเพื่อนเที่ยว ทานข้าว ดูหนัง (GFE) เป็นบริการหลักของเรา น้องๆ สุภาพและวางตัวดีมากครับ" }
-      ]
-    },
-
-    lamphun: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานลำพูน ไซด์ไลน์ลำพูน ตรงปก จ่ายหน้างาน</h3>
-          <p style="margin-bottom: 8px;">รวมโปรไฟล์ <strong>สาวรับงานลำพูน</strong> และเพื่อนเที่ยวฟิวแฟนในโซนตัวเมืองและนิคมลำพูน คัดกรองตัวตนจริง นัดหมายง่าย เดินทางไว ปลอดภัยด้วยนโยบายจ่ายเงินหน้างาน</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "แถวนิคมลำพูน นัดหมายน้องไปหาได้ไหม?", a: "ได้ครับ น้องๆ พร้อมเดินทางไปดูแลตามโรงแรมหรือที่พักแถวนิคมและในตัวเมืองลำพูนอย่างรวดเร็วครับ" },
-        { q: "นัดหมายในลำพูน ต้องโอนมัดจำไหม?", a: "ไม่ต้องโอนมัดจำทุกกรณีครับ เจอน้องตัวจริง เช็คความตรงปกหน้างานแล้วค่อยชำระเงินครับ" }
-      ]
-    },
-
-    phitsanulok: {
-      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานพิษณุโลก ไซด์ไลน์ มน. ฟิวแฟนตรงปก</h3>
-          <p style="margin-bottom: 8px;">ศูนย์รวม <strong>สาวรับงานพิษณุโลก</strong> และน้องๆ ไซด์ไลน์รอบ ม.นเรศวร (มน.) สเปกน่ารัก วัยใส เอาใจเก่ง ดูแลสไตล์ฟิวแฟนอย่างเป็นกันเอง ปลอดภัยไร้มัดจำ</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "หาน้องโซน มน. พิษณุโลก นัดพบแถวไหนง่ายสุด?", a: "แถวท่าโพธิ์ ประตู มน. และโรงแรมในตัวเมืองพิษณุโลก มีน้องๆ สแตนด์บายพร้อมบริการครับ" },
-        { q: "การันตีตรงปกอย่างไรในพิษณุโลก?", a: "ทุกโปรไฟล์ยืนยันตัวตนจริง เจอน้องหน้างานแล้วค่อยจ่ายเงิน ไม่ตรงปกยกเลิกได้ทันทีครับ" }
-      ]
-    },
-
-    "khon-kaen": {
-      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "หน้า มข.", "โนนม่วง", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "ม.ภาค", "ถนนมิตรภาพ", "ศิลา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น (อันดับ 1 อีสาน)</h3>
-          <p style="margin-bottom: 8px;">ค้นหา <strong>สาวรับงานขอนแก่น</strong> และ <strong>เด็กเอ็นขอนแก่น</strong> โปรไฟล์ตัวท็อปของภาคอีสาน เรารวมน้องๆ นักศึกษา วัยใส และสาวสวยสุดฮอต ที่พร้อมให้บริการเพื่อนเที่ยวฟิวแฟน (GFE) ดูแลอย่างดี ไม่มีเร่งเวลา</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในขอนแก่น</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนกังสดาล - หลัง มข. - โนนม่วง:</strong> อาณาจักรของน้องๆ นักศึกษา สไตล์วัยใส น่ารัก ขี้อ้อน บริการฟิวแฟนเยี่ยม</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - เซ็นทรัล - บึงแก่นนคร:</strong> นัดเจอตามโรงแรมชั้นนำกลางเมือง สะดวกรวดเร็ว ทั้งชั่วคราวและค้างคืน</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ปลอดภัย นัดเจอตัวจริงค่อยจ่ายเงิน</h3>
-          <p>เราให้ความสำคัญกับความปลอดภัยลูกค้า ไม่ต้องโอนมัดจำล่วงหน้า นัดเจอตัวจริง เช็คความตรงปก แล้วค่อยชำระเงินโดยตรงกับน้องหน้างานเท่านั้น</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" },
-        { q: "บริการฟิวแฟนขอนแก่น ทำอะไรได้บ้าง?", a: "บริการฟิวแฟนขอนแก่นบน FirstModelHub น้องๆ จะคอยดูแลเอาใจใส่เสมือนแฟนตัวจริง ทั้งร่วมมื้ออาหาร ทานข้าว คาเฟ่ หรือพักผ่อนส่วนตัว ด้วยความสุภาพ เป็นกันเอง และไม่เร่งเวลาครับ" },
-        { q: "รับงานค้างคืน (Long Time) ต้องจ่ายเท่าไหร่?", a: "เรทค้างคืนจะเฉลี่ยอยู่ที่ประมาณ 4,000 - 6,000 บาทขึ้นไป ขึ้นอยู่กับโปรไฟล์น้องๆ สามารถตรวจสอบราคาได้ที่หน้าโปรไฟล์ครับ" },
-        { q: "หาเพื่อนเที่ยว นั่งชิลร้านเหล้าแถว มข. มีไหม?", a: "มีบริการเด็กเอ็น (EN) ไปนั่งดื่มเป็นเพื่อน ชงเหล้า เอ็นเตอร์เทนที่ร้านอาหารและผับบาร์ในขอนแก่นครับ" }
-      ]
-    },
-
-    khonkaen: {
-      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "หน้า มข.", "โนนม่วง", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "ม.ภาค", "ถนนมิตรภาพ", "ศิลา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น (อันดับ 1 อีสาน)</h3>
-          <p style="margin-bottom: 8px;">ค้นหา <strong>สาวรับงานขอนแก่น</strong> และ <strong>เด็กเอ็นขอนแก่น</strong> โปรไฟล์ตัวท็อปของภาคอีสาน เรารวมน้องๆ นักศึกษา วัยใส และสาวสวยสุดฮอต ที่พร้อมให้บริการเพื่อนเที่ยวฟิวแฟน (GFE) ดูแลอย่างดี ไม่มีเร่งเวลา</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในขอนแก่น</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>โซนกังสดาล - หลัง มข. - โนนม่วง:</strong> อาณาจักรของน้องๆ นักศึกษา สไตล์วัยใส น่ารัก ขี้อ้อน บริการฟิวแฟนเยี่ยม</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ตัวเมือง - เซ็นทรัล - บึงแก่นนคร:</strong> นัดเจอตามโรงแรมชั้นนำกลางเมือง สะดวกรวดเร็ว ทั้งชั่วคราวและค้างคืน</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ปลอดภัย นัดเจอตัวจริงค่อยจ่ายเงิน</h3>
-          <p>เราให้ความสำคัญกับความปลอดภัยลูกค้า ไม่ต้องโอนมัดจำล่วงหน้า นัดเจอตัวจริง เช็คความตรงปก แล้วค่อยชำระเงินโดยตรงกับน้องหน้างานเท่านั้น</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่น นัดหมายปุ๊บเดินทางไวครับ" },
-       { q: "บริการฟิวแฟนขอนแก่น ทำอะไรได้บ้าง?", a: "บริการฟิวแฟนขอนแก่นบน FirstModelHub น้องๆ จะคอยดูแลเอาใจใส่เสมือนแฟนตัวจริง ทั้งร่วมมื้ออาหาร ทานข้าว คาเฟ่ หรือพักผ่อนส่วนตัว ด้วยความสุภาพ เป็นกันเอง และไม่เร่งเวลาครับ" },
-        { q: "รับงานค้างคืน (Long Time) ต้องจ่ายเท่าไหร่?", a: "เรทค้างคืนจะเฉลี่ยอยู่ที่ประมาณ 4,000 - 6,000 บาทขึ้นไป ขึ้นอยู่กับโปรไฟล์น้องๆ สามารถตรวจสอบราคาได้ที่หน้าโปรไฟล์ครับ" }
-      ]
-    },
-
-    phuket: {
-      zones: ["ทั้งหมด", "ป่าตอง", "ตัวเมืองภูเก็ต", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล", "กมลา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต (VIP Escorts Phuket)</h3>
-          <p style="margin-bottom: 8px;">ยกระดับวันหยุดพักผ่อนของคุณกับ <strong>สาวรับงานภูเก็ต</strong>, เด็กเอ็นวีไอพี (EN VIP) และ <strong>Phuket Escort</strong> เราคัดสรรสาวสวยหุ่นนางแบบ โปรไฟล์พรีเมียม สื่อสารภาษาอังกฤษได้ (สายฝอ) พร้อมไปปาร์ตี้พูลวิลล่าหรือล่องเรือยอร์ช</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการ ทั่วเกาะภูเก็ต</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ป่าตอง - กะทู้:</strong> ศูนย์กลางความบันเทิง น้องๆ พร้อมบริการทั้งชั่วคราวและค้างคืนในโรงแรมชั้นนำ</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>บางเทา - เชิงทะเล:</strong> สำหรับลูกค้าที่ต้องการความไฮเอนด์ พูลวิลล่าหรู น้องๆ พร้อมเดินทางไปดูแลส่วนตัว</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ไม่โอนมัดจำ รับประกันตัวจริงตรงปก</h3>
-          <p>เพิ่มความมั่นใจด้วยระบบยืนยันตัวตน ไม่มีมัดจำ นัดเจอน้องที่พูลวิลล่าหรือโรงแรม แล้วชำระเงินหน้างาน บริการเป็นมืออาชีพ ให้คุณเที่ยวภูเก็ตอย่างมีความสุขที่สุด</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" },
-        { q: "รับงานพูลวิลล่า หรือไปเที่ยวเกาะด้วยได้ไหม?", a: "ได้ครับ มีบริการเพื่อนเที่ยว (Companion) ทั้งแบบรายวันและค้างคืน พาไปปาร์ตี้พูลวิลล่าหรือล่องเรือยอร์ชได้ครับ" },
-        { q: "มีน้องที่พูดภาษาอังกฤษได้ (English Speaking) ไหม?", a: "มีจำนวนมากครับ ภูเก็ตเป็นเมืองท่องเที่ยว น้องๆ ระดับพรีเมียมสามารถสื่อสารภาษาอังกฤษเพื่อดูแลลูกค้าต่างชาติได้เป็นอย่างดี" },
-        { q: "ถ้าพักอยู่ไกล เช่น แถวบางเทา หรือ เชิงทะเล น้องไปได้ไหม?", a: "ไปได้แน่นอนครับ บริการเราเป็น Outcall ทั่วเกาะภูเก็ต (อาจมีค่าเดินทางเพิ่มเติมตามระยะทางเล็กน้อย ตกลงก่อนได้ครับ)" }
-      ]
-    },
-
-    udonthani: {
-      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี", "ทุ่งศรีเมือง", "หนองสิม", "ตลาดรังษิณา", "สี่แยกไฮเทค"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานอุดรธานี ไซด์ไลน์อุดร ไม่โอนมัดจำ</h3>
-          <p style="margin-bottom: 8px;">สัมผัสความน่ารักของ <strong>สาวรับงานอุดรธานี</strong> และ <strong>เพื่อนเที่ยวอุดร</strong> คัดโปรไฟล์น้องๆ สเปคสวย ตัวเล็ก ผิวขาว สไตล์ฟิวแฟน (GFE) พร้อมให้บริการดูแลคุณตลอดเวลาในตัวเมืองอุดรธานี</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการในอุดรธานี</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>ย่าน UD Town - เซ็นทรัลอุดร:</strong> นัดเจอง่าย เดินทางสะดวก มีน้องๆ สแตนด์บายพร้อมบริการ Outcall ถึงที่พัก</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>รอบหนองประจักษ์ - โพศรี:</strong> บริการระดับพรีเมียม เป็นส่วนตัว น้องๆ เทคแคร์เอาใจใส่ ไม่เร่งเวลา</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">โปร่งใส ชัดเจน จ่ายหน้างาน 100%</h3>
-          <p>เรารับประกันความตรงปก โปรไฟล์ผ่านการตรวจสอบ นัดเจอน้องที่โรงแรมในเมืองอุดรธานี ตรวจสอบความพึงพอใจแล้วจึงจ่ายเงิน ปลอดภัยจากมิจฉาชีพเด็ดขาด</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบที่โรงแรมหาง่ายและเดินทางสะดวกสุดครับ" },
-        { q: "ต้องการน้องไปชงเหล้าที่ร้านอาหาร หรือผับในอุดร มีไหม?", a: "มีครับ เรามีบริการเด็กเอ็น (EN) สำหรับเอ็นเตอร์เทน ชงเหล้า คุยสนุก คอยดูแลคุณและเพื่อนๆ ที่ร้านอาหารหรือปาร์ตี้ครับ" },
-        { q: "บริการแบบชั่วคราว (Short Time) ใช้เวลาเท่าไหร่?", a: "เรทมาตรฐาน Short Time จะอยู่ที่ประมาณ 1.5 - 2 ชั่วโมงครับ ให้บริการเทคแคร์สไตล์ฟิวแฟน ไม่เร่งเวลา" },
-        { q: "ต้องโอนมัดจำเพื่อจองคิวไหม?", a: "ไม่ต้องโอนมัดจำครับ! ระบบของเราให้ลูกค้าเจอน้องตัวจริงก่อน แล้วค่อยชำระเงินเต็มจำนวนหน้างาน" }
-      ]
-    },
-
-    ayutthaya: {
-      zones: ["ทั้งหมด", "โรจนะ", "ตัวเมืองอยุธยา", "บางปะอิน", "ประตูชัย", "เสนา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานอยุธยา ไซด์ไลน์โรจนะ ตรงปก จ่ายหน้างาน</h3>
-          <p style="margin-bottom: 8px;">รวมโปรไฟล์ <strong>สาวรับงานอยุธยา</strong> และไซด์ไลน์ย่านโรจนะ บางปะอิน สแตนด์บายพร้อมเดินทางไปดูแลถึงที่พักส่วนตัว ปลอดภัยไม่ต้องโอนมัดจำ</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "แถวนิคมโรจนะ อยุธยา นัดหมายได้ไหม?", a: "ได้ครับ โซนโรจนะและบางปะอินมีน้องๆ สแตนด์บายพร้อมเดินทางไปดูแลถึงโรงแรมอย่างรวดเร็วครับ" },
-        { q: "จ่ายเงินยังไงในอยุธยา?", a: "นัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระเงินตรงกับน้องครับ" }
-      ]
-    },
-
-    korat: {
-      zones: ["ทั้งหมด", "ในเมืองโคราช", "เซ็นทรัลโคราช", "เดอะมอลล์โคราช", "มทส.", "จอหอ", "ปากช่อง", "เขาใหญ่"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานโคราช ไซด์ไลน์นครราชสีมา ฟิวแฟนตรงปก</h3>
-          <p style="margin-bottom: 8px;">ศูนย์รวม <strong>สาวรับงานโคราช</strong> และน้องๆ ไซด์ไลน์ในเมืองโคราช ปากช่อง เขาใหญ่ บริการเพื่อนเที่ยวฟิวแฟน นัดหมายจ่ายเงินหน้างาน ไร้มัดจำ</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "หาเพื่อนเที่ยวทริปเขาใหญ่ มีน้องรับงานไหม?", a: "มีครับ มีน้องๆ ที่พร้อมเดินทางไปดูแลทริปพูลวิลล่าและรีสอร์ตแถวเขาใหญ่ ตกลงเรทเหมาวันได้ครับ" },
-        { q: "ในเมืองโคราช นัดหมายสะดวกไหม?", a: "สะดวกมากครับ ในตัวเมืองมีน้องๆ สแตนด์บายเยอะ เดินทางไว 15-20 นาทีถึงที่พักครับ" }
-      ]
-    },
-
-    songkhla: {
-      zones: ["ทั้งหมด", "ตัวเมืองหาดใหญ่", "คอหงส์", "ม.อ.หาดใหญ่", "ลีการ์เดนส์", "ด่านนอก", "ตัวเมืองสงขลา"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานหาดใหญ่ ไซด์ไลน์สงขลา ตรงปก จ่ายหน้างาน</h3>
-          <p style="margin-bottom: 8px;">รวมโปรไฟล์ <strong>สาวรับงานหาดใหญ่</strong> และไซด์ไลน์สงขลา สแตนด์บายพร้อมดูแลถึงโรงแรมในตัวเมืองหาดใหญ่ ปลอดภัยนัดเจอจ่ายหน้างาน</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "สาวรับงานหาดใหญ่ แถวลีการ์เดนส์ นัดยังไง?", a: "แจ้งพิกัดโรงแรมในตัวเมืองหาดใหญ่ น้องๆ สแตนด์บายพร้อมเดินทางไปดูแลถึงห้องพักอย่างรวดเร็วและมิดชิดครับ" },
-        { q: "ต้องโอนมัดจำไหมสำหรับหาดใหญ่?", a: "ไม่มีการโอนมัดจำครับ เจอน้องตัวจริงหน้างานค่อยชำระเงินตรงกับน้องครับ" }
-      ]
-    },
-
-    suratthani: {
-      zones: ["ทั้งหมด", "ตัวเมืองสุราษฎร์", "เกาะสมุย", "เฉวง", "ละไม", "บ่อผุด", "เกาะพะงัน"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">สาวรับงานสมุย ไซด์ไลน์สุราษฎร์ธานี ตรงปก 100%</h3>
-          <p style="margin-bottom: 8px;">ศูนย์รวม <strong>สาวรับงานสมุย</strong> และไซด์ไลน์สุราษฎร์ธานี พร้อมเดินทางดูแลถึงพูลวิลล่าและโรงแรมริมหาด นัดเจอจ่ายหน้างาน ปลอดภัย ไร้มัดจำ</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "บนเกาะสมุย เรียกน้องไปวิลล่าได้ไหม?", a: "ได้ครับ มีน้องๆ ประจำอยู่บนเกาะสมุย พร้อมเดินทางไปดูแลถึงโรงแรมและพูลวิลล่าส่วนตัวครับ" },
-        { q: "ระบบจ่ายเงินบนเกาะสมุยเป็นอย่างไร?", a: "นัดพบเจอตัวจริงหน้างาน ตรวจสอบความถูกต้องแล้วค่อยจ่ายเงินตรงกับน้องครับ" }
-      ]
-    },
-
-    national: {
-      zones: ["ทั้งหมด", "เชียงใหม่", "ขอนแก่น", "เชียงราย", "อุดรธานี", "ลำปาง", "ภูเก็ต", "กรุงเทพฯ", "ชลบุรี"],
-      seoContent: `
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">ศูนย์รวมสาวรับงาน ไซด์ไลน์ ทั่วไทย อันดับ 1</h3>
-          <p style="margin-bottom: 8px;">First Model Hub คือแพลตฟอร์มที่รวบรวม <strong>สาวรับงานทั่วไทย</strong>, <strong>ไซด์ไลน์ทั่วไทย</strong> และ <strong>เด็กเอ็น (EN VIP)</strong> ครอบคลุมพื้นที่บริการยอดนิยม เราคัดสรรเฉพาะน้องๆ โปรไฟล์พรีเมียม วัยใส นักศึกษา และสาวสวยหุ่นนางแบบ ที่พร้อมให้บริการสไตล์ฟิวแฟน (GFE) ดูแลดุจคนรัก</p>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ นโยบายความปลอดภัยสูงสุด (Zero-Deposit)</h3>
-          <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>จ่ายเงินหน้างานเท่านั้น:</strong> ป้องกันมิจฉาชีพ 100% ไม่มีการบังคับโอนเงินมัดจำล่วงหน้าทุกกรณี</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>การันตีตรงปก 100%:</strong> โปรไฟล์ผ่านการตรวจสอบ หากตัวจริงไม่ตรงปก สามารถยกเลิกได้ทันทีฟรี!</span></li>
-             <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span><strong>รักษาความลับลูกค้า:</strong> บริการ Outcall ส่งน้องๆ ไปยังโรงแรมหรือที่พักส่วนตัวของท่านอย่างมิดชิด</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">บริการครอบคลุมทุกความต้องการ</h3>
-          <p>เรามีบริการหลากหลาย ไม่ว่าจะเป็นเพื่อนเที่ยวทานข้าว, ดินเนอร์, เด็กเอ็นชงเหล้า, บริการแบบชั่วคราว (Short Time) หรือดูแลทั้งคืน (Overnight) เลือกจังหวัดที่คุณอยู่แล้วนัดหมายได้เลย!</p>
-        </div>
-      `,
-      reviews: [],
-      faqs: [
-        { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น ปลอดภัย 100%" },
-        { q: "ถ้าสั่งจองแล้ว น้องมาถึงแต่ไม่ตรงปก ทำอย่างไร?", a: "เราการันตีตรงปกครับ หากลูกค้าพบว่ารูปภาพและตัวจริงไม่เหมือนกัน สามารถปฏิเสธการรับบริการและยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่าย" },
-       { q: "บริการฟิวแฟน (GFE) คืออะไร แตกต่างจากการรับงานทั่วไปอย่างไร?", a: "คือรูปแบบการดูแลสุดพิเศษจากน้องๆ บนระบบของ FirstModelHub ที่เน้นการเทคแคร์ เอาใจใส่ และให้เกียรติลูกค้าดุจคนรัก เหมาะมากสำหรับผู้ที่ต้องการเพื่อนเที่ยวคาเฟ่หรือทานข้าวดินเนอร์ในย่านเชียงใหม่ เชียงราย ลำปาง ขอนแก่น และทั่วไทย โดยเน้นความเป็นกันเอง อ่อนโยน และสุภาพสูงสุดในทุกการนัดหมายครับ" },
-        { q: "มีน้องที่รับงานแบบค้างคืน (Overnight) ไหม?", a: "มีครอบคลุมทุกจังหวัดครับ ลูกค้าสามารถเช็คเรทราคาเหมาค้างคืนได้ที่หน้ารายละเอียดโปรไฟล์ของน้องๆ แต่ละคน" },
-        { q: "เปิดให้บริการตลอด 24 ชั่วโมงหรือไม่?", a: "ระบบแอดมินและการประสานงานของเราเปิดให้บริการตั้งแต่ช่วงสายถึงดึก (ตามเวลาที่ระบุหน้าเว็บ) แต่น้องๆ หลายคนสแตนด์บายรับงานตลอด 24 ชม. ค่ะ" }
-      ]
-    }
+    bangkok: { zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ"] },
+    chonburi: { zones: ["พัทยา", "หาดจอมเทียน", "บางแสน", "ศรีราชา"] },
+    chiangmai: { zones: ["นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก"] },
+    chiangrai: { zones: ["บ้านดู่", "หน้า มฟล.", "หอนาฬิกา"] },
+    lampang: { zones: ["สวนดอก", "ม.ราชภัฏลำปาง", "สบตุ๋ย"] },
+    "khon-kaen": { zones: ["กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น"] },
+    khonkaen: { zones: ["กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น"] },
+    phuket: { zones: ["ป่าตอง", "ตัวเมืองภูเก็ต", "กะทู้", "บางเทา"] },
+    udonthani: { zones: ["UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร"] },
+    national: { zones: ["เชียงใหม่", "ขอนแก่น", "ภูเก็ต", "อุดรธานี"] }
   };
 
   const REVIEW_POOL = [
@@ -1071,7 +720,7 @@ function optimizeImg(imagePath, mode = "card") {
         });
       }
 
-      if (appState.activePillTag && appState.activePillTag !== "all") {
+     if (appState.activePillTag && appState.activePillTag !== "all") {
         const filterTag = appState.activePillTag.toLowerCase().trim();
         results = results.filter(p => {
           const tagStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
@@ -1082,12 +731,24 @@ function optimizeImg(imagePath, mode = "card") {
 
           if (filterTag === "ตรงปก") return p.isVerified || combined.includes("ตรงปก");
           
+          // 🟢 ดักจับสายเด็กเอ็นปาร์ตี้ (ครอบคลุมทั้ง en, เด็กเอ็น, ชงเหล้า, ปาร์ตี้)
+          if (filterTag === "เอ็นเตอร์เทน") {
+            return combined.includes("เอ็น") || combined.includes("en") || combined.includes("ชงเหล้า") || combined.includes("ปาร์ตี้");
+          }
+
+          // 🟢 ดักจับสายรับงานค้างคืน (ครอบคลุม overnight, เหมาคืน, ค้างคืน)
+          if (filterTag === "ค้างคืน") {
+            return combined.includes("ค้างคืน") || combined.includes("overnight") || combined.includes("เหมาคืน") || combined.includes("ยาว");
+          }
+
+          // 🟢 ดักจับสไตล์ฟิวแฟน
+          if (filterTag === "ฟิวแฟน") {
+            return combined.includes("ฟิวแฟน") || combined.includes("gfe") || combined.includes("แฟน");
+          }
+
           if (filterTag.startsWith("เมือง")) {
-            // 1. รวมคีย์เวิร์ดย่านในเมืองของเชียงใหม่ และคำว่า เมือง/ในเมือง ของจังหวัดอื่นๆ
             const cityZones = ["เมือง", "ตัวเมือง", "ในเมือง", "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "มช", "ท่าแพ", "คูเมือง"];
             const isInCity = cityZones.some(z => locStr.includes(z));
-            
-            // 🔒 ตัด combined.includes(rawProv) ออก เพื่อไม่ให้น้องโซนแม่ริม/สันทราย หลุดเข้ามา
             return isInCity || combined.includes(filterTag);
           }
 
@@ -1328,13 +989,40 @@ let sectionTitle = isEN
         fiwfanProfiles = [...fiwfanProfiles, ...others];
       }
 
-      // แสดงผล 40 คน
+      // แสดงผล 40 คน พร้อมรักษากล่องเลือกจังหวัด (City Hubs) ให้เหมือน SSR 100%
       const feedProfiles = fiwfanProfiles.slice(0, 40);
+
+      const cityHubsHtml = `
+        <section class="national-city-hubs-section" style="margin-top: 10px; margin-bottom: 24px;">
+          <div class="featured-header-clean-row" style="margin-bottom: 12px;">
+            <div class="featured-title-flex">
+              <span class="section-tag-mini"><i class="fas fa-map-marked-alt"></i> พื้นที่หลัก</span>
+              <h2 class="clean-section-h2" style="font-size: 16px; margin: 0;">เลือกพื้นที่บริการ <span class="province-name-highlight">ครอบคลุมทั่วไทย</span></h2>
+            </div>
+            <a href="/locations" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูทั้งหมด &rarr;</a>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+            <a href="/location/chiangmai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงใหม่</strong>
+            </a>
+            <a href="/location/khon-kaen" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ขอนแก่น</strong>
+            </a>
+            <a href="/location/phuket" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ภูเก็ต</strong>
+            </a>
+            <a href="/location/udonthani" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">อุดรธานี</strong>
+            </a>
+          </div>
+        </section>
+      `;
 
       const wrapper = document.createElement("div");
       wrapper.className = "section-content-wrapper";
-      wrapper.style.cssText = "margin-top: 16px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
+      wrapper.style.cssText = "margin-top: 10px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
       wrapper.innerHTML = `
+        ${cityHubsHtml}
         <div class="province-header-row">
             <h2 class="province-clean-title">
                 <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
@@ -1661,6 +1349,18 @@ let sectionTitle = isEN
           <div class="profile-card-tags-row">
               ${vibeTagsHtml}
           </div>
+          
+          <!-- Social Proof: เรตติ้งดาว + วิวสด -->
+          <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; font-size: 11px;">
+            <span style="color: #F59E0B; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;">
+              ★ ${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)} 
+              <span style="color: #94A3B8; font-weight: normal; font-size: 10px;">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
+            </span>
+            <span style="color: #64748B; font-size: 10px; display: inline-flex; align-items: center; gap: 3px;">
+              <i class="fas fa-eye" style="color: #A855F7; font-size: 9px;"></i> ${((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) * 47) % 800) + 450}
+            </span>
+          </div>
+
           <div class="profile-card-title-row">
               <h3 class="profile-card-name">${escapeHTML(modelName)}</h3>
               ${ageDisplay ? `<span class="profile-card-age-tag">${ageDisplay}</span>` : ""}

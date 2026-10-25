@@ -51,8 +51,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_07">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_07">
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_08">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_08">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -186,11 +186,11 @@
           </div>
         </div>
       </div>
-     <div class="hero-headings-block">
+    <div class="hero-headings-block">
         <span class="hero-subheadline">ศูนย์รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ & เด็กเอ็น ครอบคลุมทั่วไทย</span>
         <h1 class="seo-h1-title" id="hero-h1">
           <span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย</span>
-          <span class="h1-line-2">ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน</span>
+          <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน โปรไฟล์รูปจริง นัดเจอจ่ายตรงกับน้อง</span>
         </h1>
       </div>
       <div class="hero-description-inset">
@@ -225,18 +225,18 @@
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
     </section>
 
-    <!-- Quick Filter Pills -->
+   <!-- Quick Filter Pills -->
     <div class="filter-pills-scroll-row" id="quick-filter-pills">
-      <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั่วประเทศ</button>
+      <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั้งหมด</button>
       <a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;">📍 เชียงใหม่</a>
       <a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;">📍 ขอนแก่น</a>
       <a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;">📍 ภูเก็ต</a>
       <a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;">📍 อุดรธานี</a>
-      <button class="filter-pill-tab tag-fiwfan" type="button" data-tag="ฟิวแฟน">💖 สไตล์ฟิวแฟน</button>
-      <button class="filter-pill-tab tag-verified" type="button" data-tag="ตรงปก">💎 การันตีตรงปก</button>
-      <button class="filter-pill-tab tag-cute" type="button" data-tag="ตัวเล็ก">🎀 สวยตัวเล็ก</button>
-      <button class="filter-pill-tab tag-care" type="button" data-tag="เอาใจเก่ง">🥰 เอาใจเก่ง</button>
-      <button class="filter-pill-tab tag-relax" type="button" data-tag="ไม่เร่งรีบ">⏳ ไม่เร่งงาน</button>
+      <button class="filter-pill-tab" type="button" data-tag="ฟิวแฟน">☕ เพื่อนเที่ยว (GFE)</button>
+      <button class="filter-pill-tab" type="button" data-tag="เอ็นเตอร์เทน">🥂 เด็กเอ็นปาร์ตี้ (EN)</button>
+      <button class="filter-pill-tab" type="button" data-tag="ค้างคืน">🌙 ดูแลค้างคืน</button>
+      <button class="filter-pill-tab" type="button" data-tag="ตัวเล็ก">🎀 น่ารักตัวเล็ก</button>
+      <button class="filter-pill-tab" type="button" data-tag="เอาใจเก่ง">🥰 เอาใจเก่ง</button>
     </div>
 
     <!-- Featured Profiles Section -->
@@ -612,16 +612,11 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_07"></script>
+  <script type="module" src="/main.js?v=v_20261022_08"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      const CURRENT_SW_VER = 'v_20261022_07';
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.update();
-        }
-      });
+      const CURRENT_SW_VER = 'v_20261022_08';
       navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
@@ -629,18 +624,15 @@
             if (installingWorker) {
               installingWorker.onstatechange = function() {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  const sessionKey = 'sw_reloaded_' + CURRENT_SW_VER;
-                  if (!sessionStorage.getItem(sessionKey)) {
-                    sessionStorage.setItem(sessionKey, '1');
-                    window.location.reload();
-                  }
+                  // อัปเดตแคชเงียบๆ ในพื้นหลัง ข้อมูลใหม่จะแสดงอัตโนมัติรอบถัดไป ไม่บังคับรีโหลดให้กระตุก
+                  console.log('FirstModelHub ServiceWorker updated successfully.');
                 }
               };
             }
           };
         })
         .catch(function(err) {
-          console.warn('SW Error bypassed:', err);
+          console.warn('SW registration bypassed:', err);
         });
     });
   }
