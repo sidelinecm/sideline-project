@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_07`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_08`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -198,65 +198,50 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 ระบบ AI Persona Generator สำหรับเนื้อหาในหน้าโปรไฟล์
+// 🟢 ระบบ Human Bio Generator: ใช้ข้อความจริงของน้อง + Checklist สรุปจุดสำคัญ
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
-  const hNum = parseInt(height, 10) || 160;
-  const wNum = parseInt(weight, 10) || 48;
-  const rawStats = String(stats || "").trim();
-  const bustNum = parseInt(rawStats.split(/[-/]/)[0], 10) || 34;
-  const pLocation = sanitizeThaiText(p.location || zone || provinceName);
+  let rawPersonalDesc = sanitizeThaiText(p.description || "")
+    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
+    .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
+    .trim();
 
-  const rawTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-  const isTalkative = rawTags.includes("คุยสนุก") || rawTags.includes("อัธยาศัยดี");
-  const isCaring = rawTags.includes("เอาใจเก่ง") || rawTags.includes("ฟิวแฟน") || rawTags.includes("ขี้อ้อน");
-  const isRelaxed = rawTags.includes("ไม่เร่ง") || rawTags.includes("ตามใจ");
-  const isWhiteSkin = rawTags.includes("ขาว") || rawTags.includes("ผิวขาว");
+  const speechText = (rawPersonalDesc.length >= 8) 
+    ? rawPersonalDesc 
+    : "ยินดีที่ได้รู้จักค่ะ ทักมาพูดคุยสอบถามคิวหรือนัดเวลาล่วงหน้าได้เลยนะคะ เทคแคร์เป็นกันเอง ไม่ดุค่ะ";
 
-  let lookTrait = "รูปร่างสมส่วนกำลังดี";
-  if (hNum <= 158 && wNum <= 46) lookTrait = "สาวสวยไซส์มินิ ตัวเล็กน่ารัก พกพาง่าย";
-  else if (hNum >= 165) lookTrait = "สาวสวยหุ่นเพรียว สูงโปร่ง ขาเรียว บุคลิกภาพดี";
-  else if (bustNum >= 36) lookTrait = "สาวสวยหุ่นเซ็กซี่ ทรวดทรงอกเอวชัดเจนสะดุดตา";
-  else if (wNum >= 54) lookTrait = "สาวสวยสายอวบอิ่ม เนื้อนมไข่ มีเสน่ห์น่ากอด";
-
-  let skinTrait = isWhiteSkin ? "ผิวขาวสะอาดสะอ้าน" : "ผิวพรรณเนียนสวย ดูสุขภาพดี";
-  let personalityTrait = "นิสัยน่ารัก ยิ้มแย้ม อัธยาศัยดี คุยสนุก";
-  if (isTalkative) personalityTrait = "คุยเก่ง ชวนคุยเพลิน อารมณ์ดี เป็นกันเอง ไม่มีช่วงเกร็ง";
-  else if (isCaring) personalityTrait = "ขี้อ้อน เอาใจเก่ง พูดจาเพราะ นุ่มนวล";
-
-  const p1 = `${displayName} ${lookTrait} สแตนด์บายใน${provinceName} วัย ${age} ปี สัดส่วน ${stats} (สูง ${height} ซม. / หนัก ${weight} กก.) ${skinTrait} ${personalityTrait} ไม่ตึงไม่เหวี่ยง การันตีตัวจริงสวยตรงปก 100% ค่ะ`;
-
-  let careStyle = "เน้นการดูแลสไตล์ฟิวแฟน (GFE) แท้ๆ คอยเทคแคร์ให้ผ่อนคลาย";
-  if (isCaring && isRelaxed) careStyle = "เน้นฟิวแฟนแบบใกล้ชิด เอาใจเก่ง ไม่เร่งรอบ ให้เวลาเต็มที่เหมือนอยู่กับคนรู้ใจ";
-  else if (isRelaxed) careStyle = "สไตล์การดูแลเป็นกันเอง สบายๆ ชิลล์ๆ ไม่เร่งงาน";
-
-  const p2 = `สไตล์การดูแล: ${careStyle} ไม่ว่าจะนัดทานข้าว นั่งคาเฟ่ ดินเนอร์ หรือพักผ่อนส่วนตัวในที่พัก พร้อมดูแลด้วยความสุภาพ จริงใจ และให้เกียรติลูกค้าค่ะ`;
-
-  let roomContext = `พิกัดบริการ: มีห้องพักส่วนตัวย่าน${pLocation} สะอาด มิดชิด ปลอดภัย มีที่จอดรถสะดวก หรือนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรมในเมืองได้รวดเร็วภายใน 15-30 นาที`;
-  if (pLocation.includes("นิมมาน") || pLocation.includes("เจ็ดยอด") || pLocation.includes("กังสดาล")) {
-    roomContext = `พิกัดบริการ: พักอยู่ในโซน ${pLocation} เดินทางสะดวก มิดชิด นัดหมายเดินทางไปพบที่โรงแรมหรือคอนโดส่วนตัวในพื้นที่ได้อย่างสะดวกรวดเร็ว`;
-  }
-
-  const p3 = `${roomContext} • มั่นใจได้ 100% ด้วยมาตรฐานนัดพบเจอตัวจริง ตรวจสอบความถูกต้องหน้างานก่อน จึงค่อยชำระค่าบริการตรงกับน้อง ไม่มีมัดจำล่วงหน้าทุกกรณีค่ะ`;
-
-  let bioText = "";
-  if (p.description && p.description.trim().length > 10 && !/เรทราคา|ไม่รวมห้อง|•ㅅ•|1500\/1|มัดจำ/i.test(p.description)) {
-    bioText = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(124, 58, 237, 0.15);"><strong style="color: #7C3AED;">ข้อความจากน้อง:</strong> "${sanitizeThaiText(p.description)}"</div>`;
-  }
-
-  return `<p style="margin: 0 0 8px 0; line-height: 1.65;">${p1}</p><p style="margin: 0 0 8px 0; line-height: 1.65;">${p2}</p><p style="margin: 0; line-height: 1.65;">${p3}</p>${bioText}`;
+  return `
+    <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">
+      <div style="display: flex; align-items: flex-start; gap: 8px; background: #F8F6FC; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px;">
+        <span style="font-size: 16px; line-height: 1;">💬</span>
+        <p style="font-size: 12.5px; color: #334155; line-height: 1.6; margin: 0; font-style: italic;">"${escapeHTML(speechText)}"</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569;">
+     <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-map-marker-alt" style="color: #7C3AED; width: 14px; text-align: center;"></i>
+          <span><strong>พิกัดบริการ:</strong> มีห้องส่วนตัว${zone.startsWith("ย่าน") ? "" : "ย่าน"}${escapeHTML(zone)} / พร้อมเดินทางไปหาที่พักส่วนตัว</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-heart" style="color: #E11D48; width: 14px; text-align: center;"></i>
+          <span><strong>สไตล์การดูแล:</strong> ฟิวแฟนสุภาพ เทคแคร์ดี อารมณ์ดี ไม่เร่งรีบ</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-shield-alt" style="color: #059669; width: 14px; text-align: center;"></i>
+          <span><strong>การนัดหมาย:</strong> พบตัวจริงค่อยชำระเงินตรงกับน้อง สบายใจทั้งสองฝ่าย</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-// 🟢 ระบบสุ่ม Meta Description 6 สูตรภาษาคนจริง (Deterministic Spintax ไม่ซ้ำซ้อน ไม่โดน Google แบน)
+// 🟢 ระบบ Meta Description ภาษาคนจริง: สั้นกระชับ พิกัดชัด เรทราคาจริง
 function generateHumanMetaDesc(name, prov, city, zone, stats, price, id) {
   const seed = (typeof id === "number" ? id : String(id || "1").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0));
   
   const humanTemplates = [
-    `${name} สาวรับงานไซด์ไลน์${prov} พิกัดโซน${zone} สัดส่วน ${stats} ตัวจริงตรงปก 100% ดูแลดี สไตล์ฟิวแฟนน่ารักเป็นกันเอง ไม่เร่งเวลา นัดเจอตัวจริงเช็คความตรงปกก่อนค่อยจ่ายหน้างาน ${price} ไร้มัดจำ สบายใจได้เลยค่ะ`,
-    `หาเพื่อนเที่ยว${prov} แนะนำ${name} โซน${zone} (${city}) สาวสวยหุ่นดี ${stats} เทคแคร์ดั่งแฟนคนพิเศษ อ้อนเก่ง คุยสนุก ไม่ตึงไม่เหวี่ยง มีห้องพร้อมรับและเดินทางไปหาที่พัก เรท ${price} นัดเจอจ่ายหน้างาน ปลอดภัย 100%`,
-    `${name} สแตนด์บายพร้อมดูแลโซน${zone} ${city} สัดส่วนสวย ${stats} ผิวพรรณดี สุภาพ ให้เกียรติลูกค้า นัดทานข้าว ดินเนอร์ หรือพักผ่อนส่วนตัว เดินทางถึงที่พักไว 15-30 นาที การันตีตรงปก เจอตัวจริงค่อยจ่ายเงินค่ะ`,
-    `นัดเจอน้อง${name.replace(/^(น้อง)+/, "")} ไซด์ไลน์${prov} ย่าน${zone} หมดกังวลเรื่องมิจฉาชีพ! ระบบจ่ายหน้างานตรงกับน้อง ไม่ต้องโอนมัดจำก่อนทุกกรณี ตัวจริงสวยตรงปก ${stats} สไตล์ฟิวแฟนแท้ ไม่เร่งรอบ เรทเริ่มต้น ${price} ทักคุยได้เลยค่ะ`,
-    `โปรไฟล์ตรงปก 100% ${name} รับงานไซด์ไลน์${city} พิกัด${zone} วัยใส สัดส่วน ${stats} น่ารัก ขี้อ้อน ชวนคุยเพลิน เหมือนไปเดตกับแฟนตัวจริง มีห้องส่วนตัวสะอาด ปลอดภัย นัดหมายจ่ายเงินหน้างาน ${price} ไร้กังวลเรื่องโอนก่อน`,
-    `${name} สาวรับงาน${prov} โซน${zone} สัดส่วนสะดุดตา ${stats} ดูแลสไตล์ฟิวแฟนแท้ๆ สุภาพ นุ่มนวล ไม่เร่งงาน เรทเริ่มต้น ${price} (1 ชม.) มีห้องพร้อมและนอกสถานที่ นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระเงินค่ะ`
+    `ดูโปรไฟล์ ${name} สแตนด์บายโซน${zone} (${prov}) สัดส่วน ${stats} เพื่อนเที่ยวสไตล์ฟิวแฟน น่ารัก เป็นกันเอง นัดทานข้าว คาเฟ่ หรือพักผ่อนส่วนตัว เรทเริ่มต้น ${price} ตรวจสอบตัวจริงหน้างานค่อยชำระเงินค่ะ`,
+    `${name} เพื่อนเที่ยวฟิวแฟน${prov} พิกัดย่าน${zone} สเปกน่ารัก อัธยาศัยดี ไม่เร่งงาน เรท ${price} มีห้องส่วนตัวและเดินทางได้ ปลอดภัยไม่โอนมัดจำ ทักไลน์สอบถามคิวได้ตลอดเวลาค่ะ`,
+    `โปรไฟล์ ${name} รับงานไซด์ไลน์${city} พิกัด${zone} สัดส่วน ${stats} เทคแคร์อบอุ่นเหมือนแฟนตัวจริง สุภาพ ให้เกียรติลูกค้า เรท ${price} เจอน้องตัวจริงก่อนค่อยจ่ายเงิน สบายใจ ปลอดภัยค่ะ`,
+    `นัดเจอน้อง${name.replace(/^(น้อง)+/, "")} ไซด์ไลน์${prov} ย่าน${zone} สัดส่วน ${stats} ตัวจริงรูปตรงปก ดูแลเป็นกันเอง ไม่เร่งรอบ เรทเริ่มต้น ${price} ตรวจสอบความถูกต้องหน้างานก่อนค่อยจ่ายเงินค่ะ`
   ];
 
   return humanTemplates[Math.abs(seed) % humanTemplates.length];
@@ -499,8 +484,7 @@ export default async (req, context) => {
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-    const currentFreshness = getCurrentFreshnessText();
-    const profileSeoH1 = `${displayName} สาวรับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100%`;
+  const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
     // 🟢 ใส่เดือน-ปีล่าสุด คนค้นหาเห็นแล้วอยากคลิกเพราะรู้ว่าน้องยังรับงานอยู่ปัจจุบัน
     const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
@@ -524,16 +508,16 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
 
     const profileFaqs = [
       {
-        q: `นัดพบ${displayName} ในโซน${primaryZone} (${cleanProvince}) มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`,
-        a: `${displayName} มีห้องพักส่วนตัวย่าน${primaryZone} ที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวในพื้นที่ได้อย่างรวดเร็วภายใน 15-30 นาทีค่ะ`
+        q: `การนัดพบ${displayName} มีขั้นตอนการชำระเงินอย่างไร?`,
+        a: `สามารถชำระเงินสดหรือโอนตรงให้น้องตอนที่เดินทางไปถึงที่นัดหมายได้เลยค่ะ ทางระบบไม่มีนโยบายให้โอนเงินมัดจำล่วงหน้า เพื่อความสบายใจและโปร่งใสของทั้งสองฝ่ายค่ะ`
       },
       {
-        q: `อัตราค่าบริการและการชำระเงินของ${displayName} จ่ายอย่างไร ต้องโอนมัดจำไหม?`,
-        a: `เรทเริ่มต้นอยู่ที่ ${priceDisplay} (1 ชม.) สำหรับงานฟิวแฟน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ นัดเจอตัวจริงหน้างาน เช็คความตรงปกเรียบร้อยแล้วจึงค่อยชำระเงินโดยตรงกับน้องค่ะ`
+        q: `หากน้องเดินทางไปถึงแล้วไม่เหมือนในรูปภาพ สามารถทำอย่างไรได้บ้าง?`,
+        a: `หากพบว่าตัวจริงไม่ตรงตามรูปโปรไฟล์ หรือไม่เป็นไปตามที่ตกลงกันไว้ สามารถปฏิเสธการเริ่มงานและยกเลิกการนัดหมายได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้นค่ะ`
       },
       {
-        q: `หากเจอตัวจริงแล้ว${displayName}ไม่ตรงปก สามารถยกเลิกได้ไหม?`,
-        a: `สามารถปฏิเสธและยกเลิกได้ทันทีหน้างานโดยไม่มีค่าใช้จ่ายค่ะ FirstModelHub การันตีโปรไฟล์ตัวจริงตรงปก 100% เพื่อความสบายใจสูงสุดของผู้ใช้บริการค่ะ`
+        q: `นัดพบ${displayName} ในโซน${primaryZone} มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`,
+        a: `${displayName} มีห้องพักส่วนตัวย่าน${primaryZone} ที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวในพื้นที่ได้สะดวกรวดเร็วค่ะ`
       }
     ];
 
@@ -772,10 +756,10 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
                     ${escapeHTML(profileSeoH1)}
                   </h1>
                    
-                  <div style="display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
-                      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.25); padding: 4px 12px; border-radius: 100px;">
-                          <span style="color: #059669; font-size: 11px; font-weight: 900;">✓ VERIFIED PROFILE</span>
-                          <span style="color: #065F46; font-size: 11px; font-weight: 700;">ตรงปก 100%</span>
+                 <div style="display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
+                      <div style="display: inline-flex; align-items: center; gap: 5px; background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.2); padding: 4px 10px; border-radius: 100px;">
+                          <i class="fas fa-check-circle" style="color: #059669; font-size: 12px;"></i>
+                          <span style="color: #065F46; font-size: 11px; font-weight: 700;">ยืนยันรูปถ่ายจริงแล้ว</span>
                       </div>
                       <div style="display: inline-flex; align-items: center; gap: 5px; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px;">
                           <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor};"></span>
@@ -839,8 +823,8 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
                     </button>
                 </div>
 
-               <!-- Bio Description -->
-                <div class="description" style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 14px; color: #334155; font-size: 13px; line-height: 1.7; margin-bottom: 1.25rem;">
+               <!-- Bio Description: กล่องแนะนำตัวคลีนมินิมอล ไม่ซ้อนกรอบ -->
+                <div class="profile-bio-wrapper" style="margin-bottom: 1.25rem;">
                     ${naturalDesc}
                 </div>
 
@@ -869,29 +853,22 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
   
-   <!-- ปรับ padding-bottom ให้คำนวณ safe-area อัตโนมัติ -->
+   <!-- แถบจองคิวลอยตัวด้านล่าง ปรับข้อความให้สะอาดตา ไร้คำซ้ำซาก -->
 <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(124, 58, 237, 0.15); z-index: 9999; display: flex; gap: 10px; align-items: center; box-sizing: border-box;">
         <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;">
             <i class="fab fa-line" style="font-size: 20px;"></i>
-            <span>จองคิว${escapeHTML(displayName)}</span>
-            <span style="font-size: 11px; background: rgba(0,0,0,0.22); padding: 2px 8px; border-radius: 100px; font-weight: 700;">จ่ายหน้างาน ไร้มัดจำ</span>
+            <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span>
+            <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 600;">จ่ายตรงกับน้อง</span>
         </a>
         <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
             <i class="fas fa-share-alt" style="font-size: 16px;"></i>
         </button>
     </div>
 
-   <script>
+  <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-     const CURRENT_SW_VER = '${GLOBAL_PROFILE_VERSION}';
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.update();
-        }
-      });
-
-      // ลงทะเบียน Service Worker พร้อมเวอร์ชัน
+      const CURRENT_SW_VER = '${GLOBAL_PROFILE_VERSION}';
       navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
@@ -899,12 +876,7 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
             if (installingWorker) {
               installingWorker.onstatechange = function() {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // 🟢 ผูกชื่อคีย์เข้ากับเวอร์ชันปัจจุบัน: จะรีโหลดแค่ 1 ครั้งต่อเวอร์ชันใหม่ ไม่ติดลูป และไม่อั้นเวอร์ชันถัดไป
-                  const sessionKey = 'sw_reloaded_' + CURRENT_SW_VER;
-                  if (!sessionStorage.getItem(sessionKey)) {
-                    sessionStorage.setItem(sessionKey, '1');
-                    window.location.reload();
-                  }
+                  console.log('Profile page SW updated quietly.');
                 }
               };
             }
