@@ -541,7 +541,7 @@ function optimizeImg(imagePath, mode = "card") {
 
     if (hotCandidate.length === 0) hotCandidate = appState.allProfiles;
 
-    // 🛡️ กรองตัดคนซ้ำทิ้งเด็ดขาด (ชื่อเดียวกัน หรือรูปเดียวกัน จะโผล่ได้แค่รอบเดียว)
+   // 🛡️ กรองตัดคนซ้ำทิ้งเด็ดขาด (ชื่อเดียวกัน หรือรูปเดียวกัน จะโผล่ได้แค่รอบเดียว)
     const seenHotNames = new Set();
     const hotProfiles = [];
     for (const p of hotCandidate) {
@@ -551,6 +551,10 @@ function optimizeImg(imagePath, mode = "card") {
       hotProfiles.push(p);
       if (hotProfiles.length >= 10) break;
     }
+
+    // 🟢 [เพิ่มบรรทัดนี้]: บันทึก ID ของน้องๆ ที่ติด Hot Swiper ไว้ เพื่อส่งไปตัดออกในฟีดหลักด้านล่าง
+    window.__hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
+
     vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
       const rankBadge = `#${idx + 1} HOT`;
       const pKey = (p.provinceKey || "national").toLowerCase();
@@ -564,14 +568,14 @@ function optimizeImg(imagePath, mode = "card") {
         <div class="vip-card-item ${idx === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${statusLabel}</span>
           <span class="hot-rank-badge">${rankBadge}</span>
-    <img src="${imgSrc}" 
-     alt="${escapeHTML(p.displayName)} ฟิวแฟน${escapeHTML(locationText)}" 
-     width="175" 
-     height="245" 
-     loading="${idx === 0 ? "eager" : "lazy"}" 
-     fetchpriority="${idx === 0 ? "high" : "auto"}" 
-     decoding="async" 
-     onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
+          <img src="${imgSrc}" 
+               alt="${escapeHTML(p.displayName)} ฟิวแฟน${escapeHTML(locationText)}" 
+               width="175" 
+               height="245" 
+               loading="${idx === 0 ? "eager" : "lazy"}" 
+               fetchpriority="${idx === 0 ? "high" : "auto"}" 
+               decoding="async" 
+               onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์ ${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
@@ -581,7 +585,7 @@ function optimizeImg(imagePath, mode = "card") {
         </div>
       `;
     }).join("");
-  }
+    }
 
   function executeFilterAndRender(isUserTriggered = true) {
     try {
@@ -929,20 +933,22 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       return;
     }
 
-    const isExplicitLocationPath = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
+   
+
+  const isExplicitLocationPath = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
 
     // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
     if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
-     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/);
-const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
-const currentZoneParam = routeMatch && routeMatch[2] ? decodeURIComponent(routeMatch[2]).trim() : (window.currentZoneSlug || "");
-const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
-const zoneLabelText = currentZoneParam ? ` โซน${escapeHTML(currentZoneParam)}` : "";
-const searchKeyword = domCache.searchInput?.value?.trim();
+      const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/);
+      const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
+      const currentZoneParam = routeMatch && routeMatch[2] ? decodeURIComponent(routeMatch[2]).trim() : (window.currentZoneSlug || "");
+      const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
+      const zoneLabelText = currentZoneParam ? ` โซน${escapeHTML(currentZoneParam)}` : "";
+      const searchKeyword = domCache.searchInput?.value?.trim();
 
-let sectionTitle = isEN 
-  ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>` 
-  : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`;
+      let sectionTitle = isEN 
+        ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>` 
+        : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`;
       if (searchKeyword) {
         sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
       } else if (appState.activePillTag && appState.activePillTag !== "all") {
@@ -971,9 +977,14 @@ let sectionTitle = isEN
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
 
-    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (คัดเฉพาะน้องๆ สาย #ฟิวแฟน 40 คน)
+    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (คัดเฉพาะน้องๆ สาย #ฟิวแฟน 40 คน โดยตัดคนซ้ำที่ติด Hot Swiper ออก)
     } else {
+      // 🛡️ ดึงรายชื่อ ID ที่ติดแถบ Hot Swiper ไปแล้ว เพื่อป้องกันการแสดงผลซ้ำซ้อน
+      const hotIds = window.__hotProfileIds || new Set();
+
       let fiwfanProfiles = profiles.filter(p => {
+        if (hotIds.has(String(p.id))) return false; // 👈 ตัดคนซ้ำที่อยู่บน Hot Swiper ออกเด็ดขาด
+
         const rawTags = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
         const hasTag = rawTags.some(t => {
           const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
@@ -985,7 +996,7 @@ let sectionTitle = isEN
       });
 
       if (fiwfanProfiles.length < 40) {
-        const others = profiles.filter(p => !fiwfanProfiles.some(f => f.id === p.id));
+        const others = profiles.filter(p => !hotIds.has(String(p.id)) && !fiwfanProfiles.some(f => f.id === p.id));
         fiwfanProfiles = [...fiwfanProfiles, ...others];
       }
 
@@ -1042,7 +1053,7 @@ let sectionTitle = isEN
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, feedProfiles, activeRenderId);
     }
-  }
+    }
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
