@@ -472,7 +472,6 @@ export default async (req, context) => {
     const weight = String(rawW);
     const weightDisplay = `${weight} กก.`;
   
-    // 🟢 1. สกัดตัวแปรย่านและบริบทเมืองแบบแม่นยำ
     const cleanProvince = escapeHTML(provinceNameThai);
     let rawLoc = sanitizeThaiText(profile.location || "");
     const primaryZone = rawLoc
@@ -484,8 +483,10 @@ export default async (req, context) => {
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-  const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
-    // 🟢 ใส่เดือน-ปีล่าสุด คนค้นหาเห็นแล้วอยากคลิกเพราะรู้ว่าน้องยังรับงานอยู่ปัจจุบัน
+    // 🟢 ประกาศตัวแปรดึงเดือน-ปีปัจจุบันก่อนนำไปใช้ (แก้ ReferenceError)
+    const currentFreshness = getCurrentFreshnessText(); // 👈 เพิ่มบรรทัดนี้ลงไปครับ!
+
+    const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
     const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
     // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
