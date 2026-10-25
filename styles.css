@@ -4627,3 +4627,119 @@ img:not([src]) {
   color: #FFFFFF !important;
   border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
 }
+/* ========================================================================== */
+/* 💎 UNIVERSAL FLUID RESPONSIVE ENHANCEMENTS (ทุกอุปกรณ์ ทุกขนาดหน้าจอ)         */
+/* ========================================================================== */
+
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* 1. ป้องกันปัญหาหน้าจอขยายเอง และปรับระบบ Box-sizing สากล */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* 2. ปรับ Grid การ์ดโปรไฟล์ให้ยืดหยุ่นอัตโนมัติขั้นสุด (รองรับตั้งแต่จอ 280px จนถึง 4K) */
+.profile-grid, .profiles-grid-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 420px) {
+  .profile-grid, .profiles-grid-row {
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .profile-grid, .profiles-grid-row {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .profile-grid, .profiles-grid-row {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+    gap: 20px !important;
+  }
+}
+
+/* 3. ระบบ Fluid Typography (ขนาดตัวอักษรยืดหดตามหน้าจออัตโนมัติ ไม่มียอดล้น) */
+.seo-h1-title {
+  font-size: clamp(1.2rem, 3.5vw + 0.5rem, 1.85rem) !important;
+}
+
+.hero-subheadline {
+  font-size: clamp(0.85rem, 1.5vw + 0.3rem, 1.05rem) !important;
+}
+
+/* 4. ป้องกัน Safe Area บนมือถือรุ่นใหม่ (iPhone Notch / Dynamic Island / Gesture Bar) */
+.floating-app-dock {
+  padding-bottom: calc(10px + var(--safe-bottom)) !important;
+  padding-left: max(12px, var(--safe-left)) !important;
+  padding-right: max(12px, var(--safe-right)) !important;
+}
+
+/* แถบจองคิวลอยตัวด้านล่างสุดในหน้าโปรไฟล์เดี่ยว */
+body > div[style*="position: fixed; bottom: 0;"] {
+  padding-bottom: calc(10px + var(--safe-bottom)) !important;
+}
+
+/* 5. ปรับแต่ง Lightbox Modal ให้สวยงามสมบูรณ์ทั้งมือถือและคอมพิวเตอร์ */
+@media (min-width: 768px) {
+  #lightbox {
+    padding: 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  #lightbox-content-wrapper-el {
+    width: 100% !important;
+    max-width: 740px !important;
+    max-height: 90vh !important;
+    border-radius: 28px !important;
+    overflow: hidden !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .lightbox-scroll-body {
+    max-height: calc(90vh - 40px) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  #lightbox-content-wrapper-el {
+    max-height: 94dvh !important;
+    border-top-left-radius: 24px !important;
+    border-top-right-radius: 24px !important;
+  }
+}
+
+/* 6. ป้องกันรูปภาพแตกหรือบิดเบี้ยวบนทุกอุปกรณ์ */
+img {
+  max-width: 100%;
+  height: auto;
+  font-style: italic;
+  shape-margin: 0.75rem;
+}
+
+/* 7. เพิ่มความลื่นไหลในการแตะสัมผัสบนมือถือ (Touch Action Optimization) */
+button, a, .interactive-card, .story-item-el {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
