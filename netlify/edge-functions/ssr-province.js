@@ -350,8 +350,9 @@ function optimizeImg(imagePath, mode = "card") {
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
-// 🟢 ฟังก์ชัน getDynamicIntro ฉบับสมบูรณ์ (ครอบคลุมทุกโซนและทุกจังหวัดทั่วไทย 100%)
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSlug = null) {
+  // ✅ ประกาศตัวแปรนี้ไว้บนสุด เพื่อให้เรียกได้ทั้ง provinceName และ provinceNameThai ไม่เออเร่อ 100%
+  const provinceNameThai = provinceName;
   const cleanSlug = (provinceSlug || "chiangmai").toLowerCase().replace(/[-_]/g, "");
   let cleanZones = zones && Array.isArray(zones) ? zones.filter(z => z && z !== "ทั้งหมด") : [];
 
@@ -705,7 +706,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     chiangmai: {
       headline: customZone ? customZone.headline : (zoneSlug ? `รับงานเชียงใหม่ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตัวจริงตรงปก 100%` : `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ตัวจริงตรงปก นัดเจอง่าย จ่ายหน้างาน`),
       intro: customZone ? customZone.intro : (zoneSlug ? `รวมน้องๆ สาวรับงานเชียงใหม่ และสาวไซด์ไลน์โซน${zoneSlug} วัยใสน่ารัก นักศึกษาและสาวสวยหุ่นดี พักและสแตนด์บายอยู่ในพื้นที่${zoneSlug} ดูแลใกล้ชิดสไตล์ฟิวแฟน (GFE) นัดเจอตัวจริงเช็คความตรงปกหน้างานก่อนค่อยจ่ายเงิน ไร้มัดจำค่ะ` : `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา มช. และสาวสวยหุ่นดี คัดสรรเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจปลอดภัยด้วยมาตรฐานจ่ายหน้างาน นัดเจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระเงิน หมดกังวลเรื่องการโดนหลอกโอนมัดจำล่วงหน้า 100% ค่ะ`),
-     convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceNameThai} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
+    convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceName} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
     },
     bangkok: {
       headline: customZone ? customZone.headline : (zoneSlug ? `สาวรับงานกรุงเทพฯ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตรงปก จ่ายหน้างาน` : `สาวรับงานกรุงเทพฯ • ไซด์ไลน์ กทม. เพื่อนเที่ยวฟิวแฟน VIP ตัวท็อป`),
