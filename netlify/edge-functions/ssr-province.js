@@ -350,6 +350,18 @@ function optimizeImg(imagePath, mode = "card") {
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
+// 🟢 เพิ่มฟังก์ชันช่วยสลับชุดข้อความ (Variant Rotation) ป้องกัน Duplicate Content ระหว่างหน้า
+function getVariant(seedStr, variants) {
+  if (!variants || variants.length === 0) return "";
+  let hash = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % variants.length;
+  return variants[index];
+}
+
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSlug = null) {
   // ✅ ประกาศตัวแปรนี้ไว้บนสุด เพื่อให้เรียกได้ทั้ง provinceName และ provinceNameThai ไม่เออเร่อ 100%
   const provinceNameThai = provinceName;
@@ -693,10 +705,8 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     }
   };
 
-  // 🟢 3. ตรวจสอบการเลือกใช้เนื้อหาเฉพาะโซน (Zone Override)
   const customZone = (zoneSlug && ZONE_CUSTOM_DETAILS[zoneSlug]) ? ZONE_CUSTOM_DETAILS[zoneSlug] : null;
 
-  // 🟢 4. เนื้อหาระดับจังหวัดและระดับประเทศ (Province-Level Context)
   const LOCAL_CONTEXT = {
     national: {
       headline: `สาวรับงาน • ไซด์ไลน์ทั่วไทย เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน`,
@@ -706,7 +716,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     chiangmai: {
       headline: customZone ? customZone.headline : (zoneSlug ? `รับงานเชียงใหม่ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตัวจริงตรงปก 100%` : `รับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ ตัวจริงตรงปก นัดเจอง่าย จ่ายหน้างาน`),
       intro: customZone ? customZone.intro : (zoneSlug ? `รวมน้องๆ สาวรับงานเชียงใหม่ และสาวไซด์ไลน์โซน${zoneSlug} วัยใสน่ารัก นักศึกษาและสาวสวยหุ่นดี พักและสแตนด์บายอยู่ในพื้นที่${zoneSlug} ดูแลใกล้ชิดสไตล์ฟิวแฟน (GFE) นัดเจอตัวจริงเช็คความตรงปกหน้างานก่อนค่อยจ่ายเงิน ไร้มัดจำค่ะ` : `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา มช. และสาวสวยหุ่นดี คัดสรรเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์ฟิวแฟน (GFE) ดูแลเอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจปลอดภัยด้วยมาตรฐานจ่ายหน้างาน นัดเจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระเงิน หมดกังวลเรื่องการโดนหลอกโอนมัดจำล่วงหน้า 100% ค่ะ`),
-    convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceName} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
+      convenience: customZone ? customZone.convenience : `พร้อมเดินทางดูแล (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceName} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
     },
     bangkok: {
       headline: customZone ? customZone.headline : (zoneSlug ? `สาวรับงานกรุงเทพฯ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตรงปก จ่ายหน้างาน` : `สาวรับงานกรุงเทพฯ • ไซด์ไลน์ กทม. เพื่อนเที่ยวฟิวแฟน VIP ตัวท็อป`),
@@ -784,6 +794,20 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     convenience: `ครอบคลุมโรงแรมและที่พักสำคัญในพื้นที่ ${provinceName}${zoneText} เดินทางนัดพบได้อย่างสะดวกและเป็นส่วนตัว`
   });
 
+  // 🛡️ สร้างชุดข้อความ Variant A และ B สำหรับสลับสับเปลี่ยนบล็อกล่างสุด
+  const seedKey = provinceSlug + (zoneSlug || "");
+  const safetyVariants = [
+    `ทุกโปรไฟล์ผ่านการยืนยันตัวตนด้วยรูปถ่ายจริง ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุด ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี`,
+    `การันตีความปลอดภัย: ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มี การเก็บเงินมัดจำล่วงหน้าทุกรูปแบบ หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูป สามารถปฏิเสธและยกเลิกงานได้ทันที`
+  ];
+  const termsVariants = [
+    `<strong>ข้อกำหนดการใช้งานระบบ:</strong> แพลตฟอร์ม FirstModelHub ทำหน้าที่เป็นพื้นที่สื่อกลางออนไลน์ในการลงประกาศข้อมูลเท่านั้น โดยทางเรามีนโยบายจำกัดอายุผู้เข้าชม ผู้ใช้งาน รวมถึงผู้ลงประกาศทุกคนอย่างเข้มงวด โดยจะต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น`,
+    `<strong>เงื่อนไขและนโยบายระบบ:</strong> เว็บไซต์ของเราจำกัดอายุผู้ใช้งานและผู้ลงประกาศทุกคนอย่างเข้มงวดที่ 20 ปีขึ้นไป ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุดตามมาตรฐานสากล`
+  ];
+
+  const selectedSafety = getVariant(seedKey + "_safety", safetyVariants);
+  const selectedTerms = getVariant(seedKey + "_terms", termsVariants);
+
   return `
     <div style="margin-bottom: 16px;">
       <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">${current.headline}</h3>
@@ -801,10 +825,10 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     </div>
     <div>
       <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและข้อกำหนดการใช้งาน</h3>
-      <p style="line-height: 1.65; margin-bottom: 6px;">ทุกโปรไฟล์ผ่านการยืนยันตัวตนด้วยรูปถ่ายจริง ข้อมูลการนัดหมายถูกเก็บเป็นความลับสูงสุด ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี</p>
+      <p style="line-height: 1.65; margin-bottom: 6px;">${selectedSafety}</p>
      <p style="line-height: 1.65; color: #64748B; font-size: 11.5px; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #7C3AED;">
-  <strong>ข้อกำหนดการใช้งานระบบ:</strong> แพลตฟอร์ม FirstModelHub ทำหน้าที่เป็นพื้นที่สื่อกลางออนไลน์ในการลงประกาศข้อมูลเท่านั้น โดยทางเรามีนโยบายจำกัดอายุผู้เข้าชม ผู้ใช้งาน รวมถึงผู้ลงประกาศทุกคนอย่างเข้มงวด โดยจะต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น และต้องยอมรับข้อตกลงความเป็นส่วนตัวและมาตรฐานความปลอดภัยของทางเว็บไซต์ก่อนเริ่มใช้งานทุกกรณี
-</p>
+      ${selectedTerms}
+    </p>
     </div>
   `;
 }

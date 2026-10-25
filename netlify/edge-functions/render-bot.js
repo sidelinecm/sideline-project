@@ -198,7 +198,7 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 ระบบ Human Bio Generator: ใช้ข้อความจริงของน้อง + Checklist สรุปจุดสำคัญ
+// 🟢 ระบบ Human Bio Generator: สลับชุดข้อความ A และ B ตาม ID โปรไฟล์ ป้องกันเนื้อหาซ้ำ
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   let rawPersonalDesc = sanitizeThaiText(p.description || "")
     .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
@@ -209,24 +209,50 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
     ? rawPersonalDesc 
     : "ยินดีที่ได้รู้จักค่ะ ทักมาพูดคุยสอบถามคิวหรือนัดเวลาล่วงหน้าได้เลยนะคะ เทคแคร์เป็นกันเอง ไม่ดุค่ะ";
 
+  // ใช้ ID ของน้องเป็นตัวกำหนดว่าจะแสดงรูปแบบ A หรือ B
+  const profileIdStr = String(p.id || "1");
+  const isVariantB = profileIdStr.charCodeAt(profileIdStr.length - 1) % 2 === 0;
+
+  // ชุดข้อความสลับ (Variant A & B)
+  const introText = isVariantB 
+    ? "รายละเอียดส่วนตัว สัดส่วน และพิกัดบริการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และดูแลเอาใจใส่เป็นอย่างดี สบายใจได้กับการนัดพบตัวจริงแล้วค่อยชำระค่าบริการตรงหน้างาน ไม่มีมัดจำล่วงหน้า"
+    : "ข้อมูลโปรไฟล์และสัดส่วนได้รับการตรวจสอบและยืนยันตัวตนเรียบร้อยแล้ว น้องเป็นคนอารมณ์ดี คุยสนุก และให้ความเป็นกันเอง มั่นใจได้เรื่องความปลอดภัยด้วยระบบนัดเจอตรวจสอบความถูกต้องหน้างานก่อนชำระเงิน";
+
+  const styleText = isVariantB
+    ? "สไตล์เพื่อนสนิท: นิสัยขี้อ้อน อัธยาศัยดี ชวนคุยเก่ง เน้นการดูแลเอาใจใส่ที่ทำให้คุณรู้สึกผ่อนคลายและเป็นกันเองตลอดการนัดหมาย"
+    : "เน้นฟิวแฟน: สุภาพ อ่อนโยน เทคแคร์ดี และไม่เร่งรีบในระหว่างเวลางาน เหมาะสำหรับเดินเที่ยว ทานข้าว คาเฟ่ หรือเป็นเพื่อนร่วมเดินทาง";
+
+  const locationText = isVariantB
+    ? `การเดินทาง: ประจำการอยู่ในพื้นที่${zone} สามารถเดินทางไปหาที่โรงแรมหรือคอนโดส่วนตัวของคุณได้ทันที ตกลงเรื่องพิกัดและเวลาที่สะดวกก่อนเริ่มงานได้เลย`
+    : `พื้นที่ให้บริการ: มีห้องพักส่วนตัวในทำเล${zone} หรือพร้อมเดินทางไปดูแลคุณถึงโรงแรม คอนโด และที่พักในย่านใกล้เคียงอย่างรวดเร็วและมิดชิด`;
+
+  const safetyText = isVariantB
+    ? "การันตีความปลอดภัย: ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มี การเก็บเงินมัดจำล่วงหน้าทุกรูปแบบ หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูป สามารถปฏิเสธและยกเลิกงานได้ทันที"
+    : "แนวปฏิบัติเพื่อความสบายใจ: โปรไฟล์นี้ใช้ระบบพบตัวจริงก่อนแล้วค่อยชำระเงินตรงกับน้อง ห้ามโอนเงินล่วงหน้าในทุกกรณี หากมีเงื่อนไขเรียกเก็บเงินก่อนเดินทาง โปรดแจ้งแอดมินทันทีเพื่อระงับสิทธิ์";
+
   return `
     <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">
       <div style="display: flex; align-items: flex-start; gap: 8px; background: #F8F6FC; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px;">
         <span style="font-size: 16px; line-height: 1;">💬</span>
         <p style="font-size: 12.5px; color: #334155; line-height: 1.6; margin: 0; font-style: italic;">"${escapeHTML(speechText)}"</p>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569;">
-     <div style="display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-map-marker-alt" style="color: #7C3AED; width: 14px; text-align: center;"></i>
-          <span><strong>พิกัดบริการ:</strong> มีห้องส่วนตัว${zone.startsWith("ย่าน") ? "" : "ย่าน"}${escapeHTML(zone)} / พร้อมเดินทางไปหาที่พักส่วนตัว</span>
+      
+      <div style="font-size: 12.5px; color: #475569; line-height: 1.65; margin-bottom: 10px;">
+        <p style="margin: 0 0 6px 0;">${introText}</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; border-top: 1px dashed rgba(124, 58, 237, 0.15); padding-top: 10px;">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-heart" style="color: #E11D48; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>สไตล์:</strong> ${styleText}</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-heart" style="color: #E11D48; width: 14px; text-align: center;"></i>
-          <span><strong>สไตล์การดูแล:</strong> ฟิวแฟนสุภาพ เทคแคร์ดี อารมณ์ดี ไม่เร่งรีบ</span>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-map-marker-alt" style="color: #7C3AED; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>พิกัด:</strong> ${locationText}</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-shield-alt" style="color: #059669; width: 14px; text-align: center;"></i>
-          <span><strong>การนัดหมาย:</strong> พบตัวจริงค่อยชำระเงินตรงกับน้อง สบายใจทั้งสองฝ่าย</span>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-shield-alt" style="color: #059669; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>ข้อปฏิบัติ:</strong> ${safetyText}</span>
         </div>
       </div>
     </div>
