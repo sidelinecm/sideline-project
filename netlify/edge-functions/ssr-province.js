@@ -1825,13 +1825,11 @@ pills += activeZoneKeys.map(z => {
     const primaryStories = topStoryProfiles.map(p => renderStoryItem(p)).join("");
     finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${primaryStories}</div>`);
 
-    // 🟢 แบบแก้ไขใหม่: ทำการแบ่งกลุ่มแบบตัดออกเด็ดขาด (Exclusive Partitioning)
     let hotSwiperCardsHtml = "";
     let featuredCardsHtml = "";
-    let nationalFeedProfiles = [];
 
-    if (isNational) {
-      // 1. คัดเลือกน้องกลุ่ม HOT (เก็บ ID ไว้ตัดออก)
+    // 🟢 แก้ไขใหม่ 100%: ใช้ const และ IIFE กำหนดค่า nationalFeedProfiles ทันที ป้องกัน Temporal Dead Zone
+    const nationalFeedProfiles = isNational ? (() => {
       let hotCandidate = profilesList.filter(p => {
         const combinedKeywords = `${(Array.isArray(p.style_tags) ? p.style_tags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
         return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
@@ -1870,7 +1868,6 @@ pills += activeZoneKeys.map(z => {
         `;
       }).join("");
 
-      // 2. คัดเลือกน้องกลุ่ม Featured [ตัดคนใน Hot ออก]
       const rawFeatured = profilesList.filter(p => (p.isfeatured || p.is_featured) && !hotProfileIds.has(String(p.id)));
       const featuredProfilesList = rawFeatured.length > 0 
         ? rawFeatured.slice(0, 8) 
@@ -1879,7 +1876,6 @@ pills += activeZoneKeys.map(z => {
       
       featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
 
-      // 3. คัดเลือกน้องกลุ่ม Feed หลัก [ตัดทั้งคนใน Hot และ Featured ออกเด็ดขาด]
       const excludedGlobalIds = new Set([...hotProfileIds, ...featuredProfileIds]);
       let fiwfanProfiles = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && isFiwfanProfile(p));
       
@@ -1887,8 +1883,8 @@ pills += activeZoneKeys.map(z => {
         const others = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && !fiwfanProfiles.some(f => f.id === p.id));
         fiwfanProfiles = [...fiwfanProfiles, ...others];
       }
-      nationalFeedProfiles = fiwfanProfiles.slice(0, HOME_PAGE_LIMIT);
-    }
+      return fiwfanProfiles.slice(0, HOME_PAGE_LIMIT);
+    })() : [];
 
     if (hotSwiperCardsHtml) {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
