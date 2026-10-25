@@ -93,7 +93,7 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "cachedProfiles_v3_2026";
+  const CACHE_STORAGE_KEY = "v_20261022_08";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
