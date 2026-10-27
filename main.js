@@ -93,7 +93,7 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "v_20261022_08";
+  const CACHE_STORAGE_KEY = "v_20261022_09";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
@@ -1246,9 +1246,6 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
 
-
-
-    // 🟢 แก้ปัญหาข้อ 1: ถ้าระบบจับได้ว่าเป็นโลโก้เว็บ (ทำให้สัดส่วนเพี้ยน) ให้สลับไปใช้ภาพ Placeholder แบบเบลอ 3:4 ทันที
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
         rawPath = "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
@@ -1266,7 +1263,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       ? (isEN ? `${String(ageVal).replace(/\D/g, "")} yrs` : `${String(ageVal).replace(/\D/g, "")} ปี`) 
       : "";
     
-   let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
+    let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
     const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
     if (activeZone && rawLoc.includes(activeZone)) {
@@ -1316,18 +1313,15 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>` 
       : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
 
-    // 🟢 2. ประกาศตัวแปรทั้งสองตัวนี้ เพื่อไม่ให้เกิด ReferenceError
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
-  const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
+    const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
 
-    // 🟢 REPLACEMENT: ล็อกขนาด Aspect Ratio ให้การ์ดและรูปภาพ ป้องกัน CLS (หน้ากระตุก) 100%
     const article = document.createElement("article");
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
     article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; 
 
-    // 🟢 3. ประกอบการ์ด HTML
     article.innerHTML = `
       <img src="${imgSrc}" 
            alt="${escapeHTML(richAltText)}" 
@@ -1361,15 +1355,22 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
               ${vibeTagsHtml}
           </div>
           
-          <!-- Social Proof: เรตติ้งดาว + วิวสด -->
-          <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; font-size: 11px;">
-            <span style="color: #F59E0B; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;">
-              ★ ${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)} 
-              <span style="color: #94A3B8; font-weight: normal; font-size: 10px;">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
+       <!-- Social Proof: แคปซูลกระจกฝ้าละมุนตา Softer Glass (ขอบ 0.8px สไตล์ Luxury) -->
+          <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
+            
+            <!-- ฝั่งซ้าย: ดาวทองคำเปลว กระจกฝ้าขอบบาง 0.8px -->
+            <span style="background: rgba(245, 158, 11, 0.08); border: 0.8px solid rgba(245, 158, 11, 0.22); color: #F59E0B; padding: 2px 7.5px; border-radius: 100px; font-weight: 800; font-size: 10.5px; display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+              <span style="font-size: 11px; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));">★</span>
+              <span>${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)}</span>
+              <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-size: 9.5px;">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
             </span>
-            <span style="color: #64748B; font-size: 10px; display: inline-flex; align-items: center; gap: 3px;">
-              <i class="fas fa-eye" style="color: #A855F7; font-size: 9px;"></i> ${((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) * 47) % 800) + 450}
+
+            <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
+            <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>${(p.likes_count || p.likes || 0)} 💗</span>
             </span>
+
           </div>
 
           <div class="profile-card-title-row">
@@ -1384,10 +1385,9 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
           </div>
       </div>
     `;
-
     container.appendChild(article);
     return container;
-  }
+}
 
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
@@ -1562,6 +1562,65 @@ function updateLightboxPhoto(idx) {
       }
     });
   }
+  
+// 🟢 ฟังก์ชันสร้างกล่องแนะนำตัว Persona แบบเดียวกับ render-bot.js
+function generateModalPersonaBox(profile, displayName, provName, zoneName) {
+  let rawPersonalDesc = sanitizeThaiText(profile.description || "")
+    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
+    .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
+    .trim();
+
+  const speechText = (rawPersonalDesc.length >= 8) 
+    ? rawPersonalDesc 
+    : "ยินดีที่ได้รู้จักค่ะ ทักมาพูดคุยสอบถามคิวหรือนัดเวลาล่วงหน้าได้เลยนะคะ เทคแคร์เป็นกันเอง ไม่ดุค่ะ";
+
+  const profileIdStr = String(profile.id || "1");
+  const isVariantB = profileIdStr.charCodeAt(profileIdStr.length - 1) % 2 === 0;
+
+  const introText = isVariantB 
+    ? "รายละเอียดส่วนตัว สัดส่วน และพิกัดบริการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และดูแลเอาใจใส่เป็นอย่างดี สบายใจได้กับการนัดพบตัวจริงแล้วค่อยชำระค่าบริการตรงหน้างาน ไม่มีมัดจำล่วงหน้า"
+    : "ข้อมูลโปรไฟล์และสัดส่วนได้รับการตรวจสอบและยืนยันตัวตนเรียบร้อยแล้ว น้องเป็นคนอารมณ์ดี คุยสนุก และให้ความเป็นกันเอง มั่นใจได้เรื่องความปลอดภัยด้วยระบบนัดเจอตรวจสอบความถูกต้องหน้างานก่อนชำระเงิน";
+
+  const styleText = isVariantB
+    ? "สไตล์เพื่อนสนิท: นิสัยขี้อ้อน อัธยาศัยดี ชวนคุยเก่ง เน้นการดูแลเอาใจใส่ที่ทำให้คุณรู้สึกผ่อนคลายและเป็นกันเองตลอดการนัดหมาย"
+    : "เน้นฟิวแฟน: สุภาพ อ่อนโยน เทคแคร์ดี และไม่เร่งรีบในระหว่างเวลางาน เหมาะสำหรับเดินเที่ยว ทานข้าว คาเฟ่ หรือเป็นเพื่อนร่วมเดินทาง";
+
+  const locationText = isVariantB
+    ? `การเดินทาง: ประจำการอยู่ในพื้นที่${zoneName} สามารถเดินทางไปหาที่โรงแรมหรือคอนโดส่วนตัวของคุณได้ทันที ตกลงเรื่องพิกัดและเวลาที่สะดวกก่อนเริ่มงานได้เลย`
+    : `พื้นที่ให้บริการ: มีห้องพักส่วนตัวในทำเล${zoneName} หรือพร้อมเดินทางไปดูแลคุณถึงโรงแรม คอนโด และที่พักในย่านใกล้เคียงอย่างรวดเร็วและมิดชิด`;
+
+  const safetyText = isVariantB
+    ? "การันตีความปลอดภัย: ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มี การเก็บเงินมัดจำล่วงหน้าทุกรูปแบบ หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูป สามารถปฏิเสธและยกเลิกงานได้ทันที"
+    : "แนวปฏิบัติเพื่อความสบายใจ: โปรไฟล์นี้ใช้ระบบพบตัวจริงก่อนแล้วค่อยชำระเงินตรงกับน้อง ห้ามโอนเงินล่วงหน้าในทุกกรณี หากมีเงื่อนไขเรียกเก็บเงินก่อนเดินทาง โปรดแจ้งแอดมินทันทีเพื่อระงับสิทธิ์";
+
+  return `
+    <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">
+      <div style="display: flex; align-items: flex-start; gap: 8px; background: #F8F6FC; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px;">
+        <span style="font-size: 16px; line-height: 1;">💬</span>
+        <p style="font-size: 12.5px; color: #334155; line-height: 1.6; margin: 0; font-style: italic;">"${escapeHTML(speechText)}"</p>
+      </div>
+      
+      <div style="font-size: 12.5px; color: #475569; line-height: 1.65; margin-bottom: 10px;">
+        <p style="margin: 0 0 6px 0;">${introText}</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; border-top: 1px dashed rgba(124, 58, 237, 0.15); padding-top: 10px;">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-heart" style="color: #E11D48; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>สไตล์:</strong> ${styleText}</span>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-map-marker-alt" style="color: #7C3AED; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>พิกัด:</strong> ${locationText}</span>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fas fa-shield-alt" style="color: #059669; width: 14px; text-align: center; margin-top: 3px;"></i>
+          <span><strong>ข้อปฏิบัติ:</strong> ${safetyText}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
   window.openLightboxModal = function (profile) {
     if (!profile) return;
@@ -1801,37 +1860,16 @@ if (quoteEl) {
     }
 
     
-    // 🟢 ปรับปรุงกล่องข้อความใต้ราคา: ให้ดูเป็น Personal Note หรือซ่อนถ้าเป็นสแปม
-const descContainer = document.getElementById("lightboxDescriptionContainer");
+    const descContainer = document.getElementById("lightboxDescriptionContainer");
 const descContent = document.getElementById("lightboxDescriptionContent");
 
 if (descContent) {
-  let rawDesc = (profile.description && profile.description.trim()) ? profile.description : "";
-  
-  // ล้างข้อความขยะ
-  rawDesc = rawDesc
-    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
-    .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
-    .trim();
-
-  // 🔒 ถ้าข้อความสั้นเกินไป หรือว่างเปล่า ไม่ต้องสร้างเรียงความ ให้ซ่อนกล่องทิ้งทันที!
-  if (!rawDesc || rawDesc.length < 5) {
-    if (descContainer) descContainer.style.display = "none";
-  } else {
-    // แสดงเป็นข้อความทักทายสไตล์มินิมอล หรูหรา สะอาดตา
-    descContent.innerHTML = `
-      <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #334155; line-height: 1.6;">
-        <span style="font-size: 16px; line-height: 1;">💬</span>
-        <div>
-          <strong style="color: #7C3AED; font-size: 11.5px; display: block; margin-bottom: 2px;">ข้อความจากน้อง:</strong>
-          <span>"${escapeHTML(rawDesc)}"</span>
-        </div>
-      </div>
-    `;
-    descContent.style.cssText = "background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin: 10px 0;";
-    if (descContainer) descContainer.style.display = "block";
-  }
+  descContent.innerHTML = generateModalPersonaBox(profile, displayName, pProvText, primaryZone);
+  descContent.style.cssText = "margin: 10px 0;";
+  if (descContainer) descContainer.style.display = "block";
 }
+  
+  
     
     // 🟢 9. ปุ่มแอดไลน์จองคิวหลัก (Universal Link สำหรับ iOS/Android ทุกเวอร์ชัน)
     const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
@@ -1863,7 +1901,7 @@ if (descContent) {
         <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
             
 
-<a href="${lineUrl}" target="_blank" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
+<a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
     <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
     <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
     <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
@@ -1899,61 +1937,9 @@ if (descContent) {
       `;
     }
 
-    // 💬 11. FAQ ฉบับ Dynamic Contextual: ดึงข้อมูลเฉพาะตัวของน้องแต่ละคนมาสร้างคำถาม-คำตอบ ไม่ซ้ำกัน
-    const faqTitle = document.getElementById("lightboxFaqTitle");
-    if (faqTitle) faqTitle.textContent = isEn ? `FAQ & Service Info: ${displayName}` : `คำถามที่พบบ่อยเกี่ยวกับการนัดหมาย ${displayName}`;
-    
-    const faqList = document.getElementById("lightboxFaqList");
-    if (faqList) {
-      const rawTags = (Array.isArray(profile.styleTags) ? profile.styleTags : []).join(" ").toLowerCase();
-      const descText = (profile.description || "").toLowerCase();
-      
-      const hasRoom = descText.includes("ห้อง") || rawTags.includes("พร้อมห้อง");
-      const canTravel = descText.includes("เดินทาง") || rawTags.includes("เดินทางได้");
-
-      // 1. คำถามเรื่องสถานที่นัดหมาย (แยกตามกรณี มีห้องส่วนตัว vs เดินทางไปหา Outcall)
-      let qLocation = `Q: นัดพบ ${displayName} ในย่าน ${primaryZone} มีสถานที่หรือต้องเดินทางอย่างไร?`;
-      let aLocation = "";
-      if (hasRoom && canTravel) {
-        aLocation = `${displayName} มีห้องพักส่วนตัวย่าน ${primaryZone} ที่สะอาด มิดชิด ปลอดภัย หรือสะดวกนัดหมายให้น้องเดินทางไปดูแล (Outcall) ถึงโรงแรม/ที่พักส่วนตัวของคุณในพื้นที่ได้เช่นกันค่ะ`;
-      } else if (hasRoom) {
-        aLocation = `${displayName} สแตนด์บายพร้อมดูแลที่ห้องพักส่วนตัวย่าน ${primaryZone} บรรยากาศเงียบสงบ เป็นส่วนตัว สะอาด ปลอดภัย และมีที่จอดรถสะดวกค่ะ`;
-      } else {
-        aLocation = `${displayName} พร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวของคุณในย่าน ${primaryZone} และพื้นที่ใกล้เคียงใน${pProvText} เดินทางรวดเร็วใน 15-30 นาทีค่ะ`;
-      }
-
-      // 2. คำถามเรื่องสไตล์การเทคแคร์ (สกัดจาก Style Tags จริงของน้อง)
-      let qStyle = `Q: สไตล์การดูแลและการเทคแคร์ของ ${displayName} เป็นอย่างไร?`;
-      let aStyle = "";
-      if (rawTags.includes("เอาใจเก่ง") || rawTags.includes("ขี้อ้อน")) {
-        aStyle = `${displayName} เน้นการดูแลเอาใจใส่ ออดอ้อน พูดจาไพเราะ ยิ้มแย้ม ให้ความรู้สึกสนิทสนมเสมือนอยู่กับแฟนตัวจริง ไม่เร่งรอบค่ะ`;
-      } else if (rawTags.includes("คุยสนุก")) {
-        aStyle = `${displayName} อัธยาศัยดี ชวนคุยเก่ง เป็นกันเอง ไม่มีช่วงเงียบเกร็ง เหมาะสำหรับไปเป็นเพื่อนทานข้าว ดินเนอร์ นั่งคาเฟ่ หรือพักผ่อนคลายเหงาค่ะ`;
-      } else if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก")) {
-        aStyle = `${displayName} สไตล์น่ารัก สดใส ไซส์มินิ ให้บริการด้วยความสุภาพ อ่อนโยน ให้เกียรติลูกค้า และให้เวลาเต็มที่ตลอดการนัดหมายค่ะ`;
-      } else {
-        aStyle = `${displayName} ให้บริการสไตล์ฟิวแฟน (GFE) แท้ๆ มีความเป็นมืออาชีพ สุภาพ อ่อนหวาน และรักษาความเป็นส่วนตัวของลูกค้าสูงสุดค่ะ`;
-      }
-
-      // 3. คำถามเรื่องความปลอดภัยและการชำระเงิน (เน้นการันตีตัวจริงตรงปก 100%)
-      let qSafety = `Q: เรียกใช้บริการ ${displayName} มั่นใจได้อย่างไรว่าจะตรงปกและไม่โดนโกงมัดจำ?`;
-      let aSafety = `ทางระบบ FirstModelHub การันตีรูปจริงตรงปก 100% ค่ะ นัดพบเจอ ${displayName} ตัวจริงหน้างาน ตรวจสอบความถูกต้องเรียบร้อยแล้วจึงค่อยชำระเงิน ${rateNum.toLocaleString()}.- โดยตรงกับน้อง ปราศจากความเสี่ยงเรื่องการโอนมัดจำล่วงหน้าทุกกรณีค่ะ`;
-
-      faqList.innerHTML = `
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qLocation}</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aLocation}</p>
-        </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qStyle}</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aStyle}</p>
-        </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">${qSafety}</h5>
-          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${aSafety}</p>
-        </div>
-      `;
-    }
+    // 🟢 ซ่อนกล่อง FAQ ใน Lightbox ทันที (หน้าต่างจะกระชับ คลีนตา ปิดการขายไวขึ้น)
+    const faqSection = document.getElementById("lightboxFaqSection");
+    if (faqSection) faqSection.style.display = "none";
     
 
     // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน
@@ -1970,13 +1956,13 @@ if (descContent) {
 
       let candidates = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
 
-      if (candidates.length < 3) {
+      if (candidates.length < 6) {
         const otherProvinces = allList.filter(m => String(m.id) !== String(profile.id) && !candidates.some(c => String(c.id) === String(m.id)));
         candidates = [...candidates, ...otherProvinces];
       }
 
       const shuffledList = [...candidates].sort(() => Math.random() - 0.5);
-      const relatedList = shuffledList.slice(0, 3);
+      const relatedList = shuffledList.slice(0, 6);
 
       if (relatedList.length > 0) {
         relatedGrid.innerHTML = relatedList.map(rm => {
@@ -2491,16 +2477,12 @@ async function handleUrlRouting(isInitial = false) {
     }
 
     if (domCache.provinceSelect) {
-      domCache.provinceSelect.addEventListener("change", (e) => {
-        const val = e.target.value;
-        // 1. สั่งให้ Filter ทำงานและแสดงผลทันทีแบบ SPA (ไม่รีโหลดหน้า)
-        executeFilterAndRender(true);
-        
-        // 2. แอบเปลี่ยน URL ด้านบนให้ตรงกับจังหวัด เผื่อลูกค้านำลิงก์ไปแชร์ต่อ
-        const newUrl = (val && val !== "all" && val !== "national") ? `/location/${val}` : "/";
-        history.pushState(null, "", newUrl);
-      });
-    }
+  domCache.provinceSelect.addEventListener("change", (e) => {
+    const val = e.target.value;
+    const newUrl = (val && val !== "all" && val !== "national") ? `/location/${val}` : "/";
+    window.location.href = newUrl; // 👈 เปลี่ยนหน้านำทางจริงทันที
+  });
+}
         
 
   // 🟢 1. ฟังก์ชันตัวช่วยสั่งเลื่อนหน้าจอวิ่งไปหาโซนรายชื่อน้องๆ
