@@ -2467,25 +2467,32 @@ async function handleUrlRouting(isInitial = false) {
     }
     if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
     if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
-    if (applyFilterBtn) {
+   if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
+        const selectedProv = domCache.provinceSelect?.value;
+        // ถ้าผู้ใช้เลือกจังหวัดจากฟอร์มค้นหา ให้พาเปลี่ยนหน้าไปยัง URL จังหวัดนั้นทันที (เพื่อให้ SSR โหลดโซนและเนื้อหาครบ 100%)
+        if (selectedProv && selectedProv !== "" && selectedProv !== "all" && selectedProv !== "national") {
+          window.location.href = `/location/${selectedProv}`;
+          return;
+        } else if (selectedProv === "" || selectedProv === "all" || selectedProv === "national") {
+          if (window.location.pathname !== "/") {
+            window.location.href = "/";
+            return;
+          }
+        }
+
         executeFilterAndRender(true);
         toggleSearchDrawer(false);
 
-        // 🟢 เพิ่มคำสั่งนี้: สั่งให้หน้าจอเลื่อนวิ่งขึ้นไปหารายชื่อน้องๆ ทันที
         setTimeout(() => {
           const displayArea = document.getElementById("profiles-display-area");
           if (displayArea) {
-            const headerOffset = 70; // เผื่อความสูงของแถบ Header ด้านบน
+            const headerOffset = 70;
             const elementPosition = displayArea.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-              top: Math.max(0, offsetPosition),
-              behavior: "smooth"
-            });
+            window.scrollTo({ top: Math.max(0, offsetPosition), behavior: "smooth" });
           }
-        }, 150); // รอให้หน้าต่างตัวกรองพับปิดเสร็จ แล้วเลื่อนขึ้นทันที
+        }, 150);
       };
     }
 
@@ -2712,33 +2719,25 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
    
 
     function initDockAutoHide() {
-  const floatingDock = document.querySelector('.floating-app-dock');
-  if (!floatingDock) return;
+      const floatingDock = document.querySelector('.floating-app-dock');
+      if (!floatingDock) return;
 
-  // ตั้งค่าแอนิเมชันให้สไลด์ขึ้น-ลงอย่างนุ่มนวล
-  floatingDock.style.transition = "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease";
+      let lastScrollY = window.scrollY;
 
-  let lastScrollY = window.scrollY;
+      window.addEventListener('scroll', function () {
+        const currentScrollY = window.scrollY;
 
-  window.addEventListener('scroll', function () {
-    const currentScrollY = window.scrollY;
+        // ใช้การสลับคลาส CSS แทนการกำหนด style.transform ตรงๆ เพื่อไม่ให้ทับค่า translateX(-50%)
+        if (currentScrollY > lastScrollY && currentScrollY > 80) {
+          floatingDock.classList.add('dock-hidden');
+        } else if (currentScrollY < lastScrollY) {
+          floatingDock.classList.remove('dock-hidden');
+        }
 
-    // 🟢 ถ้าไถจอลงเกิน 80px -> ให้สั่งซ่อนเมนูลงข้างล่างทันที
-    if (currentScrollY > lastScrollY && currentScrollY > 80) {
-      floatingDock.style.transform = "translateY(150%)";
-      floatingDock.style.opacity = "0";
-      floatingDock.style.pointerEvents = "none";
-    } 
-    // 🟢 ถ้าไถจอย้อนกลับขึ้นมา -> ให้แสดงเมนูกลับมาทันที
-    else if (currentScrollY < lastScrollY) {
-      floatingDock.style.transform = "translateY(0)";
-      floatingDock.style.opacity = "1";
-      floatingDock.style.pointerEvents = "auto";
+        lastScrollY = Math.max(0, currentScrollY);
+      }, { passive: true });
     }
-
-    lastScrollY = Math.max(0, currentScrollY);
-  }, { passive: true });
-}
+    
     initDockAutoHide();
 
   
