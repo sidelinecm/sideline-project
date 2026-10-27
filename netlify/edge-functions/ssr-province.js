@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_09`;
+let GLOBAL_VERSION = `v_20261022_08`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -868,7 +868,6 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
   const zoneText = loc && loc !== provinceName ? ` โซน${loc}` : "";
   return `น้อง${cleanName}${zoneText} ${provinceName} - FirstModelHub`;
 }
-
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
@@ -877,12 +876,11 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   if (currentZone && rawLoc.includes(currentZone)) {
     loc = escapeHTML(currentZone);
   } else {
-    // 🟢 แก้ไข: ลบคำนำหน้า และถ้ามีหลายชื่อย่านเว้นวรรคกัน ให้หยิบเฉพาะชื่อย่านแรกย่านเดียว
+    // 🟢 ลบคำนำหน้า และถ้ามีหลายชื่อย่านเว้นวรรคกัน ให้ตัดเอาเฉพาะคำแรกย่านเดียว
     let cleaned = rawLoc
       .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|เชียงใหม่)\s*(\/|และ)?\s*/gi, "")
       .trim();
     let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
-    // ถ้าเว้นวรรคด้วยช่องว่าง ให้ตัดเอาเฉพาะคำแรก เช่น "เจ็ดยอด นิมมาน แม่โจ้" -> จะเหลือแค่ "เจ็ดยอด"
     loc = escapeHTML(firstPart.split(/\s+/)[0].trim() || provinceName);
   }
 
@@ -933,6 +931,12 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
   }
 
+  // 🟢 คำนวณคะแนนดาว, จำนวนรีวิว และยอดหัวใจ ให้ตรงกันกับ main.js 100%
+  const idNum = parseInt(String(p.id || "1").replace(/\D/g, "") || "1", 10);
+  const ratingScore = (4.8 + ((idNum % 3) * 0.1)).toFixed(1);
+  const reviewCount = 8 + (idNum % 17);
+  const likesCount = p.likes_count || p.likes || 0;
+
   return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
@@ -945,7 +949,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
              class="profile-card-img"
              loading="${isPriorityLCP ? "eager" : "lazy"}"
              fetchpriority="${isPriorityLCP ? "high" : "auto"}"
-             decoding="async" />
+             decoding="async"
+             onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                  
         <div class="profile-card-gradient-overlay"></div>
 
@@ -963,26 +968,43 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
         
         <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
 
-       <div class="profile-card-info-content">
+        <div class="profile-card-info-content">
             <div class="profile-card-tags-row">
                 ${vibeTagsHtml}
             </div>
             
-         <!-- สำหรับ ssr-province.js -->
-          <div class="profile-card-title-row">
-              <h3 class="profile-card-name">น้อง${cleanName}</h3>
-              ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
-          </div>
-          <div class="profile-card-bottom-row">
-              <span class="profile-card-location">
-                  <i class="fas fa-map-marker-alt"></i> ${loc}
+            <!-- Social Proof: แคปซูลกระจกฝ้าละมุนตา Softer Glass (ขอบ 0.8px สไตล์ Luxury) -->
+            <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
+              
+              <!-- ฝั่งซ้าย: ดาวทองคำเปลว กระจกฝ้าขอบบาง 0.8px -->
+              <span style="background: rgba(245, 158, 11, 0.08); border: 0.8px solid rgba(245, 158, 11, 0.22); color: #F59E0B; padding: 2px 7.5px; border-radius: 100px; font-weight: 800; font-size: 10.5px; display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+                <span style="font-size: 11px; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));">★</span>
+                <span>${ratingScore}</span>
+                <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-size: 9.5px;">(${reviewCount})</span>
               </span>
-              <span class="profile-card-price">${luxuryPrice}</span>
-          </div>
-      </div>
-    </article>
-  </div>
-`;
+
+              <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
+              <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>${likesCount} 💗</span>
+              </span>
+
+            </div>
+
+            <div class="profile-card-title-row">
+                <h3 class="profile-card-name">น้อง${cleanName}</h3>
+                ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
+            </div>
+            <div class="profile-card-bottom-row">
+                <span class="profile-card-location">
+                    <i class="fas fa-map-marker-alt"></i> ${loc}
+                </span>
+                <span class="profile-card-price">${luxuryPrice}</span>
+            </div>
+        </div>
+      </article>
+    </div>
+  `;
 };
 
 
@@ -2020,26 +2042,27 @@ pills += activeZoneKeys.map(z => {
         try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
       }
       return {
-  id: p.id,
-  slug: p.slug || String(p.id),
-  name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-  imagePath: p.imagePath || p.image_url || "",
-  galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean).slice(0, 4) : [],
-  provinceKey: p.provinceKey || "chiangmai",
-  location: sanitizeThaiText(p.location || ""),
-  description: sanitizeThaiText(p.description || ""), // 👈 เพิ่มบรรทัดนี้
-  quote: sanitizeThaiText(p.slogan || p.quote || ""),       // 👈 เพิ่มบรรทัดนี้
-  rate: extractCleanNumber(p.rate || p.price),
-  age: p.age || "",
-  height: p.height || "",
-  weight: p.weight || "",
-  stats: p.stats || "",
-  line_id: (p.line_id || p.line || p.lineId || "").trim(),
-  availability: p.availability || "รับงาน",
-  isfeatured: Boolean(p.isfeatured),
-  verified: Boolean(p.verified),
-  styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
-};
+        id: p.id,
+        slug: p.slug || String(p.id),
+        name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
+        imagePath: p.imagePath || p.image_url || "",
+        galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean).slice(0, 4) : [],
+        provinceKey: p.provinceKey || "chiangmai",
+        location: sanitizeThaiText(p.location || ""),
+        description: sanitizeThaiText(p.description || ""),
+        quote: sanitizeThaiText(p.slogan || p.quote || ""),
+        rate: extractCleanNumber(p.rate || p.price),
+        age: p.age || "",
+        height: p.height || "",
+        weight: p.weight || "",
+        stats: p.stats || "",
+        line_id: (p.line_id || p.line || p.lineId || "").trim(),
+        likes_count: p.likes_count || p.likes || 0,  // 👈 เพิ่มบรรทัดนี้ครับ
+        availability: p.availability || "รับงาน",
+        isfeatured: Boolean(p.isfeatured),
+        verified: Boolean(p.verified),
+        styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
+      };
     });
 
     const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
