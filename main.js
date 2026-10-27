@@ -530,27 +530,34 @@ function optimizeImg(imagePath, mode = "card") {
       executeFilterAndRender(false);
     }
 
-    // 🟢 แก้ให้ถูกต้องเป็นแบบนี้ครับ:
-    const vipSwiperEl = document.getElementById("vip-swiper-container");
-    if (!vipSwiperEl || vipSwiperEl.querySelector(".vip-card-item")) return;
-    // 🟢 ดึงเฉพาะคนสไตล์ฟิวแฟน
-    let hotCandidate = appState.allProfiles.filter(p => {
-      const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-      return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
-    });
+    // 🟢 แก้ไขใน main.js ฟังก์ชัน populateInitialComponents()
+const vipSwiperEl = document.getElementById("vip-swiper-container");
+if (!vipSwiperEl || vipSwiperEl.querySelector(".vip-card-item")) return;
 
-    if (hotCandidate.length === 0) hotCandidate = appState.allProfiles;
+// 1. ตรวจสอบครอบคลุมทั้ง tags, description, slogan
+let hotCandidate = appState.allProfiles.filter(p => {
+  const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
+  const descStr = (p.description || "").toLowerCase();
+  const sloganStr = (p.slogan || p.quote || "").toLowerCase();
+  const combined = `${tagsStr} ${descStr} ${sloganStr}`;
+  return combined.includes("ฟิวแฟน") || combined.includes("ฟิลแฟน") || combined.includes("gfe");
+});
 
-   // 🛡️ กรองตัดคนซ้ำทิ้งเด็ดขาด (ชื่อเดียวกัน หรือรูปเดียวกัน จะโผล่ได้แค่รอบเดียว)
-    const seenHotNames = new Set();
-    const hotProfiles = [];
-    for (const p of hotCandidate) {
-      const cleanName = (p.displayName || p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-      if (seenHotNames.has(cleanName)) continue; // ถ้าชื่อซ้ำข้ามทันที
-      seenHotNames.add(cleanName);
-      hotProfiles.push(p);
-      if (hotProfiles.length >= 10) break;
-    }
+// 2. ถ้าไม่ถึง 10 คน ให้เอาโปรไฟล์แนะนำอื่นมาเติม
+if (hotCandidate.length < 10) {
+  const others = appState.allProfiles.filter(p => !hotCandidate.some(h => String(h.id) === String(p.id)));
+  hotCandidate = [...hotCandidate, ...others];
+}
+
+const seenHotNames = new Set();
+const hotProfiles = [];
+for (const p of hotCandidate) {
+  const cleanName = (p.displayName || p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+  if (seenHotNames.has(cleanName)) continue;
+  seenHotNames.add(cleanName);
+  hotProfiles.push(p);
+  if (hotProfiles.length >= 10) break;
+}
 
     // 🟢 [เพิ่มบรรทัดนี้]: บันทึก ID ของน้องๆ ที่ติด Hot Swiper ไว้ เพื่อส่งไปตัดออกในฟีดหลักด้านล่าง
     window.__hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
