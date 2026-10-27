@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_08`;
+let GLOBAL_VERSION = `v_20261022_09`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1312,23 +1312,28 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
       return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
     }
 
-    const nationalFeedProfiles = isNational ? (() => {
-      let hotCandidate = profilesList.filter(p => {
-        const combinedKeywords = `${(Array.isArray(p.style_tags) ? p.style_tags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-        return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
-      });
-      if (hotCandidate.length === 0) hotCandidate = profilesList;
+    // 🟢 แทนที่โค้ดเดิมใน ssr-province.js (ช่วงบรรทัด 690 ถึง 706) ด้วยชุดนี้:
+const nationalFeedProfiles = isNational ? (() => {
+  // 1. ดึงน้องๆ สไตล์ฟิวแฟนโดยใช้ฟังก์ชันเช็กที่สมบูรณ์ (ตรวจทั้ง tags และ description)
+  let hotCandidate = profilesList.filter(isFiwfanProfile);
 
-      const seenHotNames = new Set();
-      const hotProfiles = [];
-      for (const p of hotCandidate) {
-        const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-        if (seenHotNames.has(cleanName)) continue;
-        seenHotNames.add(cleanName);
-        hotProfiles.push(p);
-        if (hotProfiles.length >= 8) break;
-      }
-      const hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
+  // 2. ถ้ายังมีไม่ถึง 8 คน ให้ดึงน้องๆ คนอื่นในระบบมาเติมให้ครบ
+  if (hotCandidate.length < 8) {
+    const others = profilesList.filter(p => !hotCandidate.some(h => String(h.id) === String(p.id)));
+    hotCandidate = [...hotCandidate, ...others];
+  }
+
+  // 3. กรองชื่อซ้ำ และตัดเอา 8 คนแรกมาแสดงใน Hot Swiper
+  const seenHotNames = new Set();
+  const hotProfiles = [];
+  for (const p of hotCandidate) {
+    const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+    if (seenHotNames.has(cleanName)) continue;
+    seenHotNames.add(cleanName);
+    hotProfiles.push(p);
+    if (hotProfiles.length >= 8) break; // แสดง 8 คนกำลังสวยสำหรับปัดบนมือถือ
+  }
+  const hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
 
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
