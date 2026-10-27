@@ -1375,7 +1375,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
             <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
             <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              <span>${(p.likes_count || p.likes || 0)} 💗</span>
+            <span>${(p.likes_count || p.likes || 0)} 💗</span>
             </span>
 
           </div>
@@ -2704,29 +2704,45 @@ async function handleUrlRouting(isInitial = false) {
 
    
 
-    function initDockAutoHide() {
-      const floatingDock = document.querySelector('.floating-app-dock');
-      if (!floatingDock) return;
+    // ✅ แก้ไขเป็นแบบนี้ใน main.js (ฟังก์ชัน initDockAutoHide)
+function initDockAutoHide() {
+  const floatingDock = document.querySelector('.floating-app-dock');
+  if (!floatingDock) return;
 
-      let lastScrollY = window.scrollY;
-      let ticking = false;
+  // 1. ตรึงตำแหน่งไว้ล่างสุดแบบ 100% ไม่ยอมให้หลุดขอบจอ
+  floatingDock.style.position = "fixed";
+  floatingDock.style.bottom = "0";
+  floatingDock.style.left = "0";
+  floatingDock.style.right = "0";
+  floatingDock.style.zIndex = "99999";       // ลอยอยู่เหนือทุกการ์ด
+  floatingDock.style.opacity = "1";          // ชัดเจน ไม่จาง
+  floatingDock.style.visibility = "visible";
+  floatingDock.style.transform = "translateY(0)"; // ไม่เลื่อนหลบลงล่าง
 
-      window.addEventListener('scroll', function () {
-        if (!ticking) {
-          window.requestAnimationFrame(function () {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY && currentScrollY > 120) {
-              floatingDock.classList.add('dock-hidden');
-            } else {
-              floatingDock.classList.remove('dock-hidden');
-            }
-            lastScrollY = Math.max(0, currentScrollY);
-            ticking = false;
-          });
-          ticking = true;
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      window.requestAnimationFrame(function () {
+        const currentScrollY = window.scrollY;
+
+        // 2. ปรับการทำงานใหม่: ไม่สั่งซ่อนแล้ว! 
+        // แต่ถ้าผู้ใช้เริ่มเลื่อนจอ ให้เพิ่ม "เงาลอยตัว (Drop Shadow)" ชัดขึ้น
+        // เพื่อให้แถบปุ่มลอยเด่นขึ้นมา ไม่ถูกการ์ดสีขาวด้านหลังกลืน
+        if (currentScrollY > 60) {
+          floatingDock.style.boxShadow = "0 -8px 25px rgba(20, 15, 34, 0.16)";
+        } else {
+          floatingDock.style.boxShadow = "0 -2px 12px rgba(20, 15, 34, 0.08)";
         }
-      }, { passive: true });
+
+        lastScrollY = Math.max(0, currentScrollY);
+        ticking = false;
+      });
+      ticking = true;
     }
+  }, { passive: true });
+}
     initDockAutoHide();
 
   
