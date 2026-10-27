@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_10`;
+let GLOBAL_VERSION = `v_20261022_11`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -308,7 +308,7 @@ function extractCleanNumber(rate) {
 }
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-// 🟢 เวอร์ชันเสถียร 100% (ฟอนต์ไม่หลุด, ไม่กินลิมิต, บอทสแกนไม่เจอ)
+// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, บอทไม่ตีความว่ารูปเสีย
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -316,30 +316,28 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  
-  // 💎 พลิกภาพ (a_hflip) + วางลายน้ำสีขาวโปร่งแสง 45% ฟอนต์ Montserrat สไตล์ลักชัวรี
-  const WM_CARD = "a_hflip/l_text:Montserrat_20_bold_letter_spacing_3:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_30";
-  const WM_MODAL = "a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
-  const WM_FULL = "a_hflip/l_text:Montserrat_34_bold_letter_spacing_5:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_50";
 
-  let baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
-  
+  // ⚡ ตัด l_text ออกทั้งหมด เหลือแค่ f_auto,q_auto และขนาดพิกเซลที่เหมาะสม ป้องกันรูปพัง 100%
+  let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // รูปกลมขนาดเล็ก ไม่ใส่ลายน้ำ เพื่อความเร็วและไม่รก
-    baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
+    // รูปย่อยขนาดเล็ก (Thumbnail)
+    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
+    // รูปการ์ดแสดงผลปกติ
+    transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    baseTransform = `f_auto,q_auto:good,w_600,h_800,c_fill/${WM_MODAL}`;
+    // รูปขนาดกลางสำหรับ Lightbox Modal
+    transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    baseTransform = `f_auto,q_auto:good,w_1200,c_limit/${WM_FULL}`;
+    // รูปใหญ่เต็มจอ / OG Image สำหรับแชร์โซเชียล
+    transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
-
-  const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
+      // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
@@ -1746,19 +1744,19 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     let dynamicSubheadline = "";
 
     if (isNational) {
-      // 1. หน้าแรกทั่วไทย
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย</span>
-                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
-      dynamicSubheadline = ``; // ลบข้อความสีส้มออก
+      // หน้าแรก (ทั่วไทย)
+      ssrH1Html = `<span class="h1-line-1">ศูนย์รวมเพื่อนเที่ยวฟิวแฟนและไซด์ไลน์พรีเมียม</span>
+                   <span class="h1-line-2">ตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน</span>`;
+      dynamicSubheadline = ``;
     } else if (zoneSlug) {
-      // 2. หน้าเจาะจงโซนย่อย
-      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+      // หน้ารายโซนย่อย (เช่น เจ็ดยอด, สันติธรรม)
+      ssrH1Html = `<span class="h1-line-1">เพื่อนเที่ยวไซด์ไลน์${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)}</span>
+                   <span class="h1-line-2">ตัวจริงไม่จกตา นัดเจอจ่ายหน้างาน</span>`;
       dynamicSubheadline = ``;
     } else {
-      // 3. หน้ารวมทั้งจังหวัด
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ ${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+      // หน้ารายจังหวัด (เช่น เชียงใหม่)
+      ssrH1Html = `<span class="h1-line-1">สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">ฟิวแฟนตัวจริง การันตีตรงปก 100%</span>`;
       dynamicSubheadline = ``;
     }
 
@@ -1852,8 +1850,8 @@ if (!isNational && pills) {
     `;
 
     const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน คัดตัวจริงตรงปก มีห้องพร้อมและนอกสถานที่ นัดเจอน้องตัวจริงก่อนค่อยชำระค่าบริการหน้างาน สบายใจ ไร้กังวลเรื่องมัดจำค่ะ</p>${trustBoxHtml}`
-      : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""} คัดตัวจริงตรงปก 100% สไตล์ฟิวแฟนดูแลดี มีห้องส่วนตัวและพร้อมเดินทางไปหาที่พัก นัดเจอตัวจริงก่อนค่อยจ่ายหน้างาน ไม่ต้องโอนมัดจำค่ะ</p>${trustBoxHtml}`;
+      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> พื้นที่รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็นทั่วไทย คัดตัวจริงตรงปก 100% นัดเจอน้องตัวจริงก่อนค่อยจ่ายเงินหน้างาน สบายใจ ไร้กังวลเรื่องมัดจำครับ</p>${trustBoxHtml}`
+      : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์ใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""} ตัวจริงตรงปก สไตล์ฟิวแฟนดูแลดี มีห้องส่วนตัวและพร้อมเดินทางไปหาที่พัก นัดเจอตัวจริงค่อยจ่ายเงินครับ</p>${trustBoxHtml}`;
 
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset" style="padding: 12px 14px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px; margin: 10px 0;">${dynamicHeroDesc}</div>`);
 
@@ -1945,7 +1943,7 @@ if (!isNational && pills) {
         const isComingSoon = cp.key === "bangkok" && count === 0;
         const linkHref = isComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${cp.key}`;
         const countBadge = isComingSoon 
-          ? `<span style="background: rgba(225, 29, 72, 0.1); color: #E11D48; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">เปิดรับสมัคร</span>`
+  ? `<span style="background: #FFE4E6; color: #9F1239; font-size: 10.5px; font-weight: 900; padding: 3px 9px; border-radius: 100px; border: 1px solid #FDA4AF;">เปิดรับสมัคร</span>`
           : `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>`;
 
         return `
