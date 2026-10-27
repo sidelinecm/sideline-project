@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_09`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_10`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -824,18 +824,18 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
                 <section class="fmh-rates-box">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(cleanProvince)})</h2>
                     <div class="fmh-rates-grid">
-                        <div class="fmh-rate-col">
-                            <div class="time-label">1 ชม.</div>
-                            <strong class="price-val">${rateNumber.toLocaleString()}.-</strong>
-                        </div>
-                        <div class="fmh-rate-col">
-                            <div class="time-label">2 ชม.</div>
-                            <strong class="price-val">${Math.floor(rateNumber * 1.8).toLocaleString()}.-</strong>
-                        </div>
-                        <div class="fmh-rate-col">
-                            <div class="time-label">ค้างคืน</div>
-                            <strong class="price-val">${Math.floor(rateNumber * 4.5).toLocaleString()}.-</strong>
-                        </div>
+                      <div class="fmh-rate-col">
+  <div class="time-label">1 ชม.</div>
+  <strong class="price-val">${rateNumber.toLocaleString()}.-</strong>
+</div>
+<div class="fmh-rate-col">
+  <div class="time-label">2 ชม.</div>
+  <strong class="price-val">${(Math.round((rateNumber * 1.8) / 100) * 100).toLocaleString()}.-</strong>
+</div>
+<div class="fmh-rate-col">
+  <div class="time-label">ค้างคืน</div>
+  <strong class="price-val">${(Math.round((rateNumber * 4.5) / 500) * 500).toLocaleString()}.-</strong>
+</div>
                     </div>
                 </section>
 

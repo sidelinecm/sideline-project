@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_09`;
+let GLOBAL_VERSION = `v_20261022_10`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1398,10 +1398,10 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     const currentFreshness = getCurrentFreshnessText();
 
     const metaTitle = zoneSlug
-  ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (${totalCount} คนล่าสุด) จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+  ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
   : (isNational 
-      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น (${totalCount} โปรไฟล์รูปจริง) ปลอดภัยจ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) นัดเจอจ่ายหน้างาน ไม่มัดจำ | ${CONFIG.BRAND_NAME}`);
+      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
+      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`);
 
     const metaDescription = zoneSlug
       ? `ดูโปรไฟล์สาวรับงานและไซด์ไลน์โซน${zoneSlug} ใน${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟน พร้อมห้องส่วนตัวและเดินทางนอกสถานที่ ตรวจสอบตัวจริงหน้างานค่อยชำระเงินค่ะ`
@@ -1747,30 +1747,38 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
 
     if (isNational) {
       // 1. หน้าแรกทั่วไทย
-      ssrH1Html = `<span class="h1-line-1" style="display: block; font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; color: #140F22; line-height: 1.25; margin-bottom: 4px;">สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย</span>
-                   <span class="h1-line-2" style="display: block; font-size: clamp(14px, 4vw, 16px); font-weight: 800; background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">เพื่อนเที่ยวฟิวแฟน โปรไฟล์รูปจริง นัดเจอจ่ายตรงกับน้อง</span>`;
-      dynamicSubheadline = `ศูนย์รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ & เด็กเอ็น ครอบคลุมทั่วไทย`;
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย</span>
+                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+      dynamicSubheadline = ``; // ลบข้อความสีส้มออก
     } else if (zoneSlug) {
-      // 2. หน้าเจาะจงโซนย่อย (เช่น /location/chiangmai/เจ็ดยอด)
-      ssrH1Html = `<span class="h1-line-1" style="display: block; font-size: clamp(18px, 5vw, 22px); font-weight: 900; color: #140F22; line-height: 1.25; margin-bottom: 4px;">รับงาน${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2" style="display: block; font-size: clamp(14px, 4vw, 16px); font-weight: 800; background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">เพื่อนเที่ยวสไตล์ฟิวแฟน รูปถ่ายจริง สแตนด์บายพร้อมดูแล</span>`;
-      dynamicSubheadline = `สาวรับงาน${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)} ยืนยันตัวตนรูปจริง`;
+      // 2. หน้าเจาะจงโซนย่อย
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)}</span>
+                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+      dynamicSubheadline = ``;
     } else {
-      // 3. หน้ารวมทั้งจังหวัด (เช่น /location/chiangmai)
-      ssrH1Html = `<span class="h1-line-1" style="display: block; font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; color: #140F22; line-height: 1.25; margin-bottom: 4px;">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2" style="display: block; font-size: clamp(14px, 4vw, 16px); font-weight: 800; background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">เพื่อนเที่ยวสไตล์ฟิวแฟน รูปถ่ายจริง สแตนด์บายพร้อมดูแล</span>`;
-      dynamicSubheadline = `สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์ยืนยันรูปจริง`;
+      // 3. หน้ารวมทั้งจังหวัด
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ ${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+      dynamicSubheadline = ``;
     }
 
-    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1" style="text-align: center; margin: 10px 0;">${ssrH1Html}</h1>`);
-    finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, `<span class="hero-subheadline">${dynamicSubheadline}</span>`);
+    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+    finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
+
+    
+
+    
 
     function matchProfileToZone(p, cleanZ) {
-      if (!p || !cleanZ) return false;
-      const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
-      const desc = sanitizeThaiText(p.description || "").toLowerCase();
-      const tags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-      const combined = `${rawLoc} ${desc} ${tags}`;
+  if (!p || !cleanZ) return false;
+  const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
+  const desc = sanitizeThaiText(p.description || "").toLowerCase();
+  
+  // ✅ ดักจับทั้ง style_tags (จากฐานข้อมูล) และ styleTags ป้องกันข้อมูลตกหล่น 100%
+  const rawTags = p.style_tags || p.styleTags || p.tags || [];
+  const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
+  
+  const combined = `${rawLoc} ${desc} ${tags}`;
 
       const zoneWithSpace = cleanZ.replace(/-/g, " ");
       const zoneWithoutDash = cleanZ.replace(/-/g, "");
@@ -1799,20 +1807,16 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
 
     
 
-    // 🟢 สร้างปุ่มลิงก์โซนภาษาไทย ทรงแคปซูลหรูหรา สไตล์แอปมือถือ (ล็อกไม่ให้ตกบรรทัด 100%)
-    const activeZoneKeys = Object.keys(zoneCountMap);
-    
-    // 1. ปุ่ม "ทั้งหมดในจังหวัด"
-    const isAllActive = !zoneSlug;
-    const allCls = isAllActive ? "filter-pill-tab active" : "filter-pill-tab";
-   const allBtnStyle = isAllActive
-  ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);"
-  : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);";
+    // 🟢 สร้างปุ่มลิงก์โซนภาษาไทย ทรงแคปซูลหรูหรา สไตล์แอปมือถือ (Clean Code + SEO)
+const activeZoneKeys = Object.keys(zoneCountMap);
+const isAllActive = !zoneSlug;
 
-let pills = `<a href="/location/${provinceSlug}" class="${allCls}" style="${allBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">
-  <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
-  <span style="${isAllActive ? 'background: rgba(255,255,255,0.25); color: #FFF;' : 'background: rgba(124,58,237,0.1); color: #7C3AED;'} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${baseProvProfiles.length}</span>
-</a> `;
+let pills = `
+  <a href="/location/${provinceSlug}" class="filter-pill-tab ${isAllActive ? 'active' : ''}">
+    <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
+    <span class="badge-count">${baseProvProfiles.length}</span>
+  </a>
+`;
 
 pills += activeZoneKeys.map(z => {
   const cleanZ = escapeHTML(String(z).trim());
@@ -1823,27 +1827,22 @@ pills += activeZoneKeys.map(z => {
     : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
   
   const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
-  const zoneCls = isActiveZone ? "filter-pill-tab active" : "filter-pill-tab";
-  const zoneBtnStyle = isActiveZone
-    ? "background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38);"
-    : "background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #1E152A; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);";
 
-  const badgeStyle = isActiveZone
-    ? "background: rgba(255,255,255,0.25); color: #FFFFFF;"
-    : "background: rgba(124,58,237,0.1); color: #7C3AED;";
+  return `
+    <a href="${href}" class="filter-pill-tab ${isActiveZone ? 'active' : ''}">
+      <span>📍 โซน${cleanZ}</span>
+      <span class="badge-count">${count}</span>
+    </a>
+  `;
+}).join("");
 
-  return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">
-  <span>📍 โซน${cleanZ}</span>
-  <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
-</a>`;
-}).join(" ");
-
-    if (!isNational && pills) {
-      finalHtml = finalHtml.replace(
-        /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
-        `<div class="filter-pills-scroll-row" id="quick-filter-pills" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 8px !important; overflow-x: auto !important; padding: 6px 4px 14px 4px !important; scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important;">${pills}</div>`
-      );
-    }
+if (!isNational && pills) {
+  // นำไปแทนที่ใน HTML
+  finalHtml = finalHtml.replace(
+    /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
+    `<div class="filter-pills-scroll-row" id="quick-filter-pills">${pills}</div>`
+  );
+}
     
     const trustBoxHtml = `
       <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
