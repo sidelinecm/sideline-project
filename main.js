@@ -93,7 +93,7 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "v_20261022_10";
+  const CACHE_STORAGE_KEY = "v_20261022_11";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
@@ -314,7 +314,7 @@ async function getSupabaseClient() {
   return String(num);
 }
 
-// 🟢 เวอร์ชันเสถียร 100% (ฟอนต์ไม่หลุด, ไม่กินลิมิต, บอทสแกนไม่เจอ)
+// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, บอทไม่ตีความว่ารูปเสีย
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -322,30 +322,28 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const cleanPath = imagePath.trim();
-  
-  // 💎 พลิกภาพ (a_hflip) + วางลายน้ำสีขาวโปร่งแสง 45% ฟอนต์ Montserrat สไตล์ลักชัวรี
-  const WM_CARD = "a_hflip/l_text:Montserrat_20_bold_letter_spacing_3:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_30";
-  const WM_MODAL = "a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
-  const WM_FULL = "a_hflip/l_text:Montserrat_34_bold_letter_spacing_5:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_50";
 
-  let baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
-  
+  // ⚡ ตัด l_text ออกทั้งหมด เหลือแค่ f_auto,q_auto และขนาดพิกเซลที่เหมาะสม ป้องกันรูปพัง 100%
+  let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // รูปกลมขนาดเล็ก ไม่ใส่ลายน้ำ เพื่อความเร็วและไม่รก
-    baseTransform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
+    // รูปย่อยขนาดเล็ก (Thumbnail)
+    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    baseTransform = `f_auto,q_auto:good,w_400,h_560,c_fill/${WM_CARD}`;
+    // รูปการ์ดแสดงผลปกติ
+    transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    baseTransform = `f_auto,q_auto:good,w_600,h_800,c_fill/${WM_MODAL}`;
+    // รูปขนาดกลางสำหรับ Lightbox Modal
+    transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
   } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    baseTransform = `f_auto,q_auto:good,w_1200,c_limit/${WM_FULL}`;
+    // รูปใหญ่เต็มจอ / OG Image สำหรับแชร์โซเชียล
+    transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
-
-  const transform = baseTransform;
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
+      // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
