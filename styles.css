@@ -665,32 +665,24 @@ img {
   box-shadow: 0 2px 6px rgba(124, 58, 237, 0.04) !important;
 }
 
-.seo-h1-title {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  margin: 0 !important;
-  line-height: 1.28 !important;
-  text-align: center !important;
-  width: 100% !important;
-}
 .seo-h1-title .h1-line-1 {
-  font-size: clamp(18px, 5.2vw, 24px) !important;
+  font-size: clamp(22px, 6vw, 30px) !important;
   font-weight: 900 !important;
-  color: #0F0B1A !important;
-  white-space: nowrap !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8), 0 3px 8px rgba(15, 10, 26, 0.12) !important;
-  letter-spacing: -0.3px !important;
+  color: #000000 !important;
+  white-space: normal !important; /* 👈 อนุญาตให้ตัดบรรทัดเมื่อจอแคบ จะไม่ล้นขอบอีก */
+  line-height: 1.25 !important;
+  text-align: center !important;
 }
+
 .seo-h1-title .h1-line-2 {
-  font-size: clamp(16px, 4.5vw, 21px) !important;
-  font-weight: 900 !important;
-  background: linear-gradient(135deg, #FF1361 0%, #E11D48 45%, #9333EA 100%) !important;
+  font-size: clamp(14px, 4vw, 17px) !important;
+  font-weight: 800 !important;
+  background: linear-gradient(90deg, #E11D48 0%, #7C3AED 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  white-space: nowrap !important;
-  filter: drop-shadow(0 2px 8px rgba(225, 29, 72, 0.28)) !important;
-  letter-spacing: -0.2px !important;
+  white-space: normal !important; /* 👈 อนุญาตให้ตัดบรรทัด */
+  line-height: 1.35 !important;
+  text-align: center !important;
 }
 
 .t-chunk {
@@ -4744,3 +4736,440 @@ button, a, .interactive-card, .story-item-el {
   -webkit-tap-highlight-color: transparent;
 }
 
+
+
+/* --- แก้ไขแถบเมนูด้านล่าง (Bottom Dock) --- */
+.floating-app-dock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(124, 58, 237, 0.18);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+}
+
+/* บังคับให้ปุ่มทั้ง 4 แบ่งพื้นที่เท่าๆ กัน */
+.floating-app-dock .dock-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    gap: 4px;
+    padding: 6px 0;
+    /* แก้ปัญหามองไม่เห็น: เปลี่ยนสีเป็นเทาเข้ม */
+    color: #64748B; 
+    cursor: pointer;
+}
+
+/* ขนาดไอคอนและตัวหนังสือ */
+.floating-app-dock .dock-item i {
+    font-size: 20px;
+}
+.floating-app-dock .dock-item span {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* สถานะเมื่อปุ่มถูกเลือก (Active) */
+.floating-app-dock .dock-item.active {
+    color: #7C3AED; /* สีม่วงแบรนด์ */
+}
+
+/* ปรับปุ่ม LINE ให้เป็นไอคอนปกติ ไม่ใช่ปุ่มยาแคปซูลใหญ่ๆ เพื่อไม่ให้เบียดปุ่มอื่น */
+.floating-app-dock .dock-item-line {
+    color: #00B900; /* สีเขียว LINE */
+}
+.floating-app-dock .dock-item-line:active {
+    opacity: 0.7;
+}
+
+/* ดันเนื้อหาของเว็บทั้งหมดไม่ให้จมลงไปใต้เมนูด้านล่าง */
+body.fmh-app-page {
+    padding-bottom: 80px !important;
+}
+/* --- แก้ไขข้อความ Hero Section ซ้อนทับกัน --- */
+.hero-headings-block {
+    text-align: center;
+    margin: 20px 0;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* เพิ่มระยะห่างระหว่างบรรทัด */
+}
+
+/* ข้อความสีน้ำเงินเข้มด้านบนสุด */
+.hero-subheadline {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    color: #7C3AED;
+    line-height: 1.5;
+    white-space: normal; /* บังคับให้ตัดขึ้นบรรทัดใหม่ถ้ายาวเกิน */
+}
+
+/* หัวข้อหลัก (H1) */
+.seo-h1-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.h1-line-1 {
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 900;
+    color: #140F22;
+    line-height: 1.3;
+}
+
+.h1-line-2 {
+    font-size: clamp(14px, 4vw, 16px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #E11D48 0%, #D946EF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.4;
+}
+
+/* กล่องข้อความสีขาวด้านล่างหัวข้อ */
+.hero-description-inset {
+    margin-top: 10px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid rgba(124, 58, 237, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.hero-subtitle-p {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.7;
+    margin: 0;
+}
+/* --- อัปเกรดระบบ Filter Pills (ใช้ร่วมกันทั้งหน้าแรกและหน้าจังหวัด) --- */
+.filter-pills-scroll-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 4px 14px 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-pills-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+.filter-pill-tab {
+  background: #FFFFFF;
+  border: 1.5px solid rgba(124, 58, 237, 0.2);
+  color: #1E152A;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-pill-tab .badge-count {
+  background: rgba(124,58,237,0.1);
+  color: #7C3AED;
+  padding: 2px 7.5px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1;
+}
+/* สถานะ Active ของปุ่ม Filter */
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+  color: #FFFFFF;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+.filter-pill-tab.active .badge-count {
+  background: rgba(255,255,255,0.25);
+  color: #FFFFFF;
+}
+
+/* --- อัปเกรด Card Social Strip (ป้ายดาวและยอดทักไลน์) --- */
+.profile-card-social-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  width: 100%;
+}
+.social-badge-star {
+  background: rgba(245, 158, 11, 0.08);
+  border: 0.8px solid rgba(245, 158, 11, 0.22);
+  color: #F59E0B;
+  padding: 2px 7.5px;
+  border-radius: 100px;
+  font-weight: 800;
+  font-size: 10.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+}
+.social-badge-star .star-icon {
+  font-size: 11px;
+  filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
+}
+.social-badge-star .review-count {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  font-size: 9.5px;
+}
+.social-badge-likes {
+  background: rgba(124, 58, 237, 0.10);
+  border: 0.8px solid rgba(192, 132, 252, 0.22);
+  color: #E9D5FF;
+  padding: 2px 7.5px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+/* =========================================================
+   ✨ HERO SECTION: COMPLETE WITH ORANGE SUBHEADLINE
+   มีข้อความสีส้มด้านบน, ไม่แหว่งขอบจอ, ลบป้ายมัดจำซ้ำออก
+   ========================================================= */
+
+/* 1. กล่องหลักแบบคลีน ไร้กรอบหนาเทอะทะ */
+.hero-section.celestial-hero-box {
+    position: relative !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 10px 10px 6px 10px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    z-index: 1 !important;
+}
+
+/* แสงออร่าเนียนๆ ด้านหลัง */
+.hero-section.celestial-hero-box::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 40% !important; 
+    left: 50% !important;
+    width: 95vw !important; 
+    height: 95vw !important;
+    max-width: 380px !important; 
+    max-height: 380px !important;
+    transform: translate(-50%, -50%) !important;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, rgba(249, 115, 22, 0.10) 45%, transparent 70%) !important;
+    filter: blur(40px) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+/* 2. 🌟 ข้อความสีส้มด้านบน H1 (แก้ให้แสดงผลสวย ไม่หลุดขอบจอ) */
+.hero-subheadline {
+    order: -1 !important;
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #EA580C !important; /* สีส้มสดใส คมชัด ไม่จม */
+    font-size: clamp(11.5px, 3.2vw, 13px) !important;
+    font-weight: 800 !important;
+    letter-spacing: normal !important; /* ปลดล็อกไม่ถ่างคำจนล้นจอ */
+    text-transform: none !important;
+    padding: 0 4px !important;
+    margin-bottom: 6px !important;
+    text-align: center !important;
+    white-space: normal !important; /* ตัดบรรทัดพอดีหน้าจอ */
+    line-height: 1.4 !important;
+    width: 100% !important;
+}
+
+/* 3. หัวข้อใหญ่ H1: ดำสนิท คมชัด และไม่ล้นขอบจอ */
+.hero-headings-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    width: 100% !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+.seo-h1-title {
+    margin: 0 !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+
+/* H1 บรรทัดแรก: ดำสนิท ไม่ตัดคำแหว่ง */
+.seo-h1-title .h1-line-1 {
+    font-size: clamp(21px, 6vw, 28px) !important; 
+    font-weight: 900 !important; 
+    color: #000000 !important; 
+    line-height: 1.25 !important;
+    letter-spacing: -0.3px !important; 
+    white-space: normal !important; /* ป้องกันหลุดขอบ */
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    text-align: center !important;
+    padding: 0 4px !important;
+}
+
+/* H1 บรรทัดสอง: Gradient ม่วง-ชมพู มีคำว่า (ไม่มีมัดจำ) */
+.seo-h1-title .h1-line-2 {
+    font-size: clamp(13px, 3.8vw, 16px) !important;
+    font-weight: 800 !important;
+    background: linear-gradient(90deg, #E11D48 0%, #7C3AED 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    text-align: center !important;
+    padding: 0 6px !important;
+}
+
+/* 4. คำอธิบายแบบย่อ 2 บรรทัด คลีนตา */
+.hero-description-inset {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 8px !important;
+    max-width: 92% !important;
+    margin: 8px auto 0 auto !important;
+}
+.hero-subtitle-p {
+    font-size: 12px !important;
+    color: #475569 !important;
+    line-height: 1.55 !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important; 
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+.hero-subtitle-p strong {
+    font-weight: 700 !important;
+    color: #0F172A !important;
+}
+
+/* 5. ❌ ซ่อนป้าย "นัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำ 100%" ออก */
+.metric-pill.pill-safety {
+    display: none !important;
+}
+
+/* 6. แถบสถิติด้านล่าง (113 โปรไฟล์ • ตรงปก 100% • 6 จังหวัด) */
+.hero-metric-strip {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-top: 10px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+    width: 100% !important;
+}
+.metric-pill.pill-stats {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: #64748B !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+.metric-pill.pill-stats .live-dot {
+    width: 6.5px !important;
+    height: 6.5px !important;
+    background-color: #00E676 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 8px #00E676 !important;
+}
+.metric-pill.pill-stats #live-profile-count {
+    color: #7C3AED !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+}
+.metric-pill.pill-stats strong {
+    color: #000000 !important;
+    font-weight: 800 !important;
+}
+.metric-pill.pill-stats #live-province-count {
+    color: #E11D48 !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+}
+
+/* ป้าย Kiss Model ด้านบน */
+.kiss-master-brand-wrapper {
+    margin-bottom: 8px !important;
+}
+
+/* ลบข้อความสีส้มด้านบนทิ้งถาวร */
+.hero-subheadline {
+    display: none !important;
+}
+
+/* คุมกล่องข้อความใหม่ใต้ H1 ให้ลอยสวยๆ สบายตา ไม่เกะกะ */
+.hero-description-inset {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 10px !important;
+    max-width: 90% !important;
+    margin: 10px auto 0 auto !important;
+}
+
+.hero-subtitle-p {
+    font-size: 13px !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+}
+
+.hero-subtitle-p strong {
+    color: #0F172A !important;
+    font-weight: 800 !important;
+}

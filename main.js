@@ -93,7 +93,7 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "v_20261022_09";
+  const CACHE_STORAGE_KEY = "v_20261022_10";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
@@ -207,16 +207,24 @@ async function getSupabaseClient() {
   prompt("คัดลอกลิงก์โปรไฟล์นี้:", shareTargetUrl);
 };
 
-  // 🟢 [ย้ายมาไว้ตรงนี้] ฟังก์ชันแทร็กการคลิก LINE
   window.trackLineClick = async function(profileId) {
     try {
       const idNum = parseInt(profileId, 10);
       if (isNaN(idNum)) return;
 
-      const sessionKey = `tracked_line_${idNum}`;
-      if (sessionStorage.getItem(sessionKey)) return;
-      sessionStorage.setItem(sessionKey, "true");
+      // ใช้ localStorage เพื่อจำถาวรบนเบราว์เซอร์นั้นๆ (ป้องกัน 1 คนกดปั๊มยอดรัวๆ)
+      const storageKey = `tracked_line_${idNum}`;
+      if (localStorage.getItem(storageKey)) return; 
+      localStorage.setItem(storageKey, "true");
 
+      // เพิ่มตัวเลขชั่วคราวบนหน้าจอให้ผู้ใช้เห็นทันทีว่ากดแล้ว (ไม่ต้องรอรีเฟรชหน้า)
+      const likeSpans = document.querySelectorAll(`[data-profile-id="${idNum}"] .social-badge-likes span`);
+      likeSpans.forEach(span => {
+        const currentCount = parseInt(span.textContent.replace(/\D/g, "")) || 0;
+        span.innerHTML = `${currentCount + 1} 💗`;
+      });
+
+      // ส่งคำสั่งไปบวกเลขในฐานข้อมูล Supabase
       const client = await getSupabaseClient();
       if (client) {
         client.rpc("increment_likes", { profile_id_to_update: idNum }).catch(() => {});
@@ -530,9 +538,15 @@ function optimizeImg(imagePath, mode = "card") {
       executeFilterAndRender(false);
     }
 
-    // 🟢 แก้ไขใน main.js ฟังก์ชัน populateInitialComponents()
-const vipSwiperEl = document.getElementById("vip-swiper-container");
-if (!vipSwiperEl || vipSwiperEl.querySelector(".vip-card-item")) return;
+    const vipSwiperEl = document.getElementById("vip-swiper-container");
+if (!vipSwiperEl) return;
+
+// ✅ ถ้าบนหน้าจอมีน้องในแถบ HOT อยู่แล้ว ให้อ่าน ID ของน้องเก็บไว้ทันที จะได้ไม่นำมาแสดงซ้ำด้านล่าง
+const existingVipCards = vipSwiperEl.querySelectorAll(".vip-card-item");
+if (existingVipCards.length > 0) {
+  window.__hotProfileIds = new Set(Array.from(existingVipCards).map(el => String(el.dataset.profileId)));
+  return;
+}
 
 // 1. ตรวจสอบครอบคลุมทั้ง tags, description, slogan
 let hotCandidate = appState.allProfiles.filter(p => {
@@ -1092,7 +1106,7 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
     }
 
     
-   // ✅ ซิงค์ H1 ให้ตรงกับ SSR
+  // ✅ ซิงค์ H1 ให้ตรงกับ SSR (ตัดข้อความซ้ำซาก และเพิ่ม ไม่มีมัดจำ)
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
@@ -1104,10 +1118,8 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
       } else {
         const line1 = isAllOrNational 
           ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย" 
-          : `สาวรับงาน${escapeHTML(targetName)} ไซด์ไลน์${escapeHTML(targetName)}`;
-        const line2 = isAllOrNational 
-          ? "ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน" 
-          : "ฟิวแฟนตรงปก มีห้องพร้อม-นอกสถานที่ จ่ายหน้างาน 100%";
+          : `สาวรับงาน ไซด์ไลน์ ${escapeHTML(targetName)}`;
+        const line2 = "ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)"; // 👈 กำหนดเป็นคำนี้ทุกกรณี
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
@@ -1362,20 +1374,21 @@ if (currentCriteria.avail && currentCriteria.avail !== "all") {
               ${vibeTagsHtml}
           </div>
           
-       <!-- Social Proof: แคปซูลกระจกฝ้าละมุนตา Softer Glass (ขอบ 0.8px สไตล์ Luxury) -->
-          <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
+          <!-- Social Proof: ใช้ Class CSS แทน Inline Style เพื่อความสะอาดและโหลดไว -->
+          <div class="profile-card-social-strip">
             
-            <!-- ฝั่งซ้าย: ดาวทองคำเปลว กระจกฝ้าขอบบาง 0.8px -->
-            <span style="background: rgba(245, 158, 11, 0.08); border: 0.8px solid rgba(245, 158, 11, 0.22); color: #F59E0B; padding: 2px 7.5px; border-radius: 100px; font-weight: 800; font-size: 10.5px; display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-              <span style="font-size: 11px; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));">★</span>
+            <!-- ฝั่งซ้าย: ดาวทองคำเปลว -->
+            <span class="social-badge-star">
+              <span class="star-icon">★</span>
               <span>${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)}</span>
-              <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-size: 9.5px;">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
+              <span class="review-count">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
             </span>
 
-            <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
-            <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>${(p.likes_count || p.likes || 0)} 💗</span>
+            <!-- ฝั่งขวา: ยอดทักไลน์ -->
+            <span class="social-badge-likes">
+              <!-- สังเกตว่าผมเปลี่ยน stroke เป็น currentColor เพื่อให้มันดึงสีมาจาก CSS คลาสให้อัตโนมัติ -->
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>${(p.likes_count || p.likes || 0)} 💗</span>
             </span>
 
           </div>
@@ -1925,9 +1938,13 @@ if (descContent) {
     const parseFn = window.parseRateToNumber || (typeof parseRateToNumber === "function" ? parseRateToNumber : ((r) => 1500));
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
 
-    // 💰 10. ตารางเรทราคา 3 ช่อง
+    // 💰 10. ตารางเรทราคา 3 ช่อง (ปัดเศษให้เป็นเลขกลมสวยงาม)
     const ratesGrid = document.getElementById("lightboxRatesGrid");
     if (ratesGrid) {
+      // คำนวณราคาให้ลงท้ายด้วยหลักร้อย และหลักห้าร้อยที่ลงตัว
+      const rate2Hrs = Math.round((rateNum * 1.8) / 100) * 100;
+      const rateOvernight = Math.round((rateNum * 4.5) / 500) * 500;
+
       ratesGrid.innerHTML = `
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
           <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
@@ -1935,11 +1952,11 @@ if (descContent) {
         </div>
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
           <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชม.</div>
-          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 1.8).toLocaleString()}.-</strong>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rate2Hrs.toLocaleString()}.-</strong>
         </div>
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
           <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน</div>
-          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 4.5).toLocaleString()}.-</strong>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rateOvernight.toLocaleString()}.-</strong>
         </div>
       `;
     }
@@ -2483,11 +2500,10 @@ async function handleUrlRouting(isInitial = false) {
       };
     }
 
-    if (domCache.provinceSelect) {
+    // ✅ ให้เปลี่ยนหน้านำทางเฉพาะเมื่อผู้ใช้กดปุ่ม "แสดงผลลัพธ์" (applyFilterBtn) เท่านั้น
+if (domCache.provinceSelect) {
   domCache.provinceSelect.addEventListener("change", (e) => {
-    const val = e.target.value;
-    const newUrl = (val && val !== "all" && val !== "national") ? `/location/${val}` : "/";
-    window.location.href = newUrl; // 👈 เปลี่ยนหน้านำทางจริงทันที
+    // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
   });
 }
         
@@ -2567,23 +2583,25 @@ async function handleUrlRouting(isInitial = false) {
       });
     }
 
-    // 🟢 ตัวดักคลิก Quick Filter Pills (ชั้นเดียว ปล่อยให้แท็ก <a> เปลี่ยนหน้าได้ตามปกติ)
-    document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-      pill.addEventListener("click", function (e) {
-        // 1. ถ้าเป็นแท็ก <a> ที่มีลิงก์ปลายทาง (เช่น ปุ่มจังหวัด) ให้เบราว์เซอร์เปลี่ยนหน้าตามปกติ ไม่ต้องสกัด
-        if (this.tagName === "A" && this.getAttribute("href")) return;
+   // 🟢 ตัวดักคลิก Quick Filter Pills (ใน main.js)
+document.querySelectorAll(".filter-pill-tab").forEach(pill => {
+  pill.addEventListener("click", function (e) {
+    // 1. (SEO & SSR) ถ้าเป็นแท็ก <a> ที่มี href (ปุ่มโซน/จังหวัด) ให้เบราว์เซอร์เปลี่ยนหน้าตามปกติ
+    // Google Bot จะไต่ตามลิงก์นี้ไปเจอหน้าที่มี H1, Title, Description เฉพาะเจาะจง
+    if (this.tagName === "A" && this.getAttribute("href")) return;
 
-        // 2. ถ้าเป็นปุ่มแท็กทั่วไป (<button>) ให้กรองแบบไม่ต้องรีโหลดหน้า
-        e.preventDefault();
-        triggerHaptic("light");
-        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-        this.classList.add("active");
+    // 2. (UX & SPA) ถ้าเป็นปุ่ม <button> (แท็กความชอบ เช่น #ฟิวแฟน, #ตัวเล็ก) 
+    // ให้ใช้ JavaScript กรองข้อมูลที่อยู่ใน Browser ทันที ไม่ต้องโหลดหน้าใหม่ ลื่นไหล 60FPS
+    e.preventDefault();
+    triggerHaptic("light");
+    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
 
-        const selectedTag = this.getAttribute("data-tag") || "all";
-        appState.activePillTag = selectedTag;
-        executeFilterAndRender(true);
-      });
-    });
+    const selectedTag = this.getAttribute("data-tag") || "all";
+    appState.activePillTag = selectedTag;
+    executeFilterAndRender(true);
+  });
+});
 
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
@@ -2704,43 +2722,31 @@ async function handleUrlRouting(isInitial = false) {
 
    
 
-    // ✅ แก้ไขเป็นแบบนี้ใน main.js (ฟังก์ชัน initDockAutoHide)
-function initDockAutoHide() {
+    function initDockAutoHide() {
   const floatingDock = document.querySelector('.floating-app-dock');
   if (!floatingDock) return;
 
-  // 1. ตรึงตำแหน่งไว้ล่างสุดแบบ 100% ไม่ยอมให้หลุดขอบจอ
-  floatingDock.style.position = "fixed";
-  floatingDock.style.bottom = "0";
-  floatingDock.style.left = "0";
-  floatingDock.style.right = "0";
-  floatingDock.style.zIndex = "99999";       // ลอยอยู่เหนือทุกการ์ด
-  floatingDock.style.opacity = "1";          // ชัดเจน ไม่จาง
-  floatingDock.style.visibility = "visible";
-  floatingDock.style.transform = "translateY(0)"; // ไม่เลื่อนหลบลงล่าง
-
   let lastScrollY = window.scrollY;
-  let ticking = false;
+  let isScrolling;
 
   window.addEventListener('scroll', function () {
-    if (!ticking) {
-      window.requestAnimationFrame(function () {
-        const currentScrollY = window.scrollY;
+    const currentScrollY = window.scrollY;
 
-        // 2. ปรับการทำงานใหม่: ไม่สั่งซ่อนแล้ว! 
-        // แต่ถ้าผู้ใช้เริ่มเลื่อนจอ ให้เพิ่ม "เงาลอยตัว (Drop Shadow)" ชัดขึ้น
-        // เพื่อให้แถบปุ่มลอยเด่นขึ้นมา ไม่ถูกการ์ดสีขาวด้านหลังกลืน
-        if (currentScrollY > 60) {
-          floatingDock.style.boxShadow = "0 -8px 25px rgba(20, 15, 34, 0.16)";
-        } else {
-          floatingDock.style.boxShadow = "0 -2px 12px rgba(20, 15, 34, 0.08)";
-        }
-
-        lastScrollY = Math.max(0, currentScrollY);
-        ticking = false;
-      });
-      ticking = true;
+    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      floatingDock.style.transform = "translateY(150%)"; // ไถจอลง -> ซ่อนเมนู
+    } else {
+      floatingDock.style.transform = "translateY(0)";    // ไถจอขึ้น -> แสดงเมนู
+      floatingDock.style.boxShadow = currentScrollY > 20 
+        ? "0 -8px 25px rgba(20, 15, 34, 0.16)" 
+        : "0 -2px 12px rgba(20, 15, 34, 0.08)";
     }
+
+    lastScrollY = Math.max(0, currentScrollY);
+
+    window.clearTimeout(isScrolling);
+    isScrolling = setTimeout(function() {
+      floatingDock.style.transform = "translateY(0)";
+    }, 800); 
   }, { passive: true });
 }
     initDockAutoHide();
