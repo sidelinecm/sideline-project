@@ -4627,6 +4627,419 @@ img:not([src]) {
   color: #FFFFFF !important;
   border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
 }
+
+
+
+
+
+
+/* ==========================================================================
+   📐 MASTER UNIFIED TYPOGRAPHY & TACTILE DEPTH ENGINE (FIRSTMODELHUB 2026)
+   - ปรับขนาดฟอนต์ให้ได้สัดส่วนมาตรฐานเดียวกันทุกจุด (H1 - H5, P)
+   - ล็อกระดับข้อความบนการ์ด ป้องกันชื่อง้องกระโดดสูงๆ ต่ำๆ
+   - ล็อกกล่อง Bento และ เรทราคา 3 ช่อง ให้สูงเท่ากันเป๊ะ 56px ไม่เอียง
+   - มีมิติเลเยอร์แสงเงานวลตา ไม่แบนเรียบ (Tactile Glassmorphism)
+   - 🔒 คงขนาดและสัดส่วนของรูปภาพเดิมไว้ 100% ไม่แตะต้องขนาดรูปภาพ
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. มาตรฐานขนาดหัวข้อและเนื้อหา (Global Typography Standard)
+   -------------------------------------------------------------------------- */
+/* H1: หัวข้อหลักบนสุด */
+h1, .seo-h1-title {
+  line-height: 1.3 !important;
+}
+.seo-h1-title .h1-line-1 {
+  font-size: 19px !important;
+  font-weight: 900 !important;
+}
+.seo-h1-title .h1-line-2 {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+/* H2: หัวข้อหลักของแต่ละเซกชัน (เช่น น้องๆ แนะนำ, ข้อมูลบริการ) */
+h2, .clean-section-h2, .province-clean-title, .bento-headline, .hot-main-title {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+}
+
+/* H3: ชื่อน้องบนการ์ด และหัวข้อย่อย */
+h3, .step-title, .section-title-mini {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+}
+
+/* H4: หัวข้อกล่องเนื้อหาภายใน (Bento, ตารางราคา, FAQ, น้องแนะนำ) */
+h4, 
+#lightboxRatesSection h4, 
+#lightboxRelatedTitle, 
+#lightboxFaqTitle, 
+#lightboxSafetySection h4,
+.trust-text-content h4 {
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 6px !important;
+}
+
+/* H5: หัวข้อคำถามใน FAQ */
+h5, #lightboxFaqList h5, .fmh-faq-q {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+}
+
+/* ข้อความบรรยายทั่วไป (P, Text) */
+p, .bento-sub-desc, .step-desc, .trust-text-content p, .hero-subtitle-p, .fmh-faq-a {
+  font-size: 11px !important;
+  line-height: 1.55 !important;
+  color: #475569 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. ล็อกระดับข้อความบนการ์ดรูปหน้าฟีด (คงขนาดรูปภาพเดิม 100%)
+   -------------------------------------------------------------------------- */
+.profile-card-new {
+  aspect-ratio: 3 / 4.2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+}
+
+.profile-card-info-content {
+  padding: 8px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  gap: 2px !important;
+}
+
+/* ล็อกความสูงแถวแท็ก (18px) แม้มี 1 แท็ก หรือ 2 แท็ก ชื่อน้องก็ไม่โดนดัน */
+.profile-card-tags-row {
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-bottom: 2px !important;
+  overflow: hidden !important;
+}
+
+.card-vibe-pill {
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  background: rgba(15, 10, 26, 0.65) !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ล็อกความสูงแถวชื่อและอายุ (24px) อยู่ระดับสายตาเดียวกันทุกใบ */
+.profile-card-title-row {
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+}
+
+.profile-card-name, .vip-name {
+  font-size: 14.5px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: calc(100% - 44px) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 2px 6px #000000 !important;
+  margin: 0 !important;
+}
+
+.profile-card-age-tag {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  height: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  border-radius: 4px !important;
+  background: rgba(225, 29, 72, 0.85) !important;
+}
+
+/* ล็อกความสูงแถวพิกัดและราคา (22px) อยู่ระนาบเดียวกันทุกใบ */
+.profile-card-bottom-row {
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+}
+
+.profile-card-location, .vip-location {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #F8FAFC !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 60% !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.profile-card-price {
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  padding: 2px 7px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  flex-shrink: 0 !important;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+  border: 1px solid #F59E0B !important;
+  color: #92400E !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. กล่อง BENTO สเปก 3 ช่อง: สูงเท่ากันเป๊ะ 56px ทั้ง 3 ช่อง ไม่เอียง + มีมิติ
+   -------------------------------------------------------------------------- */
+#lightboxDetailsCompact .fmh-bento-grid,
+#lightboxDetailsCompact > div:first-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#lightboxDetailsCompact .bento-stat-tile {
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+  
+  /* มิติหรูหรา: ไล่เฉดสี + ขอบสะท้อนแสง + เงานุ่ม ไม่แบนเรียบ */
+  background: linear-gradient(145deg, #FFFFFF 0%, #FAF8FE 100%) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.16) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+}
+
+.bento-stat-tile .bento-label,
+.bento-stat-tile div:first-child {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: #7C3AED !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  margin-bottom: 4px !important;
+}
+
+.bento-stat-tile .bento-val,
+.bento-stat-tile div:last-child {
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* กล่องพิกัดและค่าขนมด้านล่าง Bento */
+.fmh-meta-summary-box,
+#lightboxDetailsCompact > div:last-child {
+  background: linear-gradient(145deg, #FFFFFF 0%, #FAF8FE 100%) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.14) !important;
+  border-radius: 14px !important;
+  padding: 11px 14px !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.04), inset 0 1px 1px #FFFFFF !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. กล่องเรทราคา 3 ช่อง: สูง 56px เท่ากันเป๊ะ ตัวเลขมรกตมีมิติ
+   -------------------------------------------------------------------------- */
+#lightboxRatesSection {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.16) !important;
+  border-radius: 18px !important;
+  padding: 12px 12px 14px 12px !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.06), inset 0 1px 1px #FFFFFF !important;
+  margin-top: 10px !important;
+}
+
+#lightboxRatesSection h4 {
+  font-size: 12.5px !important;
+  font-weight: 900 !important;
+  color: #7C3AED !important;
+  text-align: center !important;
+  margin: 0 0 10px 0 !important;
+  letter-spacing: 0.3px !important;
+}
+
+#lightboxRatesGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
+
+.fmh-rate-tile,
+#lightboxRatesGrid > div {
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 4px 2px !important;
+  box-sizing: border-box !important;
+  
+  background: linear-gradient(145deg, #FAF8FE 0%, #F5EFFE 100%) !important;
+  border: 1.2px solid rgba(124, 58, 237, 0.16) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.05), inset 0 1px 1px #FFFFFF !important;
+}
+
+.fmh-rate-tile .rate-duration,
+#lightboxRatesGrid > div div {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #64748B !important;
+  line-height: 1 !important;
+  margin-bottom: 3px !important;
+}
+
+.fmh-rate-tile .rate-price,
+#lightboxRatesGrid > div strong {
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #059669 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. กล่องคำถามที่พบบ่อย (FAQ): ขนาดสบายตา ตัวหนังสือคมชัด ไม่เทอะทะ
+   -------------------------------------------------------------------------- */
+#lightboxFaqTitle {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  text-align: center !important;
+  margin: 0 0 10px 0 !important;
+}
+
+#lightboxFaqList {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.fmh-faq-card,
+#lightboxFaqList > div {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.12) !important;
+  border-left: 3.5px solid #7C3AED !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  box-shadow: 0 3px 10px rgba(15, 10, 26, 0.03), inset 0 1px 1px #FFFFFF !important;
+}
+
+.fmh-faq-q,
+#lightboxFaqList h5 {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #6D28D9 !important;
+  line-height: 1.4 !important;
+  margin: 0 0 3px 0 !important;
+}
+
+.fmh-faq-a,
+#lightboxFaqList p {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #475569 !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. โซนน้องๆ แนะนำ & มาตรฐานความปลอดภัย (จัดสัดส่วนกะทัดรัด ไม่กินพื้นที่)
+   -------------------------------------------------------------------------- */
+#lightboxRelatedTitle {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  color: #7C3AED !important;
+  text-align: center !important;
+  margin: 0 0 8px 0 !important;
+}
+
+.lightbox-related-item {
+  border-radius: 12px !important;
+  border: 1.2px solid rgba(124, 58, 237, 0.15) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.lightbox-related-item div {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #140F22 !important;
+  padding: 5px 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* กล่องมาตรฐานความปลอดภัยสีเขียว */
+#lightboxSafetySection > div {
+  background: linear-gradient(145deg, #F0FDF4 0%, #FFFFFF 100%) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.25) !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+}
+
+#lightboxSafetySection h4 {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  color: #065F46 !important;
+  text-align: center !important;
+  margin: 0 0 6px 0 !important;
+}
+
+#lightboxSafetySection p {
+  font-size: 10.5px !important;
+  color: #334155 !important;
+  line-height: 1.55 !important;
+}
+
 /* ========================================================================== */
 /* 💎 UNIVERSAL FLUID RESPONSIVE ENHANCEMENTS (ทุกอุปกรณ์ ทุกขนาดหน้าจอ)         */
 /* ========================================================================== */
@@ -4742,4 +5155,129 @@ img {
 button, a, .interactive-card, .story-item-el {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   🟢 FIX FLOATING APP DOCK (วางต่อท้ายสุดของ styles.css ได้ทันที)
+========================================================= */
+
+/* 1. ตัวกรอบแถบลอย: จัดกึ่งกลาง ดึงระยะล่างออก ป้องกันไอคอนโดนตัด */
+nav.floating-app-dock,
+.floating-app-dock {
+  position: fixed !important;
+  bottom: 16px !important;
+  left: 14px !important;
+  right: 14px !important;
+  max-width: 440px !important;
+  margin: 0 auto !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  padding: 0 10px 0 12px !important; /* ลบ padding-bottom ที่ดันของหลุดจอออก */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important; /* บังคับให้อยู่กึ่งกลางแนวตั้ง */
+  justify-content: space-around !important;
+  box-sizing: border-box !important;
+  overflow: visible !important; /* ป้องกันการเฉือนหัวไอคอน */
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  z-index: 99999 !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+}
+
+/* 2. เมนูปุ่มกด (หน้าแรก, ตัวกรอง, รวมน้องๆ): เคลียร์ค่า button/a ให้อยู่กึ่งกลาง */
+.floating-app-dock .dock-item,
+nav.floating-app-dock .dock-item,
+#open-filter-dock-btn.dock-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 1 1 0 !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+  line-height: 1 !important;
+}
+
+/* 3. ไอคอน FontAwesome: แสดงขนาดเต็มตัว ไม่ตกขอบ */
+.floating-app-dock .dock-item i,
+nav.floating-app-dock .dock-item i {
+  font-size: 19px !important;
+  line-height: 1 !important;
+  display: block !important;
+  height: 20px !important;
+  width: auto !important;
+  margin: 0 0 4px 0 !important;
+  color: #64748B !important;
+  transform: none !important;
+}
+
+/* 4. ข้อความใต้ไอคอน */
+.floating-app-dock .dock-item span,
+nav.floating-app-dock .dock-item span {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: #64748B !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 5. สถานะปุ่มที่กำลังเลือกอยู่ (Active) */
+.floating-app-dock .dock-item.active i,
+.floating-app-dock .dock-item.active span {
+  color: #E11D48 !important;
+}
+
+/* 6. ปุ่มสีเขียว "จองคิว" ด้านขวา: จัดให้อยู่แนวนอนมนสวย ไม่ลอยเบี้ยว */
+.floating-app-dock .dock-item.dock-item-line,
+nav.floating-app-dock .dock-item.dock-item-line {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  height: 44px !important;
+  padding: 0 16px !important;
+  border-radius: 100px !important;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+  margin-left: 4px !important;
+}
+
+.floating-app-dock .dock-item.dock-item-line i {
+  font-size: 18px !important;
+  color: #FFFFFF !important;
+  margin: 0 !important;
+  height: auto !important;
+}
+
+.floating-app-dock .dock-item.dock-item-line span {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  margin: 0 !important;
+}
+
+/* 7. เวลาเลื่อนจอลง (Scroll Down) ให้แถบพับซ่อนลงไปอย่างสมูท */
+.floating-app-dock.dock-hidden,
+nav.floating-app-dock.dock-hidden {
+  transform: translateY(140%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
