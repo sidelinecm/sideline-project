@@ -5173,3 +5173,74 @@ body.fmh-app-page {
     color: #0F172A !important;
     font-weight: 800 !important;
 }
+
+/* ========================================================================== */
+/* ZONE & FILTER PILLS SCROLLABLE BAR (FIXED & PERFECTED)                     */
+/* ========================================================================== */
+
+.filter-pills-scroll-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 6px 4px 14px 4px !important;
+  margin-bottom: 1rem !important;
+  scrollbar-width: none !important; /* ซ่อน scrollbar ใน Firefox */
+  -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.filter-pills-scroll-row::-webkit-scrollbar {
+  display: none !important; /* ซ่อน scrollbar ใน Chrome, Safari และ Edge */
+}
+
+.filter-pill-tab {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.2) !important;
+  color: #1E152A !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06) !important;
+  height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 100px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.filter-pill-tab:hover {
+  border-color: rgba(124, 58, 237, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38) !important;
+}
+
+.filter-pill-tab .badge-count {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7C3AED !important;
+  padding: 2px 7.5px !important;
+  border-radius: 100px !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+.filter-pill-tab.active .badge-count {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
