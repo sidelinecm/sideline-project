@@ -935,7 +935,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const idNum = parseInt(String(p.id || "1").replace(/\D/g, "") || "1", 10);
   const ratingScore = (4.8 + ((idNum % 3) * 0.1)).toFixed(1);
   const reviewCount = 8 + (idNum % 17);
-  const likesCount = p.likes_count || p.likes || 0;
+  const rawLikes = p.likes_count || p.likes || 0;
+const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
 
   return `
     <div class="profile-card-new-container">
@@ -986,7 +987,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
               <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
               <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>${likesCount} 💗</span>
+                <span>${likesText}</span>
               </span>
 
             </div>

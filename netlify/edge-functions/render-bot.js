@@ -880,8 +880,8 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
   
-   <!-- แถบจองคิวลอยตัวด้านล่าง ปรับข้อความให้สะอาดตา ไร้คำซ้ำซาก -->
-<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(124, 58, 237, 0.15); z-index: 9999; display: flex; gap: 10px; align-items: center; box-sizing: border-box;">
+   <!-- 🟢 เพิ่มระดับ z-index เป็น 99999 + ปรับความทึบแสง 0.98 + เพิ่มเงา Drop Shadow ชัดเจน ไม่โดนกลืน -->
+<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1.5px solid rgba(124, 58, 237, 0.2); box-shadow: 0 -8px 30px rgba(20, 15, 34, 0.15); z-index: 99999; display: flex; gap: 10px; align-items: center; box-sizing: border-box;">
         <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;">
             <i class="fab fa-line" style="font-size: 20px;"></i>
             <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span>
