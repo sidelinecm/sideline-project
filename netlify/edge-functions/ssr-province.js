@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_08`;
+let GLOBAL_VERSION = `v_20261022_09`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -809,11 +809,10 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const selectedTerms = getVariant(seedKey + "_terms", termsVariants);
 
   return `
-    <div style="margin-bottom: 16px;">
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">${current.headline}</h3>
-      <p style="margin-bottom: 8px; line-height: 1.65;">${current.intro}</p>
-      <p style="margin-bottom: 8px; line-height: 1.65;">มั่นใจในความปลอดภัยสูงสุดด้วยนโยบาย <strong>"นัดพบเจอตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้ว จึงค่อยชำระค่าบริการ"</strong> ปราศจากความเสี่ยงจากการโอนเงินมัดจำล่วงหน้า 100%</p>
-    </div>
+  <div style="margin-bottom: 16px;">
+    <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">${current.headline}</h3>
+    <p style="margin-bottom: 8px; line-height: 1.65;">${current.intro}</p>
+  </div>
     <div style="margin-bottom: 16px;">
       <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการและการนัดหมายใน ${provinceName}${zoneSlug ? ` โซน${zoneSlug}` : ""}</h3>
       <p style="margin-bottom: 8px; line-height: 1.65;">${current.convenience}</p>
@@ -878,12 +877,13 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   if (currentZone && rawLoc.includes(currentZone)) {
     loc = escapeHTML(currentZone);
   } else {
-    loc = escapeHTML(
-      rawLoc
-        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-        .split(/[,/]/)[0]
-        .trim() || rawLoc
-    );
+    // 🟢 แก้ไข: ลบคำนำหน้า และถ้ามีหลายชื่อย่านเว้นวรรคกัน ให้หยิบเฉพาะชื่อย่านแรกย่านเดียว
+    let cleaned = rawLoc
+      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|เชียงใหม่)\s*(\/|และ)?\s*/gi, "")
+      .trim();
+    let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
+    // ถ้าเว้นวรรคด้วยช่องว่าง ให้ตัดเอาเฉพาะคำแรก เช่น "เจ็ดยอด นิมมาน แม่โจ้" -> จะเหลือแค่ "เจ็ดยอด"
+    loc = escapeHTML(firstPart.split(/\s+/)[0].trim() || provinceName);
   }
 
   const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
@@ -968,31 +968,21 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                 ${vibeTagsHtml}
             </div>
             
-            <!-- Social Proof: ดาวรีวิวเฉลี่ย + ยอดผู้เข้าชมคำนวณตาม ID สม่ำเสมอ -->
-            <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; font-size: 11px;">
-              <span style="color: #F59E0B; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;">
-                ★ ${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)} 
-                <span style="color: #94A3B8; font-weight: normal; font-size: 10px;">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
+         <!-- สำหรับ ssr-province.js -->
+          <div class="profile-card-title-row">
+              <h3 class="profile-card-name">น้อง${cleanName}</h3>
+              ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
+          </div>
+          <div class="profile-card-bottom-row">
+              <span class="profile-card-location">
+                  <i class="fas fa-map-marker-alt"></i> ${loc}
               </span>
-              <span style="color: #64748B; font-size: 10px; display: inline-flex; align-items: center; gap: 3px;">
-                <i class="fas fa-eye" style="color: #A855F7; font-size: 9px;"></i> ${((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) * 47) % 800) + 450}
-              </span>
-            </div>
-
-            <div class="profile-card-title-row">
-                <h3 class="profile-card-name">น้อง${cleanName}</h3>
-                ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
-            </div>
-            <div class="profile-card-bottom-row">
-                <span class="profile-card-location">
-                    <i class="fas fa-map-marker-alt"></i> ${loc}
-                </span>
-                <span class="profile-card-price">${luxuryPrice}</span>
-            </div>
-        </div>
-      </article>
-    </div>
-  `;
+              <span class="profile-card-price">${luxuryPrice}</span>
+          </div>
+      </div>
+    </article>
+  </div>
+`;
 };
 
 
@@ -1814,11 +1804,10 @@ pills += activeZoneKeys.map(z => {
     ? "background: rgba(255,255,255,0.25); color: #FFFFFF;"
     : "background: rgba(124,58,237,0.1); color: #7C3AED;";
 
-  // ✅ ลบ box-shadow ที่ซ้ำออก
-  return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;" title="สาวรับงานโซน${cleanZ}">
-    <span>📍 โซน${cleanZ}</span>
-    <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
-  </a>`;
+  return `<a href="${href}" class="${zoneCls}" style="${zoneBtnStyle} height: 38px; padding: 0 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">
+  <span>📍 โซน${cleanZ}</span>
+  <span style="${badgeStyle} padding: 2px 7.5px; border-radius: 100px; font-size: 10.5px; font-weight: 900; line-height: 1;">${count}</span>
+</a>`;
 }).join(" ");
 
     if (!isNational && pills) {
@@ -2031,24 +2020,26 @@ pills += activeZoneKeys.map(z => {
         try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
       }
       return {
-        id: p.id,
-        slug: p.slug || String(p.id),
-        name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-        imagePath: p.imagePath || p.image_url || "",
-        galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean).slice(0, 4) : [],
-        provinceKey: p.provinceKey || "chiangmai",
-        location: sanitizeThaiText(p.location || ""),
-        rate: extractCleanNumber(p.rate || p.price),
-        age: p.age || "",
-        height: p.height || "",
-        weight: p.weight || "",
-        stats: p.stats || "",
-        line_id: (p.line_id || p.line || p.lineId || "").trim(),
-        availability: p.availability || "รับงาน",
-        isfeatured: Boolean(p.isfeatured),
-        verified: Boolean(p.verified),
-        styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
-      };
+  id: p.id,
+  slug: p.slug || String(p.id),
+  name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
+  imagePath: p.imagePath || p.image_url || "",
+  galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean).slice(0, 4) : [],
+  provinceKey: p.provinceKey || "chiangmai",
+  location: sanitizeThaiText(p.location || ""),
+  description: sanitizeThaiText(p.description || ""), // 👈 เพิ่มบรรทัดนี้
+  quote: sanitizeThaiText(p.slogan || p.quote || ""),       // 👈 เพิ่มบรรทัดนี้
+  rate: extractCleanNumber(p.rate || p.price),
+  age: p.age || "",
+  height: p.height || "",
+  weight: p.weight || "",
+  stats: p.stats || "",
+  line_id: (p.line_id || p.line || p.lineId || "").trim(),
+  availability: p.availability || "รับงาน",
+  isfeatured: Boolean(p.isfeatured),
+  verified: Boolean(p.verified),
+  styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
+};
     });
 
     const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
