@@ -517,12 +517,12 @@ export default async (req, context) => {
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
     const currentAvail = (profile.availability || "").trim();
     
-    // เพิ่มคำว่า "สอบถามคิว" เข้าไปในกลุ่มที่ไม่ใช่ออนไลน์ทันที
+    
     const isBusy = ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด", "สอบถามคิว"].some(s => currentAvail.toLowerCase().includes(s));
     const isOnlineNow = (currentAvail === "รับงาน" || currentAvail === "พร้อมรับงาน") || (!isBusy && Boolean(currentAvail));
     const realStatusText = currentAvail || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
     
-    // ถ้าเป็น "สอบถามคิว" หรือไม่ว่าง ให้เป็นสีส้ม (#F59E0B) ถ้าพร้อมรับงานให้เป็นสีเขียว (#059669)
+  
     const statusDotColor = (currentAvail === "สอบถามคิว" || !isOnlineNow) ? "#F59E0B" : "#059669";
 
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
@@ -544,7 +544,27 @@ export default async (req, context) => {
       }
     ];
 
-    // 🟢 5. ปรับปรุง Schema Graph ระบุย่านและ Breadcrumb ลึกถึงระดับโซน (เวอร์ชันคลีน ปลอดภัย 100%)
+
+    const faqAccordionHtml = `
+      <section class="profile-faq-section" style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
+        <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">❓ คำถามพบบ่อยเกี่ยวกับ${escapeHTML(displayName)}</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${profileFaqs.map((f) => `
+            <details style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+              <summary style="padding: 10px 14px; font-size: 12.5px; font-weight: 800; color: #140F22; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+                <span>Q: ${escapeHTML(f.q)}</span>
+                <span style="color: #7C3AED; font-size: 10px; margin-left: 8px;">▼</span>
+              </summary>
+              <div style="padding: 0 14px 12px 14px; font-size: 12px; color: #475569; line-height: 1.6; border-top: 1px dashed rgba(124, 58, 237, 0.1); margin-top: 4px; padding-top: 8px;">
+                ${escapeHTML(f.a)}
+              </div>
+            </details>
+          `).join("")}
+        </div>
+      </section>
+    `;
+    
+    
     const breadcrumbItems = [
       { 
         "@type": "ListItem", 
@@ -840,7 +860,7 @@ export default async (req, context) => {
                     </button>
                 </div>
 
-               <!-- Bio Description: กล่องแนะนำตัวคลีนมินิมอล ไม่ซ้อนกรอบ -->
+              <!-- Bio Description: กล่องแนะนำตัว -->
                 <div class="profile-bio-wrapper" style="margin-bottom: 1.25rem;">
                     ${naturalDesc}
                 </div>
@@ -848,9 +868,14 @@ export default async (req, context) => {
                 <!-- Related Profiles -->
                 ${relatedCardsHtml}
 
+                <!-- 🟢 วาง FAQ Accordion ก่อนมาตรฐานความปลอดภัย -->
+                ${faqAccordionHtml}
+
+                <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
+                    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>
+
               
-<section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
-    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>
+
                
                    <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ เกณฑ์อายุผู้ใช้งาน:</strong> แพลตฟอร์ม FirstModelHub กำหนดให้ผู้ขอรับบริการและผู้ลงประกาศต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปอย่างเข้มงวด</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
