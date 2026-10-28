@@ -1084,11 +1084,15 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     
-    // 🟢 1. ระบบตรวจจับ Routing สำหรับหน้าแรก, หน้ารายจังหวัด และโซนย่อย
-    let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en";
-    let provinceSlug = isNational ? "national" : (segments[1] || "chiangmai").toLowerCase().trim();
-    if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
-    if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
+    // ✅ แก้ไข: เพิ่ม cleanPath === "/profiles" เข้าไปในกลุ่มระดับประเทศ
+let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en" || cleanPath === "/profiles";
+
+let provinceSlug = isNational 
+  ? "national" 
+  : (segments[0] === "location" && segments[1] ? segments[1] : (segments[1] || "chiangmai")).toLowerCase().trim();
+
+if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
+if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
 
     // 🟢 แก้ไขจุดที่ 4: ถอดรหัสโซนย่อยอย่างปลอดภัย (ป้องกัน Double Encoding)
     let rawZoneParam = "";
@@ -1261,6 +1265,7 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
     // 🟢 2. แยกโปรไฟล์ตามจังหวัดที่เปิดดู และกรองตามโซนย่อย
     let profilesList = deduplicatedProfiles;
     const zoneSlug = activeZoneName || null;
+    let isZoneEmpty = false; // ✅ ประกาศไว้ข้างนอกเพื่อให้ข้างล่างเรียกใช้ได้
 
     if (!isNational && provinceSlug !== "national") {
       profilesList = deduplicatedProfiles.filter(p => {
@@ -1268,21 +1273,23 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
         return provinceKeyVariants.includes(pKey);
       });
 
-     if (zoneSlug) {
+      if (zoneSlug) {
         const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
         const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
         if (matchedZoneProfiles.length === 0) {
-          return Response.redirect(`${primaryDomain}/location/${provinceSlug}`, 301);
+          isZoneEmpty = true;
+          profilesList = deduplicatedProfiles.filter(p => {
+            const pKey = (p.provinceKey || "").toLowerCase();
+            return provinceKeyVariants.includes(pKey);
+          });
+        } else {
+          profilesList = matchedZoneProfiles;
         }
-
-        profilesList = matchedZoneProfiles;
       }
-    }
-
-    // ==========================================
-    // 🟢 นำบล็อกนี้มาวางไว้ตรงนี้ (ก่อนบรรทัด 1125)
-    // ==========================================
+    } 
+    
+   
     let hotSwiperCardsHtml = "";
     let featuredCardsHtml = "";
     const HOME_PAGE_LIMIT = 40;
@@ -1375,13 +1382,7 @@ const nationalFeedProfiles = isNational ? (() => {
 
    
     
-const rawCanonicalUrl = isNational 
-      ? `${primaryDomain}/` 
-      : (zoneSlug 
-          ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
-          : `${primaryDomain}/location/${provinceSlug}`);
-
-    const canonicalUrl = encodeURI(rawCanonicalUrl);
+const rawCanonicalUrl = isNational ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) : (zoneSlug ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` : `${primaryDomain}/location/${provinceSlug}`); const canonicalUrl = encodeURI(rawCanonicalUrl);
 
     // 🟢 ย้ายขึ้นมาประกาศตรงนี้ก่อน ตัวแปรจะพร้อมใช้งานทันที
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
@@ -1399,15 +1400,16 @@ const rawCanonicalUrl = isNational
     const isChiangMai = provinceSlug === "chiangmai";
     const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
 
-    // ✅ ปล่อยให้ metaTitle และ metaDescription ทำงานต่อได้ตามปกติ
+    // ✅ กำหนด Title ตามเงื่อนไขหน้าโซนย่อย / หน้าจังหวัด / หน้าแรก
     const metaTitle = zoneSlug
-      ? `สาวรับงาน ไซด์ไลน์${zoneSlug} ${provinceNameThai} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+      ? `สาวรับงาน${provinceNameThai} ฟิวแฟน ไซด์ไลน์${zoneSlug} รูปจริงตรงปก จ่ายหน้างาน | firstmodelhub`
       : (isNational 
           ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
           : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
 
+    // ✅ กำหนด Meta Description ตามเงื่อนไขหน้าโซนย่อย / หน้าจังหวัด / หน้าแรก
     const metaDescription = zoneSlug
-      ? `รวมสาวรับงานและไซด์ไลน์โซน${zoneSlug} ${provinceNameThai} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ`
+      ? `รวมน้องๆสาวรับงานไซด์ไลน์โซน${zoneSlug} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก100% นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ  [อัปเดตข้อมูลจริง ${realFreshnessDate}]`
       : (isNational
           ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
           : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
@@ -1693,8 +1695,7 @@ const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
-  // 🟢 แก้ไข: มีน้องตั้งแต่ 1 คนขึ้นไป ให้ Google เก็บเข้า Index ได้ทันที (ไม่บล็อก)
-const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCount < 1)
+  const robotsDirectives = (zoneSlug && (isZoneEmpty || totalCount < 1))
   ? "noindex, follow"
   : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
 
@@ -1722,10 +1723,12 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:alt["'][^>]*>/i, cleanOgImageBlock);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 7. จัดการแท็กภาษา Hreflang
-    const hreflangBlock = isNational
-      ? `<link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />`
-      : `<link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />`;
+    const nationalCanonical = cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`;
+
+const hreflangBlock = isNational
+  ? `<link rel="alternate" hreflang="th" href="${nationalCanonical}" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${nationalCanonical}" />`
+  : `<link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />`;
+      
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
@@ -1779,21 +1782,24 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     }
 
     // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
-    const zoneCountMap = {};
-    const baseProvProfiles = deduplicatedProfiles.filter(p => {
-      const pKey = (p.provinceKey || "").toLowerCase();
-      return provinceKeyVariants.includes(pKey);
-    });
+const zoneCountMap = {};
+const baseProvProfiles = deduplicatedProfiles.filter(p => {
+  const pKey = (p.provinceKey || "").toLowerCase();
+  return provinceKeyVariants.includes(pKey);
+});
 
-    (cleanZonesList || []).forEach(rawZ => {
-      const cleanZ = sanitizeThaiText(rawZ).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
-      if (!cleanZ || cleanZ === "ทั้งหมด") return;
-      
-      const count = baseProvProfiles.filter(p => matchProfileToZone(p, cleanZ)).length;
-      if (count > 0) {
-        zoneCountMap[rawZ] = count;
-      }
-    });
+// ✅ แก้ไข: ดึง Array โซนจาก seoData.zones ที่ประกาศไว้ใน PROVINCE_SEO_DATA
+const zonesToScan = (seoData && Array.isArray(seoData.zones)) ? seoData.zones : [];
+
+zonesToScan.forEach(rawZ => {
+  const cleanZ = sanitizeThaiText(rawZ).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
+  if (!cleanZ || cleanZ === "ทั้งหมด") return;
+  
+  const count = baseProvProfiles.filter(p => matchProfileToZone(p, cleanZ)).length;
+  if (count > 0) {
+    zoneCountMap[rawZ] = count;
+  }
+});
 
     
 
@@ -2102,9 +2108,19 @@ if (!isNational && pills) {
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
+    
+    
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
-    finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
+finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
+
+// ✅ แก้ไข: ประกาศและสร้าง URL แผนที่ Google Maps ตามจังหวัด/พื้นที่จริง
+const mapQuery = isNational 
+  ? encodeURIComponent("ประเทศไทย") 
+  : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
+const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
+const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
+
+finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
 
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 

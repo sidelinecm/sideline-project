@@ -507,11 +507,11 @@ export default async (req, context) => {
     // 🟢 1. ดึงวัน เดือน ปี จริงจาก Database ของน้องคนนี้
     const actualDateText = getProfileActualDate(profile.updated_at || profile.created_at);
 
-    // ✅ 2. ส่วนชื่อ (Title): มีทั้ง "สาวรับงาน", "รับงาน", "ไซด์ไลน์", พิกัด และจุดขาย ครบถ้วน!
-    const pageTitle = `${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} (${primaryZone}) ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+    // ✅ 2. ส่วนชื่อ (Title): ตามรูปแบบที่ต้องการ
+    const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} ฟิวแฟน(${primaryZone}) นอกสถานที่ติดต่อสอบถาม ไม่มีมัดจำ`;
 
-    // ✅ 3. ส่วนเมตา (Description): มีคีย์เวิร์ดครบ + โชว์วันเดือนปีจริงออโต้ตรงนี้
-    const metaDescription = `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตรงปก 100% [อัปเดตข้อมูลจริง ${actualDateText}] นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ`;
+    // ✅ 3. ส่วนเมตา (Description): มีรายละเอียดครบ + วันที่อัปเดตจริง
+    const metaDescription = `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} โซน${primaryZone} นอกสถานที่ติดต่อสอบถามรายละเอียดเพิ่มเติม สัดส่วน ${stats} สไตล์ฟิวแฟน ตรงปก100% นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
@@ -545,6 +545,43 @@ export default async (req, context) => {
     ];
 
     // 🟢 5. ปรับปรุง Schema Graph ระบุย่านและ Breadcrumb ลึกถึงระดับโซน (เวอร์ชันคลีน ปลอดภัย 100%)
+    const breadcrumbItems = [
+      { 
+        "@type": "ListItem", 
+        "position": 1, 
+        "name": "หน้าแรก", 
+        "item": `${CONFIG.DOMAIN}/` 
+      },
+      { 
+        "@type": "ListItem", 
+        "position": 2, 
+        "name": stripHTML(activeBreadcrumbText), 
+        "item": `${CONFIG.DOMAIN}${provinceHubUrl}`
+      }
+    ];
+
+    if (hasDistinctZone) {
+      breadcrumbItems.push({
+        "@type": "ListItem", 
+        "position": 3, 
+        "name": `โซน${stripHTML(primaryZone)}`, 
+        "item": `${CONFIG.DOMAIN}${zoneHubUrl}`
+      });
+      breadcrumbItems.push({
+        "@type": "ListItem", 
+        "position": 4, 
+        "name": stripHTML(displayName), 
+        "item": canonicalUrl 
+      });
+    } else {
+      breadcrumbItems.push({
+        "@type": "ListItem", 
+        "position": 3, 
+        "name": stripHTML(displayName), 
+        "item": canonicalUrl 
+      });
+    }
+
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
@@ -602,32 +639,7 @@ export default async (req, context) => {
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
-          "itemListElement": [
-            { 
-              "@type": "ListItem", 
-              "position": 1, 
-              "name": "หน้าแรก", 
-              "item": `${CONFIG.DOMAIN}/` 
-            },
-            { 
-              "@type": "ListItem", 
-              "position": 2, 
-              "name": stripHTML(activeBreadcrumbText), 
-              "item": `${CONFIG.DOMAIN}${provinceHubUrl}`
-            },
-            { 
-              "@type": "ListItem", 
-              "position": 3, 
-              "name": `โซน${stripHTML(primaryZone)}`, 
-              "item": `${CONFIG.DOMAIN}${zoneHubUrl}`
-            },
-            { 
-              "@type": "ListItem", 
-              "position": 4, 
-              "name": stripHTML(displayName), 
-              "item": canonicalUrl 
-            }
-          ]
+          "itemListElement": breadcrumbItems
         },
         {
           "@type": "FAQPage",
