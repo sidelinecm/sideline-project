@@ -974,11 +974,11 @@ const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
                 <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-size: 9.5px;">(${reviewCount})</span>
               </span>
 
-              <!-- ฝั่งขวา: ยอดทักไลน์ กระจกฝ้าสีม่วงนีออนขอบบาง 0.8px -->
-              <span style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>${likesText}</span>
-              </span>
+              <!-- ฝั่งขวา: ยอดทักไลน์ (🟢 เพิ่ม class="social-badge-likes" ให้ JS ทำงานได้) -->
+<span class="social-badge-likes" style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+  <span>${likesText}</span>
+</span>
 
             </div>
 
@@ -1058,9 +1058,9 @@ export default async (req, context) => {
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
 const segments = url.pathname.split("/").filter(Boolean);
 
-// ✅ แก้ไขให้มีคำว่า if
-if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/")) {
-  const currentProv = segments[1] || "chiangmai";
+// 🟢 ทำการตรวจสอบว่าเป็นหน้ารายจังหวัดจริง (ไม่ใช่หน้าแรก) ก่อน redirect
+if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/") && segments[0] === "location" && segments[1]) {
+  const currentProv = segments[1];
   let cleanZoneName = rawZoneQuery;
   try {
     cleanZoneName = decodeURIComponent(cleanZoneName).trim();
@@ -1376,49 +1376,14 @@ const nationalFeedProfiles = isNational ? (() => {
    
     
 const rawCanonicalUrl = isNational 
-  ? `${primaryDomain}/` 
-  : (zoneSlug 
-      ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
-      : `${primaryDomain}/location/${provinceSlug}`);
+      ? `${primaryDomain}/` 
+      : (zoneSlug 
+          ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
+          : `${primaryDomain}/location/${provinceSlug}`);
 
-const canonicalUrl = encodeURI(rawCanonicalUrl);
+    const canonicalUrl = encodeURI(rawCanonicalUrl);
 
-  
-    const currentFreshness = getCurrentFreshnessText();
-
-   const isChiangMai = provinceSlug === "chiangmai";
-const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
-
-
-
-// 🟢 1. ดึงเวลาอัปเดตจริงล่าสุดในโซน/จังหวัดนั้น
-const realFreshnessDate = formatActualDateText(latestActualIso);
-
-// ✅ 2. ส่วนชื่อ (Title): ดึงคีย์เวิร์ดหลัก "สาวรับงาน + ไซด์ไลน์" คู่กับพื้นที่ 100%
-const metaTitle = zoneSlug
-  ? `สาวรับงาน ไซด์ไลน์${zoneSlug} ${provinceNameThai} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
-  : (isNational 
-      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
-
-// ✅ 3. ส่วนเมตา (Description): ครบทั้งคีย์เวิร์ดและวันเดือนปีออโต้
-const metaDescription = zoneSlug
-  ? `รวมสาวรับงานและไซด์ไลน์โซน${zoneSlug} ${provinceNameThai} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ`
-  : (isNational
-      ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
-      : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
-
-    
-
-    const cleanMetaDesc = stripHTML(metaDescription);
-    const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
-    const mapQuery = isNational 
-      ? encodeURIComponent("ประเทศไทย") 
-      : (zoneSlug ? encodeURIComponent(`${zoneSlug} ${provinceNameThai}`) : encodeURIComponent(`จังหวัด${provinceNameThai}`));
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
-    const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
-
-    // 🟢 1. คำนวณวันเวลาอัปเดตล่าสุดเพียงรอบเดียว (ลดความซ้ำซ้อน)
+    // 🟢 ย้ายขึ้นมาประกาศตรงนี้ก่อน ตัวแปรจะพร้อมใช้งานทันที
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
       return (t > 0 && t > latest) ? t : latest;
@@ -1428,6 +1393,24 @@ const metaDescription = zoneSlug
       : new Date().toISOString();
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
 
+    // 🟢 เรียกใช้ formatActualDateText ได้อย่างปลอดภัย 100%
+    const realFreshnessDate = formatActualDateText(latestActualIso);
+
+    const isChiangMai = provinceSlug === "chiangmai";
+    const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
+
+    // ✅ ปล่อยให้ metaTitle และ metaDescription ทำงานต่อได้ตามปกติ
+    const metaTitle = zoneSlug
+      ? `สาวรับงาน ไซด์ไลน์${zoneSlug} ${provinceNameThai} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+      : (isNational 
+          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
+          : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
+
+    const metaDescription = zoneSlug
+      ? `รวมสาวรับงานและไซด์ไลน์โซน${zoneSlug} ${provinceNameThai} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ`
+      : (isNational
+          ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
+          : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
     // 🟢 2. Breadcrumbs รองรับ 3 ชั้น (ภาษาไทยตรงปก URL ถูกต้องตามมาตรฐาน)
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
