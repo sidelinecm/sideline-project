@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_13`;
+let GLOBAL_VERSION = `v_20261022_11`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -232,16 +232,8 @@ function getRealTimeAgo(dateInput) {
 
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
-// 🟢 [โค้ดใหม่ที่เพิ่มเข้าไป] ฟังก์ชันคำนวณเดือน-ปีไทยแบบไดนามิก
-function getCurrentFreshnessText() {
-  const now = new Date();
-  const thaiMonths = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-  ];
-  const month = thaiMonths[now.getMonth()];
-  const year = now.getFullYear(); // ใช้ ค.ศ. (เช่น 2026) ตามพฤติกรรมการค้นหาจริงของผู้ใช้
-  return `${month} ${year}`;
+
+function formatActualDateText(dateInput) { const d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date(); const thaiMonthsShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]; return `${d.getDate()} ${thaiMonthsShort[d.getMonth()]} ${d.getFullYear()}`; 
 }
 
 function sanitizeThaiText(text) {
@@ -885,7 +877,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
-  const ageStr = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "";
+  const ageStr = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${escapeHTML(p.age)} ปี` : "20+ ปี";
   const statusClass = isAvail ? "status-online" : "status-busy";
   const luxuryPrice = formatLuxuryRate(p.rate);
 
@@ -992,7 +984,7 @@ const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
 
             <div class="profile-card-title-row">
                 <h3 class="profile-card-name">น้อง${cleanName}</h3>
-                ${ageStr ? `<span class="profile-card-age-tag">${ageStr} ปี</span>` : ""}
+               <span class="profile-card-age-tag">${ageStr}</span>
             </div>
             <div class="profile-card-bottom-row">
                 <span class="profile-card-location">
@@ -1362,8 +1354,7 @@ const nationalFeedProfiles = isNational ? (() => {
       const featuredProfileIds = new Set(featuredProfilesList.map(p => String(p.id)));
       
       const pNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
-      featuredCardsHtml = featuredProfilesList.map((p, i) => renderCardHtml(p, i === 0, pNameThai)).join("");
-
+     featuredCardsHtml = featuredProfilesList.map((p) => renderCardHtml(p, false, pNameThai)).join("");
       const excludedGlobalIds = new Set([...hotProfileIds, ...featuredProfileIds]);
       let fiwfanProfiles = profilesList.filter(p => !excludedGlobalIds.has(String(p.id)) && isFiwfanProfile(p));
       
@@ -1398,17 +1389,24 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
    const isChiangMai = provinceSlug === "chiangmai";
 const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
 
-const metaTitle = zoneSlug
-  ? `สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
-  : (isNational 
-      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
-      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ${cityModifier} (${totalCount} คนล่าสุด) ตรงปก 100% | ${CONFIG.BRAND_NAME}`);
 
-    const metaDescription = zoneSlug
-      ? `ดูโปรไฟล์สาวรับงานและไซด์ไลน์โซน${zoneSlug} ใน${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟน พร้อมห้องส่วนตัวและเดินทางนอกสถานที่ ตรวจสอบตัวจริงหน้างานค่อยชำระเงินค่ะ`
-      : (isNational
-          ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์รูปจริง) สไตล์ฟิวแฟนน่ารัก เป็นกันเอง นัดพบตัวจริงก่อนค่อยชำระเงินตรงกับน้อง ปลอดภัย ไม่ต้องโอนมัดจำล่วงหน้า`
-          : `รวมรายชื่อสาวรับงานและไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี มีห้องพักส่วนตัวและพร้อมเดินทางไปหาที่พัก เจอน้องตัวจริงก่อนค่อยจ่ายเงิน สบายใจ ปลอดภัยค่ะ`);
+
+// 🟢 1. ดึงเวลาอัปเดตจริงล่าสุดในโซน/จังหวัดนั้น
+const realFreshnessDate = formatActualDateText(latestActualIso);
+
+// ✅ 2. ส่วนชื่อ (Title): ดึงคีย์เวิร์ดหลัก "สาวรับงาน + ไซด์ไลน์" คู่กับพื้นที่ 100%
+const metaTitle = zoneSlug
+  ? `สาวรับงาน ไซด์ไลน์${zoneSlug} ${provinceNameThai} ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+  : (isNational 
+      ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
+      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
+
+// ✅ 3. ส่วนเมตา (Description): ครบทั้งคีย์เวิร์ดและวันเดือนปีออโต้
+const metaDescription = zoneSlug
+  ? `รวมสาวรับงานและไซด์ไลน์โซน${zoneSlug} ${provinceNameThai} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ`
+  : (isNational
+      ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
+      : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
 
     
 

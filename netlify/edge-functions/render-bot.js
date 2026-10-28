@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_13`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_11`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -69,14 +69,7 @@ function getRealTimeAgo(dateInput) {
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
 
-// 🟢 [โค้ดใหม่ที่เพิ่มเข้าไป] ฟังก์ชันคำนวณเดือน-ปีปัจจุบันสำหรับหน้ารายคน
-function getCurrentFreshnessText() {
-  const now = new Date();
-  const thaiMonths = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-  ];
-  return `${thaiMonths[now.getMonth()]} ${now.getFullYear()}`;
+function getProfileActualDate(dateInput) { const d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date(); const thaiMonthsShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]; return `${d.getDate()} ${thaiMonthsShort[d.getMonth()]} ${d.getFullYear()}`; 
 }
 
 function sanitizeThaiText(text) {
@@ -509,14 +502,16 @@ export default async (req, context) => {
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-    // 🟢 ประกาศตัวแปรดึงเดือน-ปีปัจจุบันก่อนนำไปใช้
-    const currentFreshness = getCurrentFreshnessText();
-
     const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
-    const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
-    // 🟢 สร้าง Meta Description ภาษาคนจริง
-    const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
+    // 🟢 1. ดึงวัน เดือน ปี จริงจาก Database ของน้องคนนี้
+    const actualDateText = getProfileActualDate(profile.updated_at || profile.created_at);
+
+    // ✅ 2. ส่วนชื่อ (Title): มีทั้ง "สาวรับงาน", "รับงาน", "ไซด์ไลน์", พิกัด และจุดขาย ครบถ้วน!
+    const pageTitle = `${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} (${primaryZone}) ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`;
+
+    // ✅ 3. ส่วนเมตา (Description): มีคีย์เวิร์ดครบ + โชว์วันเดือนปีจริงออโต้ตรงนี้
+    const metaDescription = `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตรงปก 100% [อัปเดตข้อมูลจริง ${actualDateText}] นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ`;
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
@@ -549,7 +544,7 @@ export default async (req, context) => {
       }
     ];
 
-    // 🟢 5. ปรับปรุง Schema Graph ระบุย่านและ Breadcrumb ลึกถึงระดับโซน
+    // 🟢 5. ปรับปรุง Schema Graph ระบุย่านและ Breadcrumb ลึกถึงระดับโซน (เวอร์ชันคลีน ปลอดภัย 100%)
     const schemaGraph = {
       "@context": "https://schema.org",
       "@graph": [
@@ -560,7 +555,7 @@ export default async (req, context) => {
           "name": stripHTML(pageTitle),
           "description": stripHTML(metaDescription),
           "inLanguage": "th-TH",
-         "dateModified": (profile.updated_at && !isNaN(new Date(profile.updated_at).getTime()))
+          "dateModified": (profile.updated_at && !isNaN(new Date(profile.updated_at).getTime()))
             ? new Date(profile.updated_at).toISOString()
             : ((profile.created_at && !isNaN(new Date(profile.created_at).getTime()))
                 ? new Date(profile.created_at).toISOString()
@@ -601,25 +596,6 @@ export default async (req, context) => {
               "addressLocality": primaryZone,
               "addressRegion": cleanProvince,
               "addressCountry": "TH"
-            }
-          },
-          "makesOffer": {
-            "@type": "Offer",
-            "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน ${stripHTML(displayName)}`,
-            "url": canonicalUrl,
-            "price": String(rateNumber),
-            "priceCurrency": "THB",
-            "availability": "https://schema.org/InStock",
-            "validFrom": new Date().toISOString().split("T")[0],
-            "priceValidUntil": new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-            "itemOffered": {
-              "@type": "Service",
-              "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
-              "description": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${primaryZone} จ.${cleanProvince} ตัวจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`,
-              "areaServed": {
-                "@type": "AdministrativeArea",
-                "name": `${stripHTML(primaryZone)}, ${stripHTML(cleanProvince)}`
-              }
             }
           }
         },
