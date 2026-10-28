@@ -50,10 +50,9 @@
 
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-
- <link rel="preload" href="/styles.css?v=v_20261022_11" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/styles.css?v=v_20261022_11"></noscript>
-<link rel="modulepreload" href="/main.js?v=v_20261022_11">
+<!-- 🟢 เปลี่ยนกลับมาโหลด CSS แบบมาตรฐาน ป้องกันหน้าเว็บกระตุก/ค้าง 1-2 วินาที -->
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_11">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_11">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -92,12 +91,27 @@
   </script>
 </head>
 <body class="fmh-app-page">
+    
+<!-- 1. Floating Bottom Dock (จัดปุ่มและข้อความให้สมดุล ไม่เทอะทะ) -->
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-    <a href="/" class="dock-item active"><i class="fas fa-home" aria-hidden="true"></i><span>หน้าแรก</span></a>
-    <button type="button" id="open-filter-dock-btn" class="dock-item" aria-label="เปิดหน้าต่างตัวกรองค้นหา"><i class="fas fa-search" aria-hidden="true"></i><span>ตัวกรอง</span></button>
-    <a href="/profiles" class="dock-item"><i class="fas fa-user-friends" aria-hidden="true"></i><span>รวมน้องๆ</span></a>
-    <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="ติดต่อจองคิวผ่านไลน์"><i class="fab fa-line" aria-hidden="true"></i><span>จองคิว</span></a>
-  </nav>
+  <a href="/" class="dock-item active">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <button type="button" id="open-filter-dock-btn" class="dock-item" aria-label="ตัวกรอง">
+    <i class="fas fa-search"></i>
+    <span>ตัวกรอง</span>
+  </button>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-user-friends"></i>
+    <span>รวมน้องๆ</span>
+  </a>
+  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="จองคิว">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
+
 
   <header id="page-header" role="banner">
     <a href="/" class="brand-luxe-logo" id="header-brand-logo" aria-label="FirstModelHub หน้าแรก">
@@ -118,7 +132,7 @@
     </a>
     <div class="nav-controls">
       <nav class="desktop-nav" aria-label="เมนูหลักบนคอมพิวเตอร์">
-        <a href="/profiles">รวมโปรไฟล์ VIP</a>
+        <a href="/profiles">โปรไฟล์สาวๆVIP</a>
         <a href="/locations">พื้นที่ให้บริการ</a>
         <a href="/blog">บทความ & รีวิว</a>
         <a href="/faq">คำถามที่พบบ่อย</a>
@@ -133,7 +147,7 @@
     <div class="luxury-glass-stories-box">
       <div class="stories-header-micro">
         <span class="stories-micro-title"><i class="fas fa-circle-dot" style="color: #00E676; font-size: 8px;"></i> สถานะรับงานตอนนี้ </span>
-        <span class="stories-micro-hint">แตะเพื่อดูโปรไฟล์</span>
+        <span class="stories-micro-hint">แตะเพื่อดูโปรไฟล์สาวๆ</span>
       </div>
       <div class="stories-scroll-container">
         <div class="stories-track-inner" id="agency-stories-track"></div>
@@ -148,7 +162,7 @@
     </div>
     <div class="sidebar-links-wrapper">
       <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
-      <a href="/profiles"><i class="fas fa-user-check icon-green"></i> น้องๆสาวๆที่แนะนำ</a>
+      <a href="/profiles"><i class="fas fa-user-check icon-green"></i> สาวๆที่แนะนำ</a>
       <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
       <a href="/nimman"><i class="fas fa-gem icon-pink"></i> โซนนิมมาน เชียงใหม่</a>
       <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
@@ -189,12 +203,12 @@
       </div>
   <div class="hero-headings-block">
        <h1 class="seo-h1-title" id="hero-h1">
-  <span class="h1-line-1">ศูนย์รวมเพื่อนเที่ยวฟิวแฟนและไซด์ไลน์พรีเมียม</span>
-  <span class="h1-line-2">ตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน</span>
+  <span class="h1-line-1">ศูนย์รวมสาวๆรับงานเพื่อนเที่ยวฟิวแฟนและไซด์ไลน์</span>
+  <span class="h1-line-2">โปรไฟล์จริงตรงปก100% นัดเจอจ่ายหน้างาน</span>
 </h1>
       </div>
       <div class="hero-description-inset">
-        <p class="hero-subtitle-p"><strong>FirstModelHub</strong> ศูนย์รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็น (EN VIP) ครอบคลุมทั่วไทย คัดสรรโปรไฟล์ตัวจริงตรงปก 100% นัดเจอน้องตัวจริงเช็คความตรงปกก่อนค่อยชำระเงินหน้างาน มั่นใจ ปลอดภัย ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณี</p>
+        <p class="hero-subtitle-p"><strong>FirstModelHub</strong> ศูนย์รวมน้องๆสาวๆรับงานฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็น (EN VIP) ครอบคลุมทั่วไทย คัดสรรโปรไฟล์ตัวจริงตรงปก 100% นัดเจอน้องตัวจริงเช็คความตรงปกก่อนค่อยชำระเงินหน้างาน มั่นใจ ปลอดภัย ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณี</p>
       </div>
 
       <div class="hero-metric-strip">
@@ -213,7 +227,7 @@
     <section id="hot-profiles-section" class="hot-swiper-section" aria-labelledby="hot-profiles-heading">
       <div class="hot-header-bar-classic">
         <div class="hot-title-group">
-          <h2 id="hot-profiles-heading" class="hot-main-title">น้องๆที่ HOT 🔥</h2>
+          <h2 id="hot-profiles-heading" class="hot-main-title">น้องๆที่HOT 🔥</h2>
           <span class="hot-monthly-pill">ประจำเดือน #ฟิวแฟน</span>
         </div>
         <div class="hot-swipe-cue"><i class="fas fa-chevron-left"></i> เลื่อนดู <i class="fas fa-chevron-right"></i></div>
@@ -240,9 +254,9 @@
       <div class="featured-header-clean-row">
         <div class="featured-title-flex">
           <span class="section-tag-mini"><i class="fas fa-check-circle"></i> แนะนำ</span>
-          <h2 id="featured-heading" class="clean-section-h2">น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span></h2>
+          <h2 id="featured-heading" class="clean-section-h2">น้องๆรับงาน <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span></h2>
         </div>
-        <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายเงินหน้างาน ไม่มีมัดจำ</span>
+        <span class="province-count-pill"><span class="pulse-dot-el"></span> จ่ายเงินหน้างานไม่มีมัดจำ</span>
       </div>
       <div id="featured-profiles-container" class="profile-grid" aria-labelledby="featured-heading"></div>
     </section>
@@ -257,7 +271,7 @@
       <div class="luxury-bento-wrapper">
         <div class="bento-header-center">
           <span class="bento-tag-pill"><i class="fas fa-sparkles"></i> HOW IT WORKS</span>
-          <h2 class="bento-headline">3 ขั้นตอนนัดหมายเพื่อนเที่ยวและไซด์ไลน์ ปลอดภัย 100%</h2>
+          <h2 class="bento-headline">3 ขั้นตอนนัดหมายสาวๆเพื่อนเที่ยวและน้องๆไซด์ไลน์ ปลอดภัย100%</h2>
           <p class="bento-sub-desc">สะดวกรวดเร็ว ปลอดภัย และรักษาความลับระดับสูงสุด</p>
         </div>
 
@@ -265,7 +279,7 @@
           <div class="step-compact-card">
             <span class="step-number-tag">STEP 01</span>
             <h3 class="step-title">เลือกน้องคนที่ถูกใจ</h3>
-            <p class="step-desc">ดูโปรไฟล์ สัดส่วน เรทราคา และ พิกัดที่น้องๆให้บริการในพื้นที่</p>
+            <p class="step-desc">ดูรูปโปรไฟล์ สัดส่วน เรทราคา และ พิกัดที่น้องๆให้บริการในพื้นที่</p>
           </div>
           <div class="step-compact-card">
             <span class="step-number-tag">STEP 02</span>
@@ -275,7 +289,7 @@
           <div class="step-compact-card">
             <span class="step-number-tag">STEP 03</span>
             <h3 class="step-title">พบตัวจริงค่อยชำระ</h3>
-            <p class="step-desc">เจอตัวจริง ตรวจสอบความตรงปก 100% แล้วจึงชำระค่าบริการกับน้องๆ</p>
+            <p class="step-desc">เจอตัวจริง ตรวจสอบความตรงปก100% แล้วจึงชำระค่าบริการกับน้องๆ</p>
           </div>
         </div>
 
@@ -283,15 +297,15 @@
           <div class="trust-bento-item">
             <div class="trust-icon-box check-green"><i class="fas fa-shield-alt"></i></div>
             <div class="trust-text-content">
-              <h4>จ่ายหน้างาน ไม่มีโอนมัดจำ</h4>
-              <p>ปลอดภัยจากมิจฉาชีพ 100% ไม่มีการขอโอนเงินก่อนทุกกรณี</p>
+              <h4>จ่ายหน้างานไม่มีโอนมัดจำ</h4>
+              <p>ปลอดภัยจากมิจฉาชีพ100% ไม่มีการขอโอนเงินก่อนทุกกรณี</p>
             </div>
           </div>
           <div class="trust-bento-item">
             <div class="trust-icon-box check-purple"><i class="fas fa-user-check"></i></div>
             <div class="trust-text-content">
-              <h4>การันตีตรงปก 100%</h4>
-              <p>ยืนยันรูปจริงทุกโปรไฟล์ หากไม่ตรงปกปฏิเสธยกเลิกได้ทันที</p>
+              <h4>ยืนยันรูปจริงทุกโปรไฟล์</h4>
+              <p> หากไม่ตรงปกปฏิเสธยกเลิกได้ทันที</p>
             </div>
           </div>
         </div>
@@ -302,7 +316,7 @@
             <span class="bento-tag-pill" style="background: rgba(225, 29, 72, 0.1); color: #E11D48; border: 1px solid rgba(225, 29, 72, 0.2);">
               <i class="fas fa-heart"></i> LIFESTYLE & VIBES
             </span>
-            <h3 class="bento-headline" style="font-size: 17px;">เลือกสไตล์เพื่อนเที่ยวฟิวแฟนที่ตรงใจคุณ</h3>
+            <h3 class="bento-headline" style="font-size: 17px;">เลือกสไตล์สาวๆเพื่อนเที่ยวฟิวแฟนที่ตรงใจคุณ</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px;">
             <div style="background: #FFF0F2; border: 1px solid #FFE4E6; border-radius: 14px; padding: 12px; text-align: left;">
@@ -331,8 +345,8 @@
       <!-- SEO Information Section -->
         <div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px;">
           <div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #4A4458); line-height: 1.7;">
-            <h3 style="font-size: 14px; font-weight: 800; color: #7C3AED; margin: 0 0 6px 0;">FirstModelHub แพลตฟอร์มสาวรับงานและไซด์ไลน์ตรงปก อันดับ 1</h3>
-            <p style="margin: 0 0 8px 0;">ศูนย์รวมเพื่อนเที่ยวฟิวแฟน (Girlfriend Experience) เด็กเอ็น และสาวไซด์ไลน์ที่ครอบคลุมพื้นที่มากที่สุด คัดกรองตัวตนจริง ไม่ใช้รูปปลอม เพื่อแก้ปัญหาผู้ใช้บริการโดนหลอกโอนเงินมัดจำจากมิจฉาชีพในโลกออนไลน์</p>
+            <h3 style="font-size: 14px; font-weight: 800; color: #7C3AED; margin: 0 0 6px 0;">FirstModelHub แพลตฟอร์มสาวรับงานและไซด์ไลน์ ฟิวแฟน อันดับ1</h3>
+            <p style="margin: 0 0 8px 0;">ศูนย์รวมน้องๆสาวๆเพื่อนเที่ยวฟิวแฟน (Girlfriend Experience) เด็กเอ็น และสาวไซด์ไลน์ที่ครอบคลุมสาวสวยระดับนางฟ้าที่มากที่สุด คัดกรองตัวตนจริง ไม่ใช้รูปปลอม เพื่อแก้ปัญหาผู้ใช้บริการโดนหลอกโอนเงินมัดจำจากมิจฉาชีพในโลกออนไลน์</p>
             <div style="background: rgba(124, 58, 237, 0.06); border-left: 3px solid #7C3AED; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;">
               <strong>🛡️ กฎเหล็กความปลอดภัย:</strong> นัดเจอตัวจริงหน้างาน ตรวจสอบความตรงปกให้เรียบร้อยก่อน จึงค่อยชำระเงินตรงกับน้อง ไม่มีมัดจำล่วงหน้า 100%
             </div>
