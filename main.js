@@ -1093,20 +1093,19 @@ for (const p of hotCandidate) {
     }
 
     
-  // ✅ ซิงค์ H1 ให้ตรงกับ SSR (ตัดข้อความซ้ำซาก และเพิ่ม ไม่มีมัดจำ)
+  // ใน main.js (ฟังก์ชัน replaceDomPlaceholders)
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
-        const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
-        heroH1.innerHTML = `
-          <span class="h1-line-1">${escapeHTML(enLocName)} Escorts & VIP Companions</span>
-          <span class="h1-line-2">100% Real Photos • Pay on Arrival</span>
-        `;
+        // ภาษาอังกฤษคงเดิม...
       } else {
         const line1 = isAllOrNational 
-          ? "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย" 
-          : `สาวรับงาน ไซด์ไลน์ ${escapeHTML(targetName)}`;
-        const line2 = "ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)"; // 👈 กำหนดเป็นคำนี้ทุกกรณี
+          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>` 
+          : (zoneSlug 
+              ? `สาวรับงาน ไซด์ไลน์${escapeHTML(targetName)} <span class="t-chunk">โซน${escapeHTML(zoneSlug)}</span>`
+              : `สาวรับงาน และ ไซด์ไลน์${escapeHTML(targetName)}`);
+              
+        const line2 = "ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)";
 
         heroH1.innerHTML = `
           <span class="h1-line-1">${line1}</span>
