@@ -987,31 +987,14 @@ for (const p of hotCandidate) {
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
 
-    // 🟢 5. กรณีเป็นหน้าแรกทั่วไป (คัดเฉพาะน้องๆ สาย #ฟิวแฟน 40 คน โดยตัดคนซ้ำที่ติด Hot Swiper ออก)
+    // 🟢 5. กรณีหน้าแรกทั่วไป: แสดงผลโปรไฟล์ทั้งหมด 115 คน (เรียงคนแนะนำไว้ด้านบน)
     } else {
-      // 🛡️ ดึงรายชื่อ ID ที่ติดแถบ Hot Swiper ไปแล้ว เพื่อป้องกันการแสดงผลซ้ำซ้อน
-      const hotIds = window.__hotProfileIds || new Set();
-
-      let fiwfanProfiles = profiles.filter(p => {
-        if (hotIds.has(String(p.id))) return false; // 👈 ตัดคนซ้ำที่อยู่บน Hot Swiper ออกเด็ดขาด
-
-        const rawTags = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
-        const hasTag = rawTags.some(t => {
-          const clean = String(t).replace(/^#+/, "").trim().toLowerCase();
-          return clean === "ฟิวแฟน" || clean === "ฟิลแฟน" || clean === "gfe" || clean.includes("ฟิวแฟน");
-        });
-        if (hasTag) return true;
-        const text = `${p.description || ""} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-        return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
+      // ดึงโปรไฟล์ทั้งหมดมาแสดงผล 100% โดยจัดเรียงโปรไฟล์แนะนำ (Featured) ขึ้นก่อน
+      const feedProfiles = [...profiles].sort((a, b) => {
+        if (a.isfeatured && !b.isfeatured) return -1;
+        if (!a.isfeatured && b.isfeatured) return 1;
+        return 0;
       });
-
-      if (fiwfanProfiles.length < 40) {
-        const others = profiles.filter(p => !hotIds.has(String(p.id)) && !fiwfanProfiles.some(f => f.id === p.id));
-        fiwfanProfiles = [...fiwfanProfiles, ...others];
-      }
-
-      // แสดงผล 40 คน พร้อมรักษากล่องเลือกจังหวัด (City Hubs) ให้เหมือน SSR 100%
-      const feedProfiles = fiwfanProfiles.slice(0, 40);
 
       const cityHubsHtml = `
         <section class="national-city-hubs-section" style="margin-top: 10px; margin-bottom: 24px;">
@@ -1052,7 +1035,7 @@ for (const p of hotCandidate) {
             </h2>
             <span class="province-count-pill">
                 <span class="pulse-dot-el"></span>
-                <span>#ฟิวแฟนแท้ (${feedProfiles.length} คน)</span>
+                <span>#ฟิวแฟนแท้ (${feedProfiles.length} โปรไฟล์)</span>
             </span>
         </div>
         <div class="profile-grid profiles-grid-row"></div>
@@ -1346,11 +1329,12 @@ if (mapIframe) {
     article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; 
 
     article.innerHTML = `
-      <img src="${imgSrc}" 
-           alt="${escapeHTML(richAltText)}" 
-           width="400" 
-           height="560" 
-           class="profile-card-img" 
+     <img src="${imgSrc}" 
+       alt="${escapeHTML(richAltText)}" 
+       width="400" 
+       height="560" 
+       class="profile-card-img" 
+       sizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px"
            style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;" 
            loading="${index < 4 ? "eager" : "lazy"}" 
            fetchpriority="${index === 0 ? "high" : "auto"}" 
@@ -1960,9 +1944,38 @@ if (descContent) {
       `;
     }
 
-    // 🟢 ซ่อนกล่อง FAQ ใน Lightbox ทันที (หน้าต่างจะกระชับ คลีนตา ปิดการขายไวขึ้น)
-    const faqSection = document.getElementById("lightboxFaqSection");
-    if (faqSection) faqSection.style.display = "none";
+    // 🟢 เปิดใช้งาน FAQ ใน Lightbox แบบ Accordion พับเก็บได้
+const faqSection = document.getElementById("lightboxFaqSection");
+const faqList = document.getElementById("lightboxFaqList");
+if (faqSection && faqList) {
+  faqSection.style.display = "block";
+  const modelFaqs = [
+    {
+      q: `นัดพบ${displayName} มีขั้นตอนการชำระเงินอย่างไร?`,
+      a: `สามารถชำระเงินสดหรือโอนตรงให้น้องตอนเจอตัวจริงหน้างานได้เลยค่ะ ทางระบบไม่มีนโยบายโอนมัดจำล่วงหน้า เพื่อความสบายใจ 100% ค่ะ`
+    },
+    {
+      q: `หากน้องเดินทางมาถึงแล้วไม่ตรงปก ทำอย่างไรได้บ้าง?`,
+      a: `หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูปโปรไฟล์ สามารถปฏิเสธและยกเลิกงานหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้นค่ะ`
+    },
+    {
+      q: `พิกัดโซน${primaryZone} มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`,
+      a: `${displayName} สแตนด์บายอยู่ในโซน${primaryZone} (${pProvText}) มีทั้งห้องส่วนตัวและพร้อมเดินทางไปหาที่โรงแรมหรือคอนโดอย่างรวดเร็วค่ะ`
+    }
+  ];
+
+  faqList.innerHTML = modelFaqs.map(f => `
+    <details style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; overflow: hidden; margin-bottom: 6px;">
+      <summary style="padding: 10px 12px; font-size: 12px; font-weight: 800; color: #140F22; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+        <span>Q: ${f.q}</span>
+        <span style="color: #7C3AED; font-size: 10px; margin-left: 6px;">▼</span>
+      </summary>
+      <div style="padding: 0 12px 10px 12px; font-size: 11.5px; color: #475569; line-height: 1.55; border-top: 1px dashed rgba(124, 58, 237, 0.1); padding-top: 6px;">
+        ${f.a}
+      </div>
+    </details>
+  `).join("");
+}
     
 
     // 🎀 13. น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน

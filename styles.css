@@ -5510,3 +5510,22 @@ body:has(#search-bottom-sheet.active) .floating-app-dock {
   pointer-events: none !important;
   transform: translate(-50%, 150%) !important;
 }
+
+/* 🟢 ปรับสีปุ่มจองคิว LINE ให้คอนทราสต์ผ่านเกณฑ์ PageSpeed 100% */
+.dock-item-line {
+  background: #047857 !important; /* เขียวมรกตเข้ม (Contrast Ratio 5.7:1 ผ่านเกณฑ์) */
+}
+.dock-item-line span,
+.dock-item-line i {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* 🟢 บังคับสีลิงก์โซนย่อยทุกจุดให้เป็นสีเข้ม ผ่านเกณฑ์คอนทราสต์ Google PageSpeed 100% */
+.kw-zone,
+a.kw-zone {
+  color: #4C1D95 !important; /* ม่วงเข้ม คอนทราสต์ 9.8:1 */
+  font-weight: 800 !important;
+  text-decoration: underline !important;
+}
