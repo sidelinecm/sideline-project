@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_11`;
+let GLOBAL_VERSION = `v_20261022_13`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -44,14 +44,14 @@ const CONFIG = {
 
 // 🟢 ข้อมูลครบทั้ง 15 จังหวัดดั้งเดิม
 const PROVINCE_SEO_DATA = {
-  chiangmai: {
-    name: "เชียงใหม่",
-    geo: { lat: 18.7883, lng: 98.9853 },
-    zones: [
-      "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "หน้า มช.",
-      "คูเมือง", "ท่าแพ", "ห้วยแก้ว", "รวมโชค", "สันทราย", "แม่โจ้", "พายัพ", 
-      "เซ็นทรัลเฟส", "สนามบินเชียงใหม่", "แม่ริม", "หางดง"
-    ],
+chiangmai: {
+  name: "เชียงใหม่",
+  geo: { lat: 18.7883, lng: 98.9853 },
+  zones: [
+    "นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "หน้า มช.",
+    "คูเมือง", "ท่าแพ", "ห้วยแก้ว", "รวมโชค", "สันทราย", "แม่โจ้", "พายัพ", 
+    "เซ็นทรัลเฟส", "สนามบินเชียงใหม่", "แม่ริม", "หางดง", "สันกำแพง", "สารภี", "ดอยสะเก็ด"
+  ],
     faqs: [
       { q: "นัดหมายสาวรับงานและไซด์ไลน์เชียงใหม่ โซนไหนเดินทางสะดวกที่สุด?", a: "ย่านนิมมานเหมินท์ เจ็ดยอด สันติธรรม ช้างเผือก และรอบ มช. เป็นโซนหลักที่มีน้องๆ สแตนด์บายมากที่สุด เดินทางถึงโรงแรมหรือที่พักได้รวดเร็วภายใน 15-30 นาทีครับ" },
       { q: "เรทราคาค่าบริการรับงานเชียงใหม่ เริ่มต้นเท่าไหร่?", a: "เรทเริ่มต้นมาตรฐานอยู่ที่ 1,500 บาทสำหรับการดูแลสไตล์ฟิวแฟน 1 ชั่วโมง โดยมีทั้งบริการแบบชั่วคราว (Short Time) และค้างคืน (Overnight) แสดงราคาชัดเจนบนหน้าโปรไฟล์ครับ" },
@@ -1387,7 +1387,7 @@ const nationalFeedProfiles = isNational ? (() => {
 const rawCanonicalUrl = isNational 
   ? `${primaryDomain}/` 
   : (zoneSlug 
-      ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug}` 
+      ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
       : `${primaryDomain}/location/${provinceSlug}`);
 
 const canonicalUrl = encodeURI(rawCanonicalUrl);
@@ -1395,11 +1395,14 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
   
     const currentFreshness = getCurrentFreshnessText();
 
-    const metaTitle = zoneSlug
-  ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
+   const isChiangMai = provinceSlug === "chiangmai";
+const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
+
+const metaTitle = zoneSlug
+  ? `สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`
   : (isNational 
       ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}` 
-      : `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`);
+      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ${cityModifier} (${totalCount} คนล่าสุด) ตรงปก 100% | ${CONFIG.BRAND_NAME}`);
 
     const metaDescription = zoneSlug
       ? `ดูโปรไฟล์สาวรับงานและไซด์ไลน์โซน${zoneSlug} ใน${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟน พร้อมห้องส่วนตัวและเดินทางนอกสถานที่ ตรวจสอบตัวจริงหน้างานค่อยชำระเงินค่ะ`
@@ -1755,12 +1758,13 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
                    <span class="h1-line-2">ฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน</span>`;
       dynamicSubheadline = ``;
 
-    } else {
-      // 3. หน้ารายจังหวัด (เช่น เชียงใหม่, ขอนแก่น, ภูเก็ต): เจาะจงจังหวัดชัดเจน
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน และ ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">ฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
-      dynamicSubheadline = ``;
-    }
+   } else {
+  // 3. หน้ารายจังหวัด (เน้นในเมืองเชียงใหม่ ตัดคำเชื่อมที่เกะกะออก)
+  const cityTag = provinceSlug === "chiangmai" ? "ในเมืองเชียงใหม่" : `ตัวเมือง${escapeHTML(provinceNameThai)}`;
+  ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์<span class="t-chunk">${cityTag}</span></span>
+               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟนตัวจริง ตรงปก 100% นัดเจอจ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+  dynamicSubheadline = ``;
+}
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
@@ -2012,23 +2016,44 @@ if (!isNational && pills) {
       `;
     }
 
-    finalHtml = finalHtml.replace(
+   finalHtml = finalHtml.replace(
       /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, 
-      `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆ รับงานและไซด์ไลน์${provinceNameThai}">${displayAreaHtml}</div>`
+      `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์สาวรับงานและไซด์ไลน์${provinceNameThai}">${displayAreaHtml}</div>`
     );
 
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    const freshnessBox = ` <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;"> ⚡ <strong>สถานะความพร้อมให้บริการ (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีน้องๆ สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวตนตรงปกแล้ว นัดเจอจ่ายหน้างาน ปลอดภัย 100% </div> `;
-   finalHtml = finalHtml.replace(
-  /<div id="seo-drawer-wrapper"[^>]*>[\s\S]*?<!-- FAQ Block -->/i, 
-  `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px;">
-      <div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">
-          ${freshnessBox}${linkedIntro}
+    // 🟢 1. ดึงรายชื่อน้องๆ ที่ออนไลน์จริงในพื้นที่ 5 คนแรกมาใส่ในกล่อง SEO (หมัดเด็ดชนะ FansChao)
+    const liveTopModels = profilesList.slice(0, 5).map(p => {
+      const cleanN = escapeHTML((p.name || "").replace(/^(น้อง|สาว)\s*/gi, "").trim());
+      const pSlug = encodeURIComponent(p.slug || p.id);
+      return `<a href="/sideline/${pSlug}" style="color: #7C3AED; font-weight: 800; text-decoration: underline; margin-right: 6px;">น้อง${cleanN}</a>`;
+    }).join(", ");
+
+    const dynamicRosterBlock = liveTopModels ? `
+      <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 10px 14px; margin-top: 10px; margin-bottom: 6px;">
+        <span style="font-weight: 800; color: #140F22; font-size: 12px;">🔥 โปรไฟล์ฟิวแฟนแนะนำประจำวันใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""}:</span>
+        <span style="font-size: 12px;">${liveTopModels}</span>
       </div>
-   </div>\n        <!-- FAQ Block -->`
-);
+    ` : "";
+
+    // 🟢 2. กล่อง Freshness Box แจ้งสถานะพร้อมรายชื่อจริงที่ Googlebot ให้คะแนนสูงสุด
+    const freshnessBox = `
+      <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;">
+        ⚡ <strong>สถานะความพร้อมให้บริการ (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีสาวรับงานและไซด์ไลน์สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ปลอดภัย ไร้มัดจำ
+        ${dynamicRosterBlock}
+      </div>
+    `;
+
+    finalHtml = finalHtml.replace(
+      /<div id="seo-drawer-wrapper"[^>]*>[\s\S]*?<!-- FAQ Block -->/i, 
+      `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px;">
+          <div class="seo-content-inner" style="font-size: 13px; color: #1E293B; line-height: 1.75; font-weight: 500;">
+              ${freshnessBox}${linkedIntro}
+          </div>
+       </div>\n        <!-- FAQ Block -->`
+    );
 
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
 
