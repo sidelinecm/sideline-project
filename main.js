@@ -943,7 +943,9 @@ for (const p of hotCandidate) {
 
    
 
-  const isExplicitLocationPath = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
+  const isExplicitLocationPath = window.location.pathname.includes("/location/") || 
+                                 window.location.pathname.includes("/province/") ||
+                                 window.location.pathname.startsWith("/profiles");
 
     // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
     if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
@@ -1661,18 +1663,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
    const dynamicTitle = isEn
-  ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
-  : `${displayName} รับงาน${pProvText} ไซด์ไลน์ (${primaryZone}) ตรงปก 100% | FirstModelHub`;
+      ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
+      : `${displayName} รับงานไซด์ไลน์${pProvText} ฟิวแฟน(${primaryZone}) นอกสถานที่ติดต่อสอบถาม ไม่มีมัดจำ`;
 
+    const dynamicDesc = isEn
+      ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
+      : `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${pProvText} โซน${primaryZone} นอกสถานที่ติดต่อสอบถามรายละเอียดเพิ่มเติม สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} สไตล์ฟิวแฟน ตรงปก100% นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ`;
+      
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
     if (canonicalLink) {
       canonicalLink.href = canonicalProfileUrl;
     }
 
-    const dynamicDesc = isEn
-      ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
-      : `${displayName} เพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) พิกัด ${pLocText} จ.${pProvText} สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} การันตีตัวจริง 100% ปลอดภัยนัดพบจ่ายหน้างาน ไร้มัดจำ`;
-
+    
     const metaDescEl = document.querySelector('meta[name="description"]');
     if (metaDescEl) metaDescEl.setAttribute("content", dynamicDesc);
 
@@ -2094,7 +2097,7 @@ if (descContent) {
       let targetTitle = "";
       let targetDesc = "";
 
-     if (slug && slug !== "national" && slug !== "all") {
+      if (slug && slug !== "national" && slug !== "all") {
         // 🟢 ถ้าเปิดดูหน้ารายย่านอยู่ ให้รักษา URL ย่านเดิมไว้ ไม่ดีดกลับไปหน้าจังหวัดหลัก
         if (window.currentZoneSlug) {
           targetUrl = `/location/${slug}/${window.currentZoneSlug}`;
@@ -2111,7 +2114,9 @@ if (descContent) {
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
       } else {
-        targetUrl = isEN ? "/index-en" : "/";
+        // ✅ ตรวจสอบว่าถ้ามาจากหน้า /profiles ให้กลับไปที่ /profiles (ไม่ดีดไปหน้าแรก)
+        const isFromProfiles = window.__isFromProfiles || (window.location.pathname.startsWith("/profiles"));
+        targetUrl = isEN ? "/index-en" : (isFromProfiles ? "/profiles" : "/");
         
         targetTitle = isEN 
           ? "Thailand Escorts & VIP Companions | FirstModelHub" 
@@ -2119,9 +2124,9 @@ if (descContent) {
 
         const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
         
-    const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
-      ? appState.provincesMap.size
-      : ((window.provincesData && window.provincesData.length > 0) ? window.provincesData.length : 1);
+        const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
+          ? appState.provincesMap.size
+          : ((window.provincesData && window.provincesData.length > 0) ? window.provincesData.length : 1);
 
         targetDesc = isEN
           ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
@@ -2135,6 +2140,13 @@ if (descContent) {
       document.title = targetTitle;
       const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "" : targetUrl}`;
       if (canonicalLink) canonicalLink.href = fullCanonical;
+
+      // ✅ แก้ไข: อัปเดตแท็ก hreflang ให้ชี้ไปที่ URL ปัจจุบันเสมอ
+      const hreflangTh = document.querySelector('link[rel="alternate"][hreflang="th"]');
+      if (hreflangTh) hreflangTh.href = fullCanonical;
+
+      const hreflangDefault = document.querySelector('link[rel="alternate"][hreflang="x-default"]');
+      if (hreflangDefault) hreflangDefault.href = fullCanonical;
 
       const metaDescEl = document.querySelector('meta[name="description"]');
       if (metaDescEl) metaDescEl.setAttribute("content", targetDesc);
@@ -2151,7 +2163,6 @@ if (descContent) {
       const ogImgEl = document.querySelector('meta[property="og:image"]');
       if (ogImgEl) ogImgEl.setAttribute("content", defaultHeroImg);
 
-      // 🟢 จุดที่เติมเพิ่ม: ยิง Pageview คืนค่าหน้าหลัก/หน้าจังหวัดให้ Google Analytics (GA4)
       if (typeof gtag === "function") {
         gtag("event", "page_view", {
           page_title: targetTitle,
@@ -2231,49 +2242,57 @@ function hideGlobalLoader() {
   if (loader) loader.style.display = "none";
 }
 
-  
 async function handleUrlRouting(isInitial = false) {
   let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
-  // 🟢 ตรวจสอบหน้าโปรไฟล์เดี่ยว (เปิดแกลเลอรีรูปภาพ + Dock แล้วจบการทำงาน)
-    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
-    if (isStandaloneProfile) {
-        hideGlobalLoader();
-        initDockAutoHide();
-        
-        // ⚡ ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
-        const galleryStrip = document.getElementById('profile-gallery-strip');
-        const mainProfileImg = document.getElementById('main-profile-img');
-        if (galleryStrip && mainProfileImg) {
-            galleryStrip.addEventListener('click', (e) => {
-                const btn = e.target.closest('.thumb-slot');
-                if (!btn) return;
-                
-                if (typeof triggerHaptic === 'function') triggerHaptic('light');
-                const fullSrc = btn.getAttribute('data-full-src');
-                if (fullSrc) {
-                    mainProfileImg.style.opacity = '0.3';
-                    mainProfileImg.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                        mainProfileImg.src = fullSrc;
-                        mainProfileImg.removeAttribute('srcset'); // ลบ srcset เพื่อให้เบราว์เซอร์แสดงรูปที่เลือกแน่นอน
-                        mainProfileImg.style.opacity = '1';
-                        mainProfileImg.style.transform = 'scale(1)';
-                    }, 120);
-
-                    galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
-                        b.classList.remove('active');
-                        b.style.borderColor = 'transparent';
-                    });
-                    btn.classList.add('active');
-                    btn.style.borderColor = '#7C3AED';
-                }
-            });
-        }
-        return; // ออกจากการทำงาน ไม่ต้องโหลด Database รายชื่อคนอื่น
+  // 🟢 1. ซิงค์สถานะปุ่ม Active บน Floating Bottom Dock ให้ตรงตาม URL จริงเสมอ
+  document.querySelectorAll(".floating-app-dock .dock-item").forEach(item => {
+    item.classList.remove("active");
+    const href = item.getAttribute("href");
+    if (href === rawPath || (rawPath === "/" && href === "/")) {
+      item.classList.add("active");
     }
+  });
 
-  
+  // 🟢 2. ตรวจสอบหน้าโปรไฟล์เดี่ยว (เปิดแกลเลอรีรูปภาพ + Dock แล้วจบการทำงาน)
+  const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+  if (isStandaloneProfile) {
+    hideGlobalLoader();
+    if (typeof initDockAutoHide === "function") initDockAutoHide();
+    
+    // ⚡ ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
+    const galleryStrip = document.getElementById('profile-gallery-strip');
+    const mainProfileImg = document.getElementById('main-profile-img');
+    if (galleryStrip && mainProfileImg) {
+      galleryStrip.addEventListener('click', (e) => {
+        const btn = e.target.closest('.thumb-slot');
+        if (!btn) return;
+        
+        if (typeof triggerHaptic === 'function') triggerHaptic('light');
+        const fullSrc = btn.getAttribute('data-full-src');
+        if (fullSrc) {
+          mainProfileImg.style.opacity = '0.3';
+          mainProfileImg.style.transform = 'scale(0.98)';
+          setTimeout(() => {
+            mainProfileImg.src = fullSrc;
+            mainProfileImg.removeAttribute('srcset'); // ลบ srcset เพื่อให้แสดงรูปที่เลือกแน่นอน
+            mainProfileImg.style.opacity = '1';
+            mainProfileImg.style.transform = 'scale(1)';
+          }, 120);
+
+          galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
+            b.classList.remove('active');
+            b.style.borderColor = 'transparent';
+          });
+          btn.classList.add('active');
+          btn.style.borderColor = '#7C3AED';
+        }
+      });
+    }
+    return; // ออกจากการทำงาน ไม่ต้องโหลด Database รายชื่อคนอื่น
+  }
+
+  // 🟢 3. ตรวจสอบการเปิดโปรไฟล์แบบ Lightbox Modal (ผ่าน URL /sideline/...)
   const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
   if (sidelineMatch) {
     let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
@@ -2284,124 +2303,142 @@ async function handleUrlRouting(isInitial = false) {
       String(p.id) === slugVal
     );
 
+    // Fallback ค้นหาจาก SSR window.profilesData
+    if (!foundProfile && window.profilesData && Array.isArray(window.profilesData)) {
+      const rawP = window.profilesData.find(p => String(p.id) === slugVal || String(p.slug) === slugVal);
+      if (rawP && typeof normalizeProfile === "function") foundProfile = normalizeProfile(rawP);
+    }
+
     if (foundProfile) {
       window.openLightboxModal(foundProfile);
     }
     return;
   }
 
-    // 2. ข้ามการ Re-render ซ้ำซ้อน หากหน้าเว็บมี SSR Render มาแล้ว
-    const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
-    if (isInitial && hasExistingSSR) {
-      const routeMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
-      const locSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase().trim() : "national";
-      window.currentProvinceSlug = locSlug;
-      if (domCache.provinceSelect && locSlug !== "national") {
-        domCache.provinceSelect.value = locSlug;
-      }
-      return;
+  // 🟢 4. ข้ามการ Re-render ซ้ำซ้อน หากหน้าเว็บมี SSR Render มาแล้ว
+  const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
+  if (isInitial && hasExistingSSR) {
+    const routeMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
+    const locSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase().trim() : "national";
+    window.currentProvinceSlug = locSlug;
+    if (domCache.provinceSelect && locSlug !== "national") {
+      domCache.provinceSelect.value = locSlug;
     }
+    return;
+  }
 
-   // 3. ตรวจสอบหน้ารายจังหวัด และ โซนย่อย (เช่น /location/chiangmai/เจ็ดยอด)
-    const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/i);
-    if (locationMatch) {
-      let locSlug = "";
-      let zoneSlug = "";
-      try {
-        locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
-        zoneSlug = locationMatch[2] ? decodeURIComponent(locationMatch[2]).trim() : "";
-      } catch {
-        locSlug = locationMatch[1].toLowerCase().trim();
-        zoneSlug = locationMatch[2] ? locationMatch[2].trim() : "";
-      }
-      if (locSlug === "chiang_mai") locSlug = "chiangmai";
-
-      appState.currentProfileSlug = null;
-      window.closeLightboxModal(false);
-      window.currentProvinceSlug = locSlug;
-      window.currentZoneSlug = zoneSlug;
-      if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
-
-      executeFilterAndRender(false);
-      return;
+  // 🟢 5. ตรวจสอบหน้ารายจังหวัด และ โซนย่อย (เช่น /location/chiangmai/เจ็ดยอด)
+  const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/i);
+  if (locationMatch) {
+    let locSlug = "";
+    let zoneSlug = "";
+    try {
+      locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
+      zoneSlug = locationMatch[2] ? decodeURIComponent(locationMatch[2]).trim() : "";
+    } catch {
+      locSlug = locationMatch[1].toLowerCase().trim();
+      zoneSlug = locationMatch[2] ? locationMatch[2].trim() : "";
     }
+    if (locSlug === "chiang_mai" || locSlug === "chiang-mai") locSlug = "chiangmai";
+    if (locSlug === "khonkaen" || locSlug === "khon_kaen") locSlug = "khon-kaen";
 
-    // 4. กรณีหน้าหลักทั่วไป (Default)
+    appState.currentProfileSlug = null;
+    window.closeLightboxModal(false);
+    window.currentProvinceSlug = locSlug;
+    window.currentZoneSlug = zoneSlug;
+    if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
+
+    executeFilterAndRender(false);
+    return;
+  }
+
+  // 🟢 6. ตรวจสอบหน้ารวมน้องๆ ทั้งหมด (/profiles)
+  if (rawPath === "/profiles") {
     appState.currentProfileSlug = null;
     window.currentProvinceSlug = "national";
+    window.currentZoneSlug = "";
     window.closeLightboxModal(false);
     if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
     executeFilterAndRender(false);
+    return;
   }
 
- async function initApplication() {
-    // ⚡ 1. ตรวจสอบทันทีก่อนทำอย่างอื่น: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่เปิดตรงมาจาก render-bot.js)
-    const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
-    if (isStandaloneProfile) {
-      hideGlobalLoader();
-      initDockAutoHide();
-      
-      // ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
-      const galleryStrip = document.getElementById('profile-gallery-strip');
-      const mainProfileImg = document.getElementById('main-profile-img');
-      if (galleryStrip && mainProfileImg) {
-        galleryStrip.addEventListener('click', (e) => {
-          const btn = e.target.closest('.thumb-slot');
-          if (!btn) return;
-          if (typeof triggerHaptic === 'function') triggerHaptic('light');
-          const fullSrc = btn.getAttribute('data-full-src');
-          if (fullSrc) {
-            mainProfileImg.style.opacity = '0.3';
-            mainProfileImg.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-              mainProfileImg.src = fullSrc;
-              mainProfileImg.removeAttribute('srcset');
-              mainProfileImg.style.opacity = '1';
-              mainProfileImg.style.transform = 'scale(1)';
-            }, 120);
+  // 🟢 7. กรณีหน้าหลักทั่วไป (Default Home: /)
+  appState.currentProfileSlug = null;
+  window.currentProvinceSlug = "national";
+  window.currentZoneSlug = "";
+  window.closeLightboxModal(false);
+  if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
-            galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
-              b.classList.remove('active');
-              b.style.borderColor = 'transparent';
-            });
-            btn.classList.add('active');
-            btn.style.borderColor = '#7C3AED';
-          }
-        });
-      }
+  executeFilterAndRender(false);
+}
 
-      // ดักจับปุ่มแชร์โปรไฟล์ในหน้าเดี่ยว
-      document.body.addEventListener('click', (e) => {
-        const shareBtn = e.target.closest('[data-action="share-profile"]');
-        if (shareBtn) {
-          e.preventDefault();
-          const name = shareBtn.getAttribute('data-profile-name') || 'FirstModelHub';
-          const url = shareBtn.getAttribute('data-profile-url') || window.location.href;
-          window.shareProfile(name, url);
+async function initApplication() {
+  // ⚡ 1. ตรวจสอบทันทีก่อนทำอย่างอื่น: ถ้าเป็นหน้าโปรไฟล์เดี่ยว (ที่เปิดตรงมาจาก render-bot.js)
+  const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
+  if (isStandaloneProfile) {
+    hideGlobalLoader();
+    if (typeof initDockAutoHide === "function") initDockAutoHide();
+    
+    // ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
+    const galleryStrip = document.getElementById('profile-gallery-strip');
+    const mainProfileImg = document.getElementById('main-profile-img');
+    if (galleryStrip && mainProfileImg) {
+      galleryStrip.addEventListener('click', (e) => {
+        const btn = e.target.closest('.thumb-slot');
+        if (!btn) return;
+        if (typeof triggerHaptic === 'function') triggerHaptic('light');
+        const fullSrc = btn.getAttribute('data-full-src');
+        if (fullSrc) {
+          mainProfileImg.style.opacity = '0.3';
+          mainProfileImg.style.transform = 'scale(0.98)';
+          setTimeout(() => {
+            mainProfileImg.src = fullSrc;
+            mainProfileImg.removeAttribute('srcset');
+            mainProfileImg.style.opacity = '1';
+            mainProfileImg.style.transform = 'scale(1)';
+          }, 120);
+
+          galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
+            b.classList.remove('active');
+            b.style.borderColor = 'transparent';
+          });
+          btn.classList.add('active');
+          btn.style.borderColor = '#7C3AED';
         }
       });
-
-      return; // 🛑 จบการทำงานตรงนี้ทันที! ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
     }
 
-    // 🟢 2. ถ้าเป็นหน้าแรก / หน้ารายจังหวัด ให้ดึงไลน์แอดมินและทำงานต่อตามปกติ (โค้ดเดิมของคุณ):
-    getSupabaseClient().then(client => {
-      if (!client) return;
-      client.from('site_settings').select('value').eq('key', 'admin_line_url').maybeSingle().then(({ data }) => {
-        if (data && data.value) {
-          const liveLine = data.value;
-          // 1. ตรงด้านล่าง (แถบ Bottom Dock ปุ่มจองคิว)
-          document.querySelectorAll('.dock-item-line').forEach(el => el.href = liveLine);
-          // 2. ตรงล่างสุดในเมนู (ปุ่ม Sidebar & ไอคอน Line ท้ายเว็บ)
-          document.querySelectorAll('.sidebar-line-btn, .social-btn.line').forEach(el => el.href = liveLine);
-          // 3. ตรงติดต่อแจ้งปัญหา (ศูนย์รับเรื่องร้องเรียน)
-          document.querySelectorAll('.btn-concierge-line').forEach(el => el.href = liveLine);
-        }
-      });
+    // ดักจับปุ่มแชร์โปรไฟล์ในหน้าเดี่ยว
+    document.body.addEventListener('click', (e) => {
+      const shareBtn = e.target.closest('[data-action="share-profile"]');
+      if (shareBtn) {
+        e.preventDefault();
+        const name = shareBtn.getAttribute('data-profile-name') || 'FirstModelHub';
+        const url = shareBtn.getAttribute('data-profile-url') || window.location.href;
+        window.shareProfile(name, url);
+      }
     });
 
-    
+    return; // 🛑 จบการทำงานตรงนี้ทันที! ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
+  }
+
+  // 🟢 2. ถ้าเป็นหน้าแรก / หน้ารายจังหวัด ให้ดึงไลน์แอดมินและทำงานต่อตามปกติ
+  getSupabaseClient().then(client => {
+    if (!client) return;
+    client.from('site_settings').select('value').eq('key', 'admin_line_url').maybeSingle().then(({ data }) => {
+      if (data && data.value) {
+        const liveLine = data.value;
+        // 1. ตรงด้านล่าง (แถบ Bottom Dock ปุ่มจองคิว)
+        document.querySelectorAll('.dock-item-line').forEach(el => el.href = liveLine);
+        // 2. ตรงล่างสุดในเมนู (ปุ่ม Sidebar & ไอคอน Line ท้ายเว็บ)
+        document.querySelectorAll('.sidebar-line-btn, .social-btn.line').forEach(el => el.href = liveLine);
+        // 3. ตรงติดต่อแจ้งปัญหา (ศูนย์รับเรื่องร้องเรียน)
+        document.querySelectorAll('.btn-concierge-line').forEach(el => el.href = liveLine);
+      }
+    });
+  });
 
     domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
