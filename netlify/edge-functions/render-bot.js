@@ -464,11 +464,9 @@ export default async (req, context) => {
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-    const age = cleanAge || "ไม่ระบุ";
-
-    // 🟢 แก้ไขบรรทัดนี้ได้เลยครับ:
-    const ageDisplay = (age && age !== "ไม่ระบุ") ? `${age} ปี` : "";
-
+    const age = cleanAge || "ไม่ระบุ"; // 👈 เพิ่มบรรทัดนี้กลับมา ป้องกัน ReferenceError
+    const ageDisplay = cleanAge ? `${cleanAge} ปี` : "20+ ปี";
+    
     const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
       : "160";
@@ -479,53 +477,58 @@ export default async (req, context) => {
       : "36-25-35";
 
     const rawH = parseInt(height, 10) || 160;
-    let rawW = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10) || 0;
+    const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
     
-    let waistVal = 0;
-    if (stats && typeof stats === "string") {
-      const statsParts = stats.split(/[-/]/);
-      if (statsParts.length >= 2) waistVal = parseInt(statsParts[1], 10) || 0;
-    }
-
-    if (waistVal > 0 && waistVal <= 25 && (rawW > 52 || rawW < 40)) {
-      rawW = Math.max(45, Math.min(49, rawH - 112));
-    } else if (rawW <= 0 || rawW > 70) {
-      rawW = Math.max(46, Math.min(52, rawH - 110));
-    }
+    // เคารพข้อมูลจริงจาก Database ก่อน หากไม่มีหรือค่าหลุดโลก (เช่น <= 0) ค่อยประมาณการสมส่วน
+    const rawW = (parsedDbWeight && parsedDbWeight >= 38 && parsedDbWeight <= 95)
+      ? parsedDbWeight
+      : Math.max(45, Math.min(52, rawH - 110));
 
     const weight = String(rawW);
-    const weightDisplay = `${weight} กก.`;
+    const weightDisplay = parsedDbWeight ? `${weight} กก.` : "สมส่วน";
   
     const cleanProvince = escapeHTML(provinceNameThai);
     let rawLoc = sanitizeThaiText(profile.location || "");
-    const primaryZone = rawLoc
+    const extractedZone = rawLoc
       .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
       .split(/[,/]|และใกล้/)[0]
-      .trim() || cleanProvince;
+      .trim();
+
+    // เช็คว่ามีโซนย่อยจริงที่ไม่ใช่ชื่อจังหวัดซ้ำซ้อน
+    const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
+    const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
+
+    const safeZoneSlug = hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "";
+    const zoneHubUrl = primaryZone.includes("นิมมาน") 
+      ? "/nimman" 
+      : hasDistinctZone 
+        ? encodeURI(`/location/${provinceKey}/${safeZoneSlug}`) 
+        : provinceHubUrl; // ถ้าไม่มีโซนย่อย ให้ชี้กลับหน้าจังหวัดหลัก ป้องกัน 404
 
     const cityContext = cleanProvince.includes("กรุงเทพ") ? "กรุงเทพฯ" : `ตัวเมือง${cleanProvince}`;
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-    // 🟢 ประกาศตัวแปรดึงเดือน-ปีปัจจุบันก่อนนำไปใช้ (แก้ ReferenceError)
-    const currentFreshness = getCurrentFreshnessText(); // 👈 เพิ่มบรรทัดนี้ลงไปครับ!
+    // 🟢 ประกาศตัวแปรดึงเดือน-ปีปัจจุบันก่อนนำไปใช้
+    const currentFreshness = getCurrentFreshnessText();
 
     const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
     const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} โซน${primaryZone} ตรงปก 100% [อัปเดต ${currentFreshness}] | ${CONFIG.BRAND_NAME}`;
 
-    // 🟢 3. สร้าง Meta Description ภาษาคนจริง 6 สไตล์ สุ่มตาม ID ไม่ซ้ำ ไม่โดนแบน
+    // 🟢 สร้าง Meta Description ภาษาคนจริง
     const metaDescription = generateHumanMetaDesc(displayName, cleanProvince, cityContext, primaryZone, stats, priceDisplay, profile.id || profile.slug);
-
-  const safeZoneSlug = primaryZone.trim().replace(/\s+/g, "-");
-const zoneHubUrl = primaryZone.includes("นิมมาน") 
-  ? "/nimman" 
-  : encodeURI(`/location/${provinceKey}/${safeZoneSlug}`);
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
-    const isOnlineNow = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
-    const realStatusText = profile.availability || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
-    const statusDotColor = isOnlineNow ? "#059669" : "#F59E0B";
+    const currentAvail = (profile.availability || "").trim();
+    
+    // เพิ่มคำว่า "สอบถามคิว" เข้าไปในกลุ่มที่ไม่ใช่ออนไลน์ทันที
+    const isBusy = ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด", "สอบถามคิว"].some(s => currentAvail.toLowerCase().includes(s));
+    const isOnlineNow = (currentAvail === "รับงาน" || currentAvail === "พร้อมรับงาน") || (!isBusy && Boolean(currentAvail));
+    const realStatusText = currentAvail || (isOnlineNow ? "พร้อมรับงาน" : "สอบถามคิว");
+    
+    // ถ้าเป็น "สอบถามคิว" หรือไม่ว่าง ให้เป็นสีส้ม (#F59E0B) ถ้าพร้อมรับงานให้เป็นสีเขียว (#059669)
+    const statusDotColor = (currentAvail === "สอบถามคิว" || !isOnlineNow) ? "#F59E0B" : "#059669";
 
     const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
     const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
@@ -754,18 +757,19 @@ const zoneHubUrl = primaryZone.includes("นิมมาน")
           <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;"><i class="fas fa-arrow-left"></i> ย้อนกลับ</a>
         </header>
 
-        <!-- Breadcrumb Navigation -->
-        <nav aria-label="breadcrumb">
-          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 12px;">
-            <li><a href="/" style="color: #475569; text-decoration: none;">หน้าแรก</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">${escapeHTML(activeBreadcrumbText)}</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li><a href="${zoneHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">โซน${escapeHTML(primaryZone)}</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
-          </ol>
-        </nav>
+       <nav aria-label="breadcrumb">
+  <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 12px;">
+    <li><a href="/" style="color: #475569; text-decoration: none;">หน้าแรก</a></li>
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">${escapeHTML(activeBreadcrumbText)}</a></li>
+    ${hasDistinctZone ? `
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li><a href="${zoneHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">โซน${escapeHTML(primaryZone)}</a></li>
+    ` : ""}
+    <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+    <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
+  </ol>
+</nav>
 
         <main class="main-content">
             <article class="interactive-card fmh-bento-card">
