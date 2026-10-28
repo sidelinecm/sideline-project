@@ -1130,23 +1130,29 @@ const line1 = isAllOrNational
       }
     }
 
-    // ✅ ปรับตำแหน่งแผนที่ Google Map
-    const mapIframe = document.getElementById("google-map");
-    if (mapIframe) {
-      const zoom = isAllOrNational ? 6 : 12;
-      let query = "";
-      if (isEN) {
-        const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || "Thailand");
-        query = encodeURIComponent(enLocName);
-      } else {
-        query = isAllOrNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${targetName}`);
-      }
-      
-      const newMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
-      if (mapIframe.src !== newMapSrc) {
-        mapIframe.src = newMapSrc;
-      }
-    }
+    
+
+// ✅ แก้เป็น: (เลื่อนมาใกล้ 250px จึงค่อยโหลด Main Thread จะไม่ถูกบล็อกตอนเปิดหน้าเว็บ)
+const mapIframe = document.getElementById("google-map");
+if (mapIframe) {
+  const zoom = isAllOrNational ? 6 : 12;
+  const query = isAllOrNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${targetName}`);
+  const targetMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (mapIframe.src !== targetMapSrc) mapIframe.src = targetMapSrc;
+          observer.disconnect();
+        }
+      });
+    }, { rootMargin: "250px" });
+    observer.observe(mapIframe);
+  } else {
+    mapIframe.src = targetMapSrc;
+  }
+}
 
     if (isEN) return;
 
@@ -1267,9 +1273,7 @@ const line1 = isAllOrNational
     const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
     
     const ageVal = p.safeAge || p.age;
-    const ageDisplay = ageVal && String(ageVal).trim() !== "-" && String(ageVal).trim() !== "0" 
-      ? (isEN ? `${String(ageVal).replace(/\D/g, "")} yrs` : `${String(ageVal).replace(/\D/g, "")} ปี`) 
-      : "";
+    const ageDisplay = (ageVal && String(ageVal).trim() !== "-" && String(ageVal).trim() !== "0") ? `${String(ageVal).replace(/\D/g, "")} ปี` : "20+ ปี";
     
     let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
