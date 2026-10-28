@@ -1093,17 +1093,20 @@ for (const p of hotCandidate) {
     }
 
     
-  // ใน main.js (ฟังก์ชัน replaceDomPlaceholders)
+  // ✅ ใน main.js (ฟังก์ชัน replaceDomPlaceholders)
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       if (isEN) {
         // ภาษาอังกฤษคงเดิม...
       } else {
-        const line1 = isAllOrNational 
-          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>` 
-          : (zoneSlug 
-              ? `สาวรับงาน ไซด์ไลน์${escapeHTML(targetName)} <span class="t-chunk">โซน${escapeHTML(zoneSlug)}</span>`
-              : `สาวรับงาน และ ไซด์ไลน์${escapeHTML(targetName)}`);
+        // 🟢 แก้ไข: ดึง zoneSlug จาก window.currentZoneSlug ป้องกัน Crash
+const zoneSlug = window.currentZoneSlug ? String(window.currentZoneSlug).trim() : "";
+
+const line1 = isAllOrNational 
+  ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>` 
+  : (zoneSlug 
+      ? `สาวรับงาน ไซด์ไลน์${escapeHTML(targetName)} <span class="t-chunk">โซน${escapeHTML(zoneSlug)}</span>`
+      : `สาวรับงาน และ ไซด์ไลน์${escapeHTML(targetName)}`);
               
         const line2 = "ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)";
 
@@ -2464,6 +2467,37 @@ async function handleUrlRouting(isInitial = false) {
     }
     if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
     if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
+    
+    // 🟢 ระบบรูดลงเพื่อปิดฟอร์มค้นหา (Touch Swipe Down to Dismiss)
+    if (searchBottomSheetEl) {
+      let touchStartY = 0;
+      let touchCurrentY = 0;
+
+      searchBottomSheetEl.addEventListener("touchstart", (e) => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      searchBottomSheetEl.addEventListener("touchmove", (e) => {
+        touchCurrentY = e.touches[0].clientY;
+        const diffY = touchCurrentY - touchStartY;
+        if (diffY > 0 && (searchBottomSheetEl.querySelector('.sheet-body-content')?.scrollTop ?? 0) <= 0) {
+          searchBottomSheetEl.style.transform = `translate(-50%, ${diffY}px)`;
+        }
+      }, { passive: true });
+
+      searchBottomSheetEl.addEventListener("touchend", () => {
+        const diffY = touchCurrentY - touchStartY;
+        searchBottomSheetEl.style.transform = "";
+        if (diffY > 90) {
+          toggleSearchDrawer(false); // รูดลงเกิน 90px ให้ปิดทันที
+          if (typeof triggerHaptic === "function") triggerHaptic("light");
+        }
+        touchStartY = 0;
+        touchCurrentY = 0;
+      }, { passive: true });
+    }
+    
+    
    if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         const selectedProv = domCache.provinceSelect?.value;
@@ -2689,7 +2723,8 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
     if (domCache.resetSearchBtn) {
       domCache.resetSearchBtn.addEventListener("click", () => {
         if (domCache.searchInput) domCache.searchInput.value = "";
-        if (domCache.availabilitySelect) domCache.availabilitySelect.value = "";
+        if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+        if (domCache.availabilitySelect) domCache.availabilitySelect.value = "all";
         if (domCache.featuredSelect) domCache.featuredSelect.value = "";
         if (domCache.sortSelect) domCache.sortSelect.value = "featured";
 
@@ -2698,10 +2733,14 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         const suggestionsEl = document.getElementById("search-suggestions");
         if (suggestionsEl) suggestionsEl.style.display = "none";
 
+        appState.activePillTag = "all";
+        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+        const allTab = document.querySelector('.filter-pill-tab[data-tag="all"]');
+        if (allTab) allTab.classList.add("active");
+
         executeFilterAndRender(true);
       });
     }
-
     document.querySelectorAll(".region-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".region-tab").forEach(t => t.classList.remove("active"));
@@ -3212,3 +3251,129 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         updateLiveRelativeTimestamps();
       }
     })();
+
+// ==========================================================================
+// 🚀 SEARCH BOTTOM SHEET & RUNTIME INTEGRITY PATCH (วางต่อท้าย main.js ล่างสุด)
+// ==========================================================================
+(function initSearchBottomSheetUXEnhancements() {
+  "use strict";
+
+  // 🛡️ ป้องกันบั๊ก Runtime ReferenceError: zoneSlug is not defined ทั่วทั้งระบบ
+  if (typeof window.zoneSlug === "undefined") {
+    Object.defineProperty(window, "zoneSlug", {
+      get: function() { return window.currentZoneSlug || ""; },
+      set: function(v) { window.currentZoneSlug = v; },
+      configurable: true
+    });
+  }
+
+  function setupSheetGestures() {
+    const sheetEl = document.getElementById("search-bottom-sheet");
+    const overlayEl = document.getElementById("search-drawer-overlay");
+    const closeBtn = document.getElementById("close-search-drawer-btn");
+    const resetBtn = document.getElementById("reset-search-btn");
+    const searchInput = document.getElementById("search-keyword");
+    const bodyContent = sheetEl ? sheetEl.querySelector(".sheet-body-content") : null;
+
+    if (!sheetEl) return;
+
+    // 1. ระบบรูดลงเพื่อปิด (Native-like Swipe Down to Dismiss)
+    let touchStartY = 0;
+    let touchCurrentY = 0;
+    let isDragging = false;
+
+    sheetEl.addEventListener("touchstart", (e) => {
+      // อนุญาตให้รูดลงเมื่อ Scroll อยู่ตำแหน่งบนสุดเท่านั้น
+      if (!bodyContent || bodyContent.scrollTop <= 0) {
+        touchStartY = e.touches[0].clientY;
+        touchCurrentY = touchStartY;
+        isDragging = true;
+      } else {
+        isDragging = false;
+      }
+    }, { passive: true });
+
+    sheetEl.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      touchCurrentY = e.touches[0].clientY;
+      const deltaY = touchCurrentY - touchStartY;
+
+      if (deltaY > 0) {
+        // มีแรงหน่วงเล็กน้อยเพื่อให้สัมผัสเป็นธรรมชาติ
+        sheetEl.style.transition = "none";
+        const dampenedY = Math.pow(deltaY, 0.88);
+        sheetEl.style.transform = `translate(-50%, ${dampenedY}px)`;
+      }
+    }, { passive: true });
+
+    sheetEl.addEventListener("touchend", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const deltaY = touchCurrentY - touchStartY;
+      sheetEl.style.transition = "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)";
+
+      // ถ้ารูดลงเกิน 80px ให้ปิดทันที
+      if (deltaY > 80) {
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic("light");
+        sheetEl.classList.remove("active");
+        sheetEl.style.pointerEvents = "none";
+        sheetEl.style.visibility = "hidden";
+        if (overlayEl) {
+          overlayEl.classList.remove("active");
+          overlayEl.style.pointerEvents = "none";
+          overlayEl.style.visibility = "hidden";
+        }
+        document.body.style.overflow = "";
+      } else {
+        sheetEl.style.transform = "translate(-50%, 0)";
+      }
+    }, { passive: true });
+
+    // 2. ปรับปรุงปุ่ม "🔄 ล้างค่า" ให้เคลียร์ฟอร์มแบบคลีน 100%
+    if (resetBtn && !resetBtn.dataset.patchBound) {
+      resetBtn.dataset.patchBound = "true";
+      resetBtn.addEventListener("click", () => {
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic("medium");
+
+        // เคลียร์ค่าในช่องพิมพ์
+        if (searchInput) searchInput.value = "";
+        const clearBtn = document.getElementById("clear-search-btn");
+        if (clearBtn) clearBtn.style.display = "none";
+
+        // เคลียร์คำแนะนำค้นหา
+        const popover = document.getElementById("search-suggestions");
+        if (popover) popover.style.display = "none";
+
+        // รีเซ็ต Dropdown ทั้งหมด
+        const provSelect = document.getElementById("search-province");
+        if (provSelect) provSelect.value = "";
+
+        const availSelect = document.getElementById("search-availability");
+        if (availSelect) availSelect.value = "";
+
+        const featSelect = document.getElementById("search-featured");
+        if (featSelect) featSelect.value = "";
+
+        const sortSelect = document.getElementById("sort-select");
+        if (sortSelect) sortSelect.value = "featured";
+
+        // รีเซ็ตปุ่ม Pill Tabs ให้กลับมาที่ "ทั้งหมด"
+        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+        const allPill = document.querySelector('.filter-pill-tab[data-tag="all"]');
+        if (allPill) allPill.classList.add("active");
+
+        // เรียกค้นหาและอัปเดตหน้าจอใหม่ทันที
+        if (typeof window.executeFilterAndRender === "function") {
+          window.executeFilterAndRender(true);
+        }
+      });
+    }
+  }
+
+  // ผูกการทำงานทันทีเมื่อหน้าเว็บพร้อม
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupSheetGestures);
+  } else {
+    setupSheetGestures();
+  }
+})();

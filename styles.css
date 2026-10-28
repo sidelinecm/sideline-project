@@ -5334,3 +5334,179 @@ body.fmh-app-page {
   word-break: keep-all !important;
      }
 
+/* ==========================================================================
+   ✨ ULTIMATE SEARCH BOTTOM SHEET PATCH (วางต่อท้าย styles.css ล่างสุด)
+   ========================================================================== */
+#search-drawer-overlay.drawer-backdrop {
+  z-index: 100001 !important;
+  background: rgba(10, 6, 20, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+#search-bottom-sheet.search-bottom-sheet {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translate(-50%, 105%) !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  background: #FFFFFF !important;
+  border-radius: 28px 28px 0 0 !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
+  border-bottom: none !important;
+  box-shadow: 0 -18px 50px rgba(15, 10, 26, 0.3) !important;
+  z-index: 100002 !important; /* 👈 สูงกว่า Bottom Dock ป้องกันการกดทะลุ */
+  max-height: 86dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease !important;
+  box-sizing: border-box !important;
+  /* 🟢 แก้ปัญหาติดขอบล่าง: ดันปุ่มลอยขึ้นมาพ้นแถบควบคุมโทรศัพท์ทุกรุ่น */
+  padding: 12px 18px calc(18px + env(safe-area-inset-bottom, 22px)) 18px !important;
+}
+
+#search-bottom-sheet.search-bottom-sheet.active {
+  transform: translate(-50%, 0) !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+#search-bottom-sheet .sheet-drag-handle {
+  width: 46px !important;
+  height: 5px !important;
+  background: #CBD5E1 !important;
+  border-radius: 100px !important;
+  margin: 2px auto 10px auto !important;
+  flex-shrink: 0 !important;
+  cursor: grab !important;
+}
+
+#search-bottom-sheet .sheet-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  margin-bottom: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+#search-bottom-sheet .sheet-close-btn {
+  width: 32px !important;
+  height: 32px !important;
+  background: #F1F5F9 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  color: #64748B !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+#search-bottom-sheet .sheet-body-content {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 2px !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overscroll-behavior: contain !important;
+}
+
+#search-bottom-sheet .search-inputs-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+#search-bottom-sheet .search-input-field,
+#search-bottom-sheet .search-select-field {
+  width: 100% !important;
+  background-color: #F8F6FC !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.16) !important;
+  color: #140F22 !important;
+  padding: 10px 14px !important;
+  font-size: 16px !important; /* 👈 ขนาด 16px ป้องกัน iPhone Auto-Zoom */
+  font-weight: 600 !important;
+  font-family: 'Prompt', sans-serif !important;
+  border-radius: 14px !important;
+  outline: none !important;
+  height: 48px !important; /* ขนาด 48px พอดีนิ้ว */
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+  -webkit-appearance: none !important;
+}
+
+#search-bottom-sheet select.search-select-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237C3AED' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  padding-right: 36px !important;
+}
+
+#search-bottom-sheet .search-input-field:focus,
+#search-bottom-sheet .search-select-field:focus {
+  border-color: #7C3AED !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+}
+
+#search-bottom-sheet .sheet-action-footer {
+  display: grid !important;
+  grid-template-columns: 1fr 2fr !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+  flex-shrink: 0 !important;
+}
+
+#search-bottom-sheet .sheet-reset-btn {
+  background: #F1F5F9 !important;
+  border: 1.5px solid #CBD5E1 !important;
+  color: #475569 !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  transition: transform 0.1s ease, background-color 0.15s ease !important;
+}
+
+#search-bottom-sheet .sheet-apply-btn {
+  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  font-size: 14.5px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+  transition: transform 0.1s ease, opacity 0.15s ease !important;
+}
+
+#search-bottom-sheet .sheet-apply-btn:active,
+#search-bottom-sheet .sheet-reset-btn:active {
+  transform: scale(0.96) !important;
+}
+
+/* ซ่อน Dock ล่างขณะเปิดหน้าต่างค้นหา */
+body:has(#search-bottom-sheet.active) .floating-app-dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, 150%) !important;
+}
