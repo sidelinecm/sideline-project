@@ -1744,19 +1744,21 @@ const robotsDirectives = (typeof zoneSlug !== "undefined" && zoneSlug && totalCo
     let dynamicSubheadline = "";
 
     if (isNational) {
-      // หน้าแรก (ทั่วไทย)
-      ssrH1Html = `<span class="h1-line-1">ศูนย์รวมเพื่อนเที่ยวฟิวแฟนและไซด์ไลน์พรีเมียม</span>
-                   <span class="h1-line-2">ตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน</span>`;
+      // 1. หน้าแรก (ทั่วไทย): คีย์เวิร์ดแข็งแกร่งที่สุด 4 คำหลัก ไม่ตกหล่น
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
+                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
       dynamicSubheadline = ``;
+
     } else if (zoneSlug) {
-      // หน้ารายโซนย่อย (เช่น เจ็ดยอด, สันติธรรม)
-      ssrH1Html = `<span class="h1-line-1">เพื่อนเที่ยวไซด์ไลน์${escapeHTML(provinceNameThai)} โซน${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2">ตัวจริงไม่จกตา นัดเจอจ่ายหน้างาน</span>`;
+      // 2. หน้ารายโซนย่อย (เช่น เจ็ดยอด, สันติธรรม, กังสดาล): ดึงชื่อย่านมาจับคู่กับคีย์เวิร์ด
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์${escapeHTML(provinceNameThai)} <span class="t-chunk">โซน${escapeHTML(zoneSlug)}</span></span>
+                   <span class="h1-line-2">ฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน</span>`;
       dynamicSubheadline = ``;
+
     } else {
-      // หน้ารายจังหวัด (เช่น เชียงใหม่)
-      ssrH1Html = `<span class="h1-line-1">สาวรับงานและไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">ฟิวแฟนตัวจริง การันตีตรงปก 100%</span>`;
+      // 3. หน้ารายจังหวัด (เช่น เชียงใหม่, ขอนแก่น, ภูเก็ต): เจาะจงจังหวัดชัดเจน
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน และ ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">ฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
       dynamicSubheadline = ``;
     }
 
