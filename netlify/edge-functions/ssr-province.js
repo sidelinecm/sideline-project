@@ -1411,10 +1411,15 @@ const rawCanonicalUrl = isNational
       : (isNational
           ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
           : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
+
+    // 🟢 [เติมบรรทัดนี้ลงไปตรงนี้ครับ] เพื่อให้ Schema และ Meta Tags เรียกใช้งานได้ไม่พัง
+    const cleanMetaDesc = stripHTML(metaDescription);
+
     // 🟢 2. Breadcrumbs รองรับ 3 ชั้น (ภาษาไทยตรงปก URL ถูกต้องตามมาตรฐาน)
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
     ];
+ 
     if (!isNational) {
       breadcrumbItems.push({
         "@type": "ListItem",
