@@ -1328,6 +1328,15 @@ if (mapIframe) {
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
 
+    // คำนวณดาวและรีวิว
+    const idNum = parseInt(String(p.id).replace(/\D/g, "") || "1", 10);
+    const ratingScore = (4.8 + ((idNum % 3) * 0.1)).toFixed(1);
+    const reviewCount = 8 + (idNum % 17);
+
+    // 🟢 แก้ไขจุดนี้: ต่อ String แบบธรรมดา ป้องกัน Backtick ซ้อนกันจนเกิด SyntaxError
+    const rawLikes = p.likes_count || p.likes || 0;
+    const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
+
     const article = document.createElement("article");
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
@@ -1367,23 +1376,17 @@ if (mapIframe) {
               ${vibeTagsHtml}
           </div>
           
-          <!-- Social Proof: ใช้ Class CSS แทน Inline Style เพื่อความสะอาดและโหลดไว -->
           <div class="profile-card-social-strip">
-            
-            <!-- ฝั่งซ้าย: ดาวทองคำเปลว -->
             <span class="social-badge-star">
               <span class="star-icon">★</span>
-              <span>${(4.8 + ((parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 3) * 0.1)).toFixed(1)}</span>
-              <span class="review-count">(${8 + (parseInt(String(p.id).replace(/\D/g, "") || "1", 10) % 17)})</span>
+              <span>${ratingScore}</span>
+              <span class="review-count">(${reviewCount})</span>
             </span>
 
-            <!-- ฝั่งขวา: ยอดทักไลน์ -->
             <span class="social-badge-likes">
-              <!-- สังเกตว่าผมเปลี่ยน stroke เป็น currentColor เพื่อให้มันดึงสีมาจาก CSS คลาสให้อัตโนมัติ -->
               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              <span>${(p.likes_count || p.likes || 0)} 💗</span>
+              <span>${likesText}</span>
             </span>
-
           </div>
 
           <div class="profile-card-title-row">
@@ -1400,7 +1403,7 @@ if (mapIframe) {
     `;
     container.appendChild(article);
     return container;
-}
+  }
 
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
@@ -2505,13 +2508,15 @@ async function handleUrlRouting(isInitial = false) {
    if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         const selectedProv = domCache.provinceSelect?.value;
-        // ถ้าผู้ใช้เลือกจังหวัดจากฟอร์มค้นหา ให้พาเปลี่ยนหน้าไปยัง URL จังหวัดนั้นทันที (เพื่อให้ SSR โหลดโซนและเนื้อหาครบ 100%)
+        const searchKeyword = (domCache.searchInput?.value || "").trim();
+        const queryParam = searchKeyword ? ("?q=" + encodeURIComponent(searchKeyword)) : "";
+
         if (selectedProv && selectedProv !== "" && selectedProv !== "all" && selectedProv !== "national") {
-          window.location.href = `/location/${selectedProv}`;
+          window.location.href = "/location/" + selectedProv + queryParam;
           return;
         } else if (selectedProv === "" || selectedProv === "all" || selectedProv === "national") {
           if (window.location.pathname !== "/") {
-            window.location.href = "/";
+            window.location.href = "/" + queryParam;
             return;
           }
         }
@@ -2532,11 +2537,13 @@ async function handleUrlRouting(isInitial = false) {
     }
 
     // ✅ ให้เปลี่ยนหน้านำทางเฉพาะเมื่อผู้ใช้กดปุ่ม "แสดงผลลัพธ์" (applyFilterBtn) เท่านั้น
-if (domCache.provinceSelect) {
-  domCache.provinceSelect.addEventListener("change", (e) => {
-    // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
-  });
-}
+    if (domCache.provinceSelect) {
+      domCache.provinceSelect.addEventListener("change", (e) => {
+        // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
+      });
+    }
+
+    
         
 
   // 🟢 1. ฟังก์ชันตัวช่วยสั่งเลื่อนหน้าจอวิ่งไปหาโซนรายชื่อน้องๆ
