@@ -153,16 +153,16 @@ function optimizeImg(imagePath, mode = "card") {
   let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // รูปย่อยขนาดเล็ก (Thumbnail)
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    // รูปการ์ดแสดงผลปกติ
     transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
     // รูปขนาดกลางสำหรับ Lightbox Modal
     transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-  } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    // รูปใหญ่เต็มจอ / OG Image สำหรับแชร์โซเชียล
+  } else if (mode === "og") {
+    // 🟢 ครอป 1200x630 อัตโนมัติและจับโฟกัสใบหน้า หัวไม่ขาด 100%
+    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+  } else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
     transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
 
@@ -335,8 +335,17 @@ export default async (req, context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let query = supabase.from("profiles").select("*").eq("active", true);
-    query = /^\d+$/.test(rawSlug) ? query.eq("id", rawSlug) : query.eq("slug", rawSlug);
 
+    // 🟢 ดักจับทั้ง ID ล้วน, Slug ตรงๆ, หรือ Slug ที่ลงท้ายด้วย -ID เช่น bumbim-155 ไม่หลุด 404
+    const extractedId = rawSlug.match(/-(\d+)$/);
+    if (/^\d+$/.test(rawSlug)) {
+      query = query.eq("id", rawSlug);
+    } else if (extractedId && extractedId[1]) {
+      query = query.or(`slug.eq.${rawSlug},id.eq.${extractedId[1]}`);
+    } else {
+      query = query.eq("slug", rawSlug);
+    }
+    
     const { data: profile } = await query.maybeSingle();
     if (!profile) {
       return context.next();

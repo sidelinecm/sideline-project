@@ -1462,7 +1462,7 @@ const nationalFeedProfiles = isNational ? (() => {
       webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
     }
 
-    // 🟢 4. โครงสร้าง Schema Graph หลัก
+    // 🟢 4. โครงสร้าง Schema Graph หลัก (ตัวแปรสมบูรณ์ ไม่พัง 500 และไม่ปนเปื้อนข้อมูลย่าน)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -1477,7 +1477,7 @@ const nationalFeedProfiles = isNational ? (() => {
           "width": 512,
           "height": 512
         },
-        "description": cleanMetaDesc,
+        "description": "FirstModelHub ศูนย์รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็นทั่วไทย ตัวจริงตรงปก ปลอดภัยนัดเจอจ่ายหน้างาน ไร้มัดจำ",
         "sameAs": CONFIG.SOCIAL_LINKS,
         "contactPoint": {
           "@type": "ContactPoint",
@@ -1506,20 +1506,15 @@ const nationalFeedProfiles = isNational ? (() => {
       });
     }
 
-    
-
-    
-
-    
     const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
 
-    // 2. สร้าง Schema ItemList วิ่งตามจำนวนจริงที่แสดงผลบนหน้าจอแบบอัตโนมัติ
+    // 🟢 5. สร้าง Schema ItemList วิ่งตามจำนวนจริงที่แสดงผลบนหน้าจอแบบอัตโนมัติ
     if (actualVisibleProfiles.length > 0) {
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": actualVisibleProfiles.length, // 👈 วิ่งตามจำนวนจริง (40 หรือ 45) อัตโนมัติ
+        "numberOfItems": actualVisibleProfiles.length,
         "itemListElement": actualVisibleProfiles.map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
@@ -2149,3 +2144,6 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
     return await context.next();
   }
 };
+
+
+typeof mode === "number
