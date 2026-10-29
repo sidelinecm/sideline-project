@@ -1298,7 +1298,6 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
    
     let hotSwiperCardsHtml = "";
     let featuredCardsHtml = "";
-    const HOME_PAGE_LIMIT = 40;
 
     function isFiwfanProfile(p) {
       if (!p) return false;
@@ -1316,28 +1315,24 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
     }
 
-    // 🟢 แทนที่โค้ดเดิมใน ssr-province.js (ช่วงบรรทัด 690 ถึง 706) ด้วยชุดนี้:
-const nationalFeedProfiles = isNational ? (() => {
-  // 1. ดึงน้องๆ สไตล์ฟิวแฟนโดยใช้ฟังก์ชันเช็กที่สมบูรณ์ (ตรวจทั้ง tags และ description)
-  let hotCandidate = profilesList.filter(isFiwfanProfile);
+    // 🟢 1. ดึงโปรไฟล์หน้าแรก: แสดง "ครบทุกคนตามจริง" ปลดล็อกไม่จำกัด 40 คนอีกต่อไป
+    const nationalFeedProfiles = isNational ? (() => {
+      // 1.1 คัดเลือก 8 คนแรกสำหรับแสดงบนแถบ Hot Swiper ด้านบนสุด
+      let hotCandidate = profilesList.filter(isFiwfanProfile);
+      if (hotCandidate.length < 8) {
+        const others = profilesList.filter(p => !hotCandidate.some(h => String(h.id) === String(p.id)));
+        hotCandidate = [...hotCandidate, ...others];
+      }
 
-  // 2. ถ้ายังมีไม่ถึง 8 คน ให้ดึงน้องๆ คนอื่นในระบบมาเติมให้ครบ
-  if (hotCandidate.length < 8) {
-    const others = profilesList.filter(p => !hotCandidate.some(h => String(h.id) === String(p.id)));
-    hotCandidate = [...hotCandidate, ...others];
-  }
-
-  // 3. กรองชื่อซ้ำ และตัดเอา 8 คนแรกมาแสดงใน Hot Swiper
-  const seenHotNames = new Set();
-  const hotProfiles = [];
-  for (const p of hotCandidate) {
-    const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-    if (seenHotNames.has(cleanName)) continue;
-    seenHotNames.add(cleanName);
-    hotProfiles.push(p);
-    if (hotProfiles.length >= 8) break; // แสดง 8 คนกำลังสวยสำหรับปัดบนมือถือ
-  }
-  const hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
+      const seenHotNames = new Set();
+      const hotProfiles = [];
+      for (const p of hotCandidate) {
+        const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+        if (seenHotNames.has(cleanName)) continue;
+        seenHotNames.add(cleanName);
+        hotProfiles.push(p);
+        if (hotProfiles.length >= 8) break;
+      }
 
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
@@ -1360,7 +1355,7 @@ const nationalFeedProfiles = isNational ? (() => {
         `;
       }).join("");
 
-      // 🟢 คืนค่าโปรไฟล์ทั้งหมด 115 คน โดยจัดเรียงโปรไฟล์แนะนำ (Featured) ขึ้นก่อนทันที
+      // 1.2 🟢 คืนค่าโปรไฟล์ทั้งหมด 100% ตามจริง (จัดเรียงคนที่แนะนำขึ้นก่อน ไม่ตัดทิ้ง)
       return [...profilesList].sort((a, b) => {
         const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
         const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
@@ -1368,7 +1363,9 @@ const nationalFeedProfiles = isNational ? (() => {
       });
     })() : [];
 
-    const totalCount = profilesList.length; 
+    // 🟢 2. กำหนดตัวแปรกลางที่แสดงผลจริงบนหน้าเว็บ (Visible Profiles)
+    const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
+    const totalCount = actualVisibleProfiles.length; // 👈 นับตามที่แสดงจริงบนจอแบบ Dynamic 100%
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
@@ -1382,7 +1379,6 @@ const nationalFeedProfiles = isNational ? (() => {
           : `${primaryDomain}/location/${provinceSlug}`); 
     const canonicalUrl = encodeURI(rawCanonicalUrl);
 
-    // 🟢 คำนวณเวลาอัปเดตล่าสุดจากโปรไฟล์จริงในพื้นที่
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
       return (t > 0 && t > latest) ? t : latest;
@@ -1391,28 +1387,22 @@ const nationalFeedProfiles = isNational ? (() => {
       ? new Date(latestUpdateMillis).toISOString() 
       : new Date().toISOString();
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
-
-    // 🟢 เรียกใช้ formatActualDateText ได้อย่างปลอดภัย 100%
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-    const isChiangMai = provinceSlug === "chiangmai";
-    const cityModifier = isChiangMai ? "ในเมือง" : "ตัวเมือง";
-
-    // ✅ กำหนด Title ตามเงื่อนไขหน้าโซนย่อย / หน้าจังหวัด / หน้าแรก
+    // 🟢 3. Meta Title & Description วิ่งตามตัวเลขจริงที่เรนเดอร์บนหน้าจอ
     const metaTitle = zoneSlug
       ? `สาวรับงาน${provinceNameThai} ฟิวแฟน ไซด์ไลน์${zoneSlug} รูปจริงตรงปก จ่ายหน้างาน | firstmodelhub`
       : (isNational 
           ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
           : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
 
-    // ✅ กำหนด Meta Description ตามเงื่อนไขหน้าโซนย่อย / หน้าจังหวัด / หน้าแรก (ตัวเลข 115 สอดคล้อง 100%)
     const metaDescription = zoneSlug
       ? `รวมน้องๆสาวรับงานไซด์ไลน์โซน${zoneSlug} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก100% นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${realFreshnessDate}]`
       : (isNational
           ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
           : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
-          
-   const cleanMetaDesc = stripHTML(metaDescription);
+
+    const cleanMetaDesc = stripHTML(metaDescription);
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
     ];
@@ -1434,7 +1424,7 @@ const nationalFeedProfiles = isNational ? (() => {
       }
     }
 
-    // 🟢 3. WebPage Schema (CollectionPage)
+    // 🟢 4. WebPage Schema (CollectionPage)
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
@@ -1458,11 +1448,11 @@ const nationalFeedProfiles = isNational ? (() => {
           }
     };
 
-    if (profilesList.length > 0) {
+    if (totalCount > 0) {
       webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
     }
 
-    // 🟢 4. โครงสร้าง Schema Graph หลัก (ตัวแปรสมบูรณ์ ไม่พัง 500 และไม่ปนเปื้อนข้อมูลย่าน)
+    // 🟢 5. โครงสร้าง Schema Graph หลัก
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -1506,15 +1496,13 @@ const nationalFeedProfiles = isNational ? (() => {
       });
     }
 
-    const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
-
-    // 🟢 5. สร้าง Schema ItemList วิ่งตามจำนวนจริงที่แสดงผลบนหน้าจอแบบอัตโนมัติ
-    if (actualVisibleProfiles.length > 0) {
+    // 🟢 6. Schema ItemList ที่ตรงกับสิ่งที่แสดงบนหน้าจอ 100% (ป้องกัน Google แจ้งเตือน Data Mismatch)
+    if (totalCount > 0) {
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": actualVisibleProfiles.length,
+        "numberOfItems": totalCount, // 👈 วิ่งตามจำนวนการ์ดจริงที่แสดงบนหน้าเว็บแบบ 1:1
         "itemListElement": actualVisibleProfiles.map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
@@ -1528,7 +1516,7 @@ const nationalFeedProfiles = isNational ? (() => {
       });
     }
 
-    // 🟢 6. ระบบ Adaptive FAQ (แยกคำถามระหว่าง "หน้าจังหวัด" กับ "หน้าโซนย่อย" ป้องกันเนื้อหาซ้ำ 100%)
+    // 🟢 7. ระบบ Adaptive FAQ
     const activeFaqs = zoneSlug
       ? [
           {
@@ -1542,7 +1530,6 @@ const nationalFeedProfiles = isNational ? (() => {
         ]
       : (seoData.faqs || []);
 
-    // 🟢 7. ผูก FAQ เข้าสู่ Schema JSON-LD อย่างสมบูรณ์
     if (activeFaqs && activeFaqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -1960,7 +1947,7 @@ if (!isNational && pills) {
           </div>
         </section>
 
-        <!-- ส่วนที่ 2: ฟีด 40 โปรไฟล์เน้นสเปกฟิวแฟน ตรงคีย์เวิร์ดระดับชาติ -->
+        <!-- ส่วนที่ 2: แสดงโปรไฟล์ครบทุกคนตามจริง ไม่ตัดทิ้ง -->
         <section class="section-content-wrapper" style="margin-top: 10px;">
           <div class="province-header-row">
             <h2 class="province-clean-title">
@@ -1970,7 +1957,7 @@ if (!isNational && pills) {
             </h2>
             <span class="province-count-pill">
               <span class="pulse-dot-el"></span>
-              <span>#ฟิวแฟนแท้ (${nationalFeedProfiles.length} โปรไฟล์)</span>
+              <span>#ฟิวแฟนแท้ (${totalCount} โปรไฟล์)</span>
             </span>
           </div>
           <div class="profile-grid profiles-grid-row">
