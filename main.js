@@ -17,16 +17,6 @@ function parseRateToNumber(rate) {
 }
 window.parseRateToNumber = parseRateToNumber;
 
-// 🟢 ดักจับรูปพังทั้งเว็บ (ตัดปัญหา syntax &#39; บน onerror ถาวร)
-document.addEventListener("error", (e) => {
-  if (e.target && e.target.tagName === "IMG") {
-    const fallback = "https://firstmodelhub.com/images/firstmodelhub.webp";
-    if (e.target.src !== fallback) {
-      e.target.onerror = null;
-      e.target.src = fallback;
-    }
-  }
-}, true);
 
 // 🟢 คำนวณเวลาสดฝั่ง Client (แก้ปัญหาเวลาค้างจาก CDN Cache)
 function updateLiveRelativeTimestamps() {
@@ -625,8 +615,15 @@ for (const p of hotCandidate) {
     }
     if (activeProvince === "chiang_mai" || activeProvince === "chiang-mai") activeProvince = "chiangmai";
 
+    // 🟢 ถ้าผู้ใช้อยู่หน้าย่าน/จังหวัดเดิม แล้วค้นหาจังหวัดอื่น ให้พาย้ายหน้าไปจังหวัดนั้นทันที
+    if (isUserTriggered && activeProvince !== "all" && activeProvince !== "national" && activeProvince !== window.currentProvinceSlug) {
+      const searchKeyword = (domCache.searchInput?.value || "").trim();
+      const queryParam = searchKeyword ? `?q=${encodeURIComponent(searchKeyword)}` : "";
+      window.location.href = `/location/${activeProvince}${queryParam}`;
+      return;
+    }
+
     const ZONE_SLUG_MAP = {
-        // --- 1. เชียงใหม่ ---
         "nimman": "นิมมาน", "nimmanhaemin": "นิมมาน",
         "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด",
         "santitham": "สันติธรรม",
@@ -1306,9 +1303,15 @@ if (mapIframe) {
       return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
     });
 
-    let rightBadgeHtml = isFiwFan
-      ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>` 
-      : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
+    // 🟢 โค้ดที่สมบูรณ์ใน main.js:
+let rightBadgeHtml = "";
+if (isFiwFan) {
+  rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
+} else if (p.isVerified) {
+  rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
+} else {
+  rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
+}
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
