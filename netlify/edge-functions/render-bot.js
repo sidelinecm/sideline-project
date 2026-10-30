@@ -876,10 +876,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
                 <!-- CTA Action Buttons (เปลี่ยน inline onclick เป็น Data Action) -->
                 <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; width: 100%;">
-                    <a href="${lineId}" class="fmh-btn-line-cta" rel="nofollow noopener" target="_blank">
-                        <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
-                    </a>
-
+                  <a href="${lineId}" class="fmh-btn-line-cta" rel="nofollow noopener" target="_blank" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')"> <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน) </a>
                     <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
                         <i class="fas fa-share-alt" style="font-size: 16px;"></i>
                     </button>
@@ -920,13 +917,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
   
-   <!-- 🟢 เพิ่มระดับ z-index เป็น 99999 + ปรับความทึบแสง 0.98 + เพิ่มเงา Drop Shadow ชัดเจน ไม่โดนกลืน -->
-<div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1.5px solid rgba(124, 58, 237, 0.2); box-shadow: 0 -8px 30px rgba(20, 15, 34, 0.15); z-index: 99999; display: flex; gap: 10px; align-items: center; box-sizing: border-box;">
-        <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;">
-            <i class="fab fa-line" style="font-size: 20px;"></i>
-            <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span>
-            <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 600;">จ่ายตรงกับน้อง</span>
-        </a>
+ <div style="position: fixed; bottom: 0; left: 0; right: 0; ..."> <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')"> <i class="fab fa-line" style="font-size: 20px;"></i> <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span> <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 600;">จ่ายตรงกับน้อง</span> </a>
         <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
             <i class="fas fa-share-alt" style="font-size: 16px;"></i>
         </button>

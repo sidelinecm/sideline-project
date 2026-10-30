@@ -480,7 +480,12 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       intro: "รวมสาวรับงานอำเภอหางดง เชียงใหม่ พิกัดโซนใต้ที่เงียบสงบ เหมาะสำหรับผู้ที่พักอาศัยในโครงการคอนโดหรือหมู่บ้านส่วนตัว น้องๆ น่ารัก อัธยาศัยดี ฟิวแฟนอบอุ่น นัดเจอจ่ายหน้างาน ไม่โอนก่อนค่ะ",
       convenience: "ครอบคลุมถนนเชียงใหม่-ฮอด กาดฝรั่ง และโซนบ้านถวาย เดินทางเข้าดูแลถึงที่พักและโรงแรมในพื้นที่ได้อย่างสะดวกรวดเร็วและเป็นส่วนตัว"
     },
-
+"นิมมาน": {
+      headline: "รับงานนิมมาน เชียงใหม่ • ไซด์ไลน์นิมมานเหมินท์ คาเฟ่ ดินเนอร์ ฟิวแฟน VIP ตรงปก 100%",
+      intro: "ศูนย์รวมสาวรับงานนิมมานและไซด์ไลน์ย่านนิมมานเหมินท์ แหล่งไลฟ์สไตล์สุดชิคใจกลางเชียงใหม่ รายล้อมด้วยโรงแรมหรู คอนโดมิเนียม และคาเฟ่ชั้นนำ น้องๆ น่ารัก อัธยาศัยดี สไตล์ฟิวแฟน (GFE) ดูแลอบอุ่นเสมือนแฟนตัวจริง ไม่เร่งรีบ นัดพบตัวจริงตรวจสอบความตรงปกหน้างานก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100% ค่ะ",
+      convenience: "ครอบคลุมถนนนิมมานเหมินท์ทุกซอย ถนนศิริมังคลาจารย์ และห้างสรรพสินค้า One Nimman / MAYA น้องๆ สแตนด์บายในพื้นที่ เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็วภายใน 10-15 นาทีค่ะ"
+    },
+    
     // ==================== 2. กรุงเทพมหานคร ====================
     "สุขุมวิท": {
       headline: "สาวรับงานสุขุมวิท • ไซด์ไลน์สุขุมวิท ตามแนว BTS โรงแรมหรู ฟิวแฟนพรีเมียม VIP",
@@ -1037,10 +1042,7 @@ export default async (req, context) => {
       return await context.next();
     }
 
-    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-    if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
-      return await context.next();
-    }
+  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { return await context.next(); }
 
     if (url.pathname === "/index.html") {
       return Response.redirect(`${primaryDomain}/`, 301);
@@ -1630,12 +1632,12 @@ const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
           `;
         }
 
-       const zonesHtml = p.zones.map(z => {
+      const zonesHtml = p.zones.map(z => {
   const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
   const safeSlugZ = cleanZ.replace(/\s+/g, "-");
   const zoneHref = z.includes("นิมมาน") 
-    ? "/nimman" 
-    : encodeURI(`/location/${p.key}/${safeSlugZ}`); // 👈 เข้ารหัสเป็น %E0%B... มาตรฐานเดียวกับ Breadcrumb
+    ? "/location/chiangmai/nimman" // 🟢 แก้เป็นอันนี้ ชี้ตรงไปหน้าใหม่เลย 100%
+    : encodeURI(`/location/${p.key}/${safeSlugZ}`);
 
   return `
     <li style="padding-left: 10px;">
@@ -1879,16 +1881,17 @@ if (!isNational && pills) {
 
     
 
-    if (hotSwiperCardsHtml) {
-      finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
-      const hotTitle = isNational ? "น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยมทั่วไทย" : `น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยม ${escapeHTML(provinceNameThai)}`;
-      const hotPill = isNational ? "ประจำเดือน #ฟิวแฟน" : `โซนยอดนิยม ${escapeHTML(provinceNameThai)} #ฟิวแฟน`;
-      finalHtml = finalHtml.replace(/<h2 id="hot-profiles-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="hot-profiles-heading" class="hot-main-title">${hotTitle}</h2>`);
-      finalHtml = finalHtml.replace(/<span class="hot-monthly-pill">[\s\S]*?<\/span>/i, `<span class="hot-monthly-pill">${hotPill}</span>`);
-    }
-
-    // 🟢 โค้ดใหม่ที่ใส่แทนที่ (บรรทัดเดียวสั้นๆ):
-    finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>\s*/i, "");
+    // ค้นหา if (hotSwiperCardsHtml) ใน ssr-province.js
+if (hotSwiperCardsHtml) {
+  finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
+  const hotTitle = isNational ? "น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยมทั่วไทย" : `น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยม ${escapeHTML(provinceNameThai)}`;
+  const hotPill = isNational ? "ประจำเดือน #ฟิวแฟน" : `โซนยอดนิยม ${escapeHTML(provinceNameThai)} #ฟิวแฟน`;
+  finalHtml = finalHtml.replace(/<h2 id="hot-profiles-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="hot-profiles-heading" class="hot-main-title">${hotTitle}</h2>`);
+  finalHtml = finalHtml.replace(/<span class="hot-monthly-pill">[\s\S]*?<\/span>/i, `<span class="hot-monthly-pill">${hotPill}</span>`);
+} else {
+  // 🟢 หากไม่มีการ์ด HOT ในหน้านี้ (เช่น หน้ารายจังหวัด) ให้ซ่อนไว้เลย เพื่อกันหน้าจอกระตุก (CLS = 0)
+  finalHtml = finalHtml.replace(/<section id="hot-profiles-section"[\s\S]*?<\/section>/i, "");
+}
 
     let displayAreaHtml = "";
     if (isNational) {
@@ -2034,6 +2037,7 @@ if (!isNational && pills) {
       if (typeof rawTags === "string") {
         try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
       }
+     // ✅ โค้ดที่แก้ไขแล้ว
       return {
         id: p.id,
         slug: p.slug || String(p.id),
@@ -2057,8 +2061,11 @@ if (!isNational && pills) {
         styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
       };
     });
-    #ffcaaa
+
     const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
+  
+  
+    
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
