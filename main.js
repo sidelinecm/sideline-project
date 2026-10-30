@@ -1316,12 +1316,7 @@ if (isFiwFan) {
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
 
-    // คำนวณดาวและรีวิว
-    const idNum = parseInt(String(p.id).replace(/\D/g, "") || "1", 10);
-    const ratingScore = (4.8 + ((idNum % 3) * 0.1)).toFixed(1);
-    const reviewCount = 8 + (idNum % 17);
-
-    // 🟢 แก้ไขจุดนี้: ต่อ String แบบธรรมดา ป้องกัน Backtick ซ้อนกันจนเกิด SyntaxError
+   // 🟢 แสดงเฉพาะยอดหัวใจจริงที่มีในระบบ (ตัดสูตรคำนวณดาว/รีวิวจำลองออก)
     const rawLikes = p.likes_count || p.likes || 0;
     const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
@@ -1365,13 +1360,7 @@ if (isFiwFan) {
               ${vibeTagsHtml}
           </div>
           
-          <div class="profile-card-social-strip">
-            <span class="social-badge-star">
-              <span class="star-icon">★</span>
-              <span>${ratingScore}</span>
-              <span class="review-count">(${reviewCount})</span>
-            </span>
-
+         <div class="profile-card-social-strip" style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
             <span class="social-badge-likes">
               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
               <span>${likesText}</span>
