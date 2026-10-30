@@ -796,9 +796,9 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     `โปรไฟล์แสดงภาพถ่ายตามที่ส่งลงประกาศ ผู้ใช้บริการชำระค่าบริการโดยตรงเมื่อพบผู้ให้บริการหน้างาน หากไม่ตรงตามรายละเอียดที่ระบุ สามารถปฏิเสธการเริ่มงานได้ทันที`,
     `ข้อปฏิบัติความปลอดภัย: ชำระค่าบริการโดยตรงเมื่อพบผู้ให้บริการหน้างานเท่านั้น ไม่มีนโยบายโอนมัดจำล่วงหน้า หากข้อมูลไม่ตรงตามโปรไฟล์ สามารถปฏิเสธและยกเลิกได้ทันทีโดยไม่มีค่าใช้จ่าย`
   ];
-  const termsVariants = [
+ const termsVariants = [
     `<strong>ข้อกำหนดการใช้งาน:</strong> FirstModelHub เป็นพื้นที่สื่อกลางออนไลน์ในการลงประกาศข้อมูล กำหนดให้ผู้ใช้บริการและผู้ลงประกาศต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น`,
-    `<strong>เงื่อนไขและนโยบายระบบ:</strong> เว็บไซต์สงวนสิทธิ์การใช้งานเฉพาะบุคคลอายุ 20 ปีขึ้นไป ข้อมูลการติดต่อไม่มีการเปิดเผยต่อสาธารณะ โปรดตรวจสอบรายละเอียดใน [นโยบายความเป็นส่วนตัว](/privacy-policy)`
+    `<strong>เงื่อนไขและนโยบายระบบ:</strong> เว็บไซต์สงวนสิทธิ์การใช้งานเฉพาะบุคคลอายุ 20 ปีขึ้นไป ข้อมูลการติดต่อไม่มีการเปิดเผยต่อสาธารณะ โปรดตรวจสอบรายละเอียดใน <a href="/privacy-policy" style="color: #7C3AED; text-decoration: underline;">นโยบายความเป็นส่วนตัว</a>`
   ];
 
   const selectedSafety = getVariant(seedKey + "_safety", safetyVariants);
@@ -870,10 +870,10 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
   
   let loc = "";
-  if (currentZone && rawLoc.includes(currentZone)) {
+  if (currentZone) {
+    // หากอยู่ในหน้ารายโซนย่อย ให้แสดงชื่อโซนนั้นตรงๆ ทันที
     loc = escapeHTML(currentZone);
   } else {
-    // 🟢 ลบคำนำหน้า และถ้ามีหลายชื่อย่านเว้นวรรคกัน ให้ตัดเอาเฉพาะคำแรกย่านเดียว
     let cleaned = rawLoc
       .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|เชียงใหม่)\s*(\/|และ)?\s*/gi, "")
       .trim();
@@ -1482,23 +1482,30 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       });
     }
 
-    // 🟢 6. Schema ItemList ที่ตรงกับสิ่งที่แสดงบนหน้าจอ 100% (ป้องกัน Google แจ้งเตือน Data Mismatch)
     if (totalCount > 0) {
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonicalUrl}#itemlist`,
         "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": totalCount, // 👈 วิ่งตามจำนวนการ์ดจริงที่แสดงบนหน้าเว็บแบบ 1:1
-        "itemListElement": actualVisibleProfiles.map((p, idx) => ({
-          "@type": "ListItem",
-          "position": idx + 1,
-          "item": {
-            "@type": "Person",
-            "name": `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "")}`,
-            "image": optimizeImg(p.imagePath || p.image_url || "", 400),
-            "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-          }
-        }))
+        "numberOfItems": totalCount,
+        "itemListElement": actualVisibleProfiles.map((p, idx) => {
+          // ลบคำนำหน้า และลบ Emoji/สัญลักษณ์พิเศษสำหรับ Schema โดยเฉพาะ
+          const cleanPersonName = (p.name || "สาวสวย")
+            .replace(/^(น้อง\s?)+/gi, "")
+            .replace(/[^\u0E00-\u0E7Fa-zA-Z0-9\s]/g, "")
+            .trim();
+
+          return {
+            "@type": "ListItem",
+            "position": idx + 1,
+            "item": {
+              "@type": "Person",
+              "name": `น้อง${cleanPersonName}`,
+              "image": optimizeImg(p.imagePath || p.image_url || "", 400),
+              "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
+            }
+          };
+        })
       });
     }
 
@@ -1778,8 +1785,9 @@ zonesToScan.forEach(rawZ => {
 const activeZoneKeys = Object.keys(zoneCountMap);
 const isAllActive = !zoneSlug;
 
+// ✅ เติม data-tag="all"
 let pills = `
-  <a href="/location/${provinceSlug}" class="filter-pill-tab ${isAllActive ? 'active' : ''}">
+  <a href="/location/${provinceSlug}" class="filter-pill-tab ${isAllActive ? 'active' : ''}" data-tag="all">
     <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
     <span class="badge-count">${baseProvProfiles.length}</span>
   </a>
@@ -2017,7 +2025,6 @@ if (!isNational && pills) {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-    // 🟢 Slim JSON Data: ดักจับทั้ง style_tags (DB) และ styleTags ป้องกันแท็กหลุดหาย 100%
     const clientProfilesData = profilesList.map(p => {
       let rawGal = p.galleryPaths || p.gallery_paths || p.gallery || [];
       if (typeof rawGal === "string") {
@@ -2032,7 +2039,7 @@ if (!isNational && pills) {
         slug: p.slug || String(p.id),
         name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
         imagePath: p.imagePath || p.image_url || "",
-        galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean).slice(0, 4) : [],
+        galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean) : [],
         provinceKey: p.provinceKey || "chiangmai",
         location: sanitizeThaiText(p.location || ""),
         description: sanitizeThaiText(p.description || ""),
@@ -2043,7 +2050,7 @@ if (!isNational && pills) {
         weight: p.weight || "",
         stats: p.stats || "",
         line_id: (p.line_id || p.line || p.lineId || "").trim(),
-        likes_count: p.likes_count || p.likes || 0,  // 👈 เพิ่มบรรทัดนี้ครับ
+        likes_count: p.likes_count || p.likes || 0,
         availability: p.availability || "รับงาน",
         isfeatured: Boolean(p.isfeatured),
         verified: Boolean(p.verified),
@@ -2084,9 +2091,7 @@ const mapQuery = isNational
 const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
 const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-// 👈 ทำการปิดการทำงาน (Comment Out) บรรทัดนี้ เพื่อปล่อยให้ src="about:blank" ตาม index.html เดิมทำงาน
-// finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
-
+finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
     const validLcpProfile = profilesList.find(p => {
