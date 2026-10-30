@@ -118,9 +118,19 @@ function escapeHTML(str) {
   }[tag] || tag));
 }
 
+// ✅ แก้ไขเป็น:
 function stripHTML(str) {
   if (str == null) return "";
-  return String(str).replace(/<\/(p|div|h\d)>|<br\s*\/?>/gi, " ").replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim();
+  return String(str)
+    .replace(/<\/(p|div|h\d)>|<br\s*\/?>/gi, " ")
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function extractCleanNumber(rate) {
@@ -445,9 +455,15 @@ export default async (req, context) => {
       </div>
     ` : "";
     
-    // Universal Link LINE
-    const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
-    let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
+   // ✅ แก้ไขเป็น:
+let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
+
+// 🟢 กรองบัญชี LINE ที่มีปัญหาให้ดีดกลับไปใช้ LINE กลางทันที
+if (/vos730x|318afxwt/i.test(rawLineInput)) {
+  rawLineInput = "https://line.me/ti/p/u8Bz9HsaY8";
+}
+
+let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
     const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
     if (matchUrl) {

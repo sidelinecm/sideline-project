@@ -829,13 +829,14 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
 }
 
 async function getTemplateHtml(url, context) {
-  if (TEMPLATE_HTML_CACHE) return TEMPLATE_HTML_CACHE;
+  const isEn = url.pathname.includes("-en");
+  const templateFileName = isEn ? "/index-en.html" : "/index.html"; // 👈 เลือกเทมเพลตตามภาษา
+  
   try {
-    const templateUrl = new URL("/index.html", url.origin);
+    const templateUrl = new URL(templateFileName, url.origin);
     const res = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     if (res.ok) {
-      TEMPLATE_HTML_CACHE = await res.text();
-      return TEMPLATE_HTML_CACHE;
+      return await res.text();
     }
   } catch (_err) {}
   return "";
@@ -1075,8 +1076,8 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     
-    // ✅ แก้ไข: เพิ่ม cleanPath === "/profiles" เข้าไปในกลุ่มระดับประเทศ
-let isNational = cleanPath === "/" || cleanPath === "" || cleanPath === "/index-en" || cleanPath === "/profiles";
+   const isEnglishHome = cleanPath === "/index-en";
+let isNational = cleanPath === "/" || cleanPath === "" || isEnglishHome || cleanPath === "/profiles";
 
 let provinceSlug = isNational 
   ? "national" 
@@ -1268,16 +1269,9 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
         const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
         const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
-        if (matchedZoneProfiles.length === 0) {
-          isZoneEmpty = true;
-          profilesList = deduplicatedProfiles.filter(p => {
-            const pKey = (p.provinceKey || "").toLowerCase();
-            return provinceKeyVariants.includes(pKey);
-          });
-        } else {
-          profilesList = matchedZoneProfiles;
-        }
-      }
+    if (matchedZoneProfiles.length === 0) { isZoneEmpty = true; profilesList = [];
+        } else { profilesList = matchedZoneProfiles; }
+       }
     } 
     
    
@@ -1300,7 +1294,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
     }
 
-    // 🟢 1. ดึงโปรไฟล์หน้าแรก: แสดง "ครบทุกคนตามจริง" ปลดล็อกไม่จำกัด 40 คนอีกต่อไป
+    
     const nationalFeedProfiles = isNational ? (() => {
       // 1.1 คัดเลือก 8 คนแรกสำหรับแสดงบนแถบ Hot Swiper ด้านบนสุด
       let hotCandidate = profilesList.filter(isFiwfanProfile);
@@ -1348,20 +1342,23 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       });
     })() : [];
 
-    // 🟢 2. กำหนดตัวแปรกลางที่แสดงผลจริงบนหน้าเว็บ (Visible Profiles)
+   // 🟢 2. กำหนดตัวแปรกลางที่แสดงผลจริงบนหน้าเว็บ (Visible Profiles)
     const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
-    const totalCount = actualVisibleProfiles.length; // 👈 นับตามที่แสดงจริงบนจอแบบ Dynamic 100%
+    const totalCount = actualVisibleProfiles.length;
     const liveTotalProfiles = deduplicatedProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const seoData = isNational ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default);
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
-    const rawCanonicalUrl = isNational 
-      ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) 
-      : (zoneSlug 
-          ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
-          : `${primaryDomain}/location/${provinceSlug}`); 
+    
+    const rawCanonicalUrl = isEnglishHome
+      ? `${primaryDomain}/index-en`
+      : (isNational 
+          ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) 
+          : (zoneSlug 
+              ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
+              : `${primaryDomain}/location/${provinceSlug}`)); 
     const canonicalUrl = encodeURI(rawCanonicalUrl);
 
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
@@ -1375,17 +1372,21 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
     // 🟢 3. Meta Title & Description วิ่งตามตัวเลขจริงที่เรนเดอร์บนหน้าจอ
-    const metaTitle = zoneSlug
-      ? `สาวรับงาน${provinceNameThai} ฟิวแฟน ไซด์ไลน์${zoneSlug} รูปจริงตรงปก จ่ายหน้างาน | firstmodelhub`
-      : (isNational 
-          ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-          : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`);
+    const metaTitle = isEnglishHome
+      ? `Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos | ${CONFIG.BRAND_NAME}`
+      : (zoneSlug
+          ? `สาวรับงาน${provinceNameThai} ฟิวแฟน ไซด์ไลน์${zoneSlug} รูปจริงตรงปก จ่ายหน้างาน | firstmodelhub`
+          : (isNational 
+              ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
+              : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`));
 
-    const metaDescription = zoneSlug
-      ? `รวมน้องๆสาวรับงานไซด์ไลน์โซน${zoneSlug} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก100% นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${realFreshnessDate}]`
-      : (isNational
-          ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
-          : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`);
+    const metaDescription = isEnglishHome
+      ? `Premier verified travel companions and VIP dinner dates across Thailand (${totalCount} profiles). 100% verified real photos, pay directly on arrival, zero advance deposit.`
+      : (zoneSlug
+          ? `รวมน้องๆสาวรับงานไซด์ไลน์โซน${zoneSlug} (${totalCount} คน) สไตล์ฟิวแฟน ตัวจริงตรงปก100% นัดเจอจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${realFreshnessDate}]`
+          : (isNational
+              ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
+              : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`));
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const breadcrumbItems = [
@@ -1416,11 +1417,11 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       "name": stripHTML(metaTitle),
       "description": cleanMetaDesc,
       "url": canonicalUrl,
-      "inLanguage": "th-TH",
+      "inLanguage": isEnglishHome ? "en-US" : "th-TH", // 👈 ปรับบรรทัดนี้
       "dateModified": latestActualIso,
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       "about": isNational
-        ? { "@type": "Country", "name": "ประเทศไทย", "identifier": "TH" }
+        ? { "@type": "Country", "name": isEnglishHome ? "Thailand" : "ประเทศไทย", "identifier": "TH" }
         : {
             "@type": "Place",
             "name": zoneSlug ? `โซน${zoneSlug} จังหวัด${provinceNameThai}` : `จังหวัด${provinceNameThai}`,
@@ -1528,7 +1529,14 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       });
     }
 
-    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
+    const allCardsHtml = isZoneEmpty
+  ? `<div style="grid-column: 1 / -1; text-align: center; padding: 40px 14px; background: #FFFFFF; border-radius: 18px; border: 1.5px dashed rgba(124, 58, 237, 0.2); margin: 10px 0;">
+       <p style="font-size: 14px; font-weight: 800; color: #140F22; margin: 0 0 6px 0;">ขณะนี้ยังไม่มีโปรไฟล์ในโซน${escapeHTML(zoneSlug)}</p>
+       <p style="font-size: 12px; color: #64748B; margin: 0 0 14px 0;">คุณสามารถดูโปรไฟล์ทั้งหมดในจังหวัด${escapeHTML(provinceNameThai)} ได้ค่ะ</p>
+       <a href="/location/${provinceSlug}" style="display: inline-flex; align-items: center; gap: 6px; background: #7C3AED; color: #FFFFFF; padding: 8px 18px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none;">ดูน้องๆ ทั้งหมดใน ${escapeHTML(provinceNameThai)} &rarr;</a>
+     </div>`
+  : profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
+  
    
 
     // ✅ ต้องส่ง activeFaqs เข้าไป ไม่ใช่ seoData.faqs
@@ -1615,18 +1623,19 @@ const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
           `;
         }
 
-        const zonesHtml = p.zones.map(z => {
-          const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
-          const zoneHref = z.includes("นิมมาน") 
-            ? "/nimman" 
-            : `/location/${p.key}/${cleanZ}`;
+       const zonesHtml = p.zones.map(z => {
+  const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
+  const safeSlugZ = cleanZ.replace(/\s+/g, "-");
+  const zoneHref = z.includes("นิมมาน") 
+    ? "/nimman" 
+    : encodeURI(`/location/${p.key}/${safeSlugZ}`); // 👈 เข้ารหัสเป็น %E0%B... มาตรฐานเดียวกับ Breadcrumb
 
-          return `
-            <li style="padding-left: 10px;">
-              <a href="${zoneHref}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
-            </li>
-          `;
-        }).join("");
+  return `
+    <li style="padding-left: 10px;">
+      <a href="${zoneHref}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+    </li>
+  `;
+}).join("");
 
         return `
           <li style="margin-bottom: 6px;">
@@ -1815,10 +1824,7 @@ if (!isNational && pills) {
 
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset" style="padding: 12px 14px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px; margin: 10px 0;">${dynamicHeroDesc}</div>`);
 
-    const ssrFeaturedH2 = isNational 
-      ? `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span> (จ่ายหน้างาน)`
-      : `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span> (ตัวจริงตรงปก)`;
-    finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
+    
 
     if (!isNational) {
       finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
@@ -2078,7 +2084,8 @@ const mapQuery = isNational
 const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
 const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
+// 👈 ทำการปิดการทำงาน (Comment Out) บรรทัดนี้ เพื่อปล่อยให้ src="about:blank" ตาม index.html เดิมทำงาน
+// finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
 
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
