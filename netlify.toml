@@ -24,6 +24,27 @@
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com;"
 
 [[headers]]
+  for = "/ai-catalog.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/.well-known/*"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
   for = "/*.css"
   [headers.values]
     Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
@@ -63,7 +84,7 @@
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 🟢 ฟังก์ชันล้างแคชระดับ Edge สำหรับแอดมิน (เพิ่มใหม่)
+# 🟢 ฟังก์ชันล้างแคชระดับ Edge สำหรับแอดมิน
 [[edge_functions]]
   function = "ssr-province"
   path = "/api/*"
@@ -99,7 +120,7 @@
   function = "ssr-province"
   path = "/index.html"
 
-# 🟢 เรนเดอร์หน้ารวมน้องๆ ทั้งหมด (เพิ่มใหม่)
+# 🟢 เรนเดอร์หน้ารวมน้องๆ ทั้งหมด
 [[edge_functions]]
   function = "ssr-province"
   path = "/profiles"
@@ -109,15 +130,22 @@
   function = "ssr-province"
   path = "/index-en"
 
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/.well-known/*"
-
 # ==============================================================================
 # 3. REDIRECTS & CLEAN URLS
 # ==============================================================================
 
-# 🟢 ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404 และรักษาอันดับ SEO (เพิ่มใหม่)
+# 🟢 เชื่อมต่อคำขอ AI Agent ทุกเส้นทางตรงเข้า ai-catalog.json (แก้บั๊ก PageSpeed 100%)
+[[redirects]]
+  from = "/.well-known/ai-catalog.json"
+  to = "/ai-catalog.json"
+  status = 200
+
+[[redirects]]
+  from = "/.well-known/ard.json"
+  to = "/ai-catalog.json"
+  status = 200
+
+# 🟢 ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404 และรักษาอันดับ SEO สูงสุด
 [[redirects]]
   from = "/nimman"
   to = "/location/chiangmai/nimman"
