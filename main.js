@@ -850,7 +850,9 @@ for (const p of hotCandidate) {
   }
 }
 
-  // 🟢 ดักจับคลิกโลโก้: แต่ถ้าแตะโดน "ดวงดาว" ให้ปล่อยผ่าน ห้ามรีโหลดหน้าเว็บเด็ดขาด!
+window.executeFilterAndRender = executeFilterAndRender;
+
+  
   if (!window.__logoClickRegistered) {
     window.__logoClickRegistered = true;
     document.addEventListener('click', (e) => {
@@ -1054,14 +1056,45 @@ for (const p of hotCandidate) {
       liveCounterEl.textContent = `${totalCount}`;
     }
 
-    // 🛡️ 2. ป้องกันหน้าโซนย่อย: ถ้ากำลังเปิดหน้าโซนย่อยอยู่ ห้าม JavaScript เขียนทับ H1 และแผนที่ของ SSR เด็ดขาด
+    // 🟢 1. โหลดแผนที่ Google Maps ก่อนเสมอ (รองรับทั้งหน้าแรก, หน้ารายจังหวัด และหน้าโซนย่อย)
+    const mapIframe = document.getElementById("google-map");
+    if (mapIframe) {
+      const pathSegments = window.location.pathname.split("/").filter(Boolean);
+      const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
+      const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
+      
+      const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+      const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+      
+      const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
+      const queryText = isAllOrNational 
+        ? "ประเทศไทย" 
+        : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
+      const targetMapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              if (mapIframe.src !== targetMapSrc) mapIframe.src = targetMapSrc;
+              observer.disconnect();
+            }
+          });
+        }, { rootMargin: "250px" });
+        observer.observe(mapIframe);
+      } else {
+        mapIframe.src = targetMapSrc;
+      }
+    }
+
+    // 🛡️ 2. ป้องกันหน้าโซนย่อย: ตัดจบเฉพาะส่วนเขียนทับ Title/H1 เพื่อคงค่า SSR
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
 
     if (isSubZone) {
       const liveProvinceEl = document.getElementById("live-province-count");
       if (liveProvinceEl) liveProvinceEl.textContent = "1";
-      return; // 👈 จบการทำงานตรงนี้ เพื่อรักษา H1 และแผนที่โซนย่อยที่ SSR เรนเดอร์ไว้ให้คงเดิม
+      return; // ตัดจบเฉพาะส่วน H1 ได้อย่างปลอดภัย
     }
 
     // 🟢 3. ถ้าเป็นหน้าทั่วไป (หน้าแรก หรือ หน้ารายจังหวัดปกติ) ให้ทำงานตามปกติ
@@ -1114,27 +1147,7 @@ const line1 = isAllOrNational
 
     
 
-// ✅ แก้เป็น: (เลื่อนมาใกล้ 250px จึงค่อยโหลด Main Thread จะไม่ถูกบล็อกตอนเปิดหน้าเว็บ)
-const mapIframe = document.getElementById("google-map");
-if (mapIframe) {
-  const zoom = isAllOrNational ? 6 : 12;
-  const query = isAllOrNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${targetName}`);
-  const targetMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
 
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          if (mapIframe.src !== targetMapSrc) mapIframe.src = targetMapSrc;
-          observer.disconnect();
-        }
-      });
-    }, { rootMargin: "250px" });
-    observer.observe(mapIframe);
-  } else {
-    mapIframe.src = targetMapSrc;
-  }
-}
 
     if (isEN) return;
 
@@ -2027,7 +2040,7 @@ if (faqSection && faqList) {
     }
 
     if (relatedMore) {
- const zoneLinkUrl = primaryZone.includes("นิมมาน") ? "/nimman" : `/location/${profile.provinceKey || "chiangmai"}/${primaryZone}`;
+ const zoneLinkUrl = primaryZone.includes("นิมมาน") ? "/location/chiangmai/nimman" : `/location/${profile.provinceKey || "chiangmai"}/${primaryZone}`;
 
   relatedMore.innerHTML = `
     <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
@@ -2726,37 +2739,42 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         }
       }
 
-      const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-      if (cardElement) {
-        const profileId = cardElement.getAttribute("data-profile-id");
-        const profileSlug = cardElement.getAttribute("data-profile-slug");
+    // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
+const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+if (cardElement) {
+  // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
+  if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+    return;
+  }
 
-        if (profileId || profileSlug) {
-          e.preventDefault();
+  const profileId = cardElement.getAttribute("data-profile-id");
+  const profileSlug = cardElement.getAttribute("data-profile-slug");
 
-          const searchId = String(profileId || "");
-          const searchSlug = String(profileSlug || "");
+  if (profileId || profileSlug) {
+    e.preventDefault();
+    const searchId = String(profileId || "");
+    const searchSlug = String(profileSlug || "");
 
-          let targetProfile = appState.allProfiles.find(p => 
-            String(p.id) === searchId || 
-            (p.slug && String(p.slug) === searchSlug) ||
-            (searchSlug && String(p.id) === searchSlug)
-          );
+    let targetProfile = appState.allProfiles.find(p => 
+      String(p.id) === searchId || 
+      (p.slug && String(p.slug) === searchSlug) ||
+      (searchSlug && String(p.id) === searchSlug)
+    );
 
-          if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-            const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
-            if (rawP) targetProfile = normalizeProfile(rawP);
-          }
+    if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
+      const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+      if (rawP) targetProfile = normalizeProfile(rawP);
+    }
 
-          if (targetProfile) {
-            history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-            window.openLightboxModal(targetProfile);
-          } else {
-            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-          }
-          return;
-        }
-      }
+    if (targetProfile) {
+      history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+      window.openLightboxModal(targetProfile);
+    } else {
+      window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+    }
+    return;
+  }
+}
 
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");

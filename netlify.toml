@@ -3,7 +3,7 @@
 # ==============================================================================
 [build]
   publish = "."
-  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
 
 [build.processing]
   skip_processing = false
@@ -53,7 +53,7 @@
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
 
-# 🛡️ ลำดับที่ 1 ด่านหน้าสุด: สกัดโดเมนเก่าแล้วดีด 301 ทันที
+# 🛡️ ลำดับที่ 1: ดักจับโดเมนเก่าแล้วดีด 301
 [[edge_functions]]
   function = "domain-redirect"
   path = "/*"
@@ -63,22 +63,25 @@
   function = "sitemap"
   path = "/sitemap.xml"
 
+# 🟢 ฟังก์ชันล้างแคชระดับ Edge สำหรับแอดมิน (เพิ่มใหม่)
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/api/*"
+
 # 🟢 ฟังก์ชันเรนเดอร์หน้ารายบุคคล
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดชั้นที่ 1 (เช่น /location/chiangmai)
+# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและโซนย่อย
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
 
-# 🟢 [จุดที่เพิ่มใหม่] ฟังก์ชันเรนเดอร์หน้ารายโซนย่อยชั้นที่ 2 (เช่น /location/chiangmai/เจ็ดยอด)
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*/*"
 
-# 🟢 [จุดที่เพิ่มใหม่] รองรับ path /province/ ด้วยทั้ง 1 ชั้น และ 2 ชั้น
 [[edge_functions]]
   function = "ssr-province"
   path = "/province/*"
@@ -87,6 +90,7 @@
   function = "ssr-province"
   path = "/province/*/*"
 
+# 🟢 เรนเดอร์หน้าแรก และหน้าหลัก
 [[edge_functions]]
   function = "ssr-province"
   path = "/"
@@ -95,7 +99,12 @@
   function = "ssr-province"
   path = "/index.html"
 
-# 🟢 ให้ Edge Function เรนเดอร์หน้าภาษาอังกฤษด้วย
+# 🟢 เรนเดอร์หน้ารวมน้องๆ ทั้งหมด (เพิ่มใหม่)
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/profiles"
+
+# 🟢 เรนเดอร์หน้าภาษาอังกฤษ
 [[edge_functions]]
   function = "ssr-province"
   path = "/index-en"
@@ -103,10 +112,37 @@
 [[edge_functions]]
   function = "ssr-province"
   path = "/.well-known/*"
-  
+
 # ==============================================================================
 # 3. REDIRECTS & CLEAN URLS
 # ==============================================================================
+
+# 🟢 ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404 และรักษาอันดับ SEO (เพิ่มใหม่)
+[[redirects]]
+  from = "/nimman"
+  to = "/location/chiangmai/nimman"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/nimman.html"
+  to = "/location/chiangmai/nimman"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/niman"
+  to = "/location/chiangmai/nimman"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/niman.html"
+  to = "/location/chiangmai/nimman"
+  status = 301
+  force = true
+
+# 🟢 กรอง Query String จังหวัด
 [[redirects]]
   query = { province = ":p" }
   from = "/"
@@ -135,7 +171,7 @@
   status = 301
   force = true
 
-# 🟢 บังคับตัดนามสกุล .html ทิ้งทั้งหมดเพื่อผลดีต่อ SEO สูงสุด (Canonical Clean URLs)
+# 🟢 บังคับตัดนามสกุล .html ทิ้งทั้งหมด (Canonical Clean URLs)
 [[redirects]]
   from = "/profiles.html"
   to = "/profiles"
@@ -157,12 +193,6 @@
 [[redirects]]
   from = "/locations.html"
   to = "/locations"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/nimman.html"
-  to = "/nimman"
   status = 301
   force = true
 
@@ -190,7 +220,7 @@
   status = 301
   force = true
 
-# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en แบบเป็นมาตรฐาน
+# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en
 [[redirects]]
   from = "/index-en.html"
   to = "/index-en"
