@@ -382,8 +382,8 @@ function optimizeImg(imagePath, mode = "card") {
         fullSrcUrl = img.trim();
       }
 
-      return {
-        src: optimizeImg(srcUrl, 400, 560),
+     return {
+        src: optimizeImg(srcUrl, 400), // 👈 ตัด 560 ออก
         fullSrc: optimizeImg(fullSrcUrl, "full")
       };
     });
@@ -710,7 +710,7 @@ for (const p of hotCandidate) {
         "chaweng": "เฉวง", "lamai": "ละไม", "bophut": "บ่อผุด", "phangan": "เกาะพะงัน"
       };
 
-    let rawTargetZone = (urlZone || window.currentZoneSlug || domCache.zoneSelect?.value || "").trim();
+  let rawTargetZone = (urlZone || window.currentZoneSlug || "").trim();
     let matchedZoneThai = ZONE_SLUG_MAP[rawTargetZone.toLowerCase()] || rawTargetZone;
     matchedZoneThai = sanitizeThaiText(matchedZoneThai).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
 
@@ -1248,7 +1248,7 @@ if (mapIframe) {
     }
     const imgSrc = (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? p.images[0].src 
-      : optimizeImg(rawPath, 400, 560);
+      : optimizeImg(rawPath, 400);
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1638,15 +1638,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-   const dynamicTitle = isEn
+ const dynamicTitle = isEn
       ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
       : `${displayName} รับงานไซด์ไลน์${pProvText} ฟิวแฟน(${primaryZone}) นอกสถานที่ติดต่อสอบถาม ไม่มีมัดจำ`;
+
+    document.title = dynamicTitle; // 👈 เพิ่มบรรทัดนี้ลงไป เพื่อเปลี่ยนชื่อ Title บนเบราว์เซอร์ทันที
 
     const dynamicDesc = isEn
       ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
       : `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${pProvText} โซน${primaryZone} นอกสถานที่ติดต่อสอบถามรายละเอียดเพิ่มเติม สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} สไตล์ฟิวแฟน ตรงปก100% นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ`;
       
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+    
+    
     if (canonicalLink) {
       canonicalLink.href = canonicalProfileUrl;
     }
@@ -2663,7 +2667,7 @@ async function initApplication() {
       });
     }
 
-   // 🟢 ตัวดักคลิก Quick Filter Pills (ใน main.js)
+   
 document.querySelectorAll(".filter-pill-tab").forEach(pill => {
   pill.addEventListener("click", function (e) {
     // 1. (SEO & SSR) ถ้าเป็นแท็ก <a> ที่มี href (ปุ่มโซน/จังหวัด) ให้เบราว์เซอร์เปลี่ยนหน้าตามปกติ
@@ -2773,27 +2777,6 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
     if (domCache.featuredSelect) domCache.featuredSelect.addEventListener("change", () => executeFilterAndRender(true));
     if (domCache.sortSelect) domCache.sortSelect.addEventListener("change", () => executeFilterAndRender(true));
 
-    if (domCache.resetSearchBtn) {
-      domCache.resetSearchBtn.addEventListener("click", () => {
-        if (domCache.searchInput) domCache.searchInput.value = "";
-        if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-        if (domCache.availabilitySelect) domCache.availabilitySelect.value = "all";
-        if (domCache.featuredSelect) domCache.featuredSelect.value = "";
-        if (domCache.sortSelect) domCache.sortSelect.value = "featured";
-
-        const clearBtn = document.getElementById("clear-search-btn");
-        if (clearBtn) clearBtn.style.display = "none";
-        const suggestionsEl = document.getElementById("search-suggestions");
-        if (suggestionsEl) suggestionsEl.style.display = "none";
-
-        appState.activePillTag = "all";
-        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-        const allTab = document.querySelector('.filter-pill-tab[data-tag="all"]');
-        if (allTab) allTab.classList.add("active");
-
-        executeFilterAndRender(true);
-      });
-    }
     document.querySelectorAll(".region-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".region-tab").forEach(t => t.classList.remove("active"));
@@ -2804,8 +2787,6 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         else if (region === "ภาคอีสาน") window.location.href = "/location/khon-kaen";
       });
     });
-
-   
 
     function initDockAutoHide() {
       const floatingDock = document.querySelector('.floating-app-dock');
@@ -3126,12 +3107,11 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         }
       };
 
-      // ผูกดักทุกอีเวนต์เพื่อความชัวร์
+      // 🟢 ผูก Event ให้แตะได้อย่างแม่นยำ
       star.addEventListener("pointerdown", handleTap, { passive: false });
       star.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-      star.addEventListener("touchend", (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
-    });
-  }
+    }); // 👈 ปิด forEach ให้สมบูรณ์ (มีวงเล็บปิดตามที่ Console ฟ้อง)
+  } 
 
   // 🟢 หน้าต่าง Modal ใส่รหัส PIN สไตล์ Luxury Glassmorphic
   function openAdminPinDialog(correctPin, secretKey) {
