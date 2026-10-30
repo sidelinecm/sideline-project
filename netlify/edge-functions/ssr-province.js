@@ -375,10 +375,9 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     const cleanZ = sanitizeThaiText(z);
     if (!cleanZ) return "";
 
-    // 1. กรณีเป็นโซนนิมมาน
     if (cleanZ.includes("นิมมาน")) {
-      return `<a href="/nimman" class="kw-zone" ${zoneLinkStyle} title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
-    }
+  return `<a href="/location/chiangmai/nimman" class="kw-zone" ${zoneLinkStyle} title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`; // 🟢 แก้เป็นอันนี้
+}
 
     // 2. กรณีหน้าแรก (ทั่วไทย)
     if (isNation) {
@@ -1805,8 +1804,8 @@ pills += activeZoneKeys.map(z => {
   const count = zoneCountMap[z];
   const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
   const href = cleanZ.includes("นิมมาน") 
-    ? "/nimman" 
-    : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
+  ? "/location/chiangmai/nimman" // 🟢 แก้เป็นอันนี้ ชี้ตรงไปหน้าใหม่ทันที
+  : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
   
   const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
 
