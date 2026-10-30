@@ -792,13 +792,13 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
 
   // 🛡️ สร้างชุดข้อความ Variant A และ B สำหรับสลับสับเปลี่ยนบล็อกล่างสุด
   const seedKey = provinceSlug + (zoneSlug || "");
-  const safetyVariants = [
-    `ทุกโปรไฟล์ผ่านการยืนยันตัวตนด้วยรูปถ่ายจริง ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุด ชำระเงินตรงกับน้องหน้างาน ไร้เงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี`,
-    `การันตีความปลอดภัย: ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มี การเก็บเงินมัดจำล่วงหน้าทุกรูปแบบ หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูป สามารถปฏิเสธและยกเลิกงานได้ทันที`
+ const safetyVariants = [
+    `โปรไฟล์แสดงภาพถ่ายตามที่ส่งลงประกาศ ผู้ใช้บริการชำระค่าบริการโดยตรงเมื่อพบผู้ให้บริการหน้างาน หากไม่ตรงตามรายละเอียดที่ระบุ สามารถปฏิเสธการเริ่มงานได้ทันที`,
+    `ข้อปฏิบัติความปลอดภัย: ชำระค่าบริการโดยตรงเมื่อพบผู้ให้บริการหน้างานเท่านั้น ไม่มีนโยบายโอนมัดจำล่วงหน้า หากข้อมูลไม่ตรงตามโปรไฟล์ สามารถปฏิเสธและยกเลิกได้ทันทีโดยไม่มีค่าใช้จ่าย`
   ];
   const termsVariants = [
-    `<strong>ข้อกำหนดการใช้งานระบบ:</strong> แพลตฟอร์ม FirstModelHub ทำหน้าที่เป็นพื้นที่สื่อกลางออนไลน์ในการลงประกาศข้อมูลเท่านั้น โดยทางเรามีนโยบายจำกัดอายุผู้เข้าชม ผู้ใช้งาน รวมถึงผู้ลงประกาศทุกคนอย่างเข้มงวด โดยจะต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น`,
-    `<strong>เงื่อนไขและนโยบายระบบ:</strong> เว็บไซต์ของเราจำกัดอายุผู้ใช้งานและผู้ลงประกาศทุกคนอย่างเข้มงวดที่ 20 ปีขึ้นไป ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุดตามมาตรฐานสากล`
+    `<strong>ข้อกำหนดการใช้งาน:</strong> FirstModelHub เป็นพื้นที่สื่อกลางออนไลน์ในการลงประกาศข้อมูล กำหนดให้ผู้ใช้บริการและผู้ลงประกาศต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น`,
+    `<strong>เงื่อนไขและนโยบายระบบ:</strong> เว็บไซต์สงวนสิทธิ์การใช้งานเฉพาะบุคคลอายุ 20 ปีขึ้นไป ข้อมูลการติดต่อไม่มีการเปิดเผยต่อสาธารณะ โปรดตรวจสอบรายละเอียดใน [นโยบายความเป็นส่วนตัว](/privacy-policy)`
   ];
 
   const selectedSafety = getVariant(seedKey + "_safety", safetyVariants);
@@ -927,14 +927,11 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
   }
 
-  // 🟢 คำนวณคะแนนดาว, จำนวนรีวิว และยอดหัวใจ ให้ตรงกันกับ main.js 100%
-  const idNum = parseInt(String(p.id || "1").replace(/\D/g, "") || "1", 10);
-  const ratingScore = (4.8 + ((idNum % 3) * 0.1)).toFixed(1);
-  const reviewCount = 8 + (idNum % 17);
+  // 🟢 แสดงเฉพาะยอดหัวใจจริงที่มีในระบบ (ตัดสูตรคำนวณดาว/รีวิวจำลองออก)
   const rawLikes = p.likes_count || p.likes || 0;
-const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
+  const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
 
-  return `
+ return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
        <img src="${cardImgSmall}" 
@@ -970,22 +967,11 @@ const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
                 ${vibeTagsHtml}
             </div>
             
-            <!-- Social Proof: แคปซูลกระจกฝ้าละมุนตา Softer Glass (ขอบ 0.8px สไตล์ Luxury) -->
-            <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
-              
-              <!-- ฝั่งซ้าย: ดาวทองคำเปลว กระจกฝ้าขอบบาง 0.8px -->
-              <span style="background: rgba(245, 158, 11, 0.08); border: 0.8px solid rgba(245, 158, 11, 0.22); color: #F59E0B; padding: 2px 7.5px; border-radius: 100px; font-weight: 800; font-size: 10.5px; display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-                <span style="font-size: 11px; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));">★</span>
-                <span>${ratingScore}</span>
-                <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-size: 9.5px;">(${reviewCount})</span>
+            <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
+              <span class="social-badge-likes" style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>${likesText}</span>
               </span>
-
-              <!-- ฝั่งขวา: ยอดทักไลน์ (🟢 เพิ่ม class="social-badge-likes" ให้ JS ทำงานได้) -->
-<span class="social-badge-likes" style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-  <span>${likesText}</span>
-</span>
-
             </div>
 
             <div class="profile-card-title-row">
@@ -1003,7 +989,6 @@ const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
     </div>
   `;
 };
-
 
 
 const generateDynamicFAQsHTML = faqs => {
@@ -1724,11 +1709,11 @@ const hreflangBlock = isNational
                    <span class="h1-line-2">ฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน</span>`;
       dynamicSubheadline = ``;
 
-   } else {
+ } else {
   // 3. หน้ารายจังหวัด (เน้นในเมืองเชียงใหม่ ตัดคำเชื่อมที่เกะกะออก)
   const cityTag = provinceSlug === "chiangmai" ? "ในเมืองเชียงใหม่" : `ตัวเมือง${escapeHTML(provinceNameThai)}`;
   ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์<span class="t-chunk">${cityTag}</span></span>
-               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟนตัวจริง ตรงปก 100% นัดเจอจ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
+               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน นัดพบชำระค่าบริการหน้างาน</span>`;
   dynamicSubheadline = ``;
 }
 
@@ -1817,16 +1802,16 @@ if (!isNational && pills) {
   );
 }
     
-    const trustBoxHtml = `
+   const trustBoxHtml = `
       <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
-        <span style="color: #059669; font-size: 12px; font-weight: 800;">🛡️ ปลอดภัย 100%:</span>
-        <span style="color: #140F22; font-size: 12px; font-weight: 700;">นัดเจอตัวจริงก่อนค่อยจ่าย • ไร้มัดจำ</span>
+        <span style="color: #059669; font-size: 12px; font-weight: 800;">🛡️ เงื่อนไขการนัดหมาย:</span>
+        <span style="color: #140F22; font-size: 12px; font-weight: 700;">ชำระเงินเมื่อพบผู้ให้บริการหน้างาน • ไม่มีมัดจำล่วงหน้า</span>
       </div>
     `;
 
     const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> พื้นที่รวมเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็นทั่วไทย คัดตัวจริงตรงปก 100% นัดเจอน้องตัวจริงก่อนค่อยจ่ายเงินหน้างาน สบายใจ ไร้กังวลเรื่องมัดจำครับ</p>${trustBoxHtml}`
-      : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์ใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""} ตัวจริงตรงปก สไตล์ฟิวแฟนดูแลดี มีห้องส่วนตัวและพร้อมเดินทางไปหาที่พัก นัดเจอตัวจริงค่อยจ่ายเงินครับ</p>${trustBoxHtml}`;
+      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> แพลตฟอร์มรวมข้อมูลเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็นทั่วไทย ครอบคลุมทั้งบริการนอกสถานที่และห้องพักส่วนตัว ตรวจสอบข้อมูลก่อนติดต่อ ชำระค่าบริการหน้างานโดยตรง</p>${trustBoxHtml}`
+      : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์ใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""} สไตล์ฟิวแฟน ครอบคลุมบริการเดินทางไปที่พักและห้องส่วนตัว ตรวจสอบรายละเอียดก่อนติดต่อ</p>${trustBoxHtml}`;
 
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset" style="padding: 12px 14px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px; margin: 10px 0;">${dynamicHeroDesc}</div>`);
 
@@ -2004,10 +1989,9 @@ if (!isNational && pills) {
       </div>
     ` : "";
 
-    // 🟢 2. กล่อง Freshness Box แจ้งสถานะพร้อมรายชื่อจริงที่ Googlebot ให้คะแนนสูงสุด
-    const freshnessBox = `
+   const freshnessBox = `
       <div style="background: rgba(124, 58, 237, 0.05); border-left: 3px solid #7C3AED; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.6;">
-        ⚡ <strong>สถานะความพร้อมให้บริการ (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีสาวรับงานและไซด์ไลน์สแตนด์บายใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ตรวจสอบตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ปลอดภัย ไร้มัดจำ
+        ℹ️ <strong>ข้อมูลรายการล่าสุด (<time class="fmh-relative-time" datetime="${latestActualIso}">${realProvinceTimeText}</time>):</strong> มีผู้ลงประกาศใน${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${zoneSlug}` : ""} ทั้งหมด ${totalCount} โปรไฟล์ ชำระค่าบริการโดยตรงเมื่อพบผู้ให้บริการหน้างาน
         ${dynamicRosterBlock}
       </div>
     `;
@@ -2132,5 +2116,3 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
   }
 };
 
-
-typeof mode === "number
