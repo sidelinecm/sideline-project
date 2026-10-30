@@ -2025,7 +2025,7 @@ if (!isNational && pills) {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-    const clientProfilesData = profilesList.map(p => {
+   const clientProfilesData = profilesList.map(p => {
       let rawGal = p.galleryPaths || p.gallery_paths || p.gallery || [];
       if (typeof rawGal === "string") {
         try { rawGal = JSON.parse(rawGal); } catch (_) { rawGal = rawGal.split(",").map(s => s.trim()); }
@@ -2057,7 +2057,7 @@ if (!isNational && pills) {
         styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
       };
     });
-
+    #ffcaaa
     const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
