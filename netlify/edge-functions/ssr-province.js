@@ -1042,7 +1042,12 @@ export default async (req, context) => {
       return await context.next();
     }
 
-  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { return await context.next(); }
+    // 🟢 ประกาศตัวแปร cleanPath ตรงนี้
+    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+
+    if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
+      return await context.next(); 
+    }
 
     if (url.pathname === "/index.html") {
       return Response.redirect(`${primaryDomain}/`, 301);
