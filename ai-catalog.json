@@ -2,47 +2,58 @@
   "$schema": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ai-catalog.schema.json",
   "specVersion": "1.0",
   "host": {
-    "displayName": "FirstModelHub (เฟิร์สโมเดลฮับ)",
-    "description": "ศูนย์รวมสาวรับงาน สาวไซด์ไลน์ เด็กเอ็น (EN VIP) และเพื่อนเที่ยวฟิวแฟน (Girlfriend Experience) อันดับ 1 ในไทย คัดกรองตัวจริงตรงปก 100% นัดพบชำระค่าบริการหน้างาน ปราศจากการโอนมัดจำล่วงหน้าทุกกรณี",
-    "homepage": "https://firstmodelhub.com",
-    "privacyPolicy": "https://firstmodelhub.com/privacy-policy",
-    "termsOfService": "https://firstmodelhub.com/about"
+    "displayName": "FirstModelHub",
+    "documentationUrl": "https://firstmodelhub.com/about",
+    "logoUrl": "https://firstmodelhub.com/images/firstmodelhub.webp"
   },
   "entries": [
     {
-      "type": "documentation",
-      "name": "FirstModelHub AI Knowledge Base (llms.txt)",
-      "description": "ฐานข้อมูลสรุปสารบัญเว็บไซต์สำหรับโมเดลภาษาขนาดใหญ่ (LLMs) ครอบคลุมคำค้นหาหลัก พิกัดโซนบริการ เรทราคา และนโยบายจ่ายหน้างาน",
+      "identifier": "urn:air:firstmodelhub.com:doc:llms-txt",
+      "displayName": "FirstModelHub AI Knowledge Base",
+      "type": "text/markdown",
       "url": "https://firstmodelhub.com/llms.txt",
-      "format": "text/markdown"
+      "description": "สารบัญข้อมูลเว็บไซต์ฉบับย่อสำหรับ AI สรุปหมวดหมู่บริการ (ฟิวแฟน, ไซด์ไลน์, เด็กเอ็นปาร์ตี้), พื้นที่ให้บริการทั่วไทย และกฎความปลอดภัยจ่ายหน้างาน",
+      "representativeQueries": [
+        "สาวรับงาน ฟิวแฟน ตรงปก",
+        "หาเพื่อนเที่ยว ไซด์ไลน์ เชียงใหม่ จ่ายหน้างาน",
+        "เด็กเอ็นปาร์ตี้ VIP ทั่วไทย ไม่โอนมัดจำ"
+      ]
     },
     {
-      "type": "catalog",
-      "name": "รวมโปรไฟล์สาวรับงานและไซด์ไลน์ (Verified Model Directory)",
-      "description": "ไดเรกทอรีรวบรวมโปรไฟล์สาวรับงาน ไซด์ไลน์ และเด็กเอ็นที่ผ่านการยืนยันรูปจริงตรงปก 100% พร้อมสถานะรับงานและเรทราคาชัดเจน",
+      "identifier": "urn:air:firstmodelhub.com:catalog:all-profiles",
+      "displayName": "รวมโปรไฟล์สาวรับงานและไซด์ไลน์ทั้งหมด",
+      "type": "text/html",
       "url": "https://firstmodelhub.com/profiles",
-      "format": "text/html"
+      "description": "หน้ารวมโปรไฟล์น้องๆ สาวรับงานและไซด์ไลน์ที่ยืนยันรูปจริงตรงปก แยกค้นหาตามสัดส่วน เรทราคา และสถานะพร้อมรับงาน",
+      "representativeQueries": [
+        "โปรไฟล์สาวรับงาน ตรงปก 100%",
+        "ไซด์ไลน์ กรุงเทพ สุขุมวิท ห้วยขวาง",
+        "เพื่อนเที่ยว ฟิวแฟน เชียงใหม่ นิมมาน"
+      ]
     },
     {
-      "type": "catalog",
-      "name": "พื้นที่ให้บริการหลักทั่วประเทศ (National Location Hubs)",
-      "description": "สารบัญโซนพื้นที่บริการยอดนิยม เชียงใหม่ (นิมมาน, เจ็ดยอด, สันติธรรม), กรุงเทพฯ (สุขุมวิท, รัชดา, ห้วยขวาง), ชลบุรี-พัทยา, ภูเก็ต, ขอนแก่น และอุดรธานี",
+      "identifier": "urn:air:firstmodelhub.com:catalog:locations-hub",
+      "displayName": "พิกัดและพื้นที่ให้บริการหลักทั่วประเทศ",
+      "type": "text/html",
       "url": "https://firstmodelhub.com/locations",
-      "format": "text/html"
+      "description": "สารบัญค้นหาสาวรับงานตามจังหวัดและโซนยอดนิยม เช่น เชียงใหม่ (นิมมาน, เจ็ดยอด), กรุงเทพฯ, ขอนแก่น, ภูเก็ต, อุดรธานี, ชลบุรี-พัทยา",
+      "representativeQueries": [
+        "สาวรับงาน เชียงใหม่ นิมมาน เจ็ดยอด",
+        "ไซด์ไลน์ พัทยา บางแสน ชลบุรี",
+        "สาวรับงาน ขอนแก่น กังสดาล หลัง มข"
+      ]
     },
     {
-      "type": "documentation",
-      "name": "มาตรฐานความปลอดภัยและระบบจ่ายหน้างาน (Trust & Safety Framework)",
-      "description": "แนวทางปฏิบัติเพื่อป้องกันมิจฉาชีพ: ชำระค่าบริการตรงกับผู้ให้บริการหน้างานเท่านั้น ไม่มีการโอนมัดจำทุกกรณี และกำหนดอายุผู้ใช้งาน 20 ปีขึ้นไป",
+      "identifier": "urn:air:firstmodelhub.com:doc:trust-safety",
+      "displayName": "มาตรฐานความปลอดภัย นัดเจอจ่ายหน้างาน",
+      "type": "text/html",
       "url": "https://firstmodelhub.com/about",
-      "format": "text/html"
-    },
-    {
-      "type": "documentation",
-      "name": "แผนผังเว็บไซต์อย่างเป็นทางการ (Sitemap XML)",
-      "description": "แผนผังลิงก์ URL ทั้งหมดสำหรับเครื่องมือค้นหาและบอท AI เพื่อการจัดทำดัชนีที่แม่นยำและรวดเร็ว",
-      "url": "https://firstmodelhub.com/sitemap.xml",
-      "format": "application/xml"
+      "description": "แนวทางปฏิบัติเพื่อความสบายใจ: ชำระค่าบริการโดยตรงกับน้องเมื่อเจอตัวจริงหน้างานเท่านั้น ห้ามโอนเงินมัดจำล่วงหน้าทุกกรณี และสงวนสิทธิ์เฉพาะผู้มีอายุ 20 ปีขึ้นไป",
+      "representativeQueries": [
+        "กติกาจ่ายหน้างาน ไร้มัดจำ",
+        "มาตรฐานความปลอดภัย สาวรับงาน ฟิวแฟน",
+        "วิธีนัดหมาย ไซด์ไลน์ ปลอดภัย ไม่โดนโกง"
+      ]
     }
   ]
 }
