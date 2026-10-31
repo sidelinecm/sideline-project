@@ -134,7 +134,7 @@
 # 3. REDIRECTS & CLEAN URLS
 # ==============================================================================
 
-# 🟢 เชื่อมต่อคำขอ AI Agent ทุกเส้นทางตรงเข้า ai-catalog.json (แก้บั๊ก PageSpeed 100%)
+# 🟢 เชื่อมต่อคำขอ AI Agent ทุกเส้นทางตรงเข้า ai-catalog.json
 [[redirects]]
   from = "/.well-known/ai-catalog.json"
   to = "/ai-catalog.json"

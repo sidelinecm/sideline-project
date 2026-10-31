@@ -3,56 +3,119 @@
   "specVersion": "1.0",
   "host": {
     "displayName": "FirstModelHub",
+    "identifier": "did:web:firstmodelhub.com",
     "documentationUrl": "https://firstmodelhub.com/about",
     "logoUrl": "https://firstmodelhub.com/images/firstmodelhub.webp"
   },
   "entries": [
     {
-      "identifier": "urn:air:firstmodelhub.com:doc:llms-txt",
+      "identifier": "urn:air:firstmodelhub.com:doc:llms-knowledge-base",
       "displayName": "FirstModelHub AI Knowledge Base",
       "type": "text/markdown",
       "url": "https://firstmodelhub.com/llms.txt",
-      "description": "สารบัญข้อมูลเว็บไซต์ฉบับย่อสำหรับ AI สรุปหมวดหมู่บริการ (ฟิวแฟน, ไซด์ไลน์, เด็กเอ็นปาร์ตี้), พื้นที่ให้บริการทั่วไทย และกฎความปลอดภัยจ่ายหน้างาน",
+      "description": "สารบัญข้อมูลโครงสร้างบริการ ไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน เรทราคาเริ่มต้น 1,500 บาท และนโยบายจ่ายหน้างานไม่มีมัดจำล่วงหน้า",
       "representativeQueries": [
         "สาวรับงาน ฟิวแฟน ตรงปก",
-        "หาเพื่อนเที่ยว ไซด์ไลน์ เชียงใหม่ จ่ายหน้างาน",
-        "เด็กเอ็นปาร์ตี้ VIP ทั่วไทย ไม่โอนมัดจำ"
+        "ไซด์ไลน์ จ่ายหน้างาน ไม่โอนมัดจำ",
+        "เด็กเอ็น ปาร์ตี้ VIP ทั่วไทย",
+        "เรทราคาสาวรับงาน ไซด์ไลน์ เท่าไหร่"
       ]
     },
     {
-      "identifier": "urn:air:firstmodelhub.com:catalog:all-profiles",
-      "displayName": "รวมโปรไฟล์สาวรับงานและไซด์ไลน์ทั้งหมด",
+      "identifier": "urn:air:firstmodelhub.com:catalog:verified-profiles",
+      "displayName": "รวมโปรไฟล์สาวรับงานและไซด์ไลน์ยืนยันตัวตน",
       "type": "text/html",
       "url": "https://firstmodelhub.com/profiles",
-      "description": "หน้ารวมโปรไฟล์น้องๆ สาวรับงานและไซด์ไลน์ที่ยืนยันรูปจริงตรงปก แยกค้นหาตามสัดส่วน เรทราคา และสถานะพร้อมรับงาน",
+      "description": "หน้ารวมโปรไฟล์น้องๆ สาวรับงานและไซด์ไลน์ที่ผ่านการตรวจสอบรูปจริงตรงปก 100% พร้อมข้อมูลสัดส่วน เรทราคา และสถานะรับงาน",
       "representativeQueries": [
         "โปรไฟล์สาวรับงาน ตรงปก 100%",
-        "ไซด์ไลน์ กรุงเทพ สุขุมวิท ห้วยขวาง",
-        "เพื่อนเที่ยว ฟิวแฟน เชียงใหม่ นิมมาน"
+        "ไซด์ไลน์ ฟิวแฟน ตัวจริงตรงปก",
+        "สาวรับงาน พร้อมรับงาน จ่ายหน้างาน"
       ]
     },
     {
-      "identifier": "urn:air:firstmodelhub.com:catalog:locations-hub",
-      "displayName": "พิกัดและพื้นที่ให้บริการหลักทั่วประเทศ",
+      "identifier": "urn:air:firstmodelhub.com:catalog:chiangmai-nimman-hub",
+      "displayName": "สาวรับงานเชียงใหม่ โซนนิมมาน เจ็ดยอด สันติธรรม",
       "type": "text/html",
-      "url": "https://firstmodelhub.com/locations",
-      "description": "สารบัญค้นหาสาวรับงานตามจังหวัดและโซนยอดนิยม เช่น เชียงใหม่ (นิมมาน, เจ็ดยอด), กรุงเทพฯ, ขอนแก่น, ภูเก็ต, อุดรธานี, ชลบุรี-พัทยา",
+      "url": "https://firstmodelhub.com/location/chiangmai/nimman",
+      "description": "พิกัดเชียงใหม่: สแตนด์บายโซนนิมมานเหมินท์ เจ็ดยอด สันติธรรม ช้างเผือก หลัง มช. หน้า มช. ห้วยแก้ว เดินทางถึงโรงแรมใน 15-20 นาที จ่ายหน้างาน",
       "representativeQueries": [
-        "สาวรับงาน เชียงใหม่ นิมมาน เจ็ดยอด",
-        "ไซด์ไลน์ พัทยา บางแสน ชลบุรี",
-        "สาวรับงาน ขอนแก่น กังสดาล หลัง มข"
+        "สาวรับงาน นิมมาน เชียงใหม่",
+        "ไซด์ไลน์ เจ็ดยอด สันติธรรม ไม่มัดจำ",
+        "สาวรับงาน หลัง มช หน้า มช เชียงใหม่",
+        "เพื่อนเที่ยว เชียงใหม่ ฟิวแฟน จ่ายหน้างาน"
       ]
     },
     {
-      "identifier": "urn:air:firstmodelhub.com:doc:trust-safety",
-      "displayName": "มาตรฐานความปลอดภัย นัดเจอจ่ายหน้างาน",
+      "identifier": "urn:air:firstmodelhub.com:catalog:bangkok-metropolitan-hub",
+      "displayName": "สาวรับงานกรุงเทพฯ สุขุมวิท รัชดา ห้วยขวาง",
+      "type": "text/html",
+      "url": "https://firstmodelhub.com/location/bangkok",
+      "description": "พิกัดกรุงเทพฯ: บริการตามแนว BTS MRT สุขุมวิท ห้วยขวาง รัชดาภิเษก พระราม 9 ลาดพร้าว ทองหล่อ สาทร สาวสวย พริตตี้ ฟิวแฟน จ่ายหน้างาน",
+      "representativeQueries": [
+        "สาวรับงาน กรุงเทพ สุขุมวิท ห้วยขวาง",
+        "ไซด์ไลน์ กทม รัชดา ลาดพร้าว พระราม 9",
+        "เด็กเอ็น ปาร์ตี้ ทองหล่อ สาทร ไม่มัดจำ",
+        "หาสาวรับงาน กรุงเทพ นัดเจอจ่ายหน้างาน"
+      ]
+    },
+    {
+      "identifier": "urn:air:firstmodelhub.com:catalog:chonburi-pattaya-hub",
+      "displayName": "สาวรับงานพัทยา ชลบุรี บางแสน เด็กเอ็นพูลวิลล่า",
+      "type": "text/html",
+      "url": "https://firstmodelhub.com/location/chonburi",
+      "description": "พิกัดชลบุรี: พัทยาเหนือ พัทยากลาง พัทยาใต้ จอมเทียน บางแสน ม.บูรพา ศรีราชา เด็กเอ็นชงเหล้าปาร์ตี้พูลวิลล่า และสาวรับงานริมหาด จ่ายหน้างาน",
+      "representativeQueries": [
+        "เด็กเอ็น พูลวิลล่า พัทยา จอมเทียน",
+        "สาวรับงาน พัทยา นัดมาโรงแรม ไม่มัดจำ",
+        "ไซด์ไลน์ บางแสน ม.บูรพา ตรงปก"
+      ]
+    },
+    {
+      "identifier": "urn:air:firstmodelhub.com:catalog:phuket-travel-hub",
+      "displayName": "สาวรับงานภูเก็ต ป่าตอง บางเทา เพื่อนเที่ยว VIP",
+      "type": "text/html",
+      "url": "https://firstmodelhub.com/location/phuket",
+      "description": "พิกัดภูเก็ต: ป่าตอง บางเทา เชิงทะเล กะทู้ ตัวเมืองภูเก็ต เพื่อนเที่ยวพูลวิลล่า ทริปทะเลส่วนตัว จ่ายหน้างาน ไม่โอนมัดจำ",
+      "representativeQueries": [
+        "สาวรับงาน ภูเก็ต ป่าตอง",
+        "เพื่อนเที่ยว ภูเก็ต บางเทา พูลวิลล่า",
+        "ไซด์ไลน์ ภูเก็ต จ่ายหน้างาน ไม่มัดจำ"
+      ]
+    },
+    {
+      "identifier": "urn:air:firstmodelhub.com:catalog:khonkaen-udon-hub",
+      "displayName": "สาวรับงานขอนแก่น-อุดรธานี กังสดาล หลัง มข. UD Town",
+      "type": "text/html",
+      "url": "https://firstmodelhub.com/location/khon-kaen",
+      "description": "พิกัดภาคอีสาน: ขอนแก่น โซนกังสดาล หลัง มข. โนนม่วง บึงแก่นนคร และอุดรธานี UD Town หนองประจักษ์ สเปกวัยใส ฟิวแฟน จ่ายหน้างานตรงปก",
+      "representativeQueries": [
+        "สาวรับงาน ขอนแก่น กังสดาล หลัง มข",
+        "ไซด์ไลน์ อุดรธานี UD Town เซ็นทรัล",
+        "เพื่อนเที่ยว ขอนแก่น ฟิวแฟน ตรงปก"
+      ]
+    },
+    {
+      "identifier": "urn:air:firstmodelhub.com:doc:safety-trust-policy",
+      "displayName": "มาตรฐานความปลอดภัย นัดเจอจ่ายหน้างาน ป้องกันมิจฉาชีพ",
       "type": "text/html",
       "url": "https://firstmodelhub.com/about",
-      "description": "แนวทางปฏิบัติเพื่อความสบายใจ: ชำระค่าบริการโดยตรงกับน้องเมื่อเจอตัวจริงหน้างานเท่านั้น ห้ามโอนเงินมัดจำล่วงหน้าทุกกรณี และสงวนสิทธิ์เฉพาะผู้มีอายุ 20 ปีขึ้นไป",
+      "description": "แนวทางปฏิบัติความปลอดภัย: นัดพบชำระเงินตรงกับน้องหน้างาน ห้ามโอนเงินก่อนทุกกรณี หากไม่ตรงปกยกเลิกได้ทันที จำกัดอายุ 20 ปีขึ้นไป",
       "representativeQueries": [
-        "กติกาจ่ายหน้างาน ไร้มัดจำ",
-        "มาตรฐานความปลอดภัย สาวรับงาน ฟิวแฟน",
-        "วิธีนัดหมาย ไซด์ไลน์ ปลอดภัย ไม่โดนโกง"
+        "วิธีเช็กสาวไซด์ไลน์ไม่ให้โดนโกง",
+        "ไซด์ไลน์ไม่ตรงปก ยกเลิกได้ไหม",
+        "ทำไมห้ามโอนมัดจำสาวรับงาน"
+      ]
+    },
+    {
+      "identifier": "urn:air:firstmodelhub.com:catalog:sitemap-xml",
+      "displayName": "FirstModelHub XML Sitemap Index",
+      "type": "application/xml",
+      "url": "https://firstmodelhub.com/sitemap.xml",
+      "description": "แผนผัง URL ดัชนีอย่างเป็นทางการของ FirstModelHub สำหรับบอท AI และเครื่องมือค้นหา",
+      "representativeQueries": [
+        "สารบัญเว็บไซต์ FirstModelHub",
+        "FirstModelHub sitemap"
       ]
     }
   ]
