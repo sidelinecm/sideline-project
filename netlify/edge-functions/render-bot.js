@@ -516,9 +516,9 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
 
-    const safeZoneSlug = hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "";
+   const safeZoneSlug = hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "";
     const zoneHubUrl = primaryZone.includes("นิมมาน") 
-      ? "/nimman" 
+      ? "/location/chiangmai/nimman" // ✅ เปลี่ยนให้ชี้ตรงไปที่โซนใหม่เลย
       : hasDistinctZone 
         ? encodeURI(`/location/${provinceKey}/${safeZoneSlug}`) 
         : provinceHubUrl; // ถ้าไม่มีโซนย่อย ให้ชี้กลับหน้าจังหวัดหลัก ป้องกัน 404

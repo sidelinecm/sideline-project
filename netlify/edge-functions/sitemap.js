@@ -103,6 +103,7 @@ const optimizeImgForXml = (path) => {
 // 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (แก้คำเว้นวรรคเป็นขีดกลางเพื่อความปลอดภัย)
 const TARGET_SUB_ZONES = [
   // 1. เชียงใหม่
+  { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] }, // ✅ เพิ่มโซนนิมมานแบบไดนามิก
   { province: "chiangmai", zone: "เจ็ดยอด", matchWords: ["เจ็ดยอด"] },
   { province: "chiangmai", zone: "สันติธรรม", matchWords: ["สันติธรรม"] },
   { province: "chiangmai", zone: "ช้างเผือก", matchWords: ["ช้างเผือก"] },
@@ -242,12 +243,12 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าหลักและหน้าคงที่ (Static Core Pages)
+    // 1. หน้าหลักและหน้าคงที่ (Static Core Pages) 
+    // ✅ นำ /nimman ที่เป็น Hardcode ออกแล้ว
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
       { path: "/locations", priority: "0.9", changefreq: "daily" },
-      { path: "/nimman", priority: "0.9", changefreq: "daily" },
       { path: "/blog", priority: "0.8", changefreq: "weekly" },
       { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" },
       { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" },
