@@ -536,8 +536,14 @@ if (existingVipCards.length > 0) {
   return;
 }
 
-// 1. ตรวจสอบครอบคลุมทั้ง tags, description, slogan
-let hotCandidate = appState.allProfiles.filter(p => {
+// ✅ เช็คก่อนว่าอยู่หน้าจังหวัดอะไร ถ้าอยู่หน้าจังหวัดให้กรองเฉพาะน้องจังหวัดนั้นมาทำเป็น HOT
+const currentProv = window.currentProvinceSlug || "national";
+let pool = appState.allProfiles;
+if (currentProv && currentProv !== "national" && currentProv !== "all") {
+  pool = pool.filter(p => (p.provinceKey || "").toLowerCase() === currentProv.toLowerCase());
+}
+
+let hotCandidate = pool.filter(p => {
   const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
   const descStr = (p.description || "").toLowerCase();
   const sloganStr = (p.slogan || p.quote || "").toLowerCase();
