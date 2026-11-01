@@ -1281,11 +1281,11 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
     if (matchedZoneProfiles.length === 0) { 
-        // ✅ โค้ดที่ปลอดภัย 100% ทุก Environment:
-        return Response.redirect(`${url.origin}/location/${provinceSlug}`, 302);
-      } else { 
-        profilesList = matchedZoneProfiles; 
-      }
+      return Response.redirect(`${url.origin}/location/${provinceSlug}`, 302);
+    } else { 
+      profilesList = matchedZoneProfiles; 
+    }
+  }
     
     let hotSwiperCardsHtml = "";
     let featuredCardsHtml = "";
@@ -1740,44 +1740,27 @@ const hreflangBlock = isNational
       dynamicSubheadline = ``;
 
     } else {
-      // หน้ารายจังหวัด
+      // 🟢 หน้ารายจังหวัด (เหลือไว้แค่บล็อกเดียว)
       const cityTag = provinceSlug === "chiangmai" ? "ในเมืองเชียงใหม่" : `ตัวเมือง${escapeHTML(provinceNameThai)}`;
       ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์<span class="t-chunk">${cityTag}</span></span>
                    <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน นัดพบชำระค่าบริการหน้างาน</span>`;
       dynamicSubheadline = ``;
- } else {
-  // 3. หน้ารายจังหวัด (เน้นในเมืองเชียงใหม่ ตัดคำเชื่อมที่เกะกะออก)
-  const cityTag = provinceSlug === "chiangmai" ? "ในเมืองเชียงใหม่" : `ตัวเมือง${escapeHTML(provinceNameThai)}`;
-  ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์<span class="t-chunk">${cityTag}</span></span>
-               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน นัดพบชำระค่าบริการหน้างาน</span>`;
-  dynamicSubheadline = ``;
-}
+    }
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
     finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
-
-    
-
-    
 
     function matchProfileToZone(p, cleanZ) {
   if (!p || !cleanZ) return false;
   const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
   const desc = sanitizeThaiText(p.description || "").toLowerCase();
-  
-  // ✅ ดักจับทั้ง style_tags (จากฐานข้อมูล) และ styleTags ป้องกันข้อมูลตกหล่น 100%
   const rawTags = p.style_tags || p.styleTags || p.tags || [];
   const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
-  
   const combined = `${rawLoc} ${desc} ${tags}`;
-
-      const zoneWithSpace = cleanZ.replace(/-/g, " ");
-      const zoneWithoutDash = cleanZ.replace(/-/g, "");
-
-      return combined.includes(cleanZ) || 
-             combined.includes(zoneWithSpace) || 
-             combined.includes(zoneWithoutDash);
-    }
+  const zoneWithSpace = cleanZ.replace(/-/g, " ");
+  const zoneWithoutDash = cleanZ.replace(/-/g, "");
+  return combined.includes(cleanZ) || combined.includes(zoneWithSpace) || combined.includes(zoneWithoutDash);
+}
 
     // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
 const zoneCountMap = {};
