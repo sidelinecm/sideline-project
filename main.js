@@ -46,9 +46,7 @@ function updateLiveRelativeTimestamps() {
   });
 }
 
-// 🟢 โหลด Supabase แบบ Dynamic Singleton
 
-// 🟢 โหลด Supabase แบบ Dynamic Singleton
 let supabaseClient = null;
 let supabasePromise = null;
 
