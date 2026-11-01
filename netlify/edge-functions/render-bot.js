@@ -855,7 +855,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                     </div>
                 </div>
 
-                <!-- Rates Box -->
+               
                 <section class="fmh-rates-box">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(cleanProvince)})</h2>
                     <div class="fmh-rates-grid">
@@ -887,18 +887,13 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                     ${naturalDesc}
                 </div>
 
-                <!-- Related Profiles -->
+               
                 ${relatedCardsHtml}
 
-                <!-- 🟢 วาง FAQ Accordion ก่อนมาตรฐานความปลอดภัย -->
-                ${faqAccordionHtml}
-
-                <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
-                    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>
-
-              
-
                
+                ${faqAccordionHtml}
+                <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
+                    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>             
                    <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ เกณฑ์อายุผู้ใช้งาน:</strong> แพลตฟอร์ม FirstModelHub กำหนดให้ผู้ขอรับบริการและผู้ลงประกาศต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปอย่างเข้มงวด</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
                     <p style="margin: 0;"><strong style="color: #140F22;">✓ รักษาความลับ (Zero-Log):</strong> ข้อมูลการติดต่อปลอดภัยสูงสุด</p>
@@ -917,12 +912,16 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
   
- <div style="position: fixed; bottom: 0; left: 0; right: 0; ..."> <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="padding: 12px 0;" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')"> <i class="fab fa-line" style="font-size: 20px;"></i> <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span> <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 600;">จ่ายตรงกับน้อง</span> </a>
-        <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
-            <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-        </button>
+ <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 10px 16px; border-top: 1px solid rgba(124, 58, 237, 0.15); display: flex; align-items: center; gap: 8px; z-index: 999; box-sizing: border-box;">
+      <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="flex: 1; padding: 11px 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; font-size: 13px; font-weight: 800; border-radius: 100px; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')">
+        <i class="fab fa-line" style="font-size: 20px;"></i> 
+        <span>ทักแชตสอบถามคิว${escapeHTML(displayName)}</span> 
+        <span style="font-size: 11px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 100px; font-weight: 600;">จ่ายตรงกับน้อง</span> 
+      </a>
+      <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์" style="width: 44px; height: 44px; border-radius: 50%; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+      </button>
     </div>
-
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
