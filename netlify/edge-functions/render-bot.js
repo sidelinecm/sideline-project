@@ -737,6 +737,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 
+    <!-- Open Graph (ครบสูตร Facebook & LINE) -->
     <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
@@ -744,11 +745,15 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <meta property="og:description" content="${escapeHTML(metaDescription)}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:image" content="${ogImageSocial}">
+    <meta property="og:image:secure_url" content="${ogImageSocial}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
+    <!-- Twitter Cards (ครบสูตร X/Twitter) -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@sidelinecm">
+    <meta name="twitter:creator" content="@sidelinecm">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${ogImageSocial}">

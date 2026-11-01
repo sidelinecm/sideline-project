@@ -300,7 +300,7 @@ function extractCleanNumber(rate) {
 }
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, บอทไม่ตีความว่ารูปเสีย
+// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, รูปแชร์โซเชียลหัวไม่ขาด 100%
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
@@ -309,27 +309,28 @@ function optimizeImg(imagePath, mode = "card") {
 
   const cleanPath = imagePath.trim();
 
-  // ⚡ ตัด l_text ออกทั้งหมด เหลือแค่ f_auto,q_auto และขนาดพิกเซลที่เหมาะสม ป้องกันรูปพัง 100%
   let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // รูปย่อยขนาดเล็ก (Thumbnail)
+    // 1. รูปย่อยขนาดเล็ก (Thumbnail)
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 400 || mode === "card") {
-    // รูปการ์ดแสดงผลปกติ
+    // 2. รูปการ์ดแสดงผลปกติ
     transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
   } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    // รูปขนาดกลางสำหรับ Lightbox Modal
+    // 3. รูปขนาดกลางสำหรับ Lightbox Modal
     transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
-  } else if (mode === "full" || (typeof mode === "number" && mode >= 700) || mode === "og") {
-    // รูปใหญ่เต็มจอ / OG Image สำหรับแชร์โซเชียล
+  } else if (mode === "og") {
+    // 4. 🟢 รูปสำหรับแชร์ลง LINE / Facebook (ล็อก 1200x630 แนวนอน + AI โฟกัสหน้า หัวไม่ขาด 100%)
+    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+  } else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
+    // 5. รูปใหญ่เต็มจอแบบไม่ครอปสัดส่วน
     transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
       return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
@@ -340,7 +341,7 @@ function optimizeImg(imagePath, mode = "card") {
   return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
 }
 
-// 🟢 เพิ่มฟังก์ชันช่วยสลับชุดข้อความ (Variant Rotation) ป้องกัน Duplicate Content ระหว่างหน้า
+
 function getVariant(seedStr, variants) {
   if (!variants || variants.length === 0) return "";
   let hash = 0;
@@ -2132,7 +2133,9 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
       const rawLcpImg = validLcpProfile.imagePath || validLcpProfile.image_url || validLcpProfile.imageUrl;
       const lcpImgSmall = optimizeImg(rawLcpImg, 400);
       const lcpImgLarge = optimizeImg(rawLcpImg, 600);
-      const preloadTag = `  <link rel="preload" as="image" href="${lcpImgSmall}" imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">\n</head>`;
+      
+      // 🟢 ปรับ imagesizes ให้ตรงกับแท็ก <img> ของการ์ด (48vw บนมือถือ) ป้องกันการโหลดรูปซ้ำ 2 รอบ:
+      const preloadTag = `  <link rel="preload" as="image" href="${lcpImgSmall}" imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" imagesizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px" fetchpriority="high">\n</head>`;
       finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
     }
 
