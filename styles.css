@@ -5529,3 +5529,41 @@ a.kw-zone {
   font-weight: 800 !important;
   text-decoration: underline !important;
 }
+
+/* ===================================================
+   🟢 FIX ACCESSIBILITY & CONTRAST RATIO (WCAG AAA)
+   =================================================== */
+
+/* 1. สไตล์ลิงก์ชื่อโซน (ล้างสีชมพูทิ้ง ให้เป็นป้ายม่วงคมชัด) */
+a.kw-zone, 
+.kw-zone {
+  color: #4C1D95 !important;
+  background-color: #EDE9FE !important;
+  border: 1px solid rgba(124, 58, 237, 0.25) !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 2px 9px !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+
+a.kw-zone:hover {
+  background-color: #DDD6FE !important;
+  color: #3B0764 !important;
+}
+
+/* 2. สไตล์ปุ่มจองคิว LINE แถบด้านล่าง (เขียวมรกต คอนทราสต์ตัดกับสีขาวคมชัด) */
+.floating-app-dock .dock-item.dock-item-line {
+  background: linear-gradient(135deg, #047857 0%, #065F46 100%) !important;
+  border: 1px solid #059669 !important;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.35) !important;
+}
+
+.floating-app-dock .dock-item.dock-item-line i,
+.floating-app-dock .dock-item.dock-item-line span {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
