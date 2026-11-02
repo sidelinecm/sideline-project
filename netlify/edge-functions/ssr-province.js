@@ -369,25 +369,26 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
   const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket", "bangkok", "chonburi"];
 
-  // ⚡ 1. กำหนดสไตล์สีม่วงเข้ม คอนทราสต์ระดับ AAA (ผ่านเกณฑ์ Google 100%)
-  const zoneLinkStyle = `style="color: #4C1D95; font-weight: 800; text-decoration: underline;"`;
+  // ⚡ กำหนดสไตล์สีแดงไวน์ทับทิมเข้ม เพรียวบาง คมชัด ไม่เทอะทะ (ผ่านเกณฑ์ Google AAA)
+  const zoneLinkStyle = `style="color: #881337; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;"`;
+  const zoneSpanStyle = `style="color: #881337; font-weight: 800;"`;
 
   const zoneLinks = cleanZones.slice(0, 6).map(z => {
     const cleanZ = sanitizeThaiText(z);
     if (!cleanZ) return "";
 
+    // 1. กรณีโซนนิมมาน (ชี้ตรงไปหน้าเฉพาะโซน)
     if (cleanZ.includes("นิมมาน")) {
-  return `<a href="/location/chiangmai/nimman" class="kw-zone" ${zoneLinkStyle} title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`; // 🟢 แก้เป็นอันนี้
-}
+      return `<a href="/location/chiangmai/nimman" class="kw-zone" ${zoneLinkStyle} title="สาวรับงานนิมมาน">${escapeHTML(cleanZ)}</a>`;
+    }
 
     // 2. กรณีหน้าแรก (ทั่วไทย)
     if (isNation) {
       const targetSlug = PROV_SLUG_MAP[cleanZ];
-      if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) 
-      {
+      if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
         return `<a href="/location/${targetSlug}" class="kw-zone" ${zoneLinkStyle} title="สาวรับงาน${escapeHTML(cleanZ)}">${escapeHTML(cleanZ)}</a>`;
       }
-      return `<span class="kw-zone" style="color: #4C1D95; font-weight: 800;">${escapeHTML(cleanZ)}</span>`;
+      return `<span class="kw-zone" ${zoneSpanStyle}>${escapeHTML(cleanZ)}</span>`;
     }
 
     // 3. กรณีหน้ารายจังหวัดและโซนย่อย
