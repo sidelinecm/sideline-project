@@ -35,7 +35,7 @@ const CONFIG = {
     return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgfa/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
@@ -347,14 +347,14 @@ function optimizeImg(imagePath, mode = "card") {
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
 
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
 
 
@@ -938,7 +938,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
       try { gallery = JSON.parse(gallery); } catch (_) { gallery = gallery.split(",").map(s => s.trim()); }
     }
     const validFromGallery = Array.isArray(gallery) ? gallery.find(g => g && !g.includes("firstmodelhub.webp")) : null;
-    rawImg = validFromGallery || "https://res.cloudinary.com/adjucgfa/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+    rawImg = validFromGallery || "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
   }
 
   const cardImgSmall = optimizeImg(rawImg, 400);
@@ -1957,7 +1957,7 @@ if (!isNational && pills) {
       const sSlug = encodeURIComponent(p.slug || p.id);
       let rawImg = p.imagePath || p.image_url || "";
       if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
-        rawImg = "https://res.cloudinary.com/adjucgfa/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawImg = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
       }
       const sImg = optimizeImg(rawImg, "thumb");
 

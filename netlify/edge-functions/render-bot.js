@@ -34,7 +34,7 @@ const CONFIG = {
   },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgfa/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
   DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 
@@ -195,14 +195,14 @@ function optimizeImg(imagePath, mode = "card") {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
       // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
-      return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
 
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
 
 function generateSrcSet(imagePath) {
