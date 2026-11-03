@@ -51,9 +51,9 @@
 
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<!-- 🟢 เปลี่ยนกลับมาโหลด CSS แบบมาตรฐาน ป้องกันหน้าเว็บกระตุก/ค้าง 1-2 วินาที -->
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_13">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_13">
+
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_19">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_19">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -627,11 +627,11 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_13"></script>
+  <script type="module" src="/main.js?v=v_20261022_19"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      const CURRENT_SW_VER = 'v_20261022_13';
+      const CURRENT_SW_VER = 'v_20261022_19';
       navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
