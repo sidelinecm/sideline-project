@@ -332,14 +332,14 @@ function optimizeImg(imagePath, mode = "card") {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
       // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
-      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
 
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dyynjlbuj/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${formatted}`;
 }
 
   function normalizeProfile(raw) {
@@ -1265,13 +1265,13 @@ if (heroH1) {
     popover.style.display = "block";
   }
 
- function createProfileCardDOM(p, index = 0) {
+ function createProfileCardDOM(p, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
 
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-        rawPath = "https://res.cloudinary.com/dyynjlbuj/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawPath = "https://res.cloudinary.com/adjucgfa/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
     const imgSrc = (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? p.images[0].src 
@@ -1279,14 +1279,12 @@ if (heroH1) {
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
-    const cleanName = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
-    const modelName = isEN ? (p.name_en || cleanName) : formatDisplayName(cleanName);
-    const provinceNameText = p.provinceNameThai || "เชียงใหม่";
+    const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
     
     const ageVal = p.safeAge || p.age;
     const ageDisplay = (ageVal && String(ageVal).trim() !== "-" && String(ageVal).trim() !== "0") ? `${String(ageVal).replace(/\D/g, "")} ปี` : "20+ ปี";
     
-    let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || provinceNameText));
+    let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
     const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
     if (activeZone && rawLoc.includes(activeZone)) {
@@ -1298,24 +1296,6 @@ if (heroH1) {
         .trim();
       if (!locName) locName = rawLoc;
     }
-
-    // 💡 ระบบสลับ Alt Text อัจฉริยะ ป้องกัน Pattern ซ้ำซาก (Image SEO)
-    const altTemplates = [
-      `น้อง{name} โซน{zone} {province} - FirstModelHub`,
-      `สาวไซด์ไลน์ น้อง{name} พิกัด{zone} {province} ตัวจริงตรงปก`,
-      `สาวรับงาน น้อง{name} {province} ย่าน{zone} ฟิวแฟนดูแลดี`,
-      `เพื่อนเที่ยว น้อง{name} โซน{zone} {province} ไม่มัดจำ`
-    ];
-    
-    // ใช้ ID ของน้องล็อคค่า Index เพื่อให้ข้อความของน้องแต่ละคนคงที่ ไม่สลับไปมาเวลาบอทเข้ามาเก็บข้อมูล
-    const safeIdNum = parseInt(String(p.id).replace(/\D/g, "")) || index;
-    const altIndex = safeIdNum % altTemplates.length;
-    const zoneTextForAlt = (locName && locName !== provinceNameText) ? locName : "ในเมือง";
-    
-    const dynamicAltText = altTemplates[altIndex]
-      .replace("{name}", cleanName)
-      .replace("{zone}", zoneTextForAlt)
-      .replace("{province}", provinceNameText);
 
     const isOnline = p.isAvailable !== undefined 
       ? Boolean(p.isAvailable) 
@@ -1350,16 +1330,20 @@ if (heroH1) {
       return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
     });
 
-    let rightBadgeHtml = "";
-    if (isFiwFan) {
-      rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
-    } else if (p.isVerified) {
-      rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
-    } else {
-      rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
-    }
+    // 🟢 โค้ดที่สมบูรณ์ใน main.js:
+let rightBadgeHtml = "";
+if (isFiwFan) {
+  rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
+} else if (p.isVerified) {
+  rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
+} else {
+  rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
+}
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
+    const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
+
+   // 🟢 แสดงเฉพาะยอดหัวใจจริงที่มีในระบบ (ตัดสูตรคำนวณดาว/รีวิวจำลองออก)
     const rawLikes = p.likes_count || p.likes || 0;
     const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
@@ -1371,7 +1355,7 @@ if (heroH1) {
 
     article.innerHTML = `
      <img src="${imgSrc}" 
-       alt="${escapeHTML(dynamicAltText)}" 
+       alt="${escapeHTML(richAltText)}" 
        width="400" 
        height="560" 
        class="profile-card-img" 
@@ -1424,7 +1408,7 @@ if (heroH1) {
     `;
     container.appendChild(article);
     return container;
-}
+  }
 
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
