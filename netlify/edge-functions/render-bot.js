@@ -9,10 +9,17 @@ const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 
 
 function setSafeProfileCache(key, data) {
   if (PROFILE_PAGE_CACHE.size >= MAX_CACHE_ENTRIES) {
-    const oldestKey = PROFILE_PAGE_CACHE.keys().next().value;
-    PROFILE_PAGE_CACHE.delete(oldestKey);
+    let oldestAccessTime = Infinity;
+    let keyToRemove = null;
+    for (const [k, v] of PROFILE_PAGE_CACHE.entries()) {
+      if ((v.lastAccessed || 0) < oldestAccessTime) {
+        oldestAccessTime = v.lastAccessed || 0;
+        keyToRemove = k;
+      }
+    }
+    if (keyToRemove) PROFILE_PAGE_CACHE.delete(keyToRemove);
   }
-  PROFILE_PAGE_CACHE.set(key, { ...data, cachedAt: Date.now() });
+  PROFILE_PAGE_CACHE.set(key, { ...data, cachedAt: Date.now(), lastAccessed: Date.now() });
 }
 
 const CONFIG = {
@@ -133,19 +140,27 @@ function stripHTML(str) {
     .trim();
 }
 
-function extractCleanNumber(rate) {
+function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟล์ main.js ให้ใช้ชื่อ parseRateToNumber)
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
+  
+  // 🟢 ดักเคสแจกฟรี หรือ งานกินข้าวไม่รับเงิน
+  if (str.includes("ฟรี") || str === "free") return 0;
+  // 🟢 ดักเคสไม่ระบุราคาชัดเจน (แต่ต้องมีค่าตัวเลขตั้งต้นเพื่อไม่ให้พัง)
+  if (str.includes("ตกลง") || str.includes("สอบถาม")) return 1500;
+
   if (str.includes("k")) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข
+  
   const pricePart = str.split(/[\/\(\s]/)[0];
   const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
+  
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 10) return num * 1000;
+  // 🟢 ป้องกันเคสลืมพิมพ์เลขศูนย์ เช่น พิมพ์ 15 หมายถึง 1500
+  if (num < 100 && num >= 10) return num * 100; 
   if (num < 500) return num * 10;
   return num;
 }
@@ -337,6 +352,7 @@ export default async (req, context) => {
   const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS);
   
   if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_PROFILE_VERSION) {
+    cachedPage.lastAccessed = Date.now(); // 🟢 อัปเดตเวลาการใช้งานล่าสุด
     PROFILE_PAGE_CACHE.delete(cacheKey);
     PROFILE_PAGE_CACHE.set(cacheKey, cachedPage);
     return new Response(cachedPage.html, { headers: cachedPage.headers });

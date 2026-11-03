@@ -9,10 +9,17 @@ const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
 
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
-    const oldestKey = PAGE_CACHE.keys().next().value;
-    PAGE_CACHE.delete(oldestKey);
+    let oldestAccessTime = Infinity;
+    let keyToRemove = null;
+    for (const [k, v] of PAGE_CACHE.entries()) {
+      if ((v.lastAccessed || 0) < oldestAccessTime) {
+        oldestAccessTime = v.lastAccessed || 0;
+        keyToRemove = k;
+      }
+    }
+    if (keyToRemove) PAGE_CACHE.delete(keyToRemove);
   }
-  PAGE_CACHE.set(key, { ...data, cachedAt: Date.now() });
+  PAGE_CACHE.set(key, { ...data, cachedAt: Date.now(), lastAccessed: Date.now() });
 }
 
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
@@ -283,18 +290,27 @@ function stripHTML(str) {
   return String(str).replace(/<[^>]*>?/gm, "").trim();
 }
 
-function extractCleanNumber(rate) {
+function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟล์ main.js ให้ใช้ชื่อ parseRateToNumber)
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
+  
+  // 🟢 ดักเคสแจกฟรี หรือ งานกินข้าวไม่รับเงิน
+  if (str.includes("ฟรี") || str === "free") return 0;
+  // 🟢 ดักเคสไม่ระบุราคาชัดเจน (แต่ต้องมีค่าตัวเลขตั้งต้นเพื่อไม่ให้พัง)
+  if (str.includes("ตกลง") || str.includes("สอบถาม")) return 1500;
+
   if (str.includes("k")) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
+  
   const pricePart = str.split(/[\/\(\s]/)[0];
   const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
+  
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 10) return num * 1000;
+  // 🟢 ป้องกันเคสลืมพิมพ์เลขศูนย์ เช่น พิมพ์ 15 หมายถึง 1500
+  if (num < 100 && num >= 10) return num * 100; 
   if (num < 500) return num * 10;
   return num;
 }
@@ -369,9 +385,8 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
   const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket", "bangkok", "chonburi"];
 
-  // ⚡ กำหนดสไตล์สีแดงไวน์ทับทิมเข้ม เพรียวบาง คมชัด ไม่เทอะทะ (ผ่านเกณฑ์ Google AAA)
-  const zoneLinkStyle = `style="color: #881337; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;"`;
-  const zoneSpanStyle = `style="color: #881337; font-weight: 800;"`;
+  const zoneLinkStyle = `style="color: #4C1D95; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;"`;
+const zoneSpanStyle = `style="color: #4C1D95; font-weight: 800;"`;
 
   const zoneLinks = cleanZones.slice(0, 6).map(z => {
     const cleanZ = sanitizeThaiText(z);
@@ -481,11 +496,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       intro: "รวมสาวรับงานอำเภอหางดง เชียงใหม่ พิกัดโซนใต้ที่เงียบสงบ เหมาะสำหรับผู้ที่พักอาศัยในโครงการคอนโดหรือหมู่บ้านส่วนตัว น้องๆ น่ารัก อัธยาศัยดี ฟิวแฟนอบอุ่น นัดเจอจ่ายหน้างาน ไม่โอนก่อนค่ะ",
       convenience: "ครอบคลุมถนนเชียงใหม่-ฮอด กาดฝรั่ง และโซนบ้านถวาย เดินทางเข้าดูแลถึงที่พักและโรงแรมในพื้นที่ได้อย่างสะดวกรวดเร็วและเป็นส่วนตัว"
     },
-"นิมมาน": {
-      headline: "รับงานนิมมาน เชียงใหม่ • ไซด์ไลน์นิมมานเหมินท์ คาเฟ่ ดินเนอร์ ฟิวแฟน VIP ตรงปก 100%",
-      intro: "ศูนย์รวมสาวรับงานนิมมานและไซด์ไลน์ย่านนิมมานเหมินท์ แหล่งไลฟ์สไตล์สุดชิคใจกลางเชียงใหม่ รายล้อมด้วยโรงแรมหรู คอนโดมิเนียม และคาเฟ่ชั้นนำ น้องๆ น่ารัก อัธยาศัยดี สไตล์ฟิวแฟน (GFE) ดูแลอบอุ่นเสมือนแฟนตัวจริง ไม่เร่งรีบ นัดพบตัวจริงตรวจสอบความตรงปกหน้างานก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100% ค่ะ",
-      convenience: "ครอบคลุมถนนนิมมานเหมินท์ทุกซอย ถนนศิริมังคลาจารย์ และห้างสรรพสินค้า One Nimman / MAYA น้องๆ สแตนด์บายในพื้นที่ เดินทางเข้าดูแลถึงที่พักได้อย่างสะดวกรวดเร็วภายใน 10-15 นาทีค่ะ"
-    },
+    "นิมมาน": {
+  headline: "รับงานนิมมาน เชียงใหม่ • ไซด์ไลน์นิมมาน รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ",
+  intro: "ศูนย์รวมสาวรับงานนิมมานและไซด์ไลน์ย่านนิมมานเหมินท์ แหล่งที่พักยอดฮิตใจกลางเชียงใหม่ คัดโปรไฟล์น้องๆ สเปกนักศึกษา วัยใส และสาวสวยระดับพรีเมียม สไตล์ฟิวแฟน (GFE) นัดเจอน้องตัวจริงเพื่อตรวจสอบความตรงปกก่อนค่อยจ่ายเงิน ปลอดภัย ไร้ความเสี่ยง ไม่มีการโอนมัดจำ 100% ค่ะ",
+  convenience: "น้องๆ สแตนด์บายครอบคลุมถนนนิมมานเหมินท์ทุกซอย, ถนนศิริมังคลาจารย์, วันนิมมาน (One Nimman) และห้างเมญ่า (MAYA) สามารถเดินทางเข้าดูแลถึงโรงแรมและคอนโดส่วนตัวในย่านนี้ได้อย่างสะดวกรวดเร็วภายใน 10-15 นาทีค่ะ"
+},
     
     // ==================== 2. กรุงเทพมหานคร ====================
     "สุขุมวิท": {
@@ -811,28 +826,50 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const selectedTerms = getVariant(seedKey + "_terms", termsVariants);
 
   return `
-  <div style="margin-bottom: 16px;">
-    <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">${current.headline}</h3>
-    <p style="margin-bottom: 8px; line-height: 1.65;">${current.intro}</p>
-  </div>
-    <div style="margin-bottom: 16px;">
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">📍 พิกัดบริการและการนัดหมายใน ${provinceName}${zoneSlug ? ` โซน${zoneSlug}` : ""}</h3>
-      <p style="margin-bottom: 8px; line-height: 1.65;">${current.convenience}</p>
-      <ul style="list-style-type: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;">
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เพื่อนทานข้าว ดินเนอร์ คลายเหงาในวันพักผ่อน</span></li>
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เพื่อนเที่ยวสไตล์ฟิวแฟน (GFE) เทคแคร์อบอุ่น สุภาพ ไม่เร่งรีบ</span></li>
-         <li style="display: flex; align-items: flex-start; gap: 6px;"><i class="fas fa-check-circle" style="color: #059669; font-size: 12px; margin-top: 3px;"></i> <span>เอ็นเตอร์เทนเนอร์ (EN VIP) สำหรับงานเลี้ยงสังสรรค์ส่วนตัว</span></li>
-      </ul>
-    </div>
-    <div>
-      <h3 style="font-size: 14px; color: #7C3AED; font-weight: 800; margin-bottom: 8px;">🛡️ มาตรฐานความปลอดภัยและข้อกำหนดการใช้งาน</h3>
-      <p style="line-height: 1.65; margin-bottom: 6px;">${selectedSafety}</p>
-     <p style="line-height: 1.65; color: #64748B; font-size: 11.5px; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #7C3AED;">
-      ${selectedTerms}
+  <div style="margin-bottom: 24px;">
+    <!-- H2 ดึงความเชี่ยวชาญระดับพื้นที่ (Local Authority) -->
+    <h2 style="font-size: 15px; color: #7C3AED; font-weight: 900; margin-bottom: 8px; line-height: 1.4;">
+      ${current.headline}
+    </h2>
+    <p style="margin-bottom: 12px; line-height: 1.7; font-size: 13px; color: #334155;">
+      ${current.intro}
     </p>
+  </div>
+
+  <div style="margin-bottom: 24px;">
+    <!-- H2 คุมพิกัดพื้นที่ -->
+    <h2 style="font-size: 14.5px; color: #140F22; font-weight: 900; margin-bottom: 10px;">
+      📍 พิกัดบริการรับงานและไซด์ไลน์ ใน${provinceName}${zoneSlug ? ` (${zoneSlug})` : ""}
+    </h2>
+    <p style="margin-bottom: 10px; line-height: 1.65; font-size: 12.5px; color: #475569;">
+      ${current.convenience}
+    </p>
+    
+    <!-- H3 กระจายคีย์เวิร์ดย่อย -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-top: 12px;">
+       <div style="background: #F8F6FC; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.1);">
+         <h3 style="font-size: 12px; color: #1E293B; font-weight: 800; margin: 0;"><i class="fas fa-heart" style="color: #E11D48;"></i> ฟิวแฟน (GFE) ตรงปก 100%</h3>
+       </div>
+       <div style="background: #F8F6FC; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.1);">
+         <h3 style="font-size: 12px; color: #1E293B; font-weight: 800; margin: 0;"><i class="fas fa-glass-cheers" style="color: #7C3AED;"></i> เด็กเอ็นปาร์ตี้ ชงเหล้าเก่ง</h3>
+       </div>
     </div>
+  </div>
+
+  <div style="margin-bottom: 16px;">
+    <!-- H2 คุมหมวดความปลอดภัย -->
+    <h2 style="font-size: 14.5px; color: #140F22; font-weight: 900; margin-bottom: 10px;">
+      🛡️ กฎเหล็กความปลอดภัย: นัดเจอจ่ายหน้างาน ไม่มีมัดจำ
+    </h2>
+    <p style="line-height: 1.65; margin-bottom: 8px; color: #334155; font-size: 12.5px;">${selectedSafety}</p>
+    <div style="background: rgba(124, 58, 237, 0.05); padding: 10px 14px; border-radius: 10px; border-left: 3px solid #7C3AED;">
+      <p style="margin: 0; line-height: 1.6; color: #1E293B; font-size: 12px;">
+        ${selectedTerms}
+      </p>
+    </div>
+  </div>
   `;
-}
+  }
 
 async function getTemplateHtml(url, context) {
   const isEn = url.pathname.includes("-en");
@@ -1046,20 +1083,15 @@ export default async (req, context) => {
     // ssr-province.js (บรรทัดประมาณ 560-575)
 const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
 
-// 🟢 ดักจับ URL นิมมานทุกรูปแบบที่ไม่ถูกต้อง แล้วสั่งย้ายถาวร (301) ไปยัง Canonical URL เดียว
-if (cleanPath === "/nimman" || cleanPath === "/nimman.html" || cleanPath === "/location/chiangmai/นิมมาน") {
+
+if (cleanPath === "/nimman" || cleanPath === "/nimman.html" || cleanPath === "/location/chiangmai/นิมมาน" || cleanPath.includes("/location/chiangmai/%e0%b8%99%e0%b8%b4%e0%b8%a1%e0%b8%a1%e0%b8%b2%e0%b8%99")) {
   return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
 }
 
-if (["/about", "/faq", ...].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
+const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
+if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
   return await context.next(); 
 }
-
-if (url.pathname === "/index.html") {
-  return Response.redirect(`${primaryDomain}/`, 301);
-}
-
-   
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
 const segments = url.pathname.split("/").filter(Boolean);
 
@@ -1081,7 +1113,8 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
     const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
     const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS);
-    if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) {
+   if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) {
+      cachedPage.lastAccessed = Date.now(); // 🟢 อัปเดตเวลาการใช้งานล่าสุด
       PAGE_CACHE.delete(cacheKey);
       PAGE_CACHE.set(cacheKey, cachedPage);
       return new Response(cachedPage.html, { headers: cachedPage.headers });
@@ -1342,7 +1375,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-          <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="lazy" fetchpriority="low" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "low"}" decoding="${i === 0 ? "sync" : "async"}" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -1380,14 +1413,27 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
     
-    const rawCanonicalUrl = isEnglishHome
-      ? `${primaryDomain}/index-en`
-      : (isNational 
-          ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) 
-          : (zoneSlug 
-              ? `${primaryDomain}/location/${provinceSlug}/${zoneSlug.replace(/\s+/g, "-")}` 
-              : `${primaryDomain}/location/${provinceSlug}`)); 
-    const canonicalUrl = encodeURI(rawCanonicalUrl);
+    const ZONE_TO_SLUG_MAP = {
+  "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
+  "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
+  "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
+  "แม่ริม": "maerim", "หางดง": "hangdong"
+};
+
+let safeZoneSlugPart = "";
+if (zoneSlug) {
+  safeZoneSlugPart = ZONE_TO_SLUG_MAP[zoneSlug] || zoneSlug.replace(/\s+/g, "-");
+}
+
+const rawCanonicalUrl = isEnglishHome
+  ? `${primaryDomain}/index-en`
+  : (isNational 
+      ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) 
+      : (zoneSlug 
+          ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}` 
+          : `${primaryDomain}/location/${provinceSlug}`)); 
+const canonicalUrl = encodeURI(rawCanonicalUrl);
 
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
@@ -1399,23 +1445,23 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-   // 🟢 Title Tag
+  // 🟢 Title Tag (อัดคีย์เวิร์ดทำเงิน รูปจริง + ไม่มีมัดจำ)
     const metaTitle = isEnglishHome
-      ? `Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos | ${CONFIG.BRAND_NAME}`
+      ? `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`
       : (zoneSlug
-          ? `สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} (ในตัวเมือง) ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`
+          ? `สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}`
           : (isNational 
-              ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ฟิวแฟนตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}` 
-              : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ในเมือง ตรงปก จ่ายหน้างาน | ${CONFIG.BRAND_NAME}`));
+              ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}` 
+              : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}`));
 
-    // 🟢 Meta Description
+    // 🟢 Meta Description (ดักคีย์ย่านย่อย + ย้ำความปลอดภัย)
     const metaDescription = isEnglishHome
-      ? `Premier verified travel companions and VIP dinner dates across Thailand (${totalCount} profiles). 100% verified real photos, pay directly on arrival, zero advance deposit.`
+      ? `Premium verified escorts and sidelines across Thailand (${totalCount} profiles). 100% real photos, pay directly on arrival, zero advance deposit.`
       : (zoneSlug
-          ? `ศูนย์รวมสาวรับงาน${zoneSlug} และไซด์ไลน์${zoneSlug} ในตัวเมือง${provinceNameThai} (${totalCount} โปรไฟล์) สไตล์เพื่อนเที่ยวฟิวแฟน เดินทางถึงโรงแรมและที่พักในย่าน${zoneSlug}สะดวกรวดเร็ว นัดเจอเช็คตรงปกก่อนค่อยจ่ายเงิน ปลอดภัย 100% [อัปเดตจริง ${realFreshnessDate}]`
+          ? `ค้นหาโปรไฟล์ สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${totalCount} โปรไฟล์) คัดรูปจริง 100% ตรงปก สแตนด์บายพร้อมดูแล นัดเจอง่าย จ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี [อัปเดต ${realFreshnessDate}]`
           : (isNational
-              ? `ศูนย์รวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย (${totalCount} โปรไฟล์) สไตล์ฟิวแฟน [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย ไร้มัดจำ 100%`
-              : `ศูนย์รวมสาวรับงาน${provinceNameThai} และไซด์ไลน์${provinceNameThai} (${totalCount} คนล่าสุด) สไตล์ฟิวแฟนดูแลดี [อัปเดตข้อมูลจริง ${realFreshnessDate}] นัดพบตัวจริงก่อนค่อยจ่ายเงิน ปลอดภัย 100% ค่ะ`));
+              ? `ศูนย์รวม สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย (${totalCount} โปรไฟล์) คัดรูปจริงตรงปก 100% นัดเจอง่าย จ่ายเงินหน้างานตรงกับน้อง ปลอดภัย ไร้มัดจำ [อัปเดต ${realFreshnessDate}]`
+              : `รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมย่านนิมมาน เจ็ดยอด สันติธรรม หลังมช. นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const breadcrumbItems = [
@@ -1745,21 +1791,13 @@ const hreflangBlock = isNational
 
     if (isNational) {
       ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
-                   <span class="h1-line-2">ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)</span>`;
-      dynamicSubheadline = ``;
-
+                   <span class="h1-line-2">รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
     } else if (zoneSlug) {
-      // 🟢 หน้ารายโซนย่อย: วางชื่อโซนไว้หน้าสุด ชัดเจน แยกขาดจากหน้าจังหวัด
       ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2">ในตัวเมือง${escapeHTML(provinceNameThai)} ฟิวแฟนตรงปก จ่ายหน้างาน</span>`;
-      dynamicSubheadline = ``;
-
+                   <span class="h1-line-2">${escapeHTML(provinceNameThai)} รูปจริง 100% ปลอดภัย จ่ายหน้างาน</span>`;
     } else {
-      // 🟢 หน้ารายจังหวัด (เหลือไว้แค่บล็อกเดียว)
-      const cityTag = provinceSlug === "chiangmai" ? "ในเมืองเชียงใหม่" : `ตัวเมือง${escapeHTML(provinceNameThai)}`;
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์<span class="t-chunk">${cityTag}</span></span>
-                   <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน นัดพบชำระค่าบริการหน้างาน</span>`;
-      dynamicSubheadline = ``;
+      ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">รูปจริง ตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ</span>`;
     }
 
    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
@@ -1886,10 +1924,10 @@ if (!isNational && pills) {
     `;
 
     const dynamicHeroDesc = isNational
-      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> แพลตฟอร์มรวมข้อมูลเพื่อนเที่ยวฟิวแฟน สาวไซด์ไลน์ และเด็กเอ็นทั่วไทย ครอบคลุมทั้งบริการนอกสถานที่และห้องพักส่วนตัว ตรวจสอบข้อมูลก่อนติดต่อ ชำระค่าบริการหน้างานโดยตรง</p>${trustBoxHtml}`
-      : (zoneSlug
-          ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและน้องๆ ไซด์ไลน์โซน${escapeHTML(zoneSlug)} ในตัวเมือง${escapeHTML(provinceNameThai)} สไตล์เพื่อนเที่ยวฟิวแฟน สแตนด์บายพร้อมเดินทางดูแลถึงโรงแรม คอนโด และห้องพักส่วนตัวในย่าน${escapeHTML(zoneSlug)} ตรวจสอบตัวจริงหน้างาน ชำระเงินตรงกับน้อง ไร้มัดจำ 100%</p>${trustBoxHtml}`
-          : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์ใน${escapeHTML(provinceNameThai)} สไตล์ฟิวแฟน รูปจริง 100% ไม่มีโอนมัดจำ ชำระค่าบริการเมื่อพบผู้ให้บริการหน้างานโดยตรง</p>${trustBoxHtml}`);
+  ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;"><strong>FirstModelHub</strong> แพลตฟอร์มรวมสาวรับงาน ไซด์ไลน์ และเด็กเอ็นทั่วไทย คัดเฉพาะรูปจริงตรงปก 100% ปลอดภัยสูงสุดด้วยนโยบาย <strong>นัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้าทุกกรณี</strong></p>${trustBoxHtml}`
+  : (zoneSlug
+      ? `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์โซน${escapeHTML(zoneSlug)} ${escapeHTML(provinceNameThai)} การันตีรูปจริงตรงปก 100% น้องๆ สแตนด์บายพร้อมเดินทางดูแลถึงโรงแรมและที่พักในย่าน${escapeHTML(zoneSlug)} <strong>นัดเจอเช็คตัวจริงก่อน จ่ายเงินหน้างาน ไม่มีมัดจำ</strong></p>${trustBoxHtml}`
+      : `<p class="hero-subtitle-p" style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.65;">รวมโปรไฟล์สาวรับงานและไซด์ไลน์ใน${escapeHTML(provinceNameThai)} คัดตัวจริงตรงปก 100% นัดเจอง่าย สบายใจ <strong>ชำระค่าบริการเมื่อพบผู้ให้บริการหน้างานโดยตรง ไม่โอนมัดจำ</strong></p>${trustBoxHtml}`);
 
     finalHtml = finalHtml.replace(/<div class="hero-description-inset">[\s\S]*?<\/div>/i, `<div class="hero-description-inset" style="padding: 12px 14px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 16px; margin: 10px 0;">${dynamicHeroDesc}</div>`);
 
@@ -2140,10 +2178,9 @@ if (!isNational && pills) {
       };
     });
 
-    const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
-  
-  
-    
+  // 🟢 จำกัดข้อมูลที่ฝังลง HTML ไว้ที่ 150 คนแรก เพื่อความเร็วปานจรวด
+    const initialClientProfiles = clientProfilesData.slice(0, 150);
+    const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
@@ -2153,6 +2190,7 @@ if (!isNational && pills) {
     const ssrDataScript = `
       <script id="ssr-profiles-data">
         window.profilesData = ${serializedProfilesJson};
+        window.totalProfilesCount = ${clientProfilesData.length};
         window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
         window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
         window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
@@ -2179,20 +2217,17 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-    const validLcpProfile = profilesList.find(p => {
-      const img = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-      return img && !img.includes("firstmodelhub.webp");
-    });
+   // ดึงรูปของน้องคนแรกใน Hot Swiper (รูป LCP ตัวจริงที่อยู่บนสุดของจอ)
+const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : profilesList[0];
 
-    if (validLcpProfile) {
-      const rawLcpImg = validLcpProfile.imagePath || validLcpProfile.image_url || validLcpProfile.imageUrl;
-      const lcpImgSmall = optimizeImg(rawLcpImg, 400);
-      const lcpImgLarge = optimizeImg(rawLcpImg, 600);
-      
-      // 🟢 ปรับ imagesizes ให้ตรงกับแท็ก <img> ของการ์ด (48vw บนมือถือ) ป้องกันการโหลดรูปซ้ำ 2 รอบ:
-      const preloadTag = `  <link rel="preload" as="image" href="${lcpImgSmall}" imagesrcset="${lcpImgSmall} 400w, ${lcpImgLarge} 600w" imagesizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px" fetchpriority="high">\n</head>`;
-      finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
-    }
+if (lcpTargetProfile) {
+  const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
+  const lcpExactUrl = optimizeImg(rawLcpImg, 400);
+  
+  // ลิงก์ตรงแบบ 1:1 ไม่มี srcset หลอก เบราว์เซอร์ดึงมาเรนเดอร์ได้ทันทีใน 0.3 วินาที
+  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
+  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+}
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
