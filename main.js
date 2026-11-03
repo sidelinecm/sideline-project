@@ -332,14 +332,14 @@ function optimizeImg(imagePath, mode = "card") {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
       // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
-      return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
 
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/adjucgfa/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
 
   function normalizeProfile(raw) {
@@ -1271,7 +1271,7 @@ if (heroH1) {
 
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-        rawPath = "https://res.cloudinary.com/adjucgfa/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
     const imgSrc = (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? p.images[0].src 
