@@ -729,8 +729,13 @@ for (const p of hotCandidate) {
 
     let results = [...appState.allProfiles];
 
-    // 1. กรองตามจังหวัด
-    if (activeProvince !== "all" && activeProvince !== "national") {
+// 🟢 ตัดคนที่ติด Hot Swiper ออกจากรายการด้านล่าง ไม่ให้หน้าจอกระตุกและแสดงซ้ำ
+if (window.__hotProfileIds && window.__hotProfileIds.size > 0 && !currentCriteria.text && (!currentCriteria.zone || currentCriteria.zone === "ทั้งหมด")) {
+  results = results.filter(p => !window.__hotProfileIds.has(String(p.id)));
+}
+
+// 1. กรองตามจังหวัด
+if (activeProvince !== "all" && activeProvince !== "national") {
       const cleanActive = activeProvince.toLowerCase().replace(/[-_]/g, "");
       results = results.filter(p => {
         const cleanK = String(p.provinceKey || p.province_slug || p.province || "").toLowerCase().replace(/[-_]/g, "");
@@ -1076,37 +1081,36 @@ window.executeFilterAndRender = executeFilterAndRender;
     heroSectionEl.setAttribute("aria-label", dynamicAria);
   }
 
-    // 🟢 1. โหลดแผนที่ Google Maps ก่อนเสมอ (รองรับทั้งหน้าแรก, หน้ารายจังหวัด และหน้าโซนย่อย)
-    const mapIframe = document.getElementById("google-map");
-    if (mapIframe) {
-      const pathSegments = window.location.pathname.split("/").filter(Boolean);
-      const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
-      const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
-      
-      const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
-      const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
-      
-      const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
-      const queryText = isAllOrNational 
-        ? "ประเทศไทย" 
-        : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
-      const targetMapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+  const mapIframe = document.getElementById("google-map");
+if (mapIframe) {
+  // 🟢 ถ้าเซิร์ฟเวอร์ใส่ URL มาเรียบร้อยแล้ว ให้ข้ามทันที ประหยัดเน็ต ไม่กระตุก
+  if (mapIframe.src && mapIframe.src !== "about:blank" && !mapIframe.src.endsWith("about:blank")) {
+    // ข้าม ไม่ต้องทำอะไรเพิ่ม
+  } else {
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
+    const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
+    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+    const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
+    const queryText = isAllOrNational ? "ประเทศไทย" : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
+    const targetMapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
 
-      if ("IntersectionObserver" in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              if (mapIframe.src !== targetMapSrc) mapIframe.src = targetMapSrc;
-              observer.disconnect();
-            }
-          });
-        }, { rootMargin: "250px" });
-        observer.observe(mapIframe);
-      } else {
-        mapIframe.src = targetMapSrc;
-      }
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            mapIframe.src = targetMapSrc;
+            observer.disconnect();
+          }
+        });
+      }, { rootMargin: "250px" });
+      observer.observe(mapIframe);
+    } else {
+      mapIframe.src = targetMapSrc;
     }
-
+  }
+}
     // 🛡️ 2. ป้องกันหน้าโซนย่อย: ตัดจบเฉพาะส่วนเขียนทับ Title/H1 เพื่อคงค่า SSR
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
@@ -1135,14 +1139,11 @@ if (heroH1) {
   const isSsrPage = window.location.pathname.includes("/location/") || 
                     window.location.pathname.includes("/province/") || 
                     window.location.pathname.includes("/sideline/");
-  if (!isSsrPage && !isEN) {
-    const line1 = `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
-    const line2 = "เพื่อนเที่ยวฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)";
-    heroH1.innerHTML = `
-      <span class="h1-line-1">${line1}</span>
-      <span class="h1-line-2">${line2}</span>
-    `;
-  }
+ if (!isSsrPage && !isEN) {
+  const line1 = `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
+  const line2 = "รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
+  heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
+}
 }
 
     // ✅ ซิงค์ H2 ให้ตรงกับ SSR
@@ -1475,20 +1476,24 @@ function updateLightboxPhoto(idx) {
     const photoObj = currentActivePhotoList[idx] || {};
     const nextSrc = photoObj.fullSrc || photoObj.src || "https://firstmodelhub.com/images/firstmodelhub.webp";
 
-    heroImg.style.opacity = "0.25";
+   heroImg.style.opacity = "0.3";
     heroImg.style.transform = "scale(0.98)";
     
-    // ตั้งค่า fallback เมื่อโหลดรูปผิดพลาด
-    heroImg.onerror = function() {
-      this.onerror = null;
-      this.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
-    };
-
-    setTimeout(() => {
+    // 🟢 โหลดรูปภาพใน Memory ให้เสร็จก่อน ป้องกันจอดำ
+    const preloader = new Image();
+    preloader.onload = () => {
       heroImg.src = nextSrc;
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
-    }, 110);
+    };
+    preloader.onerror = () => {
+      // ถ้ารูปเสีย/เน็ตหลุด ให้เด้งกลับไปรูป Fallback ทันที
+      heroImg.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
+      heroImg.style.opacity = "1";
+      heroImg.style.transform = "scale(1)";
+    };
+    // เริ่มดาวน์โหลดรูป
+    preloader.src = nextSrc;
 
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
@@ -1665,14 +1670,20 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
  const dynamicTitle = isEn
-      ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
-      : `${displayName} รับงานไซด์ไลน์${pProvText} ฟิวแฟน(${primaryZone}) นอกสถานที่ติดต่อสอบถาม ไม่มีมัดจำ`;
+  ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
+  : `น้อง${cleanName} สาวรับงาน${pProvText} ไซด์ไลน์${primaryZone} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ`;
+  
+  document.title = dynamicTitle; 
+  
+  
 
-    document.title = dynamicTitle; // 👈 เพิ่มบรรทัดนี้ลงไป เพื่อเปลี่ยนชื่อ Title บนเบราว์เซอร์ทันที
+const dynamicDesc = isEn
+  ? `Profile ${displayName} verified companion in ${pLocText}. 100% real photos, pay on arrival, no deposit.`
+  : `ดูโปรไฟล์ น้อง${cleanName} สาวรับงาน${pProvText} ไซด์ไลน์โซน${primaryZone} สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} การันตีรูปจริงตรงปก 100% นัดเจอง่าย สบายใจ จ่ายเงินหน้างาน ไม่มีการโอนมัดจำทุกกรณีค่ะ`;
 
-    const dynamicDesc = isEn
-      ? `${displayName} verified companion in ${pLocText}, ${pProvText}. Romantic Girlfriend Experience (GFE), 100% real photos, pay on arrival.`
-      : `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${pProvText} โซน${primaryZone} นอกสถานที่ติดต่อสอบถามรายละเอียดเพิ่มเติม สัดส่วน ${profile.safeStats || profile.stats || "ตรงปก"} สไตล์ฟิวแฟน ตรงปก100% นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ`;
+    
+
+    
       
     const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
     
@@ -2225,13 +2236,16 @@ if (faqSection && faqList) {
     let isDragging = false;
     let isEligible = false;
 
-    contentEl.addEventListener("touchstart", (e) => {
+   contentEl.addEventListener("touchstart", (e) => {
       // 🔒 ยอมให้ลากปิดได้เฉพาะแตะที่ Drag Bar หัวภาพ หรือตอนที่สกอร์อยู่บนสุดเท่านั้น
       const isFromDragBar = dragBar && (dragBar.contains(e.target) || e.target === dragBar);
       const isAtTop = !scrollBody || scrollBody.scrollTop <= 0;
       const isHeaderArea = e.target.closest(".lightbox-top-brand") || e.target.closest(".sheet-drag-pill-bar");
 
-      if (isFromDragBar || (isAtTop && isHeaderArea)) {
+      // 🟢 ป้องกันบั๊ก iOS Rubber-band: ถ้านิ้วเริ่มแตะต่ำกว่าขอบบนลงมาเกิน 120px แปลว่าไม่ได้ตั้งใจปิด
+      const isStartNearTop = e.touches[0].clientY < 120;
+
+      if (isFromDragBar || (isAtTop && isHeaderArea && isStartNearTop)) {
         isEligible = true;
         startY = e.touches[0].clientY;
         currentY = startY;
@@ -2907,29 +2921,33 @@ if (cardElement) {
           });
         }
 
-        // 2. กรณีมีข้อมูลจาก SSR (window.profilesData)
-        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           const cleanProfiles = filterValidProfiles(window.profilesData);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
-          return true;
-        }
-
-        // 3. Fallback: ดึงสดจาก Supabase (ถ้าไม่มี SSR)
-        const client = await getSupabaseClient();
-        if (!client) throw new Error("Supabase client not initialized");
-
-        const { data: rawDbProfiles } = await client
-          .from("profiles")
-          .select("*")
-          .eq("active", true)
-          .order("isfeatured", { ascending: false })
-          .order("created_at", { ascending: false });
-
-        if (rawDbProfiles && rawDbProfiles.length > 0) {
-          const cleanProfiles = filterValidProfiles(rawDbProfiles);
-          appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
-          populateInitialComponents();
+          
+          // 🟢 Lazy Load โปรไฟล์ที่เหลือเบื้องหลัง (ถ้ามีคนมากกว่า 150 คน)
+          if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData.length) {
+            setTimeout(async () => {
+              try {
+                const bgClient = await getSupabaseClient();
+                const { data } = await bgClient.from("profiles")
+                  .select("*")
+                  .eq("active", true)
+                  .order("isfeatured", { ascending: false })
+                  .order("created_at", { ascending: false })
+                  .range(window.profilesData.length, window.totalProfilesCount);
+                  
+                if (data && data.length > 0) {
+                  const moreClean = filterValidProfiles(data);
+                  const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
+                  appState.allProfiles = [...appState.allProfiles, ...moreProfiles];
+                  // ปล่อยให้ระบบค้นหาอัปเดตเองโดยไม่รบกวนผู้ใช้
+                }
+              } catch (e) { console.warn("Background fetch warning", e); }
+            }, 3000); // ดีเลย์ 3 วินาที รอให้เว็บวาดหน้าจอเสร็จก่อน
+          }
+          
           return true;
         }
 

@@ -4164,12 +4164,10 @@ img:not([src]) {
   border: 2px solid #FFFFFF !important;
 }
 
-/* จุดเขียวกะพริบสดแบบ Live Beacon */
-.story-status-dot.online {
-  background: #00E676 !important;
-  box-shadow: 0 0 10px #00E676, 0 0 18px #00E676 !important;
-  border: 2px solid #FFFFFF !important;
-  animation: liveRadarPulse 1.5s infinite ease-out !important;
+.dock-item-line {
+  background: #047857 !important; /* เขียวเข้ม Emerald 700 */
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
 }
 
 @keyframes liveRadarPulse {
