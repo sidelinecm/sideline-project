@@ -1,13 +1,13 @@
 /**
  * [ FIRST MODEL HUB - SERVICE WORKER ENGINE ]
- * High-Performance & Self-Healing Cache (Bug-Free Edition)
+ * High-Performance & Self-Healing Cache (Edge-Compliant)
  */
 
 const swUrl = new URL(self.location);
 const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261022_13';
 const CACHE_NAME = `firstmodelhub-cache-${CURRENT_VERSION}`;
 
-// 🟢 แคชเฉพาะไฟล์ Asset คงที่เท่านั้น (ห้ามแคชหน้า HTML เด็ดขาด เพื่อให้ข้อมูลสดใหม่ตลอดเวลา)
+// แคชเฉพาะไฟล์ Asset คงที่พื้นฐาน (ไม่แคช HTML เพื่อให้ข้อมูลสดเสมอ)
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
   '/images/favicon.ico',
@@ -26,7 +26,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// 🟢 ลบแคชเวอร์ชันเก่าทิ้งทันทีเมื่อมีเวอร์ชันใหม่
+// ล้างแคชเวอร์ชันเก่าทิ้งทันทีเมื่อมีการอัปเดตเวอร์ชันใหม่
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -43,13 +43,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 1. ข้าม API Supabase, Google Analytics และคำขอที่ไม่ใช่ GET
+  // 1. ข้าม Supabase API, Analytics และคำขอที่ไม่ใช่ GET
   if (url.origin.includes('supabase.co') || url.origin.includes('googletagmanager.com') || event.request.method !== 'GET') {
     return;
   }
 
-  // 2. ถ้าเป็นคำขอหน้าเว็บ (HTML Document) ให้ดึงสดจาก Network ก่อนเสมอ (Network-First)
-  // เพื่อให้หน้าแรกและหน้ารายจังหวัดแสดงข้อมูลโปรไฟล์สดใหม่จาก SSR เสมอ
+  // 2. ถ้าเป็นเอกสาร HTML (หน้ารายการ, หน้าโปรไฟล์) -> ใช้ Network-First เสมอ
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -59,7 +58,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. รูปภาพจาก Cloudinary (Cache-First + Background Refresh)
+  // 3. รูปภาพจาก Cloudinary -> Cache-First พร้อมอัปเดตเบื้องหลัง
   if (url.origin.includes('res.cloudinary.com')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
@@ -78,11 +77,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 4. ไฟล์ Static (CSS, JS, Fonts) - ดึงจากแคช หรือโหลดจากเน็ต ปลอดภัยไม่คืนค่า undefined
+  // 4. ไฟล์ Static (CSS, JS, Fonts) -> ตัด ignoreSearch ออกเพื่อให้ Query Versioning (?v=...) ทำงานถูกต้อง
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then(cachedResponse => {
+    caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) {
-        // อัปเดตแคชเบื้องหลัง
+        // อัปเดตในพื้นหลัง
         fetch(event.request).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
@@ -91,7 +90,6 @@ self.addEventListener('fetch', event => {
         return cachedResponse;
       }
 
-      // 🛡️ ป้องกัน Error สแตก: ถ้าเน็ตหลุด ให้ส่ง Response ว่าง 408 แทนการส่ง undefined
       return fetch(event.request).catch(() => {
         return new Response('', { status: 408, statusText: 'Network Request Failed' });
       });

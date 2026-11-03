@@ -1052,13 +1052,29 @@ window.executeFilterAndRender = executeFilterAndRender;
     }
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
-    const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+  const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
 
-    // 🟢 1. อัปเดตตัวเลขจำนวนโปรไฟล์สด
-    const liveCounterEl = document.getElementById("live-profile-count");
-    if (liveCounterEl) {
-      liveCounterEl.textContent = `${totalCount}`;
-    }
+  // 1. อัปเดตตัวเลขจำนวนโปรไฟล์สด
+  const liveCounterEl = document.getElementById("live-profile-count");
+  if (liveCounterEl) {
+    liveCounterEl.textContent = `${totalCount}`;
+  }
+
+  // 🟢 2. อัปเดต aria-label บน #hero-section ทันทีเมื่อผู้ใช้สลับจังหวัด/โซน
+  const heroSectionEl = document.getElementById("hero-section");
+  if (heroSectionEl) {
+    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+    const zoneSlug = window.currentZoneSlug ? String(window.currentZoneSlug).trim() : "";
+
+    const dynamicAria = isAllOrNational
+      ? "ศูนย์รวมสาวรับงานและไซด์ไลน์ทั่วไทย"
+      : (zoneSlug
+          ? `สาวรับงานและไซด์ไลน์${targetName} โซน${zoneSlug}`
+          : `ศูนย์รวมสาวรับงานและไซด์ไลน์${targetName}`);
+
+    heroSectionEl.setAttribute("aria-label", dynamicAria);
+  }
 
     // 🟢 1. โหลดแผนที่ Google Maps ก่อนเสมอ (รองรับทั้งหน้าแรก, หน้ารายจังหวัด และหน้าโซนย่อย)
     const mapIframe = document.getElementById("google-map");
@@ -1112,29 +1128,22 @@ window.executeFilterAndRender = executeFilterAndRender;
     }
 
     
-  // ✅ ใน main.js (ฟังก์ชัน replaceDomPlaceholders)
-    const heroH1 = document.getElementById("hero-h1");
-    if (heroH1) {
-      if (isEN) {
-        // ภาษาอังกฤษคงเดิม...
-      } else {
-        // 🟢 แก้ไข: ดึง zoneSlug จาก window.currentZoneSlug ป้องกัน Crash
-const zoneSlug = window.currentZoneSlug ? String(window.currentZoneSlug).trim() : "";
-
-const line1 = isAllOrNational 
-  ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>` 
-  : (zoneSlug 
-      ? `สาวรับงาน ไซด์ไลน์${escapeHTML(targetName)} <span class="t-chunk">โซน${escapeHTML(zoneSlug)}</span>`
-      : `สาวรับงาน และ ไซด์ไลน์${escapeHTML(targetName)}`);
-              
-        const line2 = "ฟิวแฟนตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)";
-
-        heroH1.innerHTML = `
-          <span class="h1-line-1">${line1}</span>
-          <span class="h1-line-2">${line2}</span>
-        `;
-      }
-    }
+  // main.js (บรรทัดประมาณ 435-450)
+const heroH1 = document.getElementById("hero-h1");
+if (heroH1) {
+  // 🟢 ถ้าหน้านี้เรนเดอร์เนื้อหา H1 มาจาก SSR เรียบร้อยแล้ว ให้ข้ามการเขียนทับทันที
+  const isSsrPage = window.location.pathname.includes("/location/") || 
+                    window.location.pathname.includes("/province/") || 
+                    window.location.pathname.includes("/sideline/");
+  if (!isSsrPage && !isEN) {
+    const line1 = `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
+    const line2 = "เพื่อนเที่ยวฟิวแฟนตัวจริง ตรงปก จ่ายหน้างาน (ไม่มีมัดจำ)";
+    heroH1.innerHTML = `
+      <span class="h1-line-1">${line1}</span>
+      <span class="h1-line-2">${line2}</span>
+    `;
+  }
+}
 
     // ✅ ซิงค์ H2 ให้ตรงกับ SSR
     const featuredH2 = document.getElementById("featured-heading");
