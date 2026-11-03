@@ -93,7 +93,8 @@ const optimizeImgForXml = (path) => {
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/dyynjlbuj/image/upload/${WM_TRANSFORM}/${fileMatch[1]}`;
+      // ✅ ใส่ชื่อบัญชีใหม่ (adjucgfa) คั่นตรงกลางแบบนี้ครับ
+      return `https://res.cloudinary.com/adjucgfa/image/upload/${WM_TRANSFORM}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
