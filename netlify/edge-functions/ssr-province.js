@@ -1043,16 +1043,21 @@ export default async (req, context) => {
       return await context.next();
     }
 
-    // 🟢 ประกาศตัวแปร cleanPath ตรงนี้
-    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+    // ssr-province.js (บรรทัดประมาณ 560-575)
+const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
 
-    if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/offline", "/profile", "/sideline"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
-      return await context.next(); 
-    }
+// 🟢 ดักจับ URL นิมมานทุกรูปแบบที่ไม่ถูกต้อง แล้วสั่งย้ายถาวร (301) ไปยัง Canonical URL เดียว
+if (cleanPath === "/nimman" || cleanPath === "/nimman.html" || cleanPath === "/location/chiangmai/นิมมาน") {
+  return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
+}
 
-    if (url.pathname === "/index.html") {
-      return Response.redirect(`${primaryDomain}/`, 301);
-    }
+if (["/about", "/faq", ...].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
+  return await context.next(); 
+}
+
+if (url.pathname === "/index.html") {
+  return Response.redirect(`${primaryDomain}/`, 301);
+}
 
    
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
@@ -1337,7 +1342,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-            <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="lazy" fetchpriority="low" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -1560,7 +1565,15 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       });
     }
 
-  const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
+  // ssr-province.js (บรรทัดประมาณ 895)
+// 🟢 รวบรวม ID ของน้องที่ติดแถบ Hot Swiper
+const hotIdSet = new Set(hotProfiles.map(p => String(p.id)));
+
+// 🟢 กรองคนที่ติด Hot ออกจากรายการ Grid ด้านล่าง (ป้องกันการแสดงซ้ำ)
+const gridProfilesList = profilesList.filter(p => !hotIdSet.has(String(p.id)));
+
+// เรนเดอร์การ์ด Grid โดยใช้รายการที่ตัดคนซ้ำออกแล้ว
+const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
    
 
     // ✅ ต้องส่ง activeFaqs เข้าไป ไม่ใช่ seoData.faqs
@@ -1749,8 +1762,31 @@ const hreflangBlock = isNational
       dynamicSubheadline = ``;
     }
 
-    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
-    finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
+   finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
+
+// 🟢 1. สร้างข้อความ aria-label และข้อความคอมเมนต์ตามหน้าที่กำลังเปิดอยู่
+const heroAriaLabel = isNational
+  ? "ศูนย์รวมสาวรับงานและไซด์ไลน์ทั่วไทย"
+  : (zoneSlug
+      ? `สาวรับงานและไซด์ไลน์${provinceNameThai} โซน${zoneSlug}`
+      : `ศูนย์รวมสาวรับงานและไซด์ไลน์${provinceNameThai}`);
+
+const heroCommentLabel = isNational
+  ? "หน้าแรก"
+  : (zoneSlug ? `${provinceNameThai} โซน${zoneSlug}` : provinceNameThai);
+
+// 🟢 2. สั่งแทนที่ aria-label ที่ล็อกเป้าหมายด้วย id="hero-section"
+finalHtml = finalHtml.replace(
+  /(<section[^>]*id=["']hero-section["'][^>]*aria-label=["'])[^"']*(["'])/i,
+  `$1${heroAriaLabel}$2`
+);
+
+// 🟢 3. สั่งแทนที่ข้อความคอมเมนต์ <!-- Hero Section ... -->
+finalHtml = finalHtml.replace(
+  /<!--\s*Hero Section\s+[^>]*-->/i,
+  `<!-- Hero Section ${heroCommentLabel} -->`
+);
 
     function matchProfileToZone(p, cleanZ) {
   if (!p || !cleanZ) return false;
@@ -1802,9 +1838,27 @@ pills += activeZoneKeys.map(z => {
   const cleanZ = escapeHTML(String(z).trim());
   const count = zoneCountMap[z];
   const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
-  const href = cleanZ.includes("นิมมาน") 
-  ? "/location/chiangmai/nimman" // 🟢 แก้เป็นอันนี้ ชี้ตรงไปหน้าใหม่ทันที
-  : encodeURI(`/location/${provinceSlug}/${cleanSlugZone}`);
+  
+  // ssr-province.js (บรรทัดประมาณ 1050)
+const ZONE_TO_SLUG = {
+  "นิมมาน": "nimman",
+  "เจ็ดยอด": "jedyod",
+  "สันติธรรม": "santitham",
+  "ช้างเผือก": "changphueak",
+  "หลัง มช.": "cmu",
+  "หน้า มช.": "namor",
+  "ท่าแพ": "thapae",
+  "สันทราย": "sansai",
+  "แม่โจ้": "maejo",
+  "พายัพ": "payap",
+  "ห้วยแก้ว": "huaykaew",
+  "รวมโชค": "ruamchok",
+  "แม่ริม": "maerim",
+  "หางดง": "hangdong"
+};
+
+const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
+const href = `/location/${provinceSlug}/${slugPart}`;
   
   const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
 
@@ -2144,8 +2198,7 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
     finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
     finalHtml = finalHtml.replace(/\/main\.js\?v=[^"'\s>]+/g, `/main.js?v=${GLOBAL_VERSION}`);
 
-    const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
+    if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) { finalHtml = finalHtml.replace(/<head>/i, '<head>\n <meta charset="utf-8">'); } const responseHeaders = { "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
       "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
       "ETag": `"${GLOBAL_VERSION}"`,
@@ -2153,7 +2206,7 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
     };
 
     setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
-    return new Response(finalHtml, { headers: responseHeaders });
+   return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);
