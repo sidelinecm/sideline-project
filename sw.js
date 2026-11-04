@@ -4,7 +4,7 @@
  */
 
 const swUrl = new URL(self.location);
-const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261022_19';
+const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261022_20';
 const CACHE_NAME = `firstmodelhub-cache-${CURRENT_VERSION}`;
 
 // แคชเฉพาะไฟล์ Asset คงที่พื้นฐาน (ไม่แคช HTML เพื่อให้ข้อมูลสดเสมอ)
