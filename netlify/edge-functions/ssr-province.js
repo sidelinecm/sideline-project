@@ -1598,7 +1598,7 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
         ]
       : (seoData.faqs || []);
 
-    if (activeFaqs && activeFaqs.length > 0) {
+  if (activeFaqs && activeFaqs.length > 0) {
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${canonicalUrl}#faq`,
@@ -1611,19 +1611,16 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       });
     }
 
-  // ssr-province.js (บรรทัดประมาณ 895)
-// 🟢 รวบรวม ID ของน้องที่ติดแถบ Hot Swiper
-const hotIdSet = new Set(hotProfiles.map(p => String(p.id)));
+    // ==============================================================================
+    // 🟢 แก้ไขตรงนี้: กำหนดให้ gridProfilesList แสดงโปรไฟล์ทั้งหมดครบถ้วน 100% ตามจริง
+    // ==============================================================================
+    const gridProfilesList = profilesList;
 
-// 🟢 กรองคนที่ติด Hot ออกจากรายการ Grid ด้านล่าง (ป้องกันการแสดงซ้ำ)
-const gridProfilesList = profilesList.filter(p => !hotIdSet.has(String(p.id)));
-
-// เรนเดอร์การ์ด Grid โดยใช้รายการที่ตัดคนซ้ำออกแล้ว
-const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
+    // เรนเดอร์การ์ด Grid โดยใช้รายการโปรไฟล์ทั้งหมดของจังหวัด/โซนนั้น
+    const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
    
-
     // ✅ ต้องส่ง activeFaqs เข้าไป ไม่ใช่ seoData.faqs
-const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
+    const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     
     const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug, zoneSlug);

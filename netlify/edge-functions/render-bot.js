@@ -877,6 +877,29 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                 </div>
 
                
+                <!-- Spec Grid (ย้ายเข้าสู่ CSS Class) -->
+                <div class="fmh-spec-grid">
+                    <div class="fmh-spec-tile">
+                        <span class="fmh-spec-tile-label">สัดส่วน</span>
+                        <strong class="fmh-spec-tile-val">${escapeHTML(stats)}</strong>
+                    </div>
+                    <div class="fmh-spec-tile">
+                        <span class="fmh-spec-tile-label">ส่วนสูง / น้ำหนัก</span>
+                        <strong class="fmh-spec-tile-val">${heightDisplay} / ${weightDisplay}</strong>
+                    </div>
+                    <div class="fmh-spec-tile">
+                        <span class="fmh-spec-tile-label">อายุ</span>
+                        <strong class="fmh-spec-tile-val">${ageDisplay}</strong>
+                    </div>
+                    <div class="fmh-spec-tile">
+                        <span class="fmh-spec-tile-label">พิกัดบริการ</span>
+                        <a href="${zoneHubUrl}" style="color: #7C3AED; font-weight: 800; font-size: 11.5px; text-decoration: none;">
+                          รับงาน${escapeHTML(cleanProvince)} (${escapeHTML(primaryZone)}) &rarr;
+                        </a>
+                    </div>
+                </div>
+
+               
                 <section class="fmh-rates-box">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(cleanProvince)})</h2>
                     <div class="fmh-rates-grid">
@@ -895,16 +918,8 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                     </div>
                 </section>
 
-                <!-- CTA Action Buttons (เปลี่ยน inline onclick เป็น Data Action) -->
-                <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; width: 100%;">
-                  <a href="${lineId}" class="fmh-btn-line-cta" rel="nofollow noopener" target="_blank" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')"> <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน) </a>
-                    <button type="button" class="fmh-btn-share-icon" data-action="share-profile" data-profile-name="${escapeHTML(displayName)}" data-profile-url="${canonicalUrl}" aria-label="แชร์โปรไฟล์">
-                        <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-                    </button>
-                </div>
-
               <!-- Bio Description: กล่องแนะนำตัว -->
-                <div class="profile-bio-wrapper" style="margin-bottom: 1.25rem;">
+                <div class="profile-bio-wrapper" style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
                     ${naturalDesc}
                 </div>
 
