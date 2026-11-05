@@ -581,7 +581,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
       },
       {
         q: `นัดพบ${displayName} ในโซน${primaryZone} มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`,
-        a: `${displayName} มีห้องพักส่วนตัวย่าน${primaryZone} ที่สะอาด มิดชิด ปลอดภัย และพร้อมเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวในพื้นที่ได้สะดวกรวดเร็วค่ะ`
+        a: `${displayName} มีห้องพักส่วนตัวย่าน${primaryZone} ที่สะอาด มิดชิด ปลอดภัย พร้อมออกเดินทางไปดูแล (Outcall) ถึงโรงแรมหรือที่พักส่วนตัวในพื้นที่ได้สะดวกรวดเร็วค่ะ`
       }
     ];
 
@@ -667,7 +667,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
           "name": stripHTML(displayName),
           "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
           "gender": "https://schema.org/Female",
-          "jobTitle": "เพื่อนเที่ยวและคนดูแลสไตล์ฟิวแฟน",
+         "jobTitle": "เพื่อนเที่ยวฟิวแฟนและไซด์ไลน์",
           "description": stripHTML(naturalDesc),
           "image": {
             "@type": "ImageObject",
@@ -848,36 +848,12 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                           <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor};"></span>
                           <span style="color: #140F22; font-size: 11.5px; font-weight: 800;">${escapeHTML(realStatusText)}</span>
                           <span style="color: #94A3B8; font-size: 10px;">•</span>
-                          <!-- 🟢 Semantic Time คำนวณสด ไม่โดนแคชหลอก -->
+                         
                           <time class="fmh-relative-time" datetime="${isoUpdatedTime}" style="color: #475569; font-size: 11.5px; font-weight: 600;">${realTimeText}</time>
                       </div>
                   </div>
                 </header>
 
-                <!-- Spec Grid (ย้ายเข้าสู่ CSS Class) -->
-                <div class="fmh-spec-grid">
-                    <div class="fmh-spec-tile">
-                        <span class="fmh-spec-tile-label">สัดส่วน</span>
-                        <strong class="fmh-spec-tile-val">${escapeHTML(stats)}</strong>
-                    </div>
-                    <div class="fmh-spec-tile">
-                        <span class="fmh-spec-tile-label">ส่วนสูง / น้ำหนัก</span>
-                        <strong class="fmh-spec-tile-val">${heightDisplay} / ${weightDisplay}</strong>
-                    </div>
-                    <div class="fmh-spec-tile">
-                        <span class="fmh-spec-tile-label">อายุ</span>
-                        <strong class="fmh-spec-tile-val">${ageDisplay}</strong>
-                    </div>
-                    <div class="fmh-spec-tile">
-                        <span class="fmh-spec-tile-label">พิกัดบริการ</span>
-                        <a href="${zoneHubUrl}" style="color: #7C3AED; font-weight: 800; font-size: 11.5px; text-decoration: none;">
-                          รับงาน${escapeHTML(cleanProvince)} (${escapeHTML(primaryZone)}) &rarr;
-                        </a>
-                    </div>
-                </div>
-
-               
-                <!-- Spec Grid (ย้ายเข้าสู่ CSS Class) -->
                 <div class="fmh-spec-grid">
                     <div class="fmh-spec-tile">
                         <span class="fmh-spec-tile-label">สัดส่วน</span>
