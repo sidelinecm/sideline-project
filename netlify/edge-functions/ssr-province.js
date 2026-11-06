@@ -1071,6 +1071,15 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
+    // 🟢 [แทรกชุดนี้ลงไป]
+    const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+    const proto = req.headers.get("x-forwarded-proto") || url.protocol.replace(":", "");
+    if (!isLocal) {
+      if (proto !== "https" || url.hostname !== "firstmodelhub.com") {
+        return Response.redirect(`https://firstmodelhub.com${url.pathname}${url.search}`, 301);
+      }
+    }
+
     if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
       return new Response(JSON.stringify({ "specVersion": "1.0", "entries": [] }), {
         status: 200,
@@ -1097,13 +1106,22 @@ export default async (req, context) => {
       return await context.next();
     }
 
-    // ssr-province.js (บรรทัดประมาณ 560-575)
-const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+let decodedPath = cleanPath;
+try {
+  decodedPath = decodeURIComponent(cleanPath);
+} catch (_) {}
 
-
-if (cleanPath === "/nimman" || cleanPath === "/nimman.html" || cleanPath === "/location/chiangmai/นิมมาน" || cleanPath.includes("/location/chiangmai/%e0%b8%99%e0%b8%b4%e0%b8%a1%e0%b8%a1%e0%b8%b2%e0%b8%99")) {
+// แก้เคสนิมมาน
+if (decodedPath === "/nimman" || decodedPath === "/nimman.html" || decodedPath === "/location/chiangmai/นิมมาน") {
   return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
 }
+// แก้เคสโซนยอดนิยมอื่นๆ ให้วิ่งเข้า Slug อังกฤษมาตรฐาน
+if (decodedPath === "/location/chiangmai/แม่โจ้") return Response.redirect(`${primaryDomain}/location/chiangmai/maejo`, 301);
+if (decodedPath === "/location/chiangmai/เจ็ดยอด") return Response.redirect(`${primaryDomain}/location/chiangmai/jedyod`, 301);
+if (decodedPath === "/location/chiangmai/สันติธรรม") return Response.redirect(`${primaryDomain}/location/chiangmai/santitham`, 301);
+if (decodedPath === "/location/chiangmai/ช้างเผือก") return Response.redirect(`${primaryDomain}/location/chiangmai/changphueak`, 301);
+if (decodedPath === "/location/chiangmai/หลัง มช." || decodedPath === "/location/chiangmai/หลัง-มช.") return Response.redirect(`${primaryDomain}/location/chiangmai/cmu`, 301);
 
 const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
 if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
@@ -1462,14 +1480,14 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-  // 🟢 Title Tag (อัดคีย์เวิร์ดทำเงิน รูปจริง + ไม่มีมัดจำ)
+  // 🟢 ปรับคีย์เวิร์ดหน้า Title ให้คำที่มี Search Volume 15,000+ ชิดซ้ายสุด
     const metaTitle = isEnglishHome
       ? `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`
       : (zoneSlug
-          ? `สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}`
+          ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} รูปตรงปก จ่ายหน้างาน ไร้มัดจำ | ${CONFIG.BRAND_NAME}`
           : (isNational 
-              ? `สาวรับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}` 
-              : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}`));
+              ? `รับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}` 
+              : `รับงาน${provinceNameThai} สาวรับงาน ไซด์ไลน์${provinceNameThai} รูปจริงตรงปก จ่ายหน้างาน ไร้มัดจำ | ${CONFIG.BRAND_NAME}`));
 
     // 🟢 Meta Description (ดักคีย์ย่านย่อย + ย้ำความปลอดภัย)
     const metaDescription = isEnglishHome
@@ -1722,10 +1740,17 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
 
       const zonesHtml = p.zones.map(z => {
   const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
-  const safeSlugZ = cleanZ.replace(/\s+/g, "-");
-  const zoneHref = z.includes("นิมมาน") 
-    ? "/location/chiangmai/nimman" // 🟢 แก้เป็นอันนี้ ชี้ตรงไปหน้าใหม่เลย 100%
-    : encodeURI(`/location/${p.key}/${safeSlugZ}`);
+  const ZONE_TO_SLUG = {
+    "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+    "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
+    "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
+    "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
+    "แม่ริม": "maerim", "หางดง": "hangdong"
+  };
+  const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
+  const zoneHref = p.key === "chiangmai" && ZONE_TO_SLUG[cleanZ]
+    ? `/location/chiangmai/${slugPart}`
+    : encodeURI(`/location/${p.key}/${slugPart}`);
 
   return `
     <li style="padding-left: 10px;">
@@ -1804,13 +1829,13 @@ const hreflangBlock = isNational
     let dynamicSubheadline = "";
 
     if (isNational) {
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
+      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
                    <span class="h1-line-2">รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
     } else if (zoneSlug) {
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2">${escapeHTML(provinceNameThai)} รูปจริง 100% ปลอดภัย จ่ายหน้างาน</span>`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)}</span>
+                   <span class="h1-line-2">${escapeHTML(provinceNameThai)} รูปตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
     } else {
-      ssrH1Html = `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
                    <span class="h1-line-2">รูปจริง ตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ</span>`;
     }
 

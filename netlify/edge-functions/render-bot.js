@@ -292,6 +292,17 @@ function generateHumanMetaDesc(name, prov, city, zone, stats, price, id) {
 export default async (req, context) => {
   const url = new URL(req.url);
 
+  
+  const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  const proto = req.headers.get("x-forwarded-proto") || url.protocol.replace(":", "");
+
+  if (!isLocal) {
+    if (proto !== "https" || url.hostname !== "firstmodelhub.com") {
+      return Response.redirect(`https://firstmodelhub.com${url.pathname}${url.search}`, 301);
+    }
+  }
+
+  
   if (url.pathname === "/api/purge-cache" || url.pathname === "/api/clear-cache") {
     const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
     if (secret === CONFIG.PURGE_SECRET) {
@@ -532,27 +543,28 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
 
-   const safeZoneSlug = hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "";
-    const zoneHubUrl = primaryZone.includes("นิมมาน") 
-      ? "/location/chiangmai/nimman" // ✅ เปลี่ยนให้ชี้ตรงไปที่โซนใหม่เลย
-      : hasDistinctZone 
-        ? encodeURI(`/location/${provinceKey}/${safeZoneSlug}`) 
-        : provinceHubUrl; // ถ้าไม่มีโซนย่อย ให้ชี้กลับหน้าจังหวัดหลัก ป้องกัน 404
+   // 🟢 แมปชื่อโซนเป็น Slug ภาษาอังกฤษให้ตรงกับ ssr-province.js
+    const UNIFIED_ZONE_SLUG_MAP = {
+      "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+      "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
+      "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
+      "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
+      "แม่ริม": "maerim", "หางดง": "hangdong", "กังสดาล": "kangsadan",
+      "โนนม่วง": "nonmuang", "บ้านดู่": "baandu", "ป่าตอง": "patong"
+    };
+
+    const targetSlugPart = UNIFIED_ZONE_SLUG_MAP[primaryZone.trim()] || (hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "");
+    const zoneHubUrl = hasDistinctZone 
+      ? `/location/${provinceKey}/${targetSlugPart}` 
+      : provinceHubUrl;
 
     const cityContext = cleanProvince.includes("กรุงเทพ") ? "กรุงเทพฯ" : `ตัวเมือง${cleanProvince}`;
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
-    const profileSeoH1 = `${displayName} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone}`;
-
-    // 🟢 1. ดึงวัน เดือน ปี จริงจาก Database ของน้องคนนี้
-    const actualDateText = getProfileActualDate(profile.updated_at || profile.created_at);
-
-    // ✅ 2. ส่วนชื่อ (Title): ตามรูปแบบที่ต้องการ
-    const pageTitle = `${displayName} รับงานไซด์ไลน์${cleanProvince} ฟิวแฟน(${primaryZone}) นอกสถานที่ติดต่อสอบถาม ไม่มีมัดจำ`;
-
-    // ✅ 3. ส่วนเมตา (Description): มีรายละเอียดครบ + วันที่อัปเดตจริง
-    const metaDescription = `โปรไฟล์ ${displayName} สาวรับงาน ไซด์ไลน์${cleanProvince} โซน${primaryZone} นอกสถานที่ติดต่อสอบถามรายละเอียดเพิ่มเติม สัดส่วน ${stats} สไตล์ฟิวแฟน ตรงปก100% นัดพบตัวจริงจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;
+    const profileSeoH1 = `${displayName} รับงาน${cleanProvince} โซน${primaryZone}`;
+    const pageTitle = `${displayName} รับงาน${cleanProvince} (${primaryZone}) ไซด์ไลน์ฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน`;
+    const metaDescription = `โปรไฟล์ ${displayName} รับงาน${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% นัดพบจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;
 
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
@@ -661,14 +673,14 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
           "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
           "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
-        {
+    {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
           "name": stripHTML(displayName),
           "alternateName": `${stripHTML(displayName)} ${CONFIG.BRAND_NAME}`,
           "gender": "https://schema.org/Female",
-         "jobTitle": "เพื่อนเที่ยวฟิวแฟนและไซด์ไลน์",
-          "description": stripHTML(naturalDesc),
+          "jobTitle": "เพื่อนเที่ยวฟิวแฟน",
+          "description": `${stripHTML(displayName)} เพื่อนเที่ยวฟิวแฟน สแตนด์บายโซน${stripHTML(primaryZone)} ${stripHTML(cleanProvince)} สัดส่วน ${stripHTML(stats)} นัดพบตัวจริงจ่ายหน้างาน`,
           "image": {
             "@type": "ImageObject",
             "@id": `${canonicalUrl}#image`,
@@ -808,7 +820,9 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
                 <span class="luxe-hub-badge">HUB</span>
             </a>
           </div>
-          <a href="${provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;"><i class="fas fa-arrow-left"></i> ย้อนกลับ</a>
+         <a href="${hasDistinctZone ? zoneHubUrl : provinceHubUrl}" style="color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">
+  <i class="fas fa-arrow-left"></i> ย้อนกลับไป${hasDistinctZone ? `โซน${escapeHTML(primaryZone)}` : `ไซด์ไลน์${escapeHTML(cleanProvince)}`}
+</a>
         </header>
 
        <nav aria-label="breadcrumb">
