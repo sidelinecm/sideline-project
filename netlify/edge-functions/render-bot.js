@@ -562,6 +562,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
+    const actualDateText = getProfileActualDate(profile.updated_at || profile.created_at); // 👈 เพิ่มบรรทัดนี้
     const profileSeoH1 = `${displayName} รับงาน${cleanProvince} โซน${primaryZone}`;
     const pageTitle = `${displayName} รับงาน${cleanProvince} (${primaryZone}) ไซด์ไลน์ฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน`;
     const metaDescription = `โปรไฟล์ ${displayName} รับงาน${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% นัดพบจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;

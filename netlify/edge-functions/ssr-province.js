@@ -500,10 +500,10 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       intro: "รวมสาวรับงานอำเภอหางดง เชียงใหม่ พิกัดโซนใต้ที่เงียบสงบ เหมาะสำหรับผู้ที่พักอาศัยในคอนโดหรือหมู่บ้านส่วนตัว น้องๆ น่ารัก อัธยาศัยดี ฟิวแฟนอบอุ่น นัดเจอจ่ายหน้างาน ไม่โอนก่อนค่ะ",
       convenience: "ครอบคลุมถนนเชียงใหม่-ฮอด กาดฝรั่ง และโซนบ้านถวาย เดินทางไปหาถึงที่พักและโรงแรมในพื้นที่ได้อย่างสะดวกรวดเร็วและเป็นส่วนตัว"
     },
-    "นิมมาน": {
-      headline: "สาวรับงานนิมมาน เชียงใหม่ • ไซด์ไลน์นิมมาน รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ",
-      intro: "ศูนย์รวมสาวรับงานนิมมานและไซด์ไลน์ย่านนิมมานเหมินท์ แหล่งที่พักยอดฮิตใจกลางเชียงใหม่ คัดโปรไฟล์น้องๆ สเปกนักศึกษา วัยใส และสาวสวยพรีเมียม สไตล์ฟิวแฟน (GFE) นัดเจอน้องตัวจริงเช็คความตรงปกก่อนค่อยจ่ายเงิน ปลอดภัย ไร้ความเสี่ยง ไม่มีการโอนมัดจำ 100% ค่ะ",
-      convenience: "น้องๆ สแตนด์บายครอบคลุมถนนนิมมานเหมินท์ทุกซอย, ถนนศิริมังคลาจารย์, วันนิมมาน (One Nimman) และห้างเมญ่า (MAYA) สามารถเดินทางไปหาถึงโรงแรมและคอนโดส่วนตัวในย่านนี้ได้อย่างสะดวกรวดเร็วภายใน 10-15 นาทีค่ะ"
+   "นิมมาน": {
+      headline: "หาเพื่อนเที่ยวและไซด์ไลน์นิมมาน เชียงใหม่ • สไตล์ฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน",
+      intro: "หากคุณพักอยู่ย่านนิมมานเหมินท์ เชียงใหม่ แล้วต้องการหาเพื่อนทานข้าว นั่งคุยในคาเฟ่ หรือเพื่อนดื่มคลายเหงา เราคัดสรรโปรไฟล์น้องๆ โซนนิมมานและศิริมังคลาจารย์ที่ยืนยันรูปจริง ดูแลสุภาพ เป็นกันเอง ปลอดภัยด้วยกฎเหล็กนัดเจอตัวจริงตรงปกก่อนแล้วค่อยจ่ายเงินหน้างาน ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ",
+      convenience: "น้องๆ พักอาศัยและสแตนด์บายครอบคลุมถนนนิมมานเหมินท์ ซอย 1-17, ถนนศิริมังคลาจารย์, วันนิมมาน (One Nimman) และห้างเมญ่า (MAYA) พร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและคอนโดในพื้นที่ได้รวดเร็วภายใน 10-15 นาทีค่ะ"
     },
     
     // ==================== 2. กรุงเทพมหานคร ====================
@@ -828,12 +828,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const selectedSafety = getVariant(seedKey + "_safety", safetyVariants);
   const selectedTerms = getVariant(seedKey + "_terms", termsVariants);
 
-  // 🟢 แสดงผล Bento Grid: หรูหรา คลีนตา ภาษาคนจริง และคอนทราสต์สี AAA
   return `
   <div style="display: flex; flex-direction: column; gap: 14px;">
-    <!-- ส่วนที่ 1: ไฮไลท์สาวรับงาน & ไซด์ไลน์ประจำพื้นที่ -->
+    <!-- ส่วนที่ 1: หัวข้อ H2 หลักของส่วนเนื้อหาประจำพื้นที่ -->
     <div style="background: #FAF8FD; border: 1.2px solid rgba(124, 58, 237, 0.14); border-radius: 16px; padding: 15px 18px;">
-      <h2 style="font-size: 14.5px; color: #4C1D95; font-weight: 900; margin: 0 0 8px 0; line-height: 1.45;">
+      <h2 style="font-size: 15px; color: #4C1D95; font-weight: 900; margin: 0 0 8px 0; line-height: 1.45;">
         ✨ ${current.headline}
       </h2>
       <p style="font-size: 12.5px; color: #334155; line-height: 1.7; margin: 0;">
@@ -841,11 +840,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       </p>
     </div>
 
-    <!-- ส่วนที่ 2: การ์ดพิกัดพื้นที่บริการ พร้อมแคปซูลชิปย่านแตะง่าย -->
+    <!-- ส่วนที่ 2: แปลงเป็น H3 หัวข้อย่อยพิกัดบริการ -->
     <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.14); border-radius: 16px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(124, 58, 237, 0.03);">
-      <h2 style="font-size: 14px; color: #1E1B4B; font-weight: 900; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
+      <h3 style="font-size: 13.5px; color: #1E1B4B; font-weight: 800; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
         <span style="color: #7C3AED;">📍</span> พิกัดบริการรับงาน & ไซด์ไลน์ ${provinceName}${zoneSlug ? ` (${zoneSlug})` : ""}
-      </h2>
+      </h3>
       <p style="font-size: 12.5px; color: #475569; line-height: 1.65; margin: 0;">
         ${current.convenience}
       </p>
@@ -858,25 +857,25 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
         <div style="background: #FDF4FF; border: 1px solid #F5D0FE; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 16px;">💖</span>
           <div>
-            <h3 style="font-size: 12px; color: #86198F; font-weight: 800; margin: 0;">เพื่อนเที่ยวฟิวแฟน (GFE)</h3>
+            <div style="font-size: 12px; color: #86198F; font-weight: 800; margin: 0;">เพื่อนเที่ยวฟิวแฟน (GFE)</div>
             <span style="font-size: 10.5px; color: #A21CAF;">น่ารัก ขี้อ้อน เทคแคร์ดั่งแฟน ไม่เร่งรอบ</span>
           </div>
         </div>
         <div style="background: #F0FDF4; border: 1px solid #BBF7D0; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 16px;">🥂</span>
           <div>
-            <h3 style="font-size: 12px; color: #166534; font-weight: 800; margin: 0;">เด็กเอ็นปาร์ตี้ (EN VIP)</h3>
+            <div style="font-size: 12px; color: #166534; font-weight: 800; margin: 0;">เด็กเอ็นปาร์ตี้ (EN VIP)</div>
             <span style="font-size: 10.5px; color: #15803D;">ชงเหล้า เอ็นเตอร์เทน คุยสนุก ทริปพูลวิลล่า</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ส่วนที่ 3: มาตรฐานความปลอดภัย จ่ายหน้างาน 100% -->
+    <!-- ส่วนที่ 3: แปลงเป็น H3 หัวข้อย่อยมาตรฐานความปลอดภัย -->
     <div style="background: #FFFFFF; border: 1.5px solid rgba(5, 150, 105, 0.22); border-radius: 16px; padding: 14px 18px; box-shadow: 0 2px 10px rgba(5, 150, 105, 0.04);">
-      <h2 style="font-size: 13.5px; color: #065F46; font-weight: 900; margin: 0 0 6px 0; display: flex; align-items: center; gap: 6px;">
+      <h3 style="font-size: 13.5px; color: #065F46; font-weight: 800; margin: 0 0 6px 0; display: flex; align-items: center; gap: 6px;">
         <span>🛡️</span> มาตรฐานความปลอดภัย: จ่ายหน้างาน 100% ไร้มัดจำ
-      </h2>
+      </h3>
       <p style="font-size: 12px; color: #1E293B; line-height: 1.6; margin: 0 0 10px 0;">
         ${selectedSafety}
       </p>
@@ -1021,7 +1020,9 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
             </div>
         </div>
         
-        <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+       <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+  <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">ดูโปรไฟล์ น้อง${cleanName} รับงาน${escapeHTML(provinceName)} ไซด์ไลน์ตรงปก</span>
+</a>
 
         <div class="profile-card-info-content">
             <div class="profile-card-tags-row">
@@ -1356,7 +1357,9 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
     if (matchedZoneProfiles.length === 0) { 
-      return Response.redirect(`${url.origin}/location/${provinceSlug}`, 302);
+      // 🟢 ไม่สั่ง 302 แต่กำหนดสถานะว่าง เพื่อให้โค้ดด้านล่างส่ง <meta name="robots" content="noindex, follow">
+      isZoneEmpty = true;
+      profilesList = []; 
     } else { 
       profilesList = matchedZoneProfiles; 
     }
@@ -1480,16 +1483,15 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-  // 🟢 ปรับคีย์เวิร์ดหน้า Title ให้คำที่มี Search Volume 15,000+ ชิดซ้ายสุด
-    const metaTitle = isEnglishHome
-      ? `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`
-      : (zoneSlug
-          ? `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ${provinceNameThai} รูปตรงปก จ่ายหน้างาน ไร้มัดจำ | ${CONFIG.BRAND_NAME}`
-          : (isNational 
-              ? `รับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ | ${CONFIG.BRAND_NAME}` 
-              : `รับงาน${provinceNameThai} สาวรับงาน ไซด์ไลน์${provinceNameThai} รูปจริงตรงปก จ่ายหน้างาน ไร้มัดจำ | ${CONFIG.BRAND_NAME}`));
+  const metaTitle = isEnglishHome
+    ? `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`
+    : (zoneSlug
+        ? `ไซด์ไลน์${zoneSlug} รับงาน${zoneSlug} รูปตรงปก จ่ายหน้างาน ไม่มัดจำ | FMH`
+        : (isNational 
+            ? `รับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ตรงปก จ่ายหน้างาน ไม่มีมัดจำ | FirstModelHub` 
+            : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รูปตรงปก จ่ายหน้างาน ไม่มัดจำ | FMH`));
 
-    // 🟢 Meta Description (ดักคีย์ย่านย่อย + ย้ำความปลอดภัย)
+    
     const metaDescription = isEnglishHome
       ? `Premium verified escorts and sidelines across Thailand (${totalCount} profiles). 100% real photos, pay directly on arrival, zero advance deposit.`
       : (zoneSlug
@@ -1826,18 +1828,21 @@ const hreflangBlock = isNational
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
    let ssrH1Html = "";
-    let dynamicSubheadline = "";
+let dynamicSubheadline = "";
 
-    if (isNational) {
-      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
-                   <span class="h1-line-2">รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
-    } else if (zoneSlug) {
-      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)}</span>
-                   <span class="h1-line-2">${escapeHTML(provinceNameThai)} รูปตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
-    } else {
-      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">รูปจริง ตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ</span>`;
-    }
+if (isNational) {
+  // 1. หน้าแรกทั่วไทย: เก็บครบทั้ง 4 คีย์เวิร์ดหลัก (สาวรับงาน, ไซด์ไลน์, เด็กเอ็น, เพื่อนเที่ยว)
+  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
+               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+} else if (zoneSlug) {
+  // 2. หน้ารายย่าน: เชื่อมโยง [ย่าน] เข้ากับ [จังหวัด] แบบไม่ยัดคำซ้ำ อ่านลื่นตา
+  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
+               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
+} else {
+  // 3. หน้ารายจังหวัด: กินรวบ 4 กลุ่มคำค้นหา (สาวรับงาน, ไซด์ไลน์, เด็กเอ็น, เพื่อนเที่ยว) ในหน้าเดียว
+  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
+               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+}
 
    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
@@ -1940,8 +1945,8 @@ const href = `/location/${provinceSlug}/${slugPart}`;
   const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
 
   return `
-    <a href="${href}" class="filter-pill-tab ${isActiveZone ? 'active' : ''}">
-      <span>📍 โซน${cleanZ}</span>
+    <a href="${href}" class="filter-pill-tab ${isActiveZone ? 'active' : ''}" title="สาวรับงานและไซด์ไลน์โซน${cleanZ}">
+      <span>📍 ไซด์ไลน์${cleanZ}</span>
       <span class="badge-count">${count}</span>
     </a>
   `;
@@ -2179,15 +2184,15 @@ if (!isNational && pills) {
       </div>
     `;
 
-    // 🟢 2. ประกอบร่างในกล่อง White Luxury Card
-    finalHtml = finalHtml.replace(
-      /<div id="seo-drawer-wrapper"[^>]*>[\s\S]*?<!-- FAQ Block -->/i, 
+    
+   finalHtml = finalHtml.replace(
+      /<div id="seo-drawer-wrapper"[\s\S]*?<\/div>\s*(?=<div id="faq-wrapper-block">)/i, 
       `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.04);">
           <div class="seo-content-inner">
               ${freshnessBox}
               ${linkedIntro}
           </div>
-       </div>\n        <!-- FAQ Block -->`
+       </div>\n        `
     );
 
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
@@ -2230,7 +2235,7 @@ if (!isNational && pills) {
       };
     });
 
-  // 🟢 จำกัดข้อมูลที่ฝังลง HTML ไว้ที่ 150 คนแรก เพื่อความเร็วปานจรวด
+  
     const initialClientProfiles = clientProfilesData.slice(0, 150);
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
