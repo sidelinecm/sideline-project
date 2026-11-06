@@ -165,42 +165,32 @@ function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟ�
   return num;
 }
 
-// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, บอทไม่ตีความว่ารูปเสีย
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
-    return DEFAULT_FALLBACK_IMG;
-  }
-
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // ⚡ ตัด l_text ออกทั้งหมด เหลือแค่ f_auto,q_auto และขนาดพิกเซลที่เหมาะสม ป้องกันรูปพัง 100%
-  let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  // ไซส์มาตรฐาน 5:7 (480x672) + g_auto (AI โฟกัสจุดเด่น/ใบหน้า ไม่ให้หลุดเฟรม)
+  let transform = "f_auto,q_auto:good,w_480,h_672,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
+    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 400 || mode === "card") {
-    transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    // รูปขนาดกลางสำหรับ Lightbox Modal
-    transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+  } else if (mode === 300 || mode === "swiper") {
+    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
+    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    // 🟢 ครอป 1200x630 อัตโนมัติและจับโฟกัสใบหน้า หัวไม่ขาด 100%
+    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
     transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  } else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
-    transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      // ประกอบ URL ใหม่ที่สะอาด ปราศจากพารามิเตอร์ขยะ โหลดไว และไม่เกิด Error 404 แน่นอน
       return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
-
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }

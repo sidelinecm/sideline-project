@@ -316,32 +316,23 @@ function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟ�
 }
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-// 🟢 เวอร์ชันสมบูรณ์ 100% ไร้ปัญหา 404, โหลดไวปานจรวด, รูปแชร์โซเชียลหัวไม่ขาด 100%
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) {
-    return DEFAULT_FALLBACK_IMG;
-  }
-
+  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  let transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
+  // ไซส์มาตรฐาน 5:7 (480x672) + g_auto (AI โฟกัสจุดเด่น/ใบหน้า ไม่ให้หลุดเฟรม)
+  let transform = "f_auto,q_auto:good,w_480,h_672,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // 1. รูปย่อยขนาดเล็ก (Thumbnail)
+    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 400 || mode === "card") {
-    // 2. รูปการ์ดแสดงผลปกติ
-    transform = "f_auto,q_auto:good,w_400,h_560,c_fill";
-  } else if (mode === 600 || (typeof mode === "number" && mode > 400 && mode < 700)) {
-    // 3. รูปขนาดกลางสำหรับ Lightbox Modal
-    transform = "f_auto,q_auto:good,w_600,h_800,c_fill";
+  } else if (mode === 300 || mode === "swiper") {
+    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
+    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    // 4. 🟢 รูปสำหรับแชร์ลง LINE / Facebook (ล็อก 1200x630 แนวนอน + AI โฟกัสหน้า หัวไม่ขาด 100%)
+    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
     transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  } else if (mode === "full" || (typeof mode === "number" && mode >= 700)) {
-    // 5. รูปใหญ่เต็มจอแบบไม่ครอปสัดส่วน
-    transform = "f_auto,q_auto:good,w_1200,c_limit";
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -351,8 +342,6 @@ function optimizeImg(imagePath, mode = "card") {
     }
     return cleanPath;
   }
-
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
@@ -956,9 +945,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     rawImg = validFromGallery || "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
   }
 
-  const cardImgSmall = optimizeImg(rawImg, 400);
-  const cardImgLarge = optimizeImg(rawImg, 600);
-  const cardSrcSet = `${cardImgSmall} 400w, ${cardImgLarge} 600w`;
+  const cardImg = optimizeImg(rawImg, "card");
 
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
   if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
@@ -993,9 +980,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
  return `
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
-       <img src="${cardImgSmall}" 
-         srcset="${cardSrcSet}" 
-         sizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px"
+      <img src="${cardImg}" 
          alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
          width="400"
          height="560"
@@ -1406,7 +1391,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
         const loc = escapeHTML(sanitizeThaiText(p.location) || currentProvName);
         const slug = encodeURIComponent(p.slug || p.id);
-        const img = optimizeImg(p.imagePath || p.image_url || "", 400);
+        const img = optimizeImg(p.imagePath || p.image_url || "", 300);
         const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
         return `
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
@@ -2273,14 +2258,14 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-   // ดึงรูปของน้องคนแรกใน Hot Swiper (รูป LCP ตัวจริงที่อยู่บนสุดของจอ)
-const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : profilesList[0];
+   const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : profilesList[0];
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  const lcpExactUrl = optimizeImg(rawLcpImg, 400);
+  // ดึงไซส์ 300 ให้ตรงกับรูปภาพจริงใน Swiper เพื่อไม่ให้เบราว์เซอร์โหลดรูปซ้ำ
+  const lcpSize = (hotProfiles && hotProfiles.length > 0) ? 300 : 480;
+  const lcpExactUrl = optimizeImg(rawLcpImg, lcpSize);
   
-  // ลิงก์ตรงแบบ 1:1 ไม่มี srcset หลอก เบราว์เซอร์ดึงมาเรนเดอร์ได้ทันทีใน 0.3 วินาที
   const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
   finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
 }
