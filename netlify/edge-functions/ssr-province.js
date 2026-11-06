@@ -1790,30 +1790,30 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
-  const robotsDirectives = (zoneSlug && (isZoneEmpty || totalCount < 1))
+ const robotsDirectives = (totalCount < 1 || isZoneEmpty)
   ? "noindex, follow"
   : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
-
-    // 🟢 2. เขียนทับ Title, Description และล้าง Keywords เก่า
+  
+    
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']keywords["'][^>]*\/?>/gi, "");
 
-    // 🟢 3. เขียนทับ Meta Robots Tag ให้เปลี่ยนเป็น noindex อัตโนมัติเมื่อเจอย่านที่ไม่มีน้อง
+    
     finalHtml = finalHtml.replace(/<meta\s+name=["']robots["'][^>]*>/i, `<meta name="robots" content="${robotsDirectives}">`);
 
-    // 🟢 4. เขียนทับ Social Meta (Open Graph & Twitter Cards)
+    
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
-    // 🟢 5. จัดการ Canonical URL และ Open Graph URL
+    
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "");
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*>/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  <link rel="canonical" id="canonical-link" href="${canonicalUrl}">\n  <meta property="og:url" content="${canonicalUrl}">\n</head>`);
     
-    // 🟢 6. จัดการรูปภาพพรีวิว Social (OG Image & Twitter Image)
+    
     const cleanOgImageBlock = `<meta property="og:image" content="${heroImage}">\n  <meta property="og:image:secure_url" content="${heroImage}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n  <meta property="og:image:alt" content="${escapeHTML(CONFIG.BRAND_NAME)} ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟน${escapeHTML(provinceNameThai)}">`;
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*>[\s\S]*?<meta\s+property=["']og:image:alt["'][^>]*>/i, cleanOgImageBlock);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);

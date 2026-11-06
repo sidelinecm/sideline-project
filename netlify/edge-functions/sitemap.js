@@ -101,94 +101,94 @@ const optimizeImgForXml = (path) => {
   return cleanPath;
 };
 
-// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (แก้คำเว้นวรรคเป็นขีดกลางเพื่อความปลอดภัย)
+// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (อัปเดต Slug เป็นภาษาอังกฤษให้ตรงกับ Canonical 100%)
 const TARGET_SUB_ZONES = [
   // 1. เชียงใหม่
-  { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] }, // ✅ เพิ่มโซนนิมมานแบบไดนามิก
-  { province: "chiangmai", zone: "เจ็ดยอด", matchWords: ["เจ็ดยอด"] },
-  { province: "chiangmai", zone: "สันติธรรม", matchWords: ["สันติธรรม"] },
-  { province: "chiangmai", zone: "ช้างเผือก", matchWords: ["ช้างเผือก"] },
-  { province: "chiangmai", zone: "แม่โจ้", matchWords: ["แม่โจ้"] },
-  { province: "chiangmai", zone: "หลัง-มช.", matchWords: ["หลัง มช", "หลังมอ", "หลัง มช."] },
-  { province: "chiangmai", zone: "หน้า-มช.", matchWords: ["หน้า มช", "หน้ามอ", "หน้า มช."] },
-  { province: "chiangmai", zone: "สันทราย", matchWords: ["สันทราย"] },
-  { province: "chiangmai", zone: "หางดง", matchWords: ["หางดง"] },
-  { province: "chiangmai", zone: "แม่ริม", matchWords: ["แม่ริม"] },
-  { province: "chiangmai", zone: "คูเมือง", matchWords: ["คูเมือง"] },
-  { province: "chiangmai", zone: "ท่าแพ", matchWords: ["ท่าแพ"] },
-  { province: "chiangmai", zone: "ห้วยแก้ว", matchWords: ["ห้วยแก้ว"] },
-  { province: "chiangmai", zone: "รวมโชค", matchWords: ["รวมโชค"] },
-  { province: "chiangmai", zone: "พายัพ", matchWords: ["พายัพ"] },
-  { province: "chiangmai", zone: "เซ็นทรัลเฟส", matchWords: ["เซ็นทรัลเฟส", "เซ็นทรัลเฟสติวัล"] },
-  { province: "chiangmai", zone: "สนามบินเชียงใหม่", matchWords: ["สนามบิน"] },
+  { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] },
+  { province: "chiangmai", zone: "jedyod", matchWords: ["เจ็ดยอด"] },
+  { province: "chiangmai", zone: "santitham", matchWords: ["สันติธรรม"] },
+  { province: "chiangmai", zone: "changphueak", matchWords: ["ช้างเผือก"] },
+  { province: "chiangmai", zone: "maejo", matchWords: ["แม่โจ้"] },
+  { province: "chiangmai", zone: "cmu", matchWords: ["หลัง มช", "หลังมอ", "หลัง มช."] },
+  { province: "chiangmai", zone: "namor", matchWords: ["หน้า มช", "หน้ามอ", "หน้า มช."] },
+  { province: "chiangmai", zone: "sansai", matchWords: ["สันทราย"] },
+  { province: "chiangmai", zone: "hangdong", matchWords: ["หางดง"] },
+  { province: "chiangmai", zone: "maerim", matchWords: ["แม่ริม"] },
+  { province: "chiangmai", zone: "kumueang", matchWords: ["คูเมือง"] },
+  { province: "chiangmai", zone: "thapae", matchWords: ["ท่าแพ"] },
+  { province: "chiangmai", zone: "huaykaew", matchWords: ["ห้วยแก้ว"] },
+  { province: "chiangmai", zone: "ruamchok", matchWords: ["รวมโชค"] },
+  { province: "chiangmai", zone: "payap", matchWords: ["พายัพ"] },
+  { province: "chiangmai", zone: "centralfest", matchWords: ["เซ็นทรัลเฟส", "เซ็นทรัลเฟสติวัล"] },
+  { province: "chiangmai", zone: "airport-cnx", matchWords: ["สนามบิน"] },
 
   // 2. กรุงเทพมหานคร
-  { province: "bangkok", zone: "สุขุมวิท", matchWords: ["สุขุมวิท"] },
-  { province: "bangkok", zone: "รัชดา", matchWords: ["รัชดา"] },
-  { province: "bangkok", zone: "ห้วยขวาง", matchWords: ["ห้วยขวาง"] },
-  { province: "bangkok", zone: "ลาดพร้าว", matchWords: ["ลาดพร้าว"] },
-  { province: "bangkok", zone: "ทองหล่อ", matchWords: ["ทองหล่อ"] },
-  { province: "bangkok", zone: "เอกมัย", matchWords: ["เอกมัย"] },
-  { province: "bangkok", zone: "สาทร", matchWords: ["สาทร"] },
-  { province: "bangkok", zone: "สีลม", matchWords: ["สีลม"] },
-  { province: "bangkok", zone: "บางนา", matchWords: ["บางนา"] },
-  { province: "bangkok", zone: "รามอินทรา", matchWords: ["รามอินทรา"] },
-  { province: "bangkok", zone: "พระราม-9", matchWords: ["พระราม 9", "พระราม9"] },
-  { province: "bangkok", zone: "อารีย์", matchWords: ["อารีย์"] },
+  { province: "bangkok", zone: "sukhumvit", matchWords: ["สุขุมวิท"] },
+  { province: "bangkok", zone: "ratchada", matchWords: ["รัชดา"] },
+  { province: "bangkok", zone: "huaikhwang", matchWords: ["ห้วยขวาง"] },
+  { province: "bangkok", zone: "ladprao", matchWords: ["ลาดพร้าว"] },
+  { province: "bangkok", zone: "thonglor", matchWords: ["ทองหล่อ"] },
+  { province: "bangkok", zone: "ekkamai", matchWords: ["เอกมัย"] },
+  { province: "bangkok", zone: "sathorn", matchWords: ["สาทร"] },
+  { province: "bangkok", zone: "silom", matchWords: ["สีลม"] },
+  { province: "bangkok", zone: "bangna", matchWords: ["บางนา"] },
+  { province: "bangkok", zone: "ramintra", matchWords: ["รามอินทรา"] },
+  { province: "bangkok", zone: "rama9", matchWords: ["พระราม 9", "พระราม9"] },
+  { province: "bangkok", zone: "ari", matchWords: ["อารีย์"] },
 
   // 3. ชลบุรี / พัทยา
-  { province: "chonburi", zone: "พัทยา", matchWords: ["พัทยา"] },
-  { province: "chonburi", zone: "พัทยากลาง", matchWords: ["พัทยากลาง"] },
-  { province: "chonburi", zone: "พัทยาใต้", matchWords: ["พัทยาใต้"] },
-  { province: "chonburi", zone: "หาดจอมเทียน", matchWords: ["จอมเทียน"] },
-  { province: "chonburi", zone: "บางแสน", matchWords: ["บางแสน"] },
-  { province: "chonburi", zone: "ศรีราชา", matchWords: ["ศรีราชา"] },
-  { province: "chonburi", zone: "ตัวเมืองชลบุรี", matchWords: ["ตัวเมืองชลบุรี", "เมืองชล"] },
-  { province: "chonburi", zone: "อมตะนคร", matchWords: ["อมตะ"] },
-  { province: "chonburi", zone: "แหลมฉบัง", matchWords: ["แหลมฉบัง"] },
-  { province: "chonburi", zone: "บ่อวิน", matchWords: ["บ่อวิน"] },
+  { province: "chonburi", zone: "pattaya", matchWords: ["พัทยา"] },
+  { province: "chonburi", zone: "pattaya-klang", matchWords: ["พัทยากลาง"] },
+  { province: "chonburi", zone: "pattaya-tai", matchWords: ["พัทยาใต้"] },
+  { province: "chonburi", zone: "jomtien", matchWords: ["จอมเทียน"] },
+  { province: "chonburi", zone: "bangsaen", matchWords: ["บางแสน"] },
+  { province: "chonburi", zone: "sriracha", matchWords: ["ศรีราชา"] },
+  { province: "chonburi", zone: "mueang-chonburi", matchWords: ["ตัวเมืองชลบุรี", "เมืองชล"] },
+  { province: "chonburi", zone: "amata", matchWords: ["อมตะ"] },
+  { province: "chonburi", zone: "laemchabang", matchWords: ["แหลมฉบัง"] },
+  { province: "chonburi", zone: "bowin", matchWords: ["บ่อวิน"] },
 
   // 4. ภูเก็ต
-  { province: "phuket", zone: "ป่าตอง", matchWords: ["ป่าตอง"] },
-  { province: "phuket", zone: "ตัวเมืองภูเก็ต", matchWords: ["ตัวเมืองภูเก็ต", "เมืองภูเก็ต"] },
-  { province: "phuket", zone: "กะทู้", matchWords: ["กะทู้"] },
-  { province: "phuket", zone: "ฉลอง", matchWords: ["ฉลอง"] },
-  { province: "phuket", zone: "กะรน", matchWords: ["กะรน"] },
-  { province: "phuket", zone: "กะตะ", matchWords: ["กะตะ"] },
-  { province: "phuket", zone: "บางเทา", matchWords: ["บางเทา"] },
-  { province: "phuket", zone: "ราไวย์", matchWords: ["ราไวย์"] },
-  { province: "phuket", zone: "เชิงทะเล", matchWords: ["เชิงทะเล"] },
-  { province: "phuket", zone: "กมลา", matchWords: ["กมลา"] },
+  { province: "phuket", zone: "patong", matchWords: ["ป่าตอง"] },
+  { province: "phuket", zone: "mueang-phuket", matchWords: ["ตัวเมืองภูเก็ต", "เมืองภูเก็ต"] },
+  { province: "phuket", zone: "kathu", matchWords: ["กะทู้"] },
+  { province: "phuket", zone: "chalong", matchWords: ["ฉลอง"] },
+  { province: "phuket", zone: "karon", matchWords: ["กะรน"] },
+  { province: "phuket", zone: "kata", matchWords: ["กะตะ"] },
+  { province: "phuket", zone: "bangtao", matchWords: ["บางเทา"] },
+  { province: "phuket", zone: "rawai", matchWords: ["ราไวย์"] },
+  { province: "phuket", zone: "cherngtalay", matchWords: ["เชิงทะเล"] },
+  { province: "phuket", zone: "kamala", matchWords: ["กมลา"] },
 
   // 5. ขอนแก่น
-  { province: "khon-kaen", zone: "กังสดาล", matchWords: ["กังสดาล"] },
-  { province: "khon-kaen", zone: "หลัง-มข.", matchWords: ["หลัง มข", "หลัง มข."] },
-  { province: "khon-kaen", zone: "หน้า-มข.", matchWords: ["หน้า มข", "หน้า มข."] },
-  { province: "khon-kaen", zone: "โนนม่วง", matchWords: ["โนนม่วง"] },
-  { province: "khon-kaen", zone: "เซ็นทรัลขอนแก่น", matchWords: ["เซ็นทรัลขอนแก่น"] },
-  { province: "khon-kaen", zone: "บึงแก่นนคร", matchWords: ["บึงแก่นนคร"] },
-  { province: "khon-kaen", zone: "ในตัวเมืองขอนแก่น", matchWords: ["ในตัวเมือง", "ในเมือง"] },
-  { province: "khon-kaen", zone: "ม.ภาค", matchWords: ["ม.ภาค"] },
+  { province: "khon-kaen", zone: "kangsadan", matchWords: ["กังสดาล"] },
+  { province: "khon-kaen", zone: "kku", matchWords: ["หลัง มข", "หลัง มข."] },
+  { province: "khon-kaen", zone: "namor-kku", matchWords: ["หน้า มข", "หน้า มข."] },
+  { province: "khon-kaen", zone: "nonmuang", matchWords: ["โนนม่วง"] },
+  { province: "khon-kaen", zone: "central-khonkaen", matchWords: ["เซ็นทรัลขอนแก่น"] },
+  { province: "khon-kaen", zone: "buengkaennakhon", matchWords: ["บึงแก่นนคร"] },
+  { province: "khon-kaen", zone: "mueang-khonkaen", matchWords: ["ในตัวเมือง", "ในเมือง"] },
+  { province: "khon-kaen", zone: "m-phak", matchWords: ["ม.ภาค"] },
 
   // 6. เชียงราย
-  { province: "chiangrai", zone: "บ้านดู่", matchWords: ["บ้านดู่"] },
-  { province: "chiangrai", zone: "หน้า-มฟล.", matchWords: ["หน้า มฟล", "มฟล", "แม่ฟ้าหลวง"] },
-  { province: "chiangrai", zone: "ตัวเมืองเชียงราย", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "chiangrai", zone: "หอนาฬิกา", matchWords: ["หอนาฬิกา"] },
-  { province: "chiangrai", zone: "แม่สาย", matchWords: ["แม่สาย"] },
+  { province: "chiangrai", zone: "baandu", matchWords: ["บ้านดู่"] },
+  { province: "chiangrai", zone: "mfu", matchWords: ["หน้า มฟล", "มฟล", "แม่ฟ้าหลวง"] },
+  { province: "chiangrai", zone: "mueang-chiangrai", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "chiangrai", zone: "clock-tower", matchWords: ["หอนาฬิกา"] },
+  { province: "chiangrai", zone: "maesai", matchWords: ["แม่สาย"] },
 
   // 7. อุดรธานี
-  { province: "udonthani", zone: "UD-Town", matchWords: ["ud town", "ยูดีทาวน์", "udtown"] },
-  { province: "udonthani", zone: "หนองประจักษ์", matchWords: ["หนองประจักษ์"] },
-  { province: "udonthani", zone: "เซ็นทรัลอุดร", matchWords: ["เซ็นทรัลอุดร"] },
-  { province: "udonthani", zone: "ตัวเมืองอุดร", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "udonthani", zone: "ตลาดรังษิณา", matchWords: ["รังษิณา"] },
+  { province: "udonthani", zone: "udtown", matchWords: ["ud town", "ยูดีทาวน์", "udtown"] },
+  { province: "udonthani", zone: "nongprajak", matchWords: ["หนองประจักษ์"] },
+  { province: "udonthani", zone: "central-udon", matchWords: ["เซ็นทรัลอุดร"] },
+  { province: "udonthani", zone: "mueang-udon", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "udonthani", zone: "rangsina", matchWords: ["รังษิณา"] },
 
   // 8. ลำปาง
-  { province: "lampang", zone: "ตัวเมืองลำปาง", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "lampang", zone: "สวนดอก", matchWords: ["สวนดอก"] },
-  { province: "lampang", zone: "ม.ราชภัฏลำปาง", matchWords: ["ราชภัฏลำปาง"] },
-  { province: "lampang", zone: "สบตุ๋ย", matchWords: ["สบตุ๋ย"] }
+  { province: "lampang", zone: "mueang-lampang", matchWords: ["ตัวเมือง", "ในเมือง"] },
+  { province: "lampang", zone: "suan-dok", matchWords: ["สวนดอก"] },
+  { province: "lampang", zone: "lpru", matchWords: ["ราชภัฏลำปาง"] },
+  { province: "lampang", zone: "sob-tui", matchWords: ["สบตุ๋ย"] }
 ];
 
 export default async (request, _context) => {
@@ -198,7 +198,7 @@ export default async (request, _context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // ดึงข้อมูลจังหวัดและโปรไฟล์ที่ Active พร้อมกัน
+    
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
       supabase.from("profiles").select("*").eq("active", true).limit(3000)
@@ -207,7 +207,7 @@ export default async (request, _context) => {
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    // แผนที่เก็บเวลาอัปเดตล่าสุดของแต่ละจังหวัดและโซน
+    
     const provinceLatestDateMap = new Map();
     const zoneLatestDateMap = new Map();
 
@@ -244,8 +244,7 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าหลักและหน้าคงที่ (Static Core Pages) 
-    // ✅ นำ /nimman ที่เป็น Hardcode ออกแล้ว
+    
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
@@ -268,7 +267,7 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 2. หน้ารายจังหวัด (Province Hubs)
+    
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
@@ -287,7 +286,7 @@ export default async (request, _context) => {
       });
     }
 
-    // 3. หน้าโซนย่อย (Sub-zones) - คัดกรองเฉพาะโซนที่มีน้องรับงานจริงเท่านั้น
+    
     TARGET_SUB_ZONES.forEach(sz => {
       const hasActiveProfiles = profiles.some(p => {
         const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
@@ -301,14 +300,14 @@ export default async (request, _context) => {
         return isSameProv && isMatchZone;
       });
 
-      // 🛑 ถ้าไม่มีน้องสแตนด์บายในโซนนั้น ไม่ต้องใส่ลง Sitemap ป้องกันปัญหา Thin Content
+      
       if (!hasActiveProfiles) return;
 
       const zoneKey = `${sz.province}_${sz.zone}`;
       const latestTimestamp = zoneLatestDateMap.get(zoneKey);
       const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
       
-      // ✅ สร้าง URL ที่แปลงขีดกลางเรียบร้อย และ Encoded สมบูรณ์ 100%
+      
       const zoneUrl = buildSafeUrl(domain, `/location/${sz.province}/${sz.zone}`);
 
       xml += `  <url>\n`;
@@ -319,7 +318,7 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 4. หน้าโปรไฟล์เดี่ยว (Profile Detail Pages + Image Sitemap)
+    
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
@@ -355,7 +354,6 @@ export default async (request, _context) => {
 
   } catch (err) {
     console.error("Sitemap generation critical error:", err);
-    // Fallback ปลอดภัยหากฐานข้อมูลขัดข้อง (ยังส่ง XML ที่ถูกต้อง ไม่ตอบ Error 500)
     return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${domain}/</loc><lastmod>${nowIso}</lastmod></url></urlset>`, {
       status: 200,
       headers: { "Content-Type": "application/xml; charset=utf-8" }
