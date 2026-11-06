@@ -384,8 +384,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
   const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket", "bangkok", "chonburi"];
 
-  // 🟢 แคปซูลชิปพิกัดย่าน: แตะง่ายบนมือถือ คอนทราสต์สีม่วงเข้มตัดพื้นหลังขาวละมุน AAA (10.5:1)
-  const chipStyle = `display: inline-flex; align-items: center; gap: 4px; background: #FAF5FF; border: 1.2px solid #DDD6FE; color: #4C1D95; font-size: 11.5px; font-weight: 800; padding: 5px 12px; border-radius: 100px; text-decoration: none; box-shadow: 0 1px 3px rgba(124, 58, 237, 0.05); transition: all 0.2s;`;
+ const chipStyle = `display: inline-flex; align-items: center; gap: 6px; background: #FFFFFF !important; border: 1.5px solid #A855F7 !important; color: #3B0764 !important; font-size: 11.5px; font-weight: 800; padding: 6px 14px; border-radius: 100px; text-decoration: none; box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12); transition: all 0.2s;`;
 
   const zoneLinks = cleanZones.slice(0, 10).map(z => {
     const cleanZ = sanitizeThaiText(z);
