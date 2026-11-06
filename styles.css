@@ -2862,10 +2862,7 @@ a[href*="line.me"]:not(.social-btn) {
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
 }
 
-@keyframes kissNamePureShimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
+
 
 @keyframes cardImgShimmer {
   0% { background-position: 200% 0; }
@@ -5555,7 +5552,183 @@ a.kw-zone:hover {
   color: #FFFFFF !important;
   font-weight: 800 !important;
 }
-.kw-zone:hover {
-  background: #F3E8FF !important; /* เปลี่ยนพื้นหลังเป็นม่วงอ่อนเมื่อชี้ */
+
+
+/* ========================================================
+   MODERN FLOATING ISLAND DOCK (IOS & PWA READY)
+   ======================================================== */
+
+.floating-app-dock {
+  position: fixed;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 28px);
+  max-width: 410px;
+  height: 64px;
+  z-index: 99999;
+
+  /* Frosted Glassmorphism ระดับลึก */
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  
+  /* ขอบสะท้อนแสงไฟบน-ล่างแบบ Liquid Retina */
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 16px 36px -6px rgba(59, 7, 100, 0.12),
+    0 4px 12px -2px rgba(15, 23, 42, 0.06),
+    inset 0 1.5px 1px rgba(255, 255, 255, 1);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 14px;
+  box-sizing: border-box;
+}
+
+/* ปุ่มเมนูปกติ 3 ตัวแรก */
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 16px;
+  color: #475569; /* Slate 600 - Contrast 6.5:1 ผ่านฉลุย */
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dock-item .dock-icon {
+  font-size: 17px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.dock-item .dock-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* Micro-Interaction เวลาสัมผัส (Tactile Feedback สไตล์แอป iPhone) */
+.dock-item:active {
+  transform: scale(0.90);
+}
+
+/* สถานะ Active ของแท็บที่เลือกอยู่ */
+.dock-item.active {
+  color: #7C3AED; /* ม่วงสดระดับ Theme FirstModel */
+}
+
+.dock-item.active .dock-icon {
   transform: translateY(-1px);
+}
+
+.dock-item.active .dock-label {
+  font-weight: 800;
+}
+
+/* จุด Glowing Indicator เล็กๆ ใต้แท็บที่ Active */
+.dock-item.active::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: #7C3AED;
+  border-radius: 50%;
+  margin-top: 1px;
+  box-shadow: 0 0 6px #7C3AED;
+}
+
+/* ========================================================
+   THE MASTER CTA BUTTON: ปุ่มติดต่อ LINE ระดับพรีเมียม
+   ======================================================== */
+
+.dock-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 46px;
+  padding: 0 18px 0 14px;
+  border-radius: 100px;
+  text-decoration: none;
+  cursor: pointer;
+
+  /* เฉดสีเขียวมรกตหรูไล่มิติ ไม่ทึบ ไม่โบราณ */
+  background: linear-gradient(135deg, #059669 0%, #047857 60%, #064E3B 100%);
+  
+  /* แสงสะท้อนขอบบนและเงาเรืองแสงสีเขียว */
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    0 6px 18px -2px rgba(5, 150, 105, 0.42);
+    
+  color: #FFFFFF !important;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.dock-cta-btn i {
+  font-size: 20px;
+  color: #FFFFFF;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.dock-cta-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+/* ไฟกระพริบ Real-Time Pulse (แสดงว่ามีแอดมินสแตนด์บาย ตอบไว) */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #4ADE80;
+  border-radius: 50%;
+  position: relative;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  top: -2.5px;
+  left: -2.5px;
+  width: 12px;
+  height: 12px;
+  background-color: #4ADE80;
+  border-radius: 50%;
+  animation: live-pulse 1.8s infinite ease-out;
+  opacity: 0.75;
+}
+
+@keyframes live-pulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* 🟢 ปิดอนิเมชันกิน CPU บนมือถือ คืนความลื่นไหลให้ระบบสัมผัส (INP < 100ms) */
+@media (max-width: 1023px) {
+  .vip-name, 
+  .profile-card-name, 
+  .profile-card-img,
+  .txt-model,
+  .h1-line-2,
+  .kiss-txt-main,
+  .vip-card-item img {
+    animation: none !important;
+  }
 }
