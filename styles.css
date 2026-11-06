@@ -5555,3 +5555,7 @@ a.kw-zone:hover {
   color: #FFFFFF !important;
   font-weight: 800 !important;
 }
+.kw-zone:hover {
+  background: #F3E8FF !important; /* เปลี่ยนพื้นหลังเป็นม่วงอ่อนเมื่อชี้ */
+  transform: translateY(-1px);
+}
