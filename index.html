@@ -91,27 +91,48 @@
     gtag('config', 'G-PG0QFDWTTG');
   </script>
 </head>
+
 <body class="fmh-app-page">
     
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <a href="/" class="dock-item active">
-    <i class="fas fa-home"></i>
-    <span>หน้าแรก</span>
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ" 
+     style="position: fixed !important; bottom: 16px !important; left: 16px !important; right: 16px !important; width: auto !important; max-width: 410px !important; margin: 0 auto !important; height: 66px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; border: 1.5px solid rgba(255, 255, 255, 0.95) !important; box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0,0,0,0.04) !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 0 8px 0 10px !important; z-index: 99999 !important;">
+  
+  <!-- 1. หน้าแรก (Active: มีกรอบเบาะสีม่วง + มิติชัดเจน) -->
+  <a href="/" class="dock-item active" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 3px; -webkit-tap-highlight-color: transparent;">
+    <div style="width: 34px; height: 30px; background: #F3E8FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 6px rgba(124, 58, 237, 0.15);">
+      <i class="fas fa-home" style="font-size: 15px; color: #7C3AED;"></i>
+    </div>
+    <span style="font-size: 10px; font-weight: 800; color: #7C3AED; letter-spacing: -0.2px;">หน้าแรก</span>
   </a>
-  <button type="button" id="open-filter-dock-btn" class="dock-item" aria-label="ตัวกรอง">
-    <i class="fas fa-search"></i>
-    <span>ตัวกรอง</span>
+
+  <!-- 2. ตัวกรอง -->
+  <button type="button" id="open-filter-dock-btn" class="dock-item" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; padding: 0; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent;">
+    <div style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
+      <i class="fas fa-sliders-h" style="font-size: 15px; color: #475569;"></i>
+    </div>
+    <span style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">ตัวกรอง</span>
   </button>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-user-friends"></i>
-    <span>รวมน้องๆ</span>
+
+  <!-- 3. รวมน้องๆ -->
+  <a href="/profiles" class="dock-item" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 3px; -webkit-tap-highlight-color: transparent;">
+    <div style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
+      <i class="fas fa-user-friends" style="font-size: 15px; color: #475569;"></i>
+    </div>
+    <span style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">รวมน้องๆ</span>
   </a>
-  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="จองคิว">
-    <i class="fab fa-line"></i>
-    <span>จองคิว</span>
+
+  <!-- เส้นแบ่งโซน (Divider) กั้นชัดเจน กันนิ้วไปโดนปุ่มข้างๆ -->
+  <div style="width: 1px; height: 26px; background: rgba(148, 163, 184, 0.3); margin: 0 4px;" aria-hidden="true"></div>
+
+  <!-- 4. ปุ่มติดต่อ LINE (สัดส่วน Compact กระชับ มีแสงเงา ไม่แย่งพื้นที่) -->
+  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" 
+     style="display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 42px; padding: 0 13px; border-radius: 100px; text-decoration: none; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 4px 12px rgba(5, 150, 105, 0.35); color: #FFFFFF !important; -webkit-tap-highlight-color: transparent; margin-left: 2px;">
+    <!-- ไฟสถานะจุดเขียวสด กระพริบแบบนุ่มนวล -->
+    <span style="width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; box-shadow: 0 0 6px #4ADE80; display: inline-block;"></span>
+    <i class="fab fa-line" style="font-size: 18px; color: #FFFFFF;"></i>
+    <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1px;">ติดต่อ</span>
   </a>
 </nav>
-
 
   <header id="page-header" role="banner">
     <a href="/" class="brand-luxe-logo" id="header-brand-logo" aria-label="FirstModelHub หน้าแรก">
