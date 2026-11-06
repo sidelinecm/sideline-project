@@ -1139,9 +1139,9 @@ if (heroH1) {
   const isSsrPage = window.location.pathname.includes("/location/") || 
                     window.location.pathname.includes("/province/") || 
                     window.location.pathname.includes("/sideline/");
- if (!isSsrPage && !isEN) {
+if (!isSsrPage && !isEN) {
   const line1 = `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
-  const line2 = "รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
+  const line2 = "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
   heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
 }
 }
@@ -1330,20 +1330,23 @@ if (heroH1) {
       return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
     });
 
-    // 🟢 โค้ดที่สมบูรณ์ใน main.js:
-let rightBadgeHtml = "";
-if (isFiwFan) {
-  rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
-} else if (p.isVerified) {
-  rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
-} else {
-  rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
-}
+    let rightBadgeHtml = "";
+    if (isFiwFan) {
+      rightBadgeHtml = `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>`;
+    } else if (p.isVerified) {
+      rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
+    } else {
+      rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
+    }
 
+    // 🟢 ประกาศตัวแปรทั้ง 3 ตัวให้ครบถ้วน ป้องกัน ReferenceError 100%
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
+    const hiddenAnchorText = isEN 
+      ? `View profile of ${modelName} verified companion in ${p.location || 'Thailand'}`
+      : `ดูโปรไฟล์ ${escapeHTML(modelName)} รับงาน${escapeHTML(p.provinceNameThai || 'เชียงใหม่')} ไซด์ไลน์ตรงปก`;
 
-   // 🟢 แสดงเฉพาะยอดหัวใจจริงที่มีในระบบ (ตัดสูตรคำนวณดาว/รีวิวจำลองออก)
+    // 🟢 ดึงยอดหัวใจจริง
     const rawLikes = p.likes_count || p.likes || 0;
     const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
@@ -1380,7 +1383,9 @@ if (isFiwFan) {
           </div>
       </div>
       
-      <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}"></a>
+     <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}">
+       <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">${hiddenAnchorText}</span>
+     </a>
 
       <div class="profile-card-info-content">
           <div class="profile-card-tags-row">
@@ -1408,7 +1413,7 @@ if (isFiwFan) {
     `;
     container.appendChild(article);
     return container;
-  }
+}
 
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
