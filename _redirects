@@ -2,6 +2,33 @@
 # Netlify 301 Force Redirects: Thai URL to Clean Model ID
 # ========================================================
 
+# 🟢 ดีดทุกคนที่เข้า /profiles เข้าหน้าแรกทันที
+/profiles                                                          /                      301!
+/profiles.html                                                     /                      301!
+
+# 1. น้อง Ammie (ชี้ไป ammie-127 ตาม sitemap)
+/sideline/ammie                                                    /sideline/ammie-127    301!
+/sideline/น้องAmmie                                                /sideline/ammie-127    301!
+/sideline/น้องAmmie-เชียงใหม่                                       /sideline/ammie-127    301!
+/sideline/น้องAmmie-ตัวเมือง                                        /sideline/ammie-127    301!
+/sideline/แอมมี่-เชียงใหม่                                          /sideline/ammie-127    301!
+/sideline/%E0%B8%99%E0%B9%89%E0%B8%AD%E0%B8%87Ammie                /sideline/ammie-127    301!
+
+# 2. น้องข้าวปุ้น เชียงใหม่ (ดักคำค้นจาก Google Snippet)
+/sideline/ข้าวปุ้น-เชียงใหม่                                        /sideline/khawpun-126   301!
+/sideline/พบกับ-ข้าวปุ้น                                            /sideline/khawpun-126   301!
+/sideline/ข้าวปุ้น-รับงานเอง                                        /sideline/khawpun-126   301!
+
+# 3. หน้าพิกัดและพื้นที่บริการเชียงใหม่ (ชี้ไป /location/chiangmai)
+/location-chiangmai                                                /location/chiangmai    301!
+/location/chiangmai-service                                        /location/chiangmai    301!
+/service-area                                                      /location/chiangmai    301!
+/พิกัดและพื้นที่บริการไซด์ไลน์เชียงใหม่                               /location/chiangmai    301!
+/sideline/พิกัดและพื้นที่บริการไซด์ไลน์เชียงใหม่                      /location/chiangmai    301!
+
+/sideline/ammie-chiangmai                                          /sideline/ammie-127    301!
+/sideline/น้องammie-ไซด์ไลน์เชียงใหม่                               /sideline/ammie-127    301!
+
 # 1. น้องใบข้าว (ID: 48)
 /sideline/%E0%B9%83%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7-%E0%B9%83%E0%B8%99%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87    /sideline/model-48    301!
 /sideline/ใบข้าว-ในเมือง                                                /sideline/model-48    301!
