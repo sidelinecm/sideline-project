@@ -1412,15 +1412,33 @@ if (!isSsrPage && !isEN) {
     containerEl.dataset.activeRenderId = renderId;
     containerEl.innerHTML = "";
 
+    // ตัดแบ่ง: วาด 12 คนแรกที่ผู้ใช้มองเห็นก่อนทันที จอจะตอบสนองใน 0.05 วินาที
+    const BATCH_SIZE = 12;
+    const firstBatch = profilesList.slice(0, BATCH_SIZE);
+    const remainingBatch = profilesList.slice(BATCH_SIZE);
+
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < profilesList.length; i++) {
+    for (let i = 0; i < firstBatch.length; i++) {
       if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
-      const cardEl = createProfileCardDOM(profilesList[i], i);
-      fragment.appendChild(cardEl);
+      fragment.appendChild(createProfileCardDOM(firstBatch[i], i));
     }
     containerEl.appendChild(fragment);
-  }
 
+    // คนที่เหลือ ให้เบราว์เซอร์วาดชุดแรกเสร็จก่อน แล้วค่อยเรนเดอร์ตามลงมาในเฟรมถัดไป
+    if (remainingBatch.length > 0) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
+          const restFragment = document.createDocumentFragment();
+          for (let j = 0; j < remainingBatch.length; j++) {
+            restFragment.appendChild(createProfileCardDOM(remainingBatch[j], BATCH_SIZE + j));
+          }
+          containerEl.appendChild(restFragment);
+        }, 0);
+      });
+    }
+  }
+    
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
     const wrapper = document.createElement("div");
     wrapper.className = "section-content-wrapper province-section";
@@ -2707,20 +2725,24 @@ async function initApplication() {
    
 document.querySelectorAll(".filter-pill-tab").forEach(pill => {
   pill.addEventListener("click", function (e) {
-    // 1. (SEO & SSR) ถ้าเป็นแท็ก <a> ที่มี href (ปุ่มโซน/จังหวัด) ให้เบราว์เซอร์เปลี่ยนหน้าตามปกติ
-    // Google Bot จะไต่ตามลิงก์นี้ไปเจอหน้าที่มี H1, Title, Description เฉพาะเจาะจง
     if (this.tagName === "A" && this.getAttribute("href")) return;
 
-    // 2. (UX & SPA) ถ้าเป็นปุ่ม <button> (แท็กความชอบ เช่น #ฟิวแฟน, #ตัวเล็ก) 
-    // ให้ใช้ JavaScript กรองข้อมูลที่อยู่ใน Browser ทันที ไม่ต้องโหลดหน้าใหม่ ลื่นไหล 60FPS
     e.preventDefault();
-    triggerHaptic("light");
+    if (typeof triggerHaptic === "function") triggerHaptic("light");
+    
+    // 1. ให้ปุ่มเปลี่ยนสีและตอบสนองนิ้วทันที (INP จะบันทึกว่าไว < 50ms)
     document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
     this.classList.add("active");
 
     const selectedTag = this.getAttribute("data-tag") || "all";
     appState.activePillTag = selectedTag;
-    executeFilterAndRender(true);
+
+    // 2. เปิดทางให้จอเรนเดอร์สีปุ่มให้เสร็จก่อน 1 จังหวะ แล้วค่อยกรองข้อมูลการ์ด
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        executeFilterAndRender(true);
+      }, 0);
+    });
   });
 });
 
