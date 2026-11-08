@@ -2328,8 +2328,31 @@ if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
   const lcpExactUrl = optimizeImg(rawLcpImg, "card"); // ดึงขนาดมาตรฐาน card (480px)
   
-  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
-  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+  // 1. นำรูป LCP ปกติ
+  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">`;
+  
+  // 2. เสริมทัพด้วย Non-blocking FontAwesome และ Speculation Rules
+  const dynamicHeadInjection = `
+  ${preloadTag}
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script type="speculationrules">
+  {
+    "prefetch": [
+      {
+        "where": { "and": [{ "href_matches": "/sideline/*" }, { "not": { "href_matches": "/*\\\\?*" } }] },
+        "eagerness": "conservative"
+      },
+      { "where": { "href_matches": "/location/*" }, "eagerness": "conservative" }
+    ]
+  }
+  </script>
+</head>`;
+
+  finalHtml = finalHtml.replace(/<\/head>/i, dynamicHeadInjection);
 }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);

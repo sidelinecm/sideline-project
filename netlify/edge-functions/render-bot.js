@@ -752,7 +752,36 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- 🟢 จุดที่ 1 และ 2: FontAwesome แบบเร็วสุด ไม่บล็อกหน้าจอ -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    </noscript>
+
+    <!-- 🟢 จุดที่ 3: Speculation Rules (Instant Load) ปลอดภัย 100% -->
+    <script type="speculationrules">
+    {
+      "prefetch": [
+        {
+          "where": {
+            "and": [
+              { "href_matches": "/sideline/*" },
+              { "not": { "href_matches": "/*\\?*" } }
+            ]
+          },
+          "eagerness": "conservative"
+        },
+        {
+          "where": { "href_matches": "/location/*" },
+          "eagerness": "conservative"
+        }
+      ]
+    }
+    </script>
+
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
@@ -770,7 +799,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <!-- Twitter Cards (ครบสูตร X/Twitter) -->
+   <!-- Twitter Cards (ครบสูตร X/Twitter) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@sidelinecm">
     <meta name="twitter:creator" content="@sidelinecm">
@@ -780,7 +809,6 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
- 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -797,6 +825,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     </script>
 </head>
 <body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22;">
+    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
