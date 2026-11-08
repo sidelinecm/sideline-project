@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_22`;
+let GLOBAL_VERSION = `v_20261022_19`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -2294,15 +2294,14 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-   const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : profilesList[0];
+  // 🟢 เปลี่ยนมา Preload การ์ดรูปแรกของ Grid ด้านล่าง (ขนาด 480px) ที่ Google ใช้วัด LCP จริง
+const lcpTargetProfile = (profilesList && profilesList.length > 0) ? profilesList[0] : (hotProfiles && hotProfiles[0]);
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  // ดึงไซส์ 300 ให้ตรงกับรูปภาพจริงใน Swiper เพื่อไม่ให้เบราว์เซอร์โหลดรูปซ้ำ
-  const lcpSize = (hotProfiles && hotProfiles.length > 0) ? 300 : 480;
-  const lcpExactUrl = optimizeImg(rawLcpImg, lcpSize);
+  const lcpExactUrl = optimizeImg(rawLcpImg, "card"); // ดึงขนาดมาตรฐาน card (480px)
   
-  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
+  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
   finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
 }
 
