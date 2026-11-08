@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_19`;
+let GLOBAL_VERSION = 'v_20261022_22';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -375,25 +375,45 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
 
  const chipStyle = `display: inline-flex; align-items: center; gap: 6px; background: #FFFFFF !important; border: 1.5px solid #A855F7 !important; color: #3B0764 !important; font-size: 11.5px; font-weight: 800; padding: 6px 14px; border-radius: 100px; text-decoration: none; box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12); transition: all 0.2s;`;
 
-  const zoneLinks = cleanZones.slice(0, 10).map(z => {
-    const cleanZ = sanitizeThaiText(z);
-    if (!cleanZ) return "";
+ const ZONE_TO_SLUG = {
+      "นิมมาน": "nimman",
+      "เจ็ดยอด": "jedyod",
+      "สันติธรรม": "santitham",
+      "ช้างเผือก": "changphueak",
+      "หลัง มช.": "cmu",
+      "หน้า มช.": "namor",
+      "ท่าแพ": "thapae",
+      "สันทราย": "sansai",
+      "แม่โจ้": "maejo",
+      "พายัพ": "payap",
+      "ห้วยแก้ว": "huaykaew",
+      "รวมโชค": "ruamchok",
+      "แม่ริม": "maerim",
+      "หางดง": "hangdong",
+      "กังสดาล": "kangsadan",
+      "หลัง มข.": "kku",
+      "บ้านดู่": "baandu",
+      "หน้า มฟล.": "mfu",
+      "UD Town": "udtown",
+      "หนองประจักษ์": "nongprajak",
+      "ป่าตอง": "patong"
+    };
 
-    if (cleanZ.includes("นิมมาน")) {
-      return `<a href="/location/chiangmai/nimman" class="kw-zone" style="${chipStyle}" title="สาวรับงานนิมมาน">📍 ${escapeHTML(cleanZ)}</a>`;
-    }
-
-    if (isNation) {
-      const targetSlug = PROV_SLUG_MAP[cleanZ];
-      if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
-        return `<a href="/location/${targetSlug}" class="kw-zone" style="${chipStyle}" title="สาวรับงาน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
+    const zoneLinks = cleanZones.slice(0, 10).map(z => {
+      const cleanZ = sanitizeThaiText(z);
+      if (!cleanZ) return "";
+      
+      if (isNation) {
+        const targetSlug = PROV_SLUG_MAP[cleanZ];
+        if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
+          return `<a href="/location/${targetSlug}" class="kw-zone" style="${chipStyle}" title="สาวรับงาน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
+        }
+        return `<span class="kw-zone" style="${chipStyle}">📍 ${escapeHTML(cleanZ)}</span>`;
       }
-      return `<span class="kw-zone" style="${chipStyle}">📍 ${escapeHTML(cleanZ)}</span>`;
-    }
-
-    const safeZoneSlug = cleanZ.replace(/\s+/g, "-");
-    return `<a href="${encodeURI(`/location/${provinceSlug}/${safeZoneSlug}`)}" class="kw-zone" style="${chipStyle}" title="สาวรับงานโซน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
-  }).filter(Boolean);
+      
+      const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
+      return `<a href="/location/${provinceSlug}/${slugPart}" class="kw-zone" style="${chipStyle}" title="สาวรับงานโซน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
+    }).filter(Boolean);
 
   const zoneChipsHtml = zoneLinks.length > 0 
     ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
@@ -1632,33 +1652,31 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     }
 
     if (totalCount > 0) {
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonicalUrl}#itemlist`,
-        "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์ทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": totalCount,
-        "itemListElement": actualVisibleProfiles.map((p, idx) => {
-          // ลบคำนำหน้า และลบ Emoji/สัญลักษณ์พิเศษสำหรับ Schema โดยเฉพาะ
-          const cleanPersonName = (p.name || "สาวสวย")
-            .replace(/^(น้อง\s?)+/gi, "")
-            .replace(/[^\u0E00-\u0E7Fa-zA-Z0-9\s]/g, "")
-            .trim();
+     const schemaProfiles = isNational ? actualVisibleProfiles.slice(0, 30) : actualVisibleProfiles;
 
-          return {
-            "@type": "ListItem",
-            "position": idx + 1,
-            "item": {
-              "@type": "Person",
-              "name": `น้อง${cleanPersonName}`,
-              "image": optimizeImg(p.imagePath || p.image_url || "", 400),
-              "url": `${primaryDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`
-            }
-          };
-        })
-      });
-    }
+  schemaGraph.push({
+    "@type": "ItemList",
+    "@id": `${canonicalUrl}#itemlist`,
+    "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์แนะนำทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
+    "numberOfItems": schemaProfiles.length,
+    "itemListElement": schemaProfiles.map((p, idx) => {
+      const pSlug = p.slug || String(p.id);
+      const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
+      return {
+        "@type": "ListItem",
+        "position": idx + 1,
+        "item": {
+          "@type": "Person",
+          "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
+          "image": pImg,
+          "url": `https://firstmodelhub.com/sideline/${pSlug}`
+        }
+      };
+    })
+  });
+  }
 
-    // 🟢 7. ระบบ Adaptive FAQ
+   
     const activeFaqs = zoneSlug
       ? [
           {
@@ -2221,7 +2239,12 @@ if (!isNational && pills) {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-   const clientProfilesData = profilesList.map(p => {
+  const forceAdjucgga = (urlStr) => {
+      if (!urlStr || typeof urlStr !== "string") return "";
+      return urlStr.replace(/res\.cloudinary\.com\/dyynjlbuj\//gi, "res.cloudinary.com/adjucgga/");
+    };
+
+    const clientProfilesData = profilesList.map(p => {
       let rawGal = p.galleryPaths || p.gallery_paths || p.gallery || [];
       if (typeof rawGal === "string") {
         try { rawGal = JSON.parse(rawGal); } catch (_) { rawGal = rawGal.split(",").map(s => s.trim()); }
@@ -2230,13 +2253,17 @@ if (!isNational && pills) {
       if (typeof rawTags === "string") {
         try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
       }
-     // ✅ โค้ดที่แก้ไขแล้ว
+
+      const rawImgPath = p.imagePath || p.image_url || "";
+      const sanitizedImgPath = forceAdjucgga(rawImgPath);
+      const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(forceAdjucgga).filter(Boolean);
+
       return {
         id: p.id,
         slug: p.slug || String(p.id),
         name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-        imagePath: p.imagePath || p.image_url || "",
-        galleryPaths: Array.isArray(rawGal) ? rawGal.filter(Boolean) : [],
+        imagePath: sanitizedImgPath,
+        galleryPaths: sanitizedGallery,
         provinceKey: p.provinceKey || "chiangmai",
         location: sanitizeThaiText(p.location || ""),
         description: sanitizeThaiText(p.description || ""),
