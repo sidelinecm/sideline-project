@@ -18,7 +18,19 @@ function parseRateToNumber(rate) {
 window.parseRateToNumber = parseRateToNumber;
 
 
-// 🟢 คำนวณเวลาสดฝั่ง Client (แก้ปัญหาเวลาค้างจาก CDN Cache)
+const yieldToMain = () => {
+  if (typeof window !== "undefined" && "scheduler" in window && "yield" in window.scheduler) {
+    return window.scheduler.yield();
+  }
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = resolve;
+    channel.port2.postMessage(null);
+  });
+};
+window.yieldToMain = yieldToMain;
+
+
 function updateLiveRelativeTimestamps() {
   const elements = document.querySelectorAll("time.fmh-relative-time");
   if (!elements || elements.length === 0) return;
@@ -1399,12 +1411,11 @@ if (heroH1) {
     return container;
 }
 
-  async function renderProfilesBatch(containerEl, profilesList, renderId) {
+ async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
     containerEl.dataset.activeRenderId = renderId;
     containerEl.innerHTML = "";
 
-    // ตัดแบ่ง: วาด 12 คนแรกที่ผู้ใช้มองเห็นก่อนทันที จอจะตอบสนองใน 0.05 วินาที
     const BATCH_SIZE = 12;
     const firstBatch = profilesList.slice(0, BATCH_SIZE);
     const remainingBatch = profilesList.slice(BATCH_SIZE);
@@ -1416,18 +1427,23 @@ if (heroH1) {
     }
     containerEl.appendChild(fragment);
 
-    // คนที่เหลือ ให้เบราว์เซอร์วาดชุดแรกเสร็จก่อน แล้วค่อยเรนเดอร์ตามลงมาในเฟรมถัดไป
     if (remainingBatch.length > 0) {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
+      (async () => {
+        let currentIdx = 0;
+        while (currentIdx < remainingBatch.length) {
           if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
-          const restFragment = document.createDocumentFragment();
-          for (let j = 0; j < remainingBatch.length; j++) {
-            restFragment.appendChild(createProfileCardDOM(remainingBatch[j], BATCH_SIZE + j));
+          
+          await window.yieldToMain(); 
+          
+          const chunk = remainingBatch.slice(currentIdx, currentIdx + BATCH_SIZE);
+          const chunkFrag = document.createDocumentFragment();
+          for (let j = 0; j < chunk.length; j++) {
+            chunkFrag.appendChild(createProfileCardDOM(chunk[j], BATCH_SIZE + currentIdx + j));
           }
-          containerEl.appendChild(restFragment);
-        }, 0);
-      });
+          containerEl.appendChild(chunkFrag);
+          currentIdx += BATCH_SIZE;
+        }
+      })();
     }
   }
     
@@ -2481,8 +2497,7 @@ async function initApplication() {
     const searchBottomSheetEl = document.getElementById("search-bottom-sheet");
     const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
-    const toggleSearchDrawer = (isOpen) => {
-      // 1. ตอบสนองภาพหน้าจอทันทีใน 0.01 วินาทีแรก (INP จะบันทึกว่าเร็วมาก < 30ms)
+    const toggleSearchDrawer = async (isOpen) => {
       if (searchBottomSheetEl) {
         searchBottomSheetEl.classList.toggle("active", isOpen);
         searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
@@ -2494,11 +2509,11 @@ async function initApplication() {
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
 
-      
-      requestAnimationFrame(() => {
-        document.body.style.overflow = isOpen ? "hidden" : "";
-      });
+      await window.yieldToMain(); 
+      document.body.style.overflow = isOpen ? "hidden" : "";
     };
+
+      
 
     if (openFilterDockBtn) {
       openFilterDockBtn.onclick = (e) => {
@@ -2629,32 +2644,37 @@ async function initApplication() {
 
    
 document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", function (e) {
+  pill.addEventListener("click", async function (e) {
     const targetHref = this.getAttribute("href");
     const currentPath = window.location.pathname.replace(/\/+$/, "");
     const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
 
-    // 🟢 ถ้าคลิกลิงก์ที่เป็นหน้าเดิมที่เปิดอยู่แล้ว ให้ยกเลิกการโหลดหน้าเว็บใหม่ทันที
     if (cleanTarget && cleanTarget === currentPath) {
       e.preventDefault();
       document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
       this.classList.add("active");
       appState.activePillTag = "all";
       if (domCache.searchInput) domCache.searchInput.value = "";
+      
+      await window.yieldToMain(); 
       executeFilterAndRender(true);
       return;
     }
 
-    if (this.tagName === "A" && targetHref) return; // ถ้าเป็นย่านอื่น ปล่อยให้ไปตามปกติ
+    if (this.tagName === "A" && targetHref) return; 
 
     e.preventDefault();
     document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
     this.classList.add("active");
+    
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic("light"); 
+    
     appState.activePillTag = this.getAttribute("data-tag") || "all";
+    
+    await window.yieldToMain(); 
     executeFilterAndRender(true);
   });
 });
-
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
       // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
@@ -2694,10 +2714,8 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         }
       }
 
-   // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
-    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+   const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
     if (cardElement) {
-      // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
       if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
         return;
       }
@@ -2707,6 +2725,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
 
       if (profileId || profileSlug) {
         e.preventDefault();
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic("light");
         const searchId = String(profileId || "");
         const searchSlug = String(profileSlug || "");
 
@@ -2721,13 +2740,12 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
           if (rawP) targetProfile = normalizeProfile(rawP);
         }
 
-        // ✅ แก้ให้เรียกตรงทันที (Next Paint จะสำเร็จใน 15-20 ms ทันที)
-if (targetProfile) {
-  history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-  window.openLightboxModal(targetProfile); // 👈 เรียกตรงทันที ตัด requestAnimationFrame ทิ้ง
-} else {
-  window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-}
+        if (targetProfile) {
+          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+          window.openLightboxModal(targetProfile);
+        } else {
+          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+        }
         return;
       }
     }
