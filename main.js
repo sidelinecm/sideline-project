@@ -2494,7 +2494,7 @@ async function initApplication() {
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
 
-      // 2. ผลักคำสั่ง overflow หน่วงไปทำในเฟรมถัดไป ป้องกัน 72% Layout Thrashing 100%
+      
       requestAnimationFrame(() => {
         document.body.style.overflow = isOpen ? "hidden" : "";
       });
@@ -2507,40 +2507,11 @@ async function initApplication() {
         toggleSearchDrawer(true);
       };
     }
+    
     if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
     if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
     
-    // 🟢 ระบบรูดลงเพื่อปิดฟอร์มค้นหา (Touch Swipe Down to Dismiss)
-    if (searchBottomSheetEl) {
-      let touchStartY = 0;
-      let touchCurrentY = 0;
-
-      searchBottomSheetEl.addEventListener("touchstart", (e) => {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-
-      searchBottomSheetEl.addEventListener("touchmove", (e) => {
-        touchCurrentY = e.touches[0].clientY;
-        const diffY = touchCurrentY - touchStartY;
-        if (diffY > 0 && (searchBottomSheetEl.querySelector('.sheet-body-content')?.scrollTop ?? 0) <= 0) {
-          searchBottomSheetEl.style.transform = `translate(-50%, ${diffY}px)`;
-        }
-      }, { passive: true });
-
-      searchBottomSheetEl.addEventListener("touchend", () => {
-        const diffY = touchCurrentY - touchStartY;
-        searchBottomSheetEl.style.transform = "";
-        if (diffY > 90) {
-          toggleSearchDrawer(false); // รูดลงเกิน 90px ให้ปิดทันที
-          if (typeof triggerHaptic === "function") triggerHaptic("light");
-        }
-        touchStartY = 0;
-        touchCurrentY = 0;
-      }, { passive: true });
-    }
-    
-    
-   if (applyFilterBtn) {
+    if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         const selectedProv = domCache.provinceSelect?.value;
         const searchKeyword = (domCache.searchInput?.value || "").trim();
