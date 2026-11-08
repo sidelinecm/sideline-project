@@ -18,17 +18,6 @@ function parseRateToNumber(rate) {
 window.parseRateToNumber = parseRateToNumber;
 
 
-const yieldToMain = () => {
-  if (typeof window !== "undefined" && "scheduler" in window && "yield" in window.scheduler) {
-    return window.scheduler.yield();
-  }
-  return new Promise((resolve) => {
-    const channel = new MessageChannel();
-    channel.port1.onmessage = resolve;
-    channel.port2.postMessage(null);
-  });
-};
-window.yieldToMain = yieldToMain;
 
 
 function updateLiveRelativeTimestamps() {
@@ -1411,7 +1400,7 @@ if (heroH1) {
     return container;
 }
 
- async function renderProfilesBatch(containerEl, profilesList, renderId) {
+ function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
     containerEl.dataset.activeRenderId = renderId;
     containerEl.innerHTML = "";
@@ -1428,22 +1417,16 @@ if (heroH1) {
     containerEl.appendChild(fragment);
 
     if (remainingBatch.length > 0) {
-      (async () => {
-        let currentIdx = 0;
-        while (currentIdx < remainingBatch.length) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
           if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
-          
-          await window.yieldToMain(); 
-          
-          const chunk = remainingBatch.slice(currentIdx, currentIdx + BATCH_SIZE);
-          const chunkFrag = document.createDocumentFragment();
-          for (let j = 0; j < chunk.length; j++) {
-            chunkFrag.appendChild(createProfileCardDOM(chunk[j], BATCH_SIZE + currentIdx + j));
+          const restFragment = document.createDocumentFragment();
+          for (let j = 0; j < remainingBatch.length; j++) {
+            restFragment.appendChild(createProfileCardDOM(remainingBatch[j], BATCH_SIZE + j));
           }
-          containerEl.appendChild(chunkFrag);
-          currentIdx += BATCH_SIZE;
-        }
-      })();
+          containerEl.appendChild(restFragment);
+        }, 10);
+      });
     }
   }
     
@@ -1831,12 +1814,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
-    // =========================================================================
-    // ⚡ PHASE 2: DEFERRED HYDRATION (ทำใน Background หลัง Paint แรกสำเร็จ)
-    // โยกงานที่กิน CPU หนัก ๆ ออกจากจังหวะคลิก ช่วยลด INP เหลือต่ำกว่า 30ms
-    // =========================================================================
-    const scheduleTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-    scheduleTask(() => {
+   
       // 1. อัปเดต Meta & Title
       const dynamicTitle = isEn
         ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
@@ -2046,7 +2024,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         `;
       }
 
-      // 9. ย้าย Google Analytics ไปรันใน Background ป้องกันการหยุดการตอบสนองหน้าจอ
+    // 9. ส่งสถิติ Google Analytics
       setTimeout(() => {
         if (typeof gtag === "function") {
           gtag("event", "page_view", {
@@ -2056,13 +2034,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
         }
       }, 250);
-    });
   };
-
-
- 
-    
-
   
  window.closeLightboxModal = function (updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
@@ -2644,7 +2616,7 @@ async function initApplication() {
 
    
 document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", async function (e) {
+  pill.addEventListener("click", function (e) { 
     const targetHref = this.getAttribute("href");
     const currentPath = window.location.pathname.replace(/\/+$/, "");
     const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
@@ -2656,8 +2628,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       appState.activePillTag = "all";
       if (domCache.searchInput) domCache.searchInput.value = "";
       
-      await window.yieldToMain(); 
-      executeFilterAndRender(true);
+      requestAnimationFrame(() => { setTimeout(() => { executeFilterAndRender(true); }, 10); });
       return;
     }
 
@@ -2668,13 +2639,13 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
     this.classList.add("active");
     
     if (typeof window.triggerHaptic === "function") window.triggerHaptic("light"); 
-    
     appState.activePillTag = this.getAttribute("data-tag") || "all";
     
-    await window.yieldToMain(); 
-    executeFilterAndRender(true);
+    // ปล่อยให้ปุ่มเปลี่ยนสีเสร็จก่อน แล้วค่อยคำนวณข้อมูล
+    requestAnimationFrame(() => { setTimeout(() => { executeFilterAndRender(true); }, 10); });
   });
 });
+
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
       // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
