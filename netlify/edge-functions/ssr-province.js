@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = `v_20261022_20`;
+let GLOBAL_VERSION = `v_20261022_22`;
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1097,16 +1097,38 @@ try {
   decodedPath = decodeURIComponent(cleanPath);
 } catch (_) {}
 
-// แก้เคสนิมมาน
-if (decodedPath === "/nimman" || decodedPath === "/nimman.html" || decodedPath === "/location/chiangmai/นิมมาน") {
+// ✅ แก้เคสพิมพ์ URL ย่อ หรือเข้าผ่าน .html ให้เข้าหน้านิมมานมาตรฐาน
+if (decodedPath === "/nimman" || decodedPath === "/nimman.html") {
   return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
 }
-// แก้เคสโซนยอดนิยมอื่นๆ ให้วิ่งเข้า Slug อังกฤษมาตรฐาน
-if (decodedPath === "/location/chiangmai/แม่โจ้") return Response.redirect(`${primaryDomain}/location/chiangmai/maejo`, 301);
-if (decodedPath === "/location/chiangmai/เจ็ดยอด") return Response.redirect(`${primaryDomain}/location/chiangmai/jedyod`, 301);
-if (decodedPath === "/location/chiangmai/สันติธรรม") return Response.redirect(`${primaryDomain}/location/chiangmai/santitham`, 301);
-if (decodedPath === "/location/chiangmai/ช้างเผือก") return Response.redirect(`${primaryDomain}/location/chiangmai/changphueak`, 301);
-if (decodedPath === "/location/chiangmai/หลัง มช." || decodedPath === "/location/chiangmai/หลัง-มช.") return Response.redirect(`${primaryDomain}/location/chiangmai/cmu`, 301);
+
+// ✅ ระบบตรวจจับสลักภาษาไทยทุกย่านทั่วไทย แล้วสั่ง 301 ไปสลักอังกฤษที่ตรงกับ Sitemap ทันที
+const THAI_TO_ENG_REDIRECT = {
+  // เชียงใหม่
+  "นิมมาน": "nimman", "แม่โจ้": "maejo", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง-มช.": "cmu", "หน้า มช.": "namor",
+  "ท่าแพ": "thapae", "สันทราย": "sansai", "ห้วยแก้ว": "huaykaew", "แม่ริม": "maerim", "หางดง": "hangdong",
+  // ขอนแก่น
+  "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หน้า มข.": "namor-kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
+  // เชียงราย
+  "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower", "แม่สาย": "maesai",
+  // อุดรธานี
+  "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
+  // ลำปาง
+  "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
+  // ภูเก็ต
+  "ป่าตอง": "patong", "ตัวเมืองภูเก็ต": "mueang-phuket", "กะทู้": "kathu", "บางเทา": "bangtao"
+};
+
+const pathParts = decodedPath.split("/").filter(Boolean);
+if (pathParts[0] === "location" && pathParts[1] && pathParts[2]) {
+  const currentProv = pathParts[1];
+  const currentZoneRaw = pathParts[2].replace(/^โซน/g, "").trim();
+  const matchedEngSlug = THAI_TO_ENG_REDIRECT[currentZoneRaw];
+  if (matchedEngSlug && matchedEngSlug !== currentZoneRaw) {
+    return Response.redirect(`${primaryDomain}/location/${currentProv}/${matchedEngSlug}`, 301);
+  }
+}
 
 const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
 if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
@@ -1341,9 +1363,9 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
     if (matchedZoneProfiles.length === 0) { 
-      // 🟢 ไม่สั่ง 302 แต่กำหนดสถานะว่าง เพื่อให้โค้ดด้านล่างส่ง <meta name="robots" content="noindex, follow">
-      isZoneEmpty = true;
-      profilesList = []; 
+      isZoneEmpty = false;
+      // ถ้าย่านนั้นยังไม่มีน้อง ให้เอาน้องในจังหวัดเดียวกันมาแสดงขัดตาทัพ 6 คน ป้องกัน Thin Content
+      profilesList = provinceProfiles.slice(0, 6); 
     } else { 
       profilesList = matchedZoneProfiles; 
     }
@@ -1436,11 +1458,28 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
 
     
     const ZONE_TO_SLUG_MAP = {
+  // เชียงใหม่
   "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
   "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
   "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
   "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
-  "แม่ริม": "maerim", "หางดง": "hangdong"
+  "แม่ริม": "maerim", "หางดง": "hangdong",
+  
+  // ขอนแก่น
+  "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หน้า มข.": "namor-kku",
+  "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon",
+  
+  // เชียงราย
+  "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower", "แม่สาย": "maesai",
+  
+  // อุดรธานี
+  "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
+  
+  // ลำปาง
+  "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
+  
+  // ภูเก็ต
+  "ป่าตอง": "patong", "ตัวเมืองภูเก็ต": "mueang-phuket", "กะทู้": "kathu", "บางเทา": "bangtao"
 };
 
 let safeZoneSlugPart = "";
@@ -1467,15 +1506,28 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-  const metaTitle = isEnglishHome
-    ? `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`
-    : (zoneSlug
-        ? `ไซด์ไลน์${zoneSlug} รับงาน${zoneSlug} รูปตรงปก จ่ายหน้างาน ไม่มัดจำ | FMH`
-        : (isNational 
-            ? `รับงาน ไซด์ไลน์ เด็กเอ็นทั่วไทย ตรงปก จ่ายหน้างาน ไม่มีมัดจำ | FirstModelHub` 
-            : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} รูปตรงปก จ่ายหน้างาน ไม่มัดจำ | FMH`));
+    // 🟢 [ย้ายขึ้นมาตรงนี้] ประกาศและสร้าง metaTitle + H1 ก่อน เพื่อให้ Schema และ Tag ด้านล่างเรียกใช้ได้ ไม่พัง!
+    let metaTitle = "";
+    let ssrH1Html = "";
+    let dynamicSubheadline = "";
 
-    
+    if (isEnglishHome) {
+      metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
+      ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
+    } else if (isNational) {
+      metaTitle = `รับงานเชียงใหม่ รับงานทั่วไทย ไซด์ไลน์ เด็กเอ็น ฟิวแฟน จ่ายหน้างาน | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
+                   <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+    } else if (zoneSlug) {
+      metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
+                   <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
+    } else {
+      metaTitle = `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน</span>`;
+    }
+
     const metaDescription = isEnglishHome
       ? `Premium verified escorts and sidelines across Thailand (${totalCount} profiles). 100% real photos, pay directly on arrival, zero advance deposit.`
       : (zoneSlug
@@ -1506,14 +1558,14 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       }
     }
 
-    // 🟢 4. WebPage Schema (CollectionPage)
+    // 🟢 4. WebPage Schema (CollectionPage) ตอนนี้เรียกใช้ metaTitle ได้ถูกต้องแล้ว 100%
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
       "name": stripHTML(metaTitle),
       "description": cleanMetaDesc,
       "url": canonicalUrl,
-      "inLanguage": isEnglishHome ? "en-US" : "th-TH", // 👈 ปรับบรรทัดนี้
+      "inLanguage": isEnglishHome ? "en-US" : "th-TH",
       "dateModified": latestActualIso,
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       "about": isNational
@@ -1529,7 +1581,8 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
             }
           }
     };
-
+    
+    
     if (totalCount > 0) {
       webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
     }
@@ -1774,9 +1827,7 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
- const robotsDirectives = (totalCount < 1 || isZoneEmpty)
-  ? "noindex, follow"
-  : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+ const robotsDirectives = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
   
     
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
@@ -1811,22 +1862,7 @@ const hreflangBlock = isNational
     finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*>\s*/gi, "");
     finalHtml = finalHtml.replace(/<\/head>/i, `  ${hreflangBlock}\n</head>`);
 
-   let ssrH1Html = "";
-let dynamicSubheadline = "";
-
-if (isNational) {
-  // 1. หน้าแรกทั่วไทย: เก็บครบทั้ง 4 คีย์เวิร์ดหลัก (สาวรับงาน, ไซด์ไลน์, เด็กเอ็น, เพื่อนเที่ยว)
-  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
-               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
-} else if (zoneSlug) {
-  // 2. หน้ารายย่าน: เชื่อมโยง [ย่าน] เข้ากับ [จังหวัด] แบบไม่ยัดคำซ้ำ อ่านลื่นตา
-  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
-               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
-} else {
-  // 3. หน้ารายจังหวัด: กินรวบ 4 กลุ่มคำค้นหา (สาวรับงาน, ไซด์ไลน์, เด็กเอ็น, เพื่อนเที่ยว) ในหน้าเดียว
-  ssrH1Html = `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
-               <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
-}
+   
 
    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
@@ -2069,7 +2105,7 @@ if (!isNational && pills) {
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 18px;">📍</span>
               <div>
-                <strong style="color: #140F22; font-size: 13.5px; font-weight: 900; display: block;">ไซด์ไลน์${escapeHTML(cp.name)}</strong>
+                <strong style="color: #140F22; font-size: 13.5px; font-weight: 900; display: block;">รับงาน${escapeHTML(cp.name)} (ไซด์ไลน์)</strong>
                 <span style="color: #94A3B8; font-size: 10.5px;">${cp.tag}</span>
               </div>
             </div>
