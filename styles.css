@@ -5944,3 +5944,22 @@ nav.floating-app-dock,
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
+
+/* 🟢 CSS CONTAINMENT: ล็อกพื้นที่ Layout ไม่ให้กวนการ์ดหลักด้านหลัง */
+#lightbox {
+  contain: layout style;
+}
+
+#lightbox-content-wrapper-el {
+  contain: content;
+  will-change: transform, opacity;
+}
+
+/* ล็อก Grid โปรไฟล์หลักไม่ให้กระตุกเวลาเปิด Pop-up */
+#profiles-display-area {
+  contain: style;
+}
+
+.vip-swiper-wrapper {
+  contain: layout paint;
+}
