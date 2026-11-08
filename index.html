@@ -52,8 +52,8 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_20">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_20">
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_22">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_22">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -264,10 +264,12 @@
   <!-- 🟢 โค้ดที่ถูกต้อง: -->
 <div class="filter-pills-scroll-row" id="quick-filter-pills">
   <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั้งหมด</button>
-  <a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;">📍 เชียงใหม่</a>
-  <a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;">📍 ขอนแก่น</a>
-  <a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;">📍 ภูเก็ต</a>
-  <a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;">📍 อุดรธานี</a>
+ 
+<a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;" title="รับงานเชียงใหม่">📍 รับงานเชียงใหม่</a>
+<a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;" title="รับงานขอนแก่น">📍 รับงานขอนแก่น</a>
+<a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;" title="รับงานภูเก็ต">📍 รับงานภูเก็ต</a>
+<a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;" title="รับงานอุดรธานี">📍 รับงานอุดรธานี</a>
+  
   <button class="filter-pill-tab" type="button" data-tag="ฟิวแฟน">☕ เพื่อนเที่ยว (GFE)</button>
   <button class="filter-pill-tab" type="button" data-tag="เอ็นเตอร์เทน">🥂 เด็กเอ็นปาร์ตี้ (EN)</button>
   <button class="filter-pill-tab" type="button" data-tag="ค้างคืน">🌙 ดูแลค้างคืน</button>
@@ -651,11 +653,11 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_20"></script>
+  <script type="module" src="/main.js?v=v_20261022_22"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      const CURRENT_SW_VER = 'v_20261022_20';
+      const CURRENT_SW_VER = 'v_20261022_22';
       navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {

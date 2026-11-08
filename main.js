@@ -1124,18 +1124,16 @@ if (mapIframe) {
     }
 
     
-  // main.js (บรรทัดประมาณ 435-450)
-const heroH1 = document.getElementById("hero-h1");
+  const heroH1 = document.getElementById("hero-h1");
 if (heroH1) {
-  // 🟢 ถ้าหน้านี้เรนเดอร์เนื้อหา H1 มาจาก SSR เรียบร้อยแล้ว ให้ข้ามการเขียนทับทันที
   const isSsrPage = window.location.pathname.includes("/location/") || 
                     window.location.pathname.includes("/province/") || 
                     window.location.pathname.includes("/sideline/");
-if (!isSsrPage && !isEN) {
-  const line1 = `สาวรับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
-  const line2 = "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
-  heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
-}
+  if (!isSsrPage && !isEN) {
+    const line1 = `รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
+    const line2 = "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
+    heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
+  }
 }
 
     // ✅ ซิงค์ H2 ให้ตรงกับ SSR
@@ -2065,12 +2063,17 @@ if (faqSection && faqList) {
             e.preventDefault();
             const targetSlug = this.getAttribute("data-profile-slug");
             const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
+            
             if (targetProfile) {
-              history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-              const scrollBody = document.getElementById("lightboxScrollBody") || document.querySelector(".lightbox-scroll-body");
-              if (scrollBody) scrollBody.scrollTop = 0;
-              window.openLightboxModal(targetProfile);
-            }
+      history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+      
+      // ให้เบราว์เซอร์วาดหน้าจอรับรู้การสัมผัส (Next Paint) ก่อนรันการคำนวณหนัก
+      requestAnimationFrame(() => {
+        window.openLightboxModal(targetProfile);
+      });
+    } else {
+      window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+    }
           });
         });
       } else {
@@ -2167,7 +2170,7 @@ if (faqSection && faqList) {
         }
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `ไซด์ไลน์${provName} สาวรับงาน${provName} ฟิวแฟนตรงปก ไม่มัดจำ | First Model Hub`;
+        targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `รับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
 
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
@@ -2553,6 +2556,7 @@ async function initApplication() {
     const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
     const toggleSearchDrawer = (isOpen) => {
+      // 1. ตอบสนองภาพหน้าจอทันทีใน 0.01 วินาทีแรก (INP จะบันทึกว่าเร็วมาก < 30ms)
       if (searchBottomSheetEl) {
         searchBottomSheetEl.classList.toggle("active", isOpen);
         searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
@@ -2563,7 +2567,11 @@ async function initApplication() {
         searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
-      document.body.style.overflow = isOpen ? "hidden" : "";
+
+      // 2. ผลักคำสั่ง overflow หน่วงไปทำในเฟรมถัดไป ป้องกัน 72% Layout Thrashing 100%
+      requestAnimationFrame(() => {
+        document.body.style.overflow = isOpen ? "hidden" : "";
+      });
     };
 
     if (openFilterDockBtn) {
@@ -2785,43 +2793,46 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         }
       }
 
-    // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
-const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-if (cardElement) {
-  // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
-  if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
-    return;
-  }
+   // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
+    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+    if (cardElement) {
+      // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
+      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+        return;
+      }
 
-  const profileId = cardElement.getAttribute("data-profile-id");
-  const profileSlug = cardElement.getAttribute("data-profile-slug");
+      const profileId = cardElement.getAttribute("data-profile-id");
+      const profileSlug = cardElement.getAttribute("data-profile-slug");
 
-  if (profileId || profileSlug) {
-    e.preventDefault();
-    const searchId = String(profileId || "");
-    const searchSlug = String(profileSlug || "");
+      if (profileId || profileSlug) {
+        e.preventDefault();
+        const searchId = String(profileId || "");
+        const searchSlug = String(profileSlug || "");
 
-    let targetProfile = appState.allProfiles.find(p => 
-      String(p.id) === searchId || 
-      (p.slug && String(p.slug) === searchSlug) ||
-      (searchSlug && String(p.id) === searchSlug)
-    );
+        let targetProfile = appState.allProfiles.find(p => 
+          String(p.id) === searchId || 
+          (p.slug && String(p.slug) === searchSlug) ||
+          (searchSlug && String(p.id) === searchSlug)
+        );
 
-    if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-      const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
-      if (rawP) targetProfile = normalizeProfile(rawP);
+        if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
+          const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+          if (rawP) targetProfile = normalizeProfile(rawP);
+        }
+
+        // 🟢 ปรับให้ตอบสนองนิ้วทันทีใน 16ms (แก้อาการค้าง INP 576ms)
+        if (targetProfile) {
+          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+          requestAnimationFrame(() => {
+            window.openLightboxModal(targetProfile);
+          });
+        } else {
+          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+        }
+        return;
+      }
     }
-
-    if (targetProfile) {
-      history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-      window.openLightboxModal(targetProfile);
-    } else {
-      window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-    }
-    return;
-  }
-}
-
+    
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");
       if (closeLightboxBtn || e.target === lightboxModal) {

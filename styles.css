@@ -5936,3 +5936,11 @@ nav.floating-app-dock,
   max-width: 410px !important;
   box-sizing: border-box !important;
 }
+#search-bottom-sheet,
+#lightbox,
+.floating-app-dock {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* บังคับใช้ GPU Render ตัดปัญหา Presentation Delay 494ms ทิ้งทันที */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}

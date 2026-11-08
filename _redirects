@@ -2,9 +2,6 @@
 # Netlify 301 Force Redirects: Thai URL to Clean Model ID
 # ========================================================
 
-# 🟢 ดีดทุกคนที่เข้า /profiles เข้าหน้าแรกทันที
-/profiles                                                          /                      301!
-/profiles.html                                                     /                      301!
 
 # 1. น้อง Ammie (ชี้ไป ammie-127 ตาม sitemap)
 /sideline/ammie                                                    /sideline/ammie-127    301!
