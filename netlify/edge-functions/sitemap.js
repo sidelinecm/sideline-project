@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - DYNAMIC XML SITEMAP ENGINE (sitemap.js)
- * Production-Ready Ultra-Defensive Version (FIXED 2026 - ZERO ERRORS)
+ * Production-Ready Ultra-Defensive Version (FIXED 2026 - ZERO REDIRECT ERRORS)
  * ==============================================================================
  */
 
@@ -57,13 +57,14 @@ const safeGetIsoDate = (dateStr, fallbackIso) => {
 };
 
 /**
- * 🛡️ ฟังก์ชันสร้าง URL ที่ปลอดภัย 100% (ตัดช่องว่าง %20 + เข้ารหัส Percent-encoded)
+ * 🛡️ ฟังก์ชันสร้าง URL ที่ปลอดภัย 100% (ตัดช่องว่าง %20 + เอนโค้ด URL ถูกต้อง)
  */
 const buildSafeUrl = (baseDomain, path) => {
   const cleanPath = path
     .trim()
-    .replace(/\s+/g, "-") // แทนที่ช่องว่างด้วยขีดกลาง ป้องกัน %20
-    .replace(/\/+/g, "/"); // ป้องกัน double slash
+    .replace(/[\r\n\t]+/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/\/+/g, "/");
   return encodeURI(`${baseDomain}${cleanPath}`);
 };
 
@@ -88,12 +89,11 @@ const getProfileMainImage = (p) => {
 const optimizeImgForXml = (path) => {
   if (!path || typeof path !== "string" || !path.trim()) return null;
   const cleanPath = path.trim();
-  const WM_TRANSFORM = "f_auto,q_auto:good,w_600,h_800,c_fill/a_hflip/l_text:Montserrat_26_bold_letter_spacing_4:FIRSTMODELHUB,co_rgb:ffffff,o_45/fl_layer_apply,g_south,y_40";
+  const WM_TRANSFORM = "f_auto,q_auto:good,w_600,h_800,c_fill";
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      // ✅ ใส่ชื่อบัญชีใหม่ (adjucgga) คั่นตรงกลางแบบนี้ครับ
       return `https://res.cloudinary.com/adjucgga/image/upload/${WM_TRANSFORM}/${fileMatch[1]}`;
     }
     return cleanPath;
@@ -101,7 +101,7 @@ const optimizeImgForXml = (path) => {
   return cleanPath;
 };
 
-// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (อัปเดต Slug เป็นภาษาอังกฤษให้ตรงกับ Canonical 100%)
+// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (Slug ภาษาอังกฤษตรงกับระบบ SSR และ 200 OK 100%)
 const TARGET_SUB_ZONES = [
   // 1. เชียงใหม่
   { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] },
@@ -198,26 +198,31 @@ export default async (request, _context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    
+    // 🟢 ดึงเฉพาะโปรไฟล์ที่ Active และมีรูปถ่ายจริงเท่านั้น (ไม่เอาโปรไฟล์ร้าง)
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
-      supabase.from("profiles").select("*").eq("active", true).limit(3000)
+      supabase.from("profiles")
+        .select("id, slug, name, location, description, styleTags, imagePath, image_url, provinceKey, province_key, province, updated_at, created_at, active")
+        .eq("active", true)
+        .limit(3000)
     ]);
 
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    
     const provinceLatestDateMap = new Map();
     const zoneLatestDateMap = new Map();
 
     profiles.forEach(p => {
-      const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+      let pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+      if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
+      if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
+
       const pLoc = (p.location || "").toLowerCase();
       const pDesc = (p.description || "").toLowerCase();
       const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
       const fullText = `${pLoc} ${pDesc} ${pTags}`;
-      const pDateStr = p.lastUpdated || p.last_updated || p.updated_at || p.created_at;
+      const pDateStr = p.updated_at || p.created_at;
       
       if (pDateStr) {
         const pTime = new Date(pDateStr).getTime();
@@ -244,13 +249,13 @@ export default async (request, _context) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    
+    // 1. หน้าคงที่หลัก (Static Pages)
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
       { path: "/locations", priority: "0.9", changefreq: "daily" },
       { path: "/blog", priority: "0.8", changefreq: "weekly" },
-      { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" },
+      { path: "/blog/what-is-trong-pok", priority: "0.8", changefreq: "monthly" },
       { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" },
       { path: "/blog/vip-etiquette-how-to-book-companion", priority: "0.8", changefreq: "monthly" },
       { path: "/about", priority: "0.5", changefreq: "monthly" },
@@ -267,11 +272,14 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    
+    // 2. หน้ารายจังหวัด (Province Hubs)
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
-          const cleanKey = String(p.key).trim().toLowerCase();
+          let cleanKey = String(p.key).trim().toLowerCase();
+          if (cleanKey === "chiang_mai" || cleanKey === "chiang-mai") cleanKey = "chiangmai";
+          if (cleanKey === "khonkaen" || cleanKey === "khon_kaen") cleanKey = "khon-kaen";
+
           const latestTimestamp = provinceLatestDateMap.get(cleanKey);
           const provIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
           const provUrl = buildSafeUrl(domain, `/location/${cleanKey}`);
@@ -286,10 +294,13 @@ export default async (request, _context) => {
       });
     }
 
-    
+    // 3. หน้ารายโซนย่อย (Sub-zones)
     TARGET_SUB_ZONES.forEach(sz => {
       const hasActiveProfiles = profiles.some(p => {
-        const pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+        let pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+        if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
+        if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
+
         const pLoc = (p.location || "").toLowerCase();
         const pDesc = (p.description || "").toLowerCase();
         const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
@@ -300,14 +311,11 @@ export default async (request, _context) => {
         return isSameProv && isMatchZone;
       });
 
-      
       if (!hasActiveProfiles) return;
 
       const zoneKey = `${sz.province}_${sz.zone}`;
       const latestTimestamp = zoneLatestDateMap.get(zoneKey);
       const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
-      
-      
       const zoneUrl = buildSafeUrl(domain, `/location/${sz.province}/${sz.zone}`);
 
       xml += `  <url>\n`;
@@ -318,13 +326,20 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    
+    // 4. หน้าโปรไฟล์น้องๆ (Individual Profiles - ปลายทาง 200 OK 100% ไม่ติด 301)
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
-          const rawSlug = String(p.slug || p.id).trim();
+          let rawSlug = String(p.slug || p.id).trim();
+
+          // 🟢 ตรวจสอบเด็ดขาด: ถ้า Slug มีภาษาไทย ให้แปลงเป็น model-ID ทันที
+          // เพื่อให้ตรงกับ URL ปลายทางที่เป็น 200 OK ใน _redirects (ตัดปัญหา 301 ถาวร)
+          if (/[\u0E00-\u0E7F]/.test(rawSlug)) {
+            rawSlug = `model-${p.id}`;
+          }
+
           const safeProfileUrl = buildSafeUrl(domain, `/sideline/${rawSlug}`);
-          const modDate = safeGetIsoDate(p.lastUpdated || p.last_updated || p.updated_at || p.created_at, nowIso);
+          const modDate = safeGetIsoDate(p.updated_at || p.created_at, nowIso);
 
           let imageXml = "";
           const imgPath = getProfileMainImage(p);

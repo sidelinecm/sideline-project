@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_23';
+let GLOBAL_VERSION = 'v_20261022_24';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -963,10 +963,12 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
 }
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
-  let rawLoc = sanitizeThaiText(p.location) || provinceName;
   
-  // ✅ ดึงพิกัดจริงของน้องมาแสดง หากน้องระบุย่านย่อยให้แสดงย่านย่อยนั้น เพื่อความเป็นธรรมชาติ
+  // ✅ ต้องเป็น p.location ให้ตรงกับตัวแปร p ของฟังก์ชัน
+  let rawLoc = sanitizeThaiText(p.location || "");
   let cleaned = rawLoc
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\.+$/, "")
     .replace(new RegExp(`^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|${provinceName})\\s*(\\/|และ)?\\s*`, "gi"), "")
     .trim();
   let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
@@ -1157,8 +1159,8 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 6. เส้นทางหน้าที่ข้ามไปรัน Static / Page ปกติ
-    const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
+    // 🟢 ลบ "/profiles" ออกจาก BYPASS_ROUTES เพื่อให้เซิร์ฟเวอร์เรนเดอร์หน้านี้เอง:
+    const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations"];
     if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
       return await context.next(); 
     }
@@ -1497,15 +1499,18 @@ if (zoneSlug) {
   safeZoneSlugPart = MASTER_ZONE_TO_SLUG[zoneSlug] || MASTER_ZONE_TO_SLUG[zoneSlug.replace(/\./g, "")] || zoneSlug.replace(/\s+/g, "-");
 }
 
+// ✅ ตัว rawCanonicalUrl ตัวจริงต้องอยู่ที่นี่ (หลังประกาศ safeZoneSlugPart แล้ว)
 const rawCanonicalUrl = isEnglishHome
   ? `${primaryDomain}/index-en`
-  : (isNational 
-      ? (cleanPath === "/profiles" ? `${primaryDomain}/profiles` : `${primaryDomain}/`) 
-      : (zoneSlug 
-          ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}` 
-          : `${primaryDomain}/location/${provinceSlug}`)); 
+  : (cleanPath === "/profiles" 
+      ? `${primaryDomain}/profiles` 
+      : (isNational 
+          ? `${primaryDomain}/` 
+          : (zoneSlug 
+              ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}` 
+              : `${primaryDomain}/location/${provinceSlug}`))); 
 const canonicalUrl = encodeURI(rawCanonicalUrl);
-
+    
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
       return (t > 0 && t > latest) ? t : latest;

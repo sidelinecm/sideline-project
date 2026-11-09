@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_23`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_24`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -523,43 +523,71 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const weightDisplay = parsedDbWeight ? `${weight} กก.` : "สมส่วน";
   
     const cleanProvince = escapeHTML(provinceNameThai);
-    let rawLoc = sanitizeThaiText(profile.location || "");
-    const extractedZone = rawLoc
-      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-      .split(/[,/]|และใกล้/)[0]
-      .trim();
+   // 🟢 ล้างทั้งตัวเคาะบรรทัด ช่องว่างตกค้าง และจุดปิดท้ายออกให้หมดก่อนนำไปใช้:
+let rawLoc = sanitizeThaiText(profile.location || "");
+const extractedZone = rawLoc
+  .replace(/[\r\n\t]+/g, " ")  // แปลงตัวเคาะขึ้นบรรทัดใหม่ทั้งหมดให้เป็นช่องว่างเดียว
+  .replace(/\.+$/, "")          // ลบจุดที่อยู่ท้ายข้อความทิ้ง เช่น "มช." -> "มช"
+  .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+  .split(/[,/]|และใกล้/)[0]
+  .trim();
 
     
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
 
    
-    const UNIFIED_ZONE_SLUG_MAP = {
-      // เชียงใหม่
-      "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
-      "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
-      "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
-      "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo", "พายัพ": "payap",
-      "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "แม่ริม": "maerim", "หางดง": "hangdong",
-      // กรุงเทพฯ
-      "สุขุมวิท": "sukhumvit", "รัชดา": "ratchada", "ห้วยขวาง": "huaikhwang", "ลาดพร้าว": "ladprao",
-      "ทองหล่อ": "thonglor", "เอกมัย": "ekkamai", "สาทร": "sathorn", "สีลม": "silom",
-      "บางนา": "bangna", "พระราม 9": "rama9", "อารีย์": "ari",
-      // ชลบุรี / พัทยา
-      "พัทยา": "pattaya", "หาดจอมเทียน": "jomtien", "บางแสน": "bangsaen", "ศรีราชา": "sriracha",
-      // ภูเก็ต
-      "ตัวเมืองภูเก็ต": "mueang-phuket", "ป่าตอง": "patong", "กะทู้": "kathu", "บางเทา": "bangtao",
-      // ขอนแก่น
-      "กังสดาล": "kangsadan", "หลัง มข.": "kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
-      // เชียงราย & อุดรธานี
-      "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower",
-      "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon"
-    };
+    // 🟢 วางทับแทนที่บล็อกเดิมใน render-bot.js ทั้งหมด:
+const UNIFIED_ZONE_SLUG_MAP = {
+  // 1. เชียงใหม่
+  "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
+  "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
+  "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo", "พายัพ": "payap",
+  "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "แม่ริม": "maerim", "หางดง": "hangdong",
+  "เซ็นทรัลเฟส": "centralfest", "สนามบินเชียงใหม่": "airport-cnx", "สนามบิน": "airport-cnx",
 
-    const targetSlugPart = UNIFIED_ZONE_SLUG_MAP[primaryZone.trim()] || (hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "");
-    const zoneHubUrl = hasDistinctZone 
-      ? `/location/${provinceKey}/${targetSlugPart}` 
-      : provinceHubUrl;
+  // 2. กรุงเทพมหานคร
+  "สุขุมวิท": "sukhumvit", "รัชดา": "ratchada", "รัชดาภิเษก": "ratchada", "ห้วยขวาง": "huaikhwang",
+  "ลาดพร้าว": "ladprao", "ทองหล่อ": "thonglor", "เอกมัย": "ekkamai", "สาทร": "sathorn",
+  "สีลม": "silom", "บางนา": "bangna", "พระราม 9": "rama9", "พระราม9": "rama9",
+  "อารีย์": "ari", "รามอินทรา": "ramintra",
+
+  // 3. ชลบุรี / พัทยา
+  "พัทยา": "pattaya", "พัทยากลาง": "pattaya-klang", "พัทยาใต้": "pattaya-tai",
+  "หาดจอมเทียน": "jomtien", "จอมเทียน": "jomtien", "บางแสน": "bangsaen", "ศรีราชา": "sriracha",
+  "ตัวเมืองชลบุรี": "mueang-chonburi", "อมตะนคร": "amata", "อมตะ": "amata", "แหลมฉบัง": "laemchabang", "บ่อวิน": "bowin",
+
+  // 4. ภูเก็ต
+  "ตัวเมืองภูเก็ต": "mueang-phuket", "ป่าตอง": "patong", "กะทู้": "kathu", "ฉลอง": "chalong",
+  "กะรน": "karon", "กะตะ": "kata", "บางเทา": "bangtao", "ราไวย์": "rawai",
+  "เชิงทะเล": "cherngtalay", "กมลา": "kamala", "สนามบินภูเก็ต": "phuket-airport",
+
+  // 5. ขอนแก่น
+  "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku", "หลังมอ": "kku",
+  "หน้า มข.": "namor-kku", "หน้า มข": "namor-kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
+  "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak", "ศิลา": "sila", "ถนนมิตรภาพ": "mittraphap",
+
+  // 6. เชียงราย & อุดรธานี
+  "ตัวเมืองเชียงราย": "mueang-chiangrai", "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หน้า มฟล": "mfu",
+  "ม.แม่ฟ้าหลวง": "mae-fah-luang", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar",
+  "เด่นห้า": "den-ha", "รอบเวียง": "rop-wiang", "ริมกก": "rim-kok", "สนามบินเชียงราย": "chiangrai-airport",
+  "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
+  "บ้านจาน": "ban-chan", "โพศรี": "pho-si", "ตลาดรังษิณา": "rangsina",
+
+  // 7. ลำปาง & พิษณุโลก
+  "ตัวเมืองลำปาง": "mueang-lampang", "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru", "ม.ราชภัฏ": "lpru",
+  "กาดกองต้า": "kad-kong-ta", "อัศวิน": "atsavin", "เกาะคา": "ko-kha",
+  "ตัวเมืองพิษณุโลก": "mueang-phitsanulok", "รอบ มน.": "nu", "รอบ มน": "nu", "ท่าโพธิ์": "tha-pho"
+};
+
+// กรองตัวอักษรขึ้นบรรทัดใหม่ (\n) และจุด (.) ทิ้ง ป้องกัน URL เสีย
+const cleanZoneKey = primaryZone.trim().replace(/[\r\n\t]+/g, "").replace(/\.+$/, "");
+const targetSlugPart = UNIFIED_ZONE_SLUG_MAP[cleanZoneKey] || UNIFIED_ZONE_SLUG_MAP[cleanZoneKey.replace(/\./g, "")] || encodeURIComponent(cleanZoneKey.replace(/\s+/g, "-"));
+
+const zoneHubUrl = hasDistinctZone 
+  ? `/location/${provinceKey}/${targetSlugPart}` 
+  : provinceHubUrl;
 
     const cityContext = cleanProvince.includes("กรุงเทพ") ? "กรุงเทพฯ" : `ตัวเมือง${cleanProvince}`;
     const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
@@ -570,7 +598,12 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const pageTitle = `${displayName} รับงาน${cleanProvince} (${primaryZone}) ไซด์ไลน์ฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน`;
     const metaDescription = `โปรไฟล์ ${displayName} รับงาน${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% นัดพบจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;
 
-    const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
+   // ถ้าเข้าผ่าน URL แบบ model-ID หรือ slug ใน DB มีภาษาไทย ให้ใช้ clean URL ปัจจุบันเป็น Canonical ทันที
+let canonicalSlug = String(profile.slug || profile.id);
+if (/[\u0E00-\u0E7F]/.test(canonicalSlug) || rawSlug.startsWith("model-")) {
+  canonicalSlug = rawSlug.startsWith("model-") ? rawSlug : `model-${profile.id}`;
+}
+const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSlug)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
     const currentAvail = (profile.availability || "").trim();
     
