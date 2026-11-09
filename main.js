@@ -1992,15 +1992,23 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       const relatedGrid = document.getElementById("lightboxRelatedGrid");
       const relatedMore = document.getElementById("lightboxRelatedMoreLink");
       if (relatedGrid) {
-        const allList = (appState && appState.allProfiles && appState.allProfiles.length > 0) ? appState.allProfiles : (window.profilesData || []);
-        const pKey = (profile.provinceKey || "chiangmai").toLowerCase();
-        let candidates = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
-        if (candidates.length < 6) {
-          const otherProvinces = allList.filter(m => String(m.id) !== String(profile.id) && !candidates.some(c => String(c.id) === String(m.id)));
-          candidates = [...candidates, ...otherProvinces];
-        }
-        const shuffledList = [...candidates].sort(() => Math.random() - 0.5);
-        const relatedList = shuffledList.slice(0, 6);
+        
+const allList = (appState && appState.allProfiles && appState.allProfiles.length > 0) ? appState.allProfiles : (window.profilesData || []);
+const pKey = (profile.provinceKey || "chiangmai").toLowerCase();
+
+
+const sameProv = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
+const otherProv = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() !== pKey);
+
+const shuffledSame = [...sameProv].sort(() => Math.random() - 0.5);
+const shuffledOther = [...otherProv].sort(() => Math.random() - 0.5);
+
+// ผสมกันอย่างละ 3 คน (จากจังหวัดเดียวกัน 3 คน + จากจังหวัดอื่นทั่วไทย 3 คน)
+let candidates = [...shuffledSame.slice(0, 3), ...shuffledOther.slice(0, 3)];
+if (candidates.length < 6) {
+  candidates = [...shuffledSame, ...shuffledOther];
+}
+const relatedList = candidates.sort(() => Math.random() - 0.5).slice(0, 6);
 
         if (relatedList.length > 0) {
           relatedGrid.innerHTML = relatedList.map(rm => {
