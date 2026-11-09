@@ -1,4 +1,4 @@
-
+// 🟢 แก้ไขฟังก์ชันด้านบนสุดของ main.js (บรรทัด 1 - 15)
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
@@ -1130,35 +1130,6 @@ if (mapIframe) {
     }
 
     
-  const heroH1 = document.getElementById("hero-h1");
-if (heroH1) {
-  const isSsrPage = window.location.pathname.includes("/location/") || 
-                    window.location.pathname.includes("/province/") || 
-                    window.location.pathname.includes("/sideline/");
-  if (!isSsrPage && !isEN) {
-    const line1 = `รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
-    const line2 = "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
-    heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
-  }
-}
-
-    // ✅ ซิงค์ H2 ให้ตรงกับ SSR
-    const featuredH2 = document.getElementById("featured-heading");
-    if (featuredH2) {
-      if (isEN) {
-        const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
-        featuredH2.innerHTML = `Featured Companions in <span class="province-name-highlight">${escapeHTML(enLocName)}</span>`;
-      } else {
-        featuredH2.innerHTML = isAllOrNational
-          ? `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span> (จ่ายหน้างาน)`
-          : `น้องๆ แนะนำ <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(targetName)}</span> (ตัวจริงตรงปก)`;
-      }
-    }
-
-    
-
-
-
     if (isEN) return;
 
     try {
@@ -1413,11 +1384,9 @@ if (heroH1) {
     containerEl.dataset.activeRenderId = renderId;
     containerEl.innerHTML = "";
 
-    // ตัดแบ่ง: วาด 12 คนแรกที่ผู้ใช้มองเห็นก่อนทันที จอจะตอบสนองใน 0.05 วินาที
-    const BATCH_SIZE = 12;
+    const BATCH_SIZE = 12; // วาด 12 ใบแรกทันทีให้เต็มจอ
     const firstBatch = profilesList.slice(0, BATCH_SIZE);
-    const remainingBatch = profilesList.slice(BATCH_SIZE);
-
+    
     const fragment = document.createDocumentFragment();
     for (let i = 0; i < firstBatch.length; i++) {
       if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
@@ -1425,17 +1394,31 @@ if (heroH1) {
     }
     containerEl.appendChild(fragment);
 
-    // คนที่เหลือ ให้เบราว์เซอร์วาดชุดแรกเสร็จก่อน แล้วค่อยเรนเดอร์ตามลงมาในเฟรมถัดไป
-    if (remainingBatch.length > 0) {
+    // ⚡ แบ่งวาดส่วนที่เหลือทีละ 12 ใบ ไม่วาดรวดเดียว 100 ใบ เพื่อไม่ให้ Main Thread ค้าง
+    let currentIndex = BATCH_SIZE;
+    
+    function renderNextChunk() {
+      if (currentIndex >= profilesList.length) return;
+      if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
+
+      const chunkFragment = document.createDocumentFragment();
+      const end = Math.min(currentIndex + BATCH_SIZE, profilesList.length);
+      
+      for (let j = currentIndex; j < end; j++) {
+        chunkFragment.appendChild(createProfileCardDOM(profilesList[j], j));
+      }
+      containerEl.appendChild(chunkFragment);
+      currentIndex = end;
+
+      // สั่งให้เบราว์เซอร์พักหายใจ แล้ววาดก้อนถัดไป
       requestAnimationFrame(() => {
-        setTimeout(() => {
-          if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
-          const restFragment = document.createDocumentFragment();
-          for (let j = 0; j < remainingBatch.length; j++) {
-            restFragment.appendChild(createProfileCardDOM(remainingBatch[j], BATCH_SIZE + j));
-          }
-          containerEl.appendChild(restFragment);
-        }, 0);
+        setTimeout(renderNextChunk, 0);
+      });
+    }
+
+    if (profilesList.length > BATCH_SIZE) {
+      requestAnimationFrame(() => {
+        setTimeout(renderNextChunk, 10); // หน่วงเล็กน้อยให้เฟรมแรก Paint เสร็จก่อน
       });
     }
   }
@@ -2481,19 +2464,50 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const sidebarMenuEl = document.getElementById("sidebar-menu");
     const sidebarOverlayEl = document.getElementById("sidebar-overlay");
     const closeMenuBtn = document.getElementById("close-menu-btn");
+    
+    const openFilterDockBtn = document.getElementById("open-filter-dock-btn");
+    const closeSearchDrawerBtn = document.getElementById("close-search-drawer-btn");
+    const applyFilterBtn = document.getElementById("apply-filter-btn");
+    const searchBottomSheetEl = document.getElementById("search-bottom-sheet");
+    const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
+    // ⚡ แก้ INP: ปล่อยให้ UI แสดงผลทันทีก่อน แล้วค่อยสั่งซ่อน Scrollbar ทีหลัง
     const toggleSidebar = (isOpen) => {
-      if (sidebarMenuEl) {
-        sidebarMenuEl.classList.toggle("active", isOpen);
-        sidebarMenuEl.style.pointerEvents = isOpen ? "auto" : "none";
-        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      if (sidebarOverlayEl) {
-        sidebarOverlayEl.classList.toggle("active", isOpen);
-        sidebarOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
-        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      document.body.style.overflow = isOpen ? "hidden" : "";
+      requestAnimationFrame(() => {
+        if (sidebarMenuEl) {
+          sidebarMenuEl.classList.toggle("active", isOpen);
+          sidebarMenuEl.style.pointerEvents = isOpen ? "auto" : "none";
+          sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+        }
+        if (sidebarOverlayEl) {
+          sidebarOverlayEl.classList.toggle("active", isOpen);
+          sidebarOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
+          sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+        }
+        // หน่วงเวลาการแก้ body overflow ไม่ให้บล็อกการแสดงผลของเบราว์เซอร์
+        setTimeout(() => {
+          document.body.style.overflow = isOpen ? "hidden" : "";
+        }, 300);
+      });
+    };
+
+    const toggleSearchDrawer = (isOpen) => {
+      requestAnimationFrame(() => {
+        if (searchBottomSheetEl) {
+          searchBottomSheetEl.classList.toggle("active", isOpen);
+          searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
+          searchBottomSheetEl.style.visibility = isOpen ? "visible" : "hidden";
+        }
+        if (searchDrawerOverlayEl) {
+          searchDrawerOverlayEl.classList.toggle("active", isOpen);
+          searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
+          searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+        }
+        // หน่วงเวลาการแก้ body overflow ไม่ให้บล็อกการแสดงผล
+        setTimeout(() => {
+          document.body.style.overflow = isOpen ? "hidden" : "";
+        }, 300);
+      });
     };
 
     if (menuToggleBtn) menuToggleBtn.onclick = () => toggleSidebar(true);
@@ -2504,26 +2518,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         link.onclick = () => toggleSidebar(false);
       });
     }
-
-    const openFilterDockBtn = document.getElementById("open-filter-dock-btn");
-    const closeSearchDrawerBtn = document.getElementById("close-search-drawer-btn");
-    const applyFilterBtn = document.getElementById("apply-filter-btn");
-    const searchBottomSheetEl = document.getElementById("search-bottom-sheet");
-    const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
-
-    const toggleSearchDrawer = (isOpen) => {
-      if (searchBottomSheetEl) {
-        searchBottomSheetEl.classList.toggle("active", isOpen);
-        searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
-        searchBottomSheetEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      if (searchDrawerOverlayEl) {
-        searchDrawerOverlayEl.classList.toggle("active", isOpen);
-        searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
-        searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      // ⚡ ตัด requestAnimationFrame และ body.style.overflow ทิ้งเด็ดขาดเพื่อกำจัด Presentation Delay 206ms
-    };
 
     if (openFilterDockBtn) {
       openFilterDockBtn.onclick = (e) => {
@@ -2653,34 +2647,42 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
   document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", function (e) {
-    const targetHref = this.getAttribute("href");
-    const currentPath = window.location.pathname.replace(/\/+$/, "");
-    const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
+    pill.addEventListener("click", function (e) {
+      const targetHref = this.getAttribute("href");
+      const currentPath = window.location.pathname.replace(/\/+$/, "");
+      const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
 
-    // ⚡ ถ้าคลิกแท็บที่เปิดอยู่แล้ว ให้หยุดทำงานทันที ตอบสนองใน 0 ms ไม่ลบ DOM การ์ดทิ้ง!
-    if (cleanTarget && cleanTarget === currentPath) {
-      e.preventDefault();
-      if (this.classList.contains("active") && (!domCache.searchInput || !domCache.searchInput.value)) {
-        return; // ออกทันที ไม่ต้องวาดการ์ด 64 ใบซ้ำ
+      if (cleanTarget && cleanTarget === currentPath) {
+        e.preventDefault();
+        if (this.classList.contains("active") && (!domCache.searchInput || !domCache.searchInput.value)) return;
+        
+        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+        this.classList.add("active");
+        appState.activePillTag = "all";
+        if (domCache.searchInput) domCache.searchInput.value = "";
+        
+        // ⚡ ปล่อยเบราว์เซอร์ Paint สีปุ่มก่อน ค่อยรันคำนวณ (ลด INP 100%)
+        requestAnimationFrame(() => {
+          setTimeout(() => executeFilterAndRender(true), 50);
+        });
+        return;
       }
-      document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-      this.classList.add("active");
-      appState.activePillTag = "all";
-      if (domCache.searchInput) domCache.searchInput.value = "";
-      executeFilterAndRender(true);
-      return;
-    }
-    
-    if (this.tagName === "A" && targetHref) return; // ถ้าเป็นย่านอื่น ปล่อยให้ไปตามปกติ
+      
+      if (this.tagName === "A" && targetHref) return;
 
-    e.preventDefault();
-    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-    this.classList.add("active");
-    appState.activePillTag = this.getAttribute("data-tag") || "all";
-    executeFilterAndRender(true);
+      e.preventDefault();
+      document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+      this.classList.add("active"); // เปลี่ยนสีปุ่มทันทีใน 0 ms
+      appState.activePillTag = this.getAttribute("data-tag") || "all";
+      
+      // ⚡ ดีเลย์การเรนเดอร์การ์ดออกไป 50ms ให้มือถือไม่ค้างตอนกด
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          executeFilterAndRender(true);
+        }, 50);
+      });
+    });
   });
-});
 
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
