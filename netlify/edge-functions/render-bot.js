@@ -761,26 +761,26 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     </noscript>
 
-    <!-- 🟢 จุดที่ 3: Speculation Rules (Instant Load) ปลอดภัย 100% -->
-    <script type="speculationrules">
+ 
+<script type="speculationrules">
+{
+  "prefetch": [
     {
-      "prefetch": [
-        {
-          "where": {
-            "and": [
-              { "href_matches": "/sideline/*" },
-              { "not": { "href_matches": "/*\\?*" } }
-            ]
-          },
-          "eagerness": "conservative"
-        },
-        {
-          "where": { "href_matches": "/location/*" },
-          "eagerness": "conservative"
-        }
-      ]
+      "where": {
+        "and": [
+          { "href_matches": "/sideline/*" },
+          { "not": { "href_matches": "/*\\\\?*" } } 
+        ]
+      },
+      "eagerness": "conservative"
+    },
+    {
+      "where": { "href_matches": "/location/*" },
+      "eagerness": "conservative"
     }
-    </script>
+  ]
+}
+</script>
 
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="shortcut icon" href="/images/favicon.ico">
@@ -826,7 +826,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 </head>
 <body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
-    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
+    
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
