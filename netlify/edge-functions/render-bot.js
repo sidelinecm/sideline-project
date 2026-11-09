@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
+// 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
 let GLOBAL_PROFILE_VERSION = `v_20261022_22`;
@@ -386,10 +387,10 @@ export default async (req, context) => {
     if (provinceKey === "chiangmai") provVariants.push("chiang-mai", "chiang_mai");
     if (provinceKey === "khon-kaen" || provinceKey === "khonkaen") provVariants.push("khonkaen", "khon_kaen");
 
-    const provCol = ("province_key" in profile) ? "province_key"
-  : ("province_slug" in profile) ? "province_slug"
-  : ("provinceKey" in profile) ? "provinceKey"
-  : "province_key";
+    const provCol = ("provinceKey" in profile && profile.provinceKey) ? "provinceKey"
+      : ("province_slug" in profile && profile.province_slug) ? "province_slug"
+      : ("province_key" in profile && profile.province_key) ? "province_key"
+      : "provinceKey";
 
     let relatedProfiles = [];
     try {
@@ -528,18 +529,31 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
       .split(/[,/]|และใกล้/)[0]
       .trim();
 
-    // เช็คว่ามีโซนย่อยจริงที่ไม่ใช่ชื่อจังหวัดซ้ำซ้อน
+    
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
 
-   // 🟢 แมปชื่อโซนเป็น Slug ภาษาอังกฤษให้ตรงกับ ssr-province.js
+   
     const UNIFIED_ZONE_SLUG_MAP = {
-      "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
-      "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
-      "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
-      "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
-      "แม่ริม": "maerim", "หางดง": "hangdong", "กังสดาล": "kangsadan",
-      "โนนม่วง": "nonmuang", "บ้านดู่": "baandu", "ป่าตอง": "patong"
+      // เชียงใหม่
+      "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+      "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
+      "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
+      "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo", "พายัพ": "payap",
+      "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "แม่ริม": "maerim", "หางดง": "hangdong",
+      // กรุงเทพฯ
+      "สุขุมวิท": "sukhumvit", "รัชดา": "ratchada", "ห้วยขวาง": "huaikhwang", "ลาดพร้าว": "ladprao",
+      "ทองหล่อ": "thonglor", "เอกมัย": "ekkamai", "สาทร": "sathorn", "สีลม": "silom",
+      "บางนา": "bangna", "พระราม 9": "rama9", "อารีย์": "ari",
+      // ชลบุรี / พัทยา
+      "พัทยา": "pattaya", "หาดจอมเทียน": "jomtien", "บางแสน": "bangsaen", "ศรีราชา": "sriracha",
+      // ภูเก็ต
+      "ตัวเมืองภูเก็ต": "mueang-phuket", "ป่าตอง": "patong", "กะทู้": "kathu", "บางเทา": "bangtao",
+      // ขอนแก่น
+      "กังสดาล": "kangsadan", "หลัง มข.": "kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
+      // เชียงราย & อุดรธานี
+      "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower",
+      "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon"
     };
 
     const targetSlugPart = UNIFIED_ZONE_SLUG_MAP[primaryZone.trim()] || (hasDistinctZone ? primaryZone.trim().replace(/\s+/g, "-") : "");
@@ -751,36 +765,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
-    <!-- 🟢 จุดที่ 1 และ 2: FontAwesome แบบเร็วสุด ไม่บล็อกหน้าจอ -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <noscript>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    </noscript>
-
- 
-<script type="speculationrules">
-{
-  "prefetch": [
-    {
-      "where": {
-        "and": [
-          { "href_matches": "/sideline/*" },
-          { "not": { "href_matches": "/*\\\\?*" } } 
-        ]
-      },
-      "eagerness": "conservative"
-    },
-    {
-      "where": { "href_matches": "/location/*" },
-      "eagerness": "conservative"
-    }
-  ]
-}
-</script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
@@ -798,7 +783,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-   <!-- Twitter Cards (ครบสูตร X/Twitter) -->
+    <!-- Twitter Cards (ครบสูตร X/Twitter) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@sidelinecm">
     <meta name="twitter:creator" content="@sidelinecm">
@@ -808,6 +793,7 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
+ 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -825,7 +811,6 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
 </head>
 <body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
-    
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">

@@ -219,6 +219,58 @@ PROVINCE_SEO_DATA["hatyai"] = PROVINCE_SEO_DATA["songkhla"];
 PROVINCE_SEO_DATA["surat-thani"] = PROVINCE_SEO_DATA["suratthani"];
 PROVINCE_SEO_DATA["samui"] = PROVINCE_SEO_DATA["suratthani"];
 
+// 🟢 รวม Master Slug ทุกโซนทั่วไทย (Single Source of Truth)
+const MASTER_ZONE_TO_SLUG = {
+  // 1. เชียงใหม่
+  "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
+  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
+  "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
+  "ท่าแพ": "thapae", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "สันทราย": "sansai",
+  "แม่โจ้": "maejo", "พายัพ": "payap", "เซ็นทรัลเฟส": "centralfest", "สนามบินเชียงใหม่": "airport-cnx",
+  "แม่ริม": "maerim", "หางดง": "hangdong", "สันกำแพง": "sankamphaeng", "สารภี": "saraphi", "ดอยสะเก็ด": "doisaket",
+
+  // 2. กรุงเทพมหานคร
+  "สุขุมวิท": "sukhumvit", "รัชดา": "ratchada", "ห้วยขวาง": "huaikhwang", "ลาดพร้าว": "ladprao",
+  "ทองหล่อ": "thonglor", "เอกมัย": "ekkamai", "สาทร": "sathorn", "สีลม": "silom",
+  "บางนา": "bangna", "รามอินทรา": "ramintra", "พระราม 9": "rama9", "อารีย์": "ari",
+
+  // 3. ชลบุรี / พัทยา
+  "พัทยา": "pattaya", "พัทยากลาง": "pattaya-klang", "พัทยาใต้": "pattaya-tai",
+  "หาดจอมเทียน": "jomtien", "บางแสน": "bangsaen", "ศรีราชา": "sriracha",
+  "ตัวเมืองชลบุรี": "mueang-chonburi", "อมตะนคร": "amata", "แหลมฉบัง": "laemchabang", "บ่อวิน": "bowin",
+
+  // 4. ภูเก็ต
+  "ตัวเมืองภูเก็ต": "mueang-phuket", "ป่าตอง": "patong", "กะทู้": "kathu", "ฉลอง": "chalong",
+  "กะรน": "karon", "กะตะ": "kata", "บางเทา": "bangtao", "ราไวย์": "rawai",
+  "เชิงทะเล": "cherngtalay", "กมลา": "kamala", "สนามบินภูเก็ต": "phuket-airport",
+
+  // 5. ขอนแก่น
+  "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku", "หลังมอ": "kku",
+  "หน้า มข.": "namor-kku", "หน้า มข": "namor-kku", "หน้ามอ": "namor-kku", "โนนม่วง": "nonmuang",
+  "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak", "ศิลา": "sila",
+
+  // 6. เชียงราย
+  "ตัวเมืองเชียงราย": "mueang-chiangrai", "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หน้า มฟล": "mfu",
+  "ม.แม่ฟ้าหลวง": "mae-fah-luang", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar", "แม่สาย": "maesai",
+
+  // 7. อุดรธานี
+  "ตัวเมืองอุดร": "mueang-udon", "UD Town": "udtown", "หนองประจักษ์": "nongprajak",
+  "เซ็นทรัลอุดร": "central-udon", "บ้านจาน": "ban-chan", "โพศรี": "pho-si",
+
+  // 8. ลำปาง & ลำพูน
+  "ตัวเมืองลำปาง": "mueang-lampang", "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
+  "ตัวเมืองลำพูน": "mueang-lamphun", "นิคมลำพูน": "nikom-lamphun",
+
+  // 9. พิษณุโลก & อยุธยา
+  "ตัวเมืองพิษณุโลก": "mueang-phitsanulok", "รอบ มน.": "nu", "รอบ มน": "nu", "ท่าโพธิ์": "tha-pho",
+  "โรจนะ": "rojana", "ตัวเมืองอยุธยา": "mueang-ayutthaya", "บางปะอิน": "bang-pa-in",
+
+  // 10. โคราช, หาดใหญ่, สุราษฎร์-สมุย
+  "ในเมืองโคราช": "mueang-korat", "เซ็นทรัลโคราช": "central-korat", "เขาใหญ่": "khaoyai", "ปากช่อง": "pakchong",
+  "ตัวเมืองหาดใหญ่": "hatyai", "ม.อ.หาดใหญ่": "psu", "ด่านนอก": "dannok",
+  "ตัวเมืองสุราษฎร์": "mueang-surat", "เกาะสมุย": "samui", "เฉวง": "chaweng", "ละไม": "lamai"
+};
+
 function getRealTimeAgo(dateInput) {
   if (!dateInput) return "วันนี้";
   const updatedTime = typeof dateInput === "number" ? dateInput : new Date(dateInput).getTime();
@@ -375,31 +427,7 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
 
  const chipStyle = `display: inline-flex; align-items: center; gap: 6px; background: #FFFFFF !important; border: 1.5px solid #A855F7 !important; color: #3B0764 !important; font-size: 11.5px; font-weight: 800; padding: 6px 14px; border-radius: 100px; text-decoration: none; box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12); transition: all 0.2s;`;
 
- const ZONE_TO_SLUG = {
-      "นิมมาน": "nimman",
-      "เจ็ดยอด": "jedyod",
-      "สันติธรรม": "santitham",
-      "ช้างเผือก": "changphueak",
-      "หลัง มช.": "cmu",
-      "หน้า มช.": "namor",
-      "ท่าแพ": "thapae",
-      "สันทราย": "sansai",
-      "แม่โจ้": "maejo",
-      "พายัพ": "payap",
-      "ห้วยแก้ว": "huaykaew",
-      "รวมโชค": "ruamchok",
-      "แม่ริม": "maerim",
-      "หางดง": "hangdong",
-      "กังสดาล": "kangsadan",
-      "หลัง มข.": "kku",
-      "บ้านดู่": "baandu",
-      "หน้า มฟล.": "mfu",
-      "UD Town": "udtown",
-      "หนองประจักษ์": "nongprajak",
-      "ป่าตอง": "patong"
-    };
-
-    const zoneLinks = cleanZones.slice(0, 10).map(z => {
+ const zoneLinks = cleanZones.slice(0, 10).map(z => {
       const cleanZ = sanitizeThaiText(z);
       if (!cleanZ) return "";
       
@@ -411,7 +439,8 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
         return `<span class="kw-zone" style="${chipStyle}">📍 ${escapeHTML(cleanZ)}</span>`;
       }
       
-      const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
+      // ✅ ดึงจาก MASTER_ZONE_TO_SLUG โดยตรง
+      const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
       return `<a href="/location/${provinceSlug}/${slugPart}" class="kw-zone" style="${chipStyle}" title="สาวรับงานโซน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
     }).filter(Boolean);
 
@@ -1040,10 +1069,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
               </span>
             </div>
 
-            <div class="profile-card-title-row">
-                <h3 class="profile-card-name">น้อง${cleanName}</h3>
-               <span class="profile-card-age-tag">${ageStr}</span>
-            </div>
+            <div class="profile-card-title-row"> <strong class="profile-card-name">น้อง${cleanName}</strong> <span class="profile-card-age-tag">${ageStr}</span> </div>
             <div class="profile-card-bottom-row">
                 <span class="profile-card-location">
                     <i class="fas fa-map-marker-alt"></i> ${loc}
@@ -1076,7 +1102,7 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
-    // 🟢 [แทรกชุดนี้ลงไป]
+    // 🟢 1. บังคับ HTTPS และเช็ค Localhost
     const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
     const proto = req.headers.get("x-forwarded-proto") || url.protocol.replace(":", "");
     if (!isLocal) {
@@ -1085,6 +1111,7 @@ export default async (req, context) => {
       }
     }
 
+    // 🟢 2. AI Catalog Endpoint
     if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
       return new Response(JSON.stringify({ "specVersion": "1.0", "entries": [] }), {
         status: 200,
@@ -1092,6 +1119,7 @@ export default async (req, context) => {
       });
     }
 
+    // 🟢 3. เคลียร์แคชระบบ (Admin Secret Purge)
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
       const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
       if (secret === CONFIG.PURGE_SECRET) {
@@ -1107,77 +1135,64 @@ export default async (req, context) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
+    // 🟢 4. ข้ามไฟล์ Static และ SSR Bypass
     if (req.headers.get("x-ssr-bypass") === "true" || STATIC_EXT_REGEX.test(url.pathname)) {
       return await context.next();
     }
 
     const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-let decodedPath = cleanPath;
-try {
-  decodedPath = decodeURIComponent(cleanPath);
-} catch (_) {}
+    let decodedPath = cleanPath;
+    try {
+      decodedPath = decodeURIComponent(cleanPath);
+    } catch (_) {}
 
-// ✅ แก้เคสพิมพ์ URL ย่อ หรือเข้าผ่าน .html ให้เข้าหน้านิมมานมาตรฐาน
-if (decodedPath === "/nimman" || decodedPath === "/nimman.html") {
-  return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
-}
+    // ✅ แก้เคสพิมพ์ URL ย่อ หรือเข้าผ่าน .html ให้เข้าหน้านิมมานมาตรฐาน
+    if (decodedPath === "/nimman" || decodedPath === "/nimman.html") {
+      return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
+    }
 
-// ✅ ระบบตรวจจับสลักภาษาไทยทุกย่านทั่วไทย แล้วสั่ง 301 ไปสลักอังกฤษที่ตรงกับ Sitemap ทันที
-const THAI_TO_ENG_REDIRECT = {
-  // เชียงใหม่
-  "นิมมาน": "nimman", "แม่โจ้": "maejo", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
-  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง-มช.": "cmu", "หน้า มช.": "namor",
-  "ท่าแพ": "thapae", "สันทราย": "sansai", "ห้วยแก้ว": "huaykaew", "แม่ริม": "maerim", "หางดง": "hangdong",
-  // ขอนแก่น
-  "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หน้า มข.": "namor-kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
-  // เชียงราย
-  "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower", "แม่สาย": "maesai",
-  // อุดรธานี
-  "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
-  // ลำปาง
-  "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
-  // ภูเก็ต
-  "ป่าตอง": "patong", "ตัวเมืองภูเก็ต": "mueang-phuket", "กะทู้": "kathu", "บางเทา": "bangtao"
-};
+    // ✅ 5. ดักจับ URL ภาษาไทยใน Path แล้ว 301 Redirect ไป Slug อังกฤษมาตรฐานทั่วไทย
+    const pathParts = decodedPath.split("/").filter(Boolean);
+    if (pathParts[0] === "location" && pathParts[1] && pathParts[2]) {
+      const currentProv = pathParts[1];
+      const currentZoneRaw = pathParts[2].replace(/^โซน/g, "").trim();
+      const matchedEngSlug = MASTER_ZONE_TO_SLUG[currentZoneRaw] || MASTER_ZONE_TO_SLUG[currentZoneRaw.replace(/\./g, "")];
+      if (matchedEngSlug && matchedEngSlug !== currentZoneRaw) {
+        return Response.redirect(`${primaryDomain}/location/${currentProv}/${matchedEngSlug}`, 301);
+      }
+    }
 
-const pathParts = decodedPath.split("/").filter(Boolean);
-if (pathParts[0] === "location" && pathParts[1] && pathParts[2]) {
-  const currentProv = pathParts[1];
-  const currentZoneRaw = pathParts[2].replace(/^โซน/g, "").trim();
-  const matchedEngSlug = THAI_TO_ENG_REDIRECT[currentZoneRaw];
-  if (matchedEngSlug && matchedEngSlug !== currentZoneRaw) {
-    return Response.redirect(`${primaryDomain}/location/${currentProv}/${matchedEngSlug}`, 301);
-  }
-}
+    // 🟢 6. เส้นทางหน้าที่ข้ามไปรัน Static / Page ปกติ
+    const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
+    if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
+      return await context.next(); 
+    }
 
-const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/profiles"];
-if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
-  return await context.next(); 
-}
+    // ✅ 7. ดักจับ Query String ?zone= แล้ว 301 Redirect ตรงไป Slug อังกฤษทันที (ไม่มี Redirect Chain)
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
-const segments = url.pathname.split("/").filter(Boolean);
+    const segments = url.pathname.split("/").filter(Boolean);
 
-if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/") && segments[0] === "location" && segments[1]) {
-  const currentProv = segments[1];
-  let cleanZoneName = rawZoneQuery;
-  try {
-    cleanZoneName = decodeURIComponent(cleanZoneName).trim();
-  } catch (_) {}
-  
-  const cleanZoneRaw = cleanZoneName.replace(/^โซน/g, "").trim();
-  // ✅ ตรวจสอบและแปลงเป็น slug ภาษาอังกฤษตั้งแต่รอบแรก ป้องกันการ redirect 2 รอบ
-  const mappedSlug = THAI_TO_ENG_REDIRECT[cleanZoneRaw] || cleanZoneRaw.replace(/\s+/g, "-");
-  const targetRedirectUrl = encodeURI(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${mappedSlug}`);
-  return Response.redirect(targetRedirectUrl, 301);
-}
+    if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/") && segments[0] === "location" && segments[1]) {
+      const currentProv = segments[1];
+      let cleanZoneName = rawZoneQuery;
+      try {
+        cleanZoneName = decodeURIComponent(cleanZoneName).trim();
+      } catch (_) {}
+      
+      const rawZ = cleanZoneName.replace(/^โซน/g, "").trim();
+      // ดึงตรงจาก MASTER_ZONE_TO_SLUG ถ้าไม่มีค่อยแทนที่ space ด้วยขีด
+      const safeZone = MASTER_ZONE_TO_SLUG[rawZ] || MASTER_ZONE_TO_SLUG[rawZ.replace(/\./g, "")] || rawZ.replace(/\s+/g, "-");
+      const targetRedirectUrl = `${primaryDomain}/location/${currentProv}/${safeZone}`;
+      return Response.redirect(targetRedirectUrl, 301);
+    }
 
+    // 🟢 8. เช็ค Cache Memory รายวัน
     const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
-
     const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
     const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS);
-   if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) {
-      cachedPage.lastAccessed = Date.now(); // 🟢 อัปเดตเวลาการใช้งานล่าสุด
+    if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) {
+      cachedPage.lastAccessed = Date.now();
       PAGE_CACHE.delete(cacheKey);
       PAGE_CACHE.set(cacheKey, cachedPage);
       return new Response(cachedPage.html, { headers: cachedPage.headers });
@@ -1461,14 +1476,10 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       }).join("");
     }
 
-    // 🟢 5. จัดเรียงฟีดโปรไฟล์ทั้งหมดสำหรับหน้าแรก (เอาคนแนะนำขึ้นก่อน)
-    const nationalFeedProfiles = isNational ? [...profilesList].sort((a, b) => {
-      const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
-      const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
-      return featB - featA;
-    }) : [];
-
-   // 🟢 2. กำหนดตัวแปรกลางที่แสดงผลจริงบนหน้าเว็บ (Visible Profiles)
+  const hotIdsSet = new Set(hotProfiles.map(h => String(h.id))); const nationalFeedProfiles = isNational ? profilesList .filter(p => !hotIdsSet.has(String(p.id))) .sort((a, b) => { const featA = (a.isfeatured || a.is_featured) ? 1 : 0; const featB = (b.isfeatured || b.is_featured) ? 1 : 0; return featB - featA; }) : [];
+    
+   
+   
     const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
     const totalCount = actualVisibleProfiles.length;
     const liveTotalProfiles = deduplicatedProfiles.length;
@@ -1478,34 +1489,10 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
     
-    const ZONE_TO_SLUG_MAP = {
-  // เชียงใหม่
-  "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
-  "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
-  "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
-  "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
-  "แม่ริม": "maerim", "หางดง": "hangdong",
-  
-  // ขอนแก่น
-  "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หน้า มข.": "namor-kku",
-  "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon",
-  
-  // เชียงราย
-  "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หอนาฬิกา": "clock-tower", "แม่สาย": "maesai",
-  
-  // อุดรธานี
-  "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
-  
-  // ลำปาง
-  "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
-  
-  // ภูเก็ต
-  "ป่าตอง": "patong", "ตัวเมืองภูเก็ต": "mueang-phuket", "กะทู้": "kathu", "บางเทา": "bangtao"
-};
-
+    
 let safeZoneSlugPart = "";
 if (zoneSlug) {
-  safeZoneSlugPart = ZONE_TO_SLUG_MAP[zoneSlug] || zoneSlug.replace(/\s+/g, "-");
+  safeZoneSlugPart = MASTER_ZONE_TO_SLUG[zoneSlug] || MASTER_ZONE_TO_SLUG[zoneSlug.replace(/\./g, "")] || zoneSlug.replace(/\s+/g, "-");
 }
 
 const rawCanonicalUrl = isEnglishHome
@@ -1653,29 +1640,32 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     }
 
     if (totalCount > 0) {
-     const schemaProfiles = isNational ? actualVisibleProfiles.slice(0, 30) : actualVisibleProfiles;
+      // ✅ ให้อ่านจาก actualVisibleProfiles ทั้งหมดโดยตรง ไม่ต้องตัดทอน 30 คนอีกต่อไป
+      const schemaProfiles = actualVisibleProfiles;
 
-  schemaGraph.push({
-    "@type": "ItemList",
-    "@id": `${canonicalUrl}#itemlist`,
-    "name": isNational ? "รายชื่อเพื่อนเที่ยวและไซด์ไลน์แนะนำทั่วไทย" : `รายชื่อเพื่อนเที่ยวและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-    "numberOfItems": schemaProfiles.length,
-    "itemListElement": schemaProfiles.map((p, idx) => {
-      const pSlug = p.slug || String(p.id);
-      const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
-      return {
-        "@type": "ListItem",
-        "position": idx + 1,
-        "item": {
-          "@type": "Person",
-          "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
-          "image": pImg,
-          "url": `https://firstmodelhub.com/sideline/${pSlug}`
-        }
-      };
-    })
-  });
-  }
+      schemaGraph.push({
+        "@type": "ItemList",
+        "@id": `${canonicalUrl}#itemlist`,
+        "name": isNational 
+          ? "รายชื่อสาวรับงานและไซด์ไลน์ทั้งหมดทั่วไทย" 
+          : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
+        "numberOfItems": schemaProfiles.length, // นับจำนวนจริงอัตโนมัติ (เช่น 114, 65, 18)
+        "itemListElement": schemaProfiles.map((p, idx) => {
+          const pSlug = p.slug || String(p.id);
+          const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
+          return {
+            "@type": "ListItem",
+            "position": idx + 1,
+            "item": {
+              "@type": "Person",
+              "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
+              "image": pImg,
+              "url": `https://firstmodelhub.com/sideline/${pSlug}`
+            }
+          };
+        })
+      });
+    }
 
    
     const activeFaqs = zoneSlug
@@ -1797,25 +1787,18 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
         }
 
       const zonesHtml = p.zones.map(z => {
-  const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
-  const ZONE_TO_SLUG = {
-    "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
-    "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หน้า มช.": "namor",
-    "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo",
-    "พายัพ": "payap", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok",
-    "แม่ริม": "maerim", "หางดง": "hangdong"
-  };
-  const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
-  const zoneHref = p.key === "chiangmai" && ZONE_TO_SLUG[cleanZ]
-    ? `/location/chiangmai/${slugPart}`
-    : encodeURI(`/location/${p.key}/${slugPart}`);
+        const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
+        const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
+        
+        // ✅ ปลดล็อคให้ทุกจังหวัด (กทม., ชลบุรี, ภูเก็ต, ขอนแก่น ฯลฯ) ได้ Slug ภาษาอังกฤษเหมือนกัน 100%
+        const zoneHref = `/location/${p.key}/${slugPart}`;
 
-  return `
-    <li style="padding-left: 10px;">
-      <a href="${zoneHref}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
-    </li>
-  `;
-}).join("");
+        return `
+          <li style="padding-left: 10px;">
+            <a href="${zoneHref}" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">• ${escapeHTML(z)}</a>
+          </li>
+        `;
+      }).join("");
 
         return `
           <li style="margin-bottom: 6px;">
@@ -1916,9 +1899,28 @@ finalHtml = finalHtml.replace(
   const rawTags = p.style_tags || p.styleTags || p.tags || [];
   const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
   const combined = `${rawLoc} ${desc} ${tags}`;
+
+  // คำพ้องและรูปแบบการพิมพ์ย่อที่พบบ่อยในไทย
+  const aliasMap = {
+    "หลัง มช.": ["หลังมอ", "หลังมช", "หลัง มช", "สุเทพ", "วัดอุโมงค์"],
+    "หน้า มช.": ["หน้ามอ", "หน้ามช", "หน้า มช", "กาดมาลิน", "มาลินพลาซ่า"],
+    "รอบ มน.": ["รอบมน", "มน.", "ม.นเรศวร", "ท่าโพธิ์"],
+    "หน้า มฟล.": ["หน้ามฟล", "มฟล.", "มฟล", "ม.แม่ฟ้าหลวง"],
+    "UD Town": ["ud town", "udtown", "ยูดีทาวน์", "ยูดี"],
+    "กังสดาล": ["กังสดาล", "บึงหนองแวง"],
+    "หลัง มข.": ["หลังมอ", "หลังมข", "หลัง มข", "โนนม่วง"]
+  };
+
+  const aliases = aliasMap[cleanZ] || [];
   const zoneWithSpace = cleanZ.replace(/-/g, " ");
   const zoneWithoutDash = cleanZ.replace(/-/g, "");
-  return combined.includes(cleanZ) || combined.includes(zoneWithSpace) || combined.includes(zoneWithoutDash);
+  const zoneWithoutDots = cleanZ.replace(/\./g, "");
+
+  return combined.includes(cleanZ) ||
+         combined.includes(zoneWithSpace) ||
+         combined.includes(zoneWithoutDash) ||
+         combined.includes(zoneWithoutDots) ||
+         aliases.some(alias => combined.includes(alias));
 }
 
     // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
@@ -1960,25 +1962,8 @@ pills += activeZoneKeys.map(z => {
   const count = zoneCountMap[z];
   const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
   
-  // ssr-province.js (บรรทัดประมาณ 1050)
-const ZONE_TO_SLUG = {
-  "นิมมาน": "nimman",
-  "เจ็ดยอด": "jedyod",
-  "สันติธรรม": "santitham",
-  "ช้างเผือก": "changphueak",
-  "หลัง มช.": "cmu",
-  "หน้า มช.": "namor",
-  "ท่าแพ": "thapae",
-  "สันทราย": "sansai",
-  "แม่โจ้": "maejo",
-  "พายัพ": "payap",
-  "ห้วยแก้ว": "huaykaew",
-  "รวมโชค": "ruamchok",
-  "แม่ริม": "maerim",
-  "หางดง": "hangdong"
-};
-
-const slugPart = ZONE_TO_SLUG[cleanZ] || cleanZ.replace(/\s+/g, "-");
+  // ✅ ดึงจาก MASTER_ZONE_TO_SLUG ตัวเดียว ครอบคลุมทุกจังหวัดทั่วไทย
+const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
 const href = `/location/${provinceSlug}/${slugPart}`;
   
   const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
@@ -2312,7 +2297,7 @@ if (!isNational && pills) {
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
 finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
-
+// ✅ แก้ไข: ประกาศและสร้าง URL แผนที่ Google Maps ตามจังหวัด/พื้นที่จริง
 const mapQuery = isNational 
   ? encodeURIComponent("ประเทศไทย") 
   : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
@@ -2322,14 +2307,15 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  
+  // 🟢 เปลี่ยนมา Preload การ์ดรูปแรกของ Grid ด้านล่าง (ขนาด 480px) ที่ Google ใช้วัด LCP จริง
+const lcpTargetProfile = (profilesList && profilesList.length > 0) ? profilesList[0] : (hotProfiles && hotProfiles[0]);
+
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  const lcpExactUrl = optimizeImg(rawLcpImg, "card");
-  const preloadTag = `\n  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">`;
+  const lcpExactUrl = optimizeImg(rawLcpImg, "card"); // ดึงขนาดมาตรฐาน card (480px)
   
-  // ✅ แทรกไว้ต่อท้าย <meta charset> ทันที เพื่อความถูกต้องตามมาตรฐาน W3C และ LCP เร็วสุด
-  finalHtml = finalHtml.replace(/(<meta\s+charset=["'][^"']+["']\s*\/?>)/i, `$1${preloadTag}`);
+  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
+  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
 }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
