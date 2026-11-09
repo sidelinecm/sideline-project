@@ -1529,12 +1529,9 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     if (isEnglishHome) {
       metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
       ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
-    } else if (isNational) {
-      metaTitle = `รับงานเชียงใหม่ รับงานทั่วไทย ไซด์ไลน์ เด็กเอ็น ฟิวแฟน จ่ายหน้างาน | FirstModelHub`;
-      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
-                   <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+    } else if (isNational) { metaTitle = `รับงานไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง100% จ่ายหน้างานไม่มีมัดจำ | FirstModelHub`; ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span> <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
     } else if (zoneSlug) {
-      metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
+      metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
       ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
                    <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
     } else {

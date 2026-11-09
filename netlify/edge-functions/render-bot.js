@@ -392,23 +392,31 @@ export default async (req, context) => {
       : ("province_key" in profile && profile.province_key) ? "province_key"
       : "provinceKey";
 
-    let relatedProfiles = [];
-    try {
-      const { data: sameProvinceProfiles } = await supabase
-        .from("profiles")
-        .select("id, slug, name, imagePath, image_url, isfeatured")
-        .eq("active", true)
-        .neq("id", profile.id)
-        .in(provCol, provVariants)
-        .order("isfeatured", { ascending: false })
-        .limit(6);
+   
+let relatedProfiles = [];
+try {
+  
+  const { data: sameProvinceProfiles } = await supabase
+    .from("profiles")
+    .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
+    .eq("active", true)
+    .neq("id", profile.id)
+    .in(provCol, provVariants)
+    .limit(3);
 
-      if (sameProvinceProfiles && sameProvinceProfiles.length > 0) {
-        relatedProfiles = sameProvinceProfiles.slice(0, 6);
-      }
-    } catch (err) {
-      console.warn("Related profiles fetch error:", err);
-    }
+ 
+  const { data: otherProfiles } = await supabase
+    .from("profiles")
+    .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
+    .eq("active", true)
+    .neq("id", profile.id)
+    .not(provCol, 'in', `(${provVariants.join(',')})`)
+    .limit(3);
+
+  relatedProfiles = [...(sameProvinceProfiles || []), ...(otherProfiles || [])].sort(() => Math.random() - 0.5).slice(0, 6);
+} catch (err) {
+  console.warn("Related profiles fetch error:", err);
+}
 
     if (relatedProfiles.length === 0) {
       try {
