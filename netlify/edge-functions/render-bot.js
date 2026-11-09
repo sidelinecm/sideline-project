@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_22`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_23`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -694,12 +694,12 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
           "height": {
             "@type": "QuantitativeValue",
             "value": cleanHeightNum,
-            "unitCode": "CMT"
+            "unitText": "cm"
           },
           "weight": {
             "@type": "QuantitativeValue",
             "value": cleanWeightNum,
-            "unitCode": "KGM"
+            "unitText": "kg"
           },
           "homeLocation": {
             "@type": "Place",

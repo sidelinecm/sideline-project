@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_22';
+let GLOBAL_VERSION = 'v_20261022_23';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -373,9 +373,9 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // ไซส์มาตรฐาน 5:7 (480x672) + g_auto (AI โฟกัสจุดเด่น/ใบหน้า ไม่ให้หลุดเฟรม)
-  let transform = "f_auto,q_auto:good,w_480,h_672,c_fill,g_auto";
-
+ 
+ let transform = "f_auto,q_auto:good,w_360,h_504,c_fill,g_auto";
+  
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
@@ -965,17 +965,12 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
   
-  let loc = "";
-  if (currentZone) {
-    // หากอยู่ในหน้ารายโซนย่อย ให้แสดงชื่อโซนนั้นตรงๆ ทันที
-    loc = escapeHTML(currentZone);
-  } else {
-    let cleaned = rawLoc
-      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|เชียงใหม่)\s*(\/|และ)?\s*/gi, "")
-      .trim();
-    let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
-    loc = escapeHTML(firstPart.split(/\s+/)[0].trim() || provinceName);
-  }
+  // ✅ ดึงพิกัดจริงของน้องมาแสดง หากน้องระบุย่านย่อยให้แสดงย่านย่อยนั้น เพื่อความเป็นธรรมชาติ
+  let cleaned = rawLoc
+    .replace(new RegExp(`^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|${provinceName})\\s*(\\/|และ)?\\s*`, "gi"), "")
+    .trim();
+  let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
+  let loc = escapeHTML(firstPart.split(/\s+/)[0].trim() || currentZone || provinceName);
 
   const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
@@ -1358,8 +1353,9 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
       if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
 
+      // ✅ กรองรูปภาพอย่างเข้มงวด: ต้องไม่ใช่ค่าว่าง, ไม่ใช่โลโก้เว็บ, และมีความยาว URL ที่สมบูรณ์
       const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
-      if (!rawImg || rawImg.includes("firstmodelhub.webp")) continue;
+      if (!rawImg || rawImg.includes("firstmodelhub.webp") || rawImg.length < 15) continue;
 
       let imgSig = "";
       const parts = rawImg.split("?")[0].split("/");
@@ -1476,13 +1472,19 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       }).join("");
     }
 
-  const hotIdsSet = new Set(hotProfiles.map(h => String(h.id))); const nationalFeedProfiles = isNational ? profilesList .filter(p => !hotIdsSet.has(String(p.id))) .sort((a, b) => { const featA = (a.isfeatured || a.is_featured) ? 1 : 0; const featB = (b.isfeatured || b.is_featured) ? 1 : 0; return featB - featA; }) : [];
-    
-   
-   
-    const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
-    const totalCount = actualVisibleProfiles.length;
-    const liveTotalProfiles = deduplicatedProfiles.length;
+  // ✅ กำหนดจำนวนโปรไฟล์ทั้งหมดที่แท้จริงให้เป็น Single Source of Truth
+  const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
+  
+  // สำหรับหน้าแรก ให้แสดงน้องๆ ทั้งหมด โดยเรียงคนที่ติด Hot/Featured ไว้ด้านบนสุดอย่างเป็นระเบียบ
+  const nationalFeedProfiles = isNational ? [...deduplicatedProfiles].sort((a, b) => {
+    const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
+    const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
+    return featB - featA;
+  }) : [];
+
+  const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
+  // ✅ ใช้จำนวนคนจริงของหน้านั้นๆ เสมอ (หน้าแรก = 114, หน้ารายจังหวัด = จำนวนจริงในจังหวัด)
+  const totalCount = isNational ? liveTotalProfiles : actualVisibleProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const seoData = isNational ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default);
@@ -2003,10 +2005,18 @@ if (!isNational && pills) {
 
     if (!isNational) {
       finalHtml = finalHtml.replace('id="breadcrumb-wrapper" style="display: none;', 'id="breadcrumb-wrapper" style="display: block;');
-      let bcHtml = `<li><a href="/location/${provinceSlug}" style="color: #64748B; text-decoration: none;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>`;
+      
+      // ✅ ถ้ามี zoneSlug: หน้าจังหวัดให้เป็นลิงก์คลิกได้ และโซนย่อยเป็นข้อความปิดท้าย
+      // ✅ ถ้าไม่มี zoneSlug (อยู่หน้าจังหวัด): หน้าจังหวัดต้องเป็นข้อความปิดท้าย ไม่ใส่ลิงก์วนเข้าหาตัวเอง
+      let bcHtml = "";
       if (zoneSlug) {
-        bcHtml += `<li style="color: #94A3B8;" aria-hidden="true">&raquo;</li><li aria-current="page"><span style="color: #140F22; font-weight: 700;">โซน${escapeHTML(zoneSlug)}</span></li>`;
+        bcHtml = `<li><a href="/location/${provinceSlug}" style="color: #64748B; text-decoration: none;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</a></li>
+                  <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+                  <li aria-current="page"><span style="color: #140F22; font-weight: 700;">โซน${escapeHTML(zoneSlug)}</span></li>`;
+      } else {
+        bcHtml = `<li aria-current="page"><span style="color: #140F22; font-weight: 700;">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span></li>`;
       }
+
       finalHtml = finalHtml.replace(/<ol[^>]*>[\s\S]*?<\/ol>/i, `<ol style="display: flex; align-items: center; gap: 6px; list-style: none; padding: 0; margin: 0; font-size: 11.5px;"><li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li><li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>${bcHtml}</ol>`);
 
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
@@ -2280,13 +2290,14 @@ if (!isNational && pills) {
     const ssrDataScript = `
       <script id="ssr-profiles-data">
         window.profilesData = ${serializedProfilesJson};
-        window.totalProfilesCount = ${clientProfilesData.length};
+        window.totalProfilesCount = ${totalCount}; // ✅ ซิงค์ให้ตรงกับตัวเลขบนหน้าจอและ Meta Description 100%
         window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
         window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
         window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
         window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
       </script>
     `;
+    
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
