@@ -2311,7 +2311,7 @@ if (!isNational && pills) {
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
 finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
-// ✅ แก้ไข: ประกาศและสร้าง URL แผนที่ Google Maps ตามจังหวัด/พื้นที่จริง
+
 const mapQuery = isNational 
   ? encodeURIComponent("ประเทศไทย") 
   : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
@@ -2321,24 +2321,25 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  // 🟢 เปลี่ยนมา Preload การ์ดรูปแรกของ Grid ด้านล่าง (ขนาด 480px) ที่ Google ใช้วัด LCP จริง
+  
 const lcpTargetProfile = (profilesList && profilesList.length > 0) ? profilesList[0] : (hotProfiles && hotProfiles[0]);
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  const lcpExactUrl = optimizeImg(rawLcpImg, "card"); // ดึงขนาดมาตรฐาน card (480px)
+  const lcpExactUrl = optimizeImg(rawLcpImg, "card");
   
-  // 1. นำรูป LCP ปกติ
+  
   const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">`;
   
-  // 2. เสริมทัพด้วย Non-blocking FontAwesome และ Speculation Rules
+  
   const dynamicHeadInjection = `
   ${preloadTag}
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  </noscript>
   <script type="speculationrules">
   {
     "prefetch": [
