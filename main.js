@@ -1,17 +1,18 @@
-// 🟢 แก้ไขฟังก์ชันด้านบนสุดของ main.js (บรรทัด 1 - 15)
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
+  if (str.includes("ฟรี") || str === "free") return 0;
+  if (str.includes("ตกลง") || str.includes("สอบถาม")) return 1500;
+
   if (str.includes("k")) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข ป้องกันกลายเป็น 15001
   const pricePart = str.split(/[\/\(\s]/)[0];
   const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 10) return num * 1000;
+  if (num < 100 && num >= 10) return num * 100; // ป้องกันพิมพ์ 15 ให้กลายเป็น 1500
   if (num < 500) return num * 10;
   return num;
 }
@@ -716,12 +717,9 @@ for (const p of hotCandidate) {
 
     let results = [...appState.allProfiles];
 
-// 🟢 ตัดคนที่ติด Hot Swiper ออกจากรายการด้านล่าง ไม่ให้หน้าจอกระตุกและแสดงซ้ำ
-if (window.__hotProfileIds && window.__hotProfileIds.size > 0 && !currentCriteria.text && (!currentCriteria.zone || currentCriteria.zone === "ทั้งหมด")) {
-  results = results.filter(p => !window.__hotProfileIds.has(String(p.id)));
-}
 
-// 1. กรองตามจังหวัด
+
+
 if (activeProvince !== "all" && activeProvince !== "national") {
       const cleanActive = activeProvince.toLowerCase().replace(/[-_]/g, "");
       results = results.filter(p => {
@@ -730,7 +728,7 @@ if (activeProvince !== "all" && activeProvince !== "national") {
       });
     }
 
-    // 2. 🟢 กรองตามโซนย่อยอย่างแม่นยำ (เช็กทั้ง location, description และ tags)
+   
     if (currentCriteria.zone && currentCriteria.zone !== "ทั้งหมด") {
       const targetZ = currentCriteria.zone;
       const zoneWithSpace = targetZ.replace(/-/g, " ");
@@ -2469,22 +2467,20 @@ async function initApplication() {
     const searchBottomSheetEl = document.getElementById("search-bottom-sheet");
     const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
-    const toggleSearchDrawer = async (isOpen) => {
-      if (searchBottomSheetEl) {
-        searchBottomSheetEl.classList.toggle("active", isOpen);
-        searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
-        searchBottomSheetEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      if (searchDrawerOverlayEl) {
-        searchDrawerOverlayEl.classList.toggle("active", isOpen);
-        searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
-        searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
+   const toggleSearchDrawer = (isOpen) => {
+  if (searchBottomSheetEl) {
+    searchBottomSheetEl.classList.toggle("active", isOpen);
+    searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
+    searchBottomSheetEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
+  if (searchDrawerOverlayEl) {
+    searchDrawerOverlayEl.classList.toggle("active", isOpen);
+    searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
+    searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
 
-      await window.yieldToMain(); 
-      document.body.style.overflow = isOpen ? "hidden" : "";
-    };
-
+  document.body.style.overflow = isOpen ? "hidden" : "";
+};
       
 
     if (openFilterDockBtn) {
