@@ -1,4 +1,4 @@
-// 🟢 แก้ไขฟังก์ชันด้านบนสุดของ main.js (บรรทัด 1 - 15)
+
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
@@ -874,23 +874,35 @@ window.executeFilterAndRender = executeFilterAndRender;
     }, { capture: true });
   }
 
-  async function renderDisplayArea(profiles, isFilteredOrLocationView) {
-    if (!domCache.profilesDisplayArea) return;
+ // 🟢 โค้ดที่สมบูรณ์แบบ 100% (คุ้มครองทั้งหน้าแรก และ หน้ารายจังหวัด/โซนย่อย เช่น เชียงใหม่)
+async function renderDisplayArea(profiles, isFilteredOrLocationView) {
+  if (!domCache.profilesDisplayArea) return;
 
-    appState.renderId = (appState.renderId || 0) + 1;
-    const activeRenderId = appState.renderId;
+  // 1. เช็คว่ามี HTML การ์ดจาก Server หรือยัง และไม่ได้มีคำพิมพ์ค้นหาค้างไว้
+  const hasExistingSSR = domCache.profilesDisplayArea.querySelector(".profile-card-new");
+  const hasSearchQuery = Boolean(domCache.searchInput?.value?.trim());
 
-    // 🟢 1. เคลียร์และซ่อนกล่อง Error & No Results เริ่มต้น
-    if (domCache.noResultsMessage) {
-      domCache.noResultsMessage.classList.add("hidden");
-      domCache.noResultsMessage.style.display = "none";
-      domCache.noResultsMessage.innerHTML = "";
-    }
-    if (domCache.fetchErrorMessage) {
-      domCache.fetchErrorMessage.classList.add("hidden");
-      domCache.fetchErrorMessage.style.display = "none";
-    }
+  // 2. ถ้าเป็นการโหลดครั้งแรก (renderId === 0) และมีเนื้อหาอยู่แล้ว โดยไม่ได้กดค้นหา ให้หยุดทันที!
+  if (hasExistingSSR && (appState.renderId || 0) === 0 && !hasSearchQuery) {
+    appState.renderId = 1;
+    return; // 🛑 สั่งหยุดทำงานทันที! ไม่ลบหน้าจอ ทั้งหน้าแรก และหน้ารายจังหวัด (เชียงใหม่/ภูเก็ต/ขอนแก่น)
+  }
 
+  appState.renderId = (appState.renderId || 0) + 1;
+  const activeRenderId = appState.renderId;
+
+  // 🟢 1. เคลียร์และซ่อนกล่อง Error & No Results เริ่มต้น
+  if (domCache.noResultsMessage) {
+    domCache.noResultsMessage.classList.add("hidden");
+    domCache.noResultsMessage.style.display = "none";
+    domCache.noResultsMessage.innerHTML = "";
+  }
+  if (domCache.fetchErrorMessage) {
+    domCache.fetchErrorMessage.classList.add("hidden");
+    domCache.fetchErrorMessage.style.display = "none";
+  }
+
+  
     // 🟢 2. จัดการส่วน Featured (แนะนำ) ด้านบน
     if (domCache.featuredSection) {
       const isHomeView = !isFilteredOrLocationView && 

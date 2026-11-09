@@ -6024,3 +6024,196 @@ nav.floating-app-dock,
   opacity: 0;
   pointer-events: none;
 }
+
+/* ==============================================================================
+   🚀 ULTIMATE PERFORMANCE & CORE WEB VITALS PATCH (INP & LCP FIX)
+   ============================================================================== */
+
+/* ------------------------------------------------------------------------------
+   1. ล้างแอนิเมชันเดิมที่ทำให้ CPU ทำงาน 100% (KILL UNCOMPOSITED ANIMATIONS)
+   ------------------------------------------------------------------------------ */
+/* ยกเลิกการขยับ background-position-x, box-shadow และ filter ทั้งหมดที่เป็นตัวการฉุด INP 616ms */
+.vip-name,
+.profile-card-name,
+.txt-model,
+.h1-line-2,
+.kiss-txt-main,
+.profile-card-img,
+.live-dot,
+.luxe-star-crest,
+div.footer-top-grid > div.footer-brand-col > a.brand-luxe-logo > span.luxe-star-crest {
+  animation: none !important;
+  -webkit-animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* ล้าง Background Shimmer ที่ค้างอยู่บนแท็กรูปภาพ <img> */
+.profile-card-img {
+  background-image: none !important;
+  background-color: #F1F5F9 !important;
+}
+
+/* ------------------------------------------------------------------------------
+   2. เพิ่มแอนิเมชันอันใหม่: รันบน GPU 100% (0ms MAIN THREAD BLOCKING)
+   ------------------------------------------------------------------------------ */
+
+/* 🟢 A. Live Dot Pulse: เปลี่ยนจาก box-shadow มาใช้ transform: scale + opacity (GPU) */
+.live-dot {
+  position: relative !important;
+  display: inline-block !important;
+  width: 7px !important;
+  height: 7px !important;
+  background-color: #059669 !important;
+  border-radius: 50% !important;
+  transform: translateZ(0); /* บังคับขึ้น Layer GPU */
+}
+
+.live-dot::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: inherit;
+  transform: translateZ(0);
+  animation: gpuLivePulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite !important;
+  pointer-events: none;
+}
+
+@keyframes gpuLivePulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* 🟢 B. Star Crest: หมุนและเปล่งประกายด้วย GPU แทนการใช้ filter drop-shadow */
+.luxe-star-crest {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: translateZ(0);
+  animation: gpuStarGleam 3.5s ease-in-out infinite !important;
+  will-change: transform, opacity;
+}
+
+@keyframes gpuStarGleam {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15) rotate(12deg);
+    opacity: 0.88;
+  }
+}
+
+/* 🟢 C. ข้อความ H1, ชื่อโมเดล และโลโก้: ไล่เฉดสีทอง-ม่วงหรูหรา คมชัด ไม่กินแรงเครื่อง */
+.kiss-txt-main,
+.txt-model {
+  background: linear-gradient(135deg, #FFF0B3 0%, #F59E0B 50%, #D97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  display: inline-block !important;
+}
+
+.h1-line-2 {
+  background: linear-gradient(135deg, #140F22 0%, #7C3AED 55%, #E11D48 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  display: inline-block !important;
+}
+
+/* แสง Shimmer วิ่งผ่านตัวหนังสือแบบ Hardware Accelerated */
+.vip-name,
+.profile-card-name {
+  position: relative !important;
+  display: inline-block !important;
+  color: #140F22 !important;
+  overflow: hidden !important;
+}
+
+.vip-name::after,
+.profile-card-name::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -120% !important;
+  width: 80% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 100%
+  ) !important;
+  transform: translate3d(0, 0, 0) skewX(-20deg) !important;
+  animation: gpuTextShine 3s infinite !important;
+  pointer-events: none !important;
+}
+
+@keyframes gpuTextShine {
+  0% {
+    transform: translate3d(0, 0, 0) skewX(-20deg);
+  }
+  30%, 100% {
+    transform: translate3d(320%, 0, 0) skewX(-20deg);
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   3. ปลดล็อก INP มือถือ: ตัดดีเลย์การสัมผัส 300ms ทั่วทั้งเว็บไซต์
+   ------------------------------------------------------------------------------ */
+a,
+button,
+input,
+select,
+.interactive-card,
+.dock-item,
+.filter-pill-tab,
+.vip-card-item,
+.profile-card-new,
+.sheet-close-btn,
+.circle-btn-el {
+  touch-action: manipulation !important; /* ปิดการรอ Double-Tap ทำให้แตะปุ๊บ ติดปั๊บ */
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ------------------------------------------------------------------------------
+   4. แยก DOM เลย์เอาต์ (LAYOUT ISOLATION) ป้องกันหน้าจอกระตุกขณะเลื่อน
+   ------------------------------------------------------------------------------ */
+/* แถบสไลด์และฟีดการ์ด */
+.vip-swiper-wrapper,
+.stories-scroll-container,
+.filter-pills-scroll-row {
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+  transform: translateZ(0) !important;
+  overscroll-behavior-x: contain !important;
+}
+
+/* กักบริเวณการเรนเดอร์ของการ์ดแต่ละใบ ไม่ให้กระทบทั้งหน้า */
+.profile-card-new-container {
+  content-visibility: auto !important;
+  contain-intrinsic-size: 300px 420px !important;
+  contain: layout style paint !important;
+}
+
+.profile-card-new {
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform !important;
+}
+
+/* รูปภาพโหลดไว ไม่กระตุกเฟรม */
+.profile-card-img {
+  content-visibility: auto !important;
+  transform: translateZ(0) !important;
+}
