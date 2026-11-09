@@ -68,32 +68,19 @@
 
  
   <script type="speculationrules">
-  {
-    "prerender": [
-      {
-        "where": {
-          "or": [
-            { "href_matches": "/" },
-            { "href_matches": "/profiles" }
-          ]
-        },
-        "eagerness": "moderate"
-      }
-    ],
-    "prefetch": [
-      {
-        "where": {
-          "or": [
-            { "href_matches": "/sideline/*" },
-            { "href_matches": "/location/*" }
-          ]
-        },
-        "eagerness": "conservative"
-      }
-    ]
-  }
-  </script>
-
+{
+  "prefetch": [
+    {
+      "where": {
+        "or": [
+          { "href_matches": "/location/*" }
+        ]
+      },
+      "eagerness": "conservative"
+    }
+  ]
+}
+</script>
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -125,34 +112,29 @@
   
   
   <script>
-    
     window.addEventListener('load', function() {
-      // ใช้ setTimeout หน่วงเวลาไว้ 1 วินาที เพื่อปล่อยให้ Main Thread ว่างพอสำหรับรับแรงกดปุ่มของยูสเซอร์
+      // ⚡ รอ 1.5 วินาทีหลังเว็บโหลดเสร็จ เพื่อปล่อยให้ CPU ว่างรับแรงกดปุ่มของยูสเซอร์ก่อน
       setTimeout(function() {
         var gtmScript = document.createElement('script');
         gtmScript.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
-        gtmScript.defer = true; // บังคับให้โหลดสคริปต์ทำงานในเบื้องหลัง
+        gtmScript.defer = true;
         document.head.appendChild(gtmScript);
 
         window.dataLayer = window.dataLayer || [];
         
-        // ⚡ โยนงาน GTM ไปเบื้องหลัง ไม่ให้บล็อก Main Thread ตอนผู้ใช้กดปุ่ม (แก้ INP)
         function gtag(){ 
-          const args = arguments;
-          if (window.requestIdleCallback) {
-            window.requestIdleCallback(() => { dataLayer.push(args); }, { timeout: 1000 });
-          } else {
-            setTimeout(() => { dataLayer.push(args); }, 10);
-          }
+          window.dataLayer.push(arguments); 
         }
-        window.gtag = gtag; // ประกาศฟังก์ชันไว้ที่ Global Object
+        window.gtag = gtag;
         
         gtag('js', new Date());
+        
+        // ⚡ ปิดการดัก Event ในหน้านี้เพื่อไม่ให้ GTM วิ่งตรวจ DOM 4,000 จุดตอนนิ้วแตะ
         gtag('config', 'G-PG0QFDWTTG', { 
-            'send_page_view': true,
-            'cookie_flags': 'SameSite=None;Secure' // ลดภาระการประมวลผลคุกกี้
+          'send_page_view': true,
+          'cookie_flags': 'SameSite=None;Secure'
         });
-      }, 1000); // 1000 มิลลิวินาที = 1 วินาทีหลังจากโหลดหน้าเว็บเสร็จ
+      }, 1500); // 👈 มีวงเล็บปิดครบถ้วน ไม่เออเร่อ
     });
   </script>
 
@@ -177,26 +159,10 @@
       touch-action: manipulation;
     }
     
-    /* ⚡ เทคนิคขั้นสูง: ตัดการคำนวณ Layout ของการ์ดที่อยู่นอกจอ ลดเวลา Layout ลง 90% ทันที */
-    .profile-card-new-container {
-      content-visibility: auto;
-      contain-intrinsic-size: 300px 420px;
-    }
+    
 
-    /* =========================================
-       ✅ ส่วนที่เพิ่มใหม่: แก้ปัญหา INP & LCP (DebugBear)
-       ========================================= */
-
-    /* 1. บังคับปุ่มให้ยุบ/เปลี่ยนสีทันทีที่นิ้วแตะ (ลด Presentation Delay จาก 400ms เหลือ 0ms ทันที) */
-    .dock-item:active, 
-    .filter-pill-tab:active,
-    .city-hub-card:active {
-      transform: scale(0.92) !important;
-      opacity: 0.7 !important;
-      transition: transform 0.05s ease, opacity 0.05s ease !important;
-    }
-
-    /* 2. ป้องกัน GTM แย่งการตอบสนองของปุ่มเมื่อใช้นิ้วแตะ */
+    
+   
     .filter-pill-tab {
       touch-action: manipulation;
     }

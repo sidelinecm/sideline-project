@@ -2825,15 +2825,7 @@ a[href*="line.me"]:not(.social-btn) {
   100% { transform: translate3d(-50%, 0, 0); }
 }
 
-@keyframes diamondTwinkleGleam {
-  0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.75)); }
-  50% { transform: scale(1.18) rotate(10deg); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95)); }
-}
 
-@keyframes liquidChromeSweep {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
 
 @keyframes kissBadgeFloat {
   0%, 100% { transform: translateY(0); }
@@ -2850,11 +2842,7 @@ a[href*="line.me"]:not(.social-btn) {
   50% { transform: scale(1.16) rotate(-6deg); }
 }
 
-@keyframes liveRippleWave {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.75); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(0, 230, 118, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
-}
+
 
 
 
@@ -3842,11 +3830,7 @@ body, body.fmh-app-page {
   z-index: 100000 !important;
 }
 
-/* ล็อก Body ไม่ให้ Scroll พื้นหลังทะลุ */
-body.lightbox-open {
-  overflow: hidden !important;
-  touch-action: none !important;
-}
+
 
 /* 📱 รองรับ Notch / Dynamic Island ของ iPhone ทุกรุ่น */
 #lightbox-content-wrapper-el {
