@@ -1060,7 +1060,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
             </div>
             
             <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
-              <span class="social-badge-likes" style="background: rgba(124, 58, 237, 0.10); border: 0.8px solid rgba(192, 132, 252, 0.22); color: #E9D5FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+              <span class="social-badge-likes" style="background: #3B0764; border: 0.8px solid #7C3AED; color: #F3E8FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>${likesText}</span>
               </span>
@@ -2317,7 +2317,7 @@ const mapQuery = isNational
 const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
 const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="${mapEmbedUrl}"`);
+finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
   // 🟢 เปลี่ยนมา Preload การ์ดรูปแรกของ Grid ด้านล่าง (ขนาด 480px) ที่ Google ใช้วัด LCP จริง
