@@ -2640,16 +2640,18 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-   
-document.querySelectorAll(".filter-pill-tab").forEach(pill => {
+  document.querySelectorAll(".filter-pill-tab").forEach(pill => {
   pill.addEventListener("click", function (e) {
     const targetHref = this.getAttribute("href");
     const currentPath = window.location.pathname.replace(/\/+$/, "");
     const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
 
-    // 🟢 ถ้าคลิกลิงก์ที่เป็นหน้าเดิมที่เปิดอยู่แล้ว ให้ยกเลิกการโหลดหน้าเว็บใหม่ทันที
+    // ⚡ ถ้าคลิกแท็บที่เปิดอยู่แล้ว ให้หยุดทำงานทันที ตอบสนองใน 0 ms ไม่ลบ DOM การ์ดทิ้ง!
     if (cleanTarget && cleanTarget === currentPath) {
       e.preventDefault();
+      if (this.classList.contains("active") && (!domCache.searchInput || !domCache.searchInput.value)) {
+        return; // ออกทันที ไม่ต้องวาดการ์ด 64 ใบซ้ำ
+      }
       document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
       this.classList.add("active");
       appState.activePillTag = "all";
@@ -2657,7 +2659,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       executeFilterAndRender(true);
       return;
     }
-
+    
     if (this.tagName === "A" && targetHref) return; // ถ้าเป็นย่านอื่น ปล่อยให้ไปตามปกติ
 
     e.preventDefault();
@@ -2750,13 +2752,15 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
           if (rawP) targetProfile = normalizeProfile(rawP);
         }
 
-        // ✅ แก้ให้เรียกตรงทันที (Next Paint จะสำเร็จใน 15-20 ms ทันที)
-if (targetProfile) {
-  history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-  window.openLightboxModal(targetProfile); // 👈 เรียกตรงทันที ตัด requestAnimationFrame ทิ้ง
-} else {
-  window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-}
+       if (targetProfile) {
+          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+          // ⚡ ตอบสนองคลิกทันที แล้วปล่อยให้เนื้อหาเรนเดอร์ใน Microtask ถัดไป ตัดอาการ Layout ค้าง
+          setTimeout(() => {
+            window.openLightboxModal(targetProfile);
+          }, 0);
+        } else {
+          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+        }
         return;
       }
     }
