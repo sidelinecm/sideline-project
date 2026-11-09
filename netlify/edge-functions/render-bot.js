@@ -1,9 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-// 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_20`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_22`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -387,10 +386,10 @@ export default async (req, context) => {
     if (provinceKey === "chiangmai") provVariants.push("chiang-mai", "chiang_mai");
     if (provinceKey === "khon-kaen" || provinceKey === "khonkaen") provVariants.push("khonkaen", "khon_kaen");
 
-    const provCol = ("provinceKey" in profile && profile.provinceKey) ? "provinceKey"
-      : ("province_slug" in profile && profile.province_slug) ? "province_slug"
-      : ("province_key" in profile && profile.province_key) ? "province_key"
-      : "provinceKey";
+    const provCol = ("province_key" in profile) ? "province_key"
+  : ("province_slug" in profile) ? "province_slug"
+  : ("provinceKey" in profile) ? "provinceKey"
+  : "province_key";
 
     let relatedProfiles = [];
     try {

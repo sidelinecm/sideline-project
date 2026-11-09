@@ -1157,7 +1157,6 @@ if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
     const rawZoneQuery = url.searchParams.get("zone")?.trim();
 const segments = url.pathname.split("/").filter(Boolean);
 
-// 🟢 ทำการตรวจสอบว่าเป็นหน้ารายจังหวัดจริง (ไม่ใช่หน้าแรก) ก่อน redirect
 if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/") && segments[0] === "location" && segments[1]) {
   const currentProv = segments[1];
   let cleanZoneName = rawZoneQuery;
@@ -1165,8 +1164,10 @@ if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.inclu
     cleanZoneName = decodeURIComponent(cleanZoneName).trim();
   } catch (_) {}
   
-  const safeZone = cleanZoneName.replace(/\s+/g, "-");
-  const targetRedirectUrl = encodeURI(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${safeZone}`);
+  const cleanZoneRaw = cleanZoneName.replace(/^โซน/g, "").trim();
+  // ✅ ตรวจสอบและแปลงเป็น slug ภาษาอังกฤษตั้งแต่รอบแรก ป้องกันการ redirect 2 รอบ
+  const mappedSlug = THAI_TO_ENG_REDIRECT[cleanZoneRaw] || cleanZoneRaw.replace(/\s+/g, "-");
+  const targetRedirectUrl = encodeURI(`${CONFIG.PRIMARY_DOMAIN}/location/${currentProv}/${mappedSlug}`);
   return Response.redirect(targetRedirectUrl, 301);
 }
 
@@ -2322,38 +2323,13 @@ finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
   
-const lcpTargetProfile = (profilesList && profilesList.length > 0) ? profilesList[0] : (hotProfiles && hotProfiles[0]);
-
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
   const lcpExactUrl = optimizeImg(rawLcpImg, "card");
+  const preloadTag = `\n  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">`;
   
-  
-  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">`;
-  
-  
-  const dynamicHeadInjection = `
-  ${preloadTag}
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  </noscript>
-  <script type="speculationrules">
-  {
-    "prefetch": [
-      {
-        "where": { "and": [{ "href_matches": "/sideline/*" }, { "not": { "href_matches": "/*\\\\?*" } }] },
-        "eagerness": "conservative"
-      },
-      { "where": { "href_matches": "/location/*" }, "eagerness": "conservative" }
-    ]
-  }
-  </script>
-</head>`;
-
-  finalHtml = finalHtml.replace(/<\/head>/i, dynamicHeadInjection);
+  // ✅ แทรกไว้ต่อท้าย <meta charset> ทันที เพื่อความถูกต้องตามมาตรฐาน W3C และ LCP เร็วสุด
+  finalHtml = finalHtml.replace(/(<meta\s+charset=["'][^"']+["']\s*\/?>)/i, `$1${preloadTag}`);
 }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
