@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * 💎 FIRST MODEL HUB - DYNAMIC XML SITEMAP ENGINE (sitemap.js)
+ * 💎 FIRST MODEL HUB - ADVANCED DYNAMIC XML SITEMAP ENGINE (sitemap.js)
  * Production-Ready Ultra-Defensive Version (FIXED 2026 - ZERO REDIRECT ERRORS)
  * ==============================================================================
  */
@@ -26,7 +26,7 @@ const CONFIG = {
 };
 
 /**
- * 🔒 ป้องกัน XML Syntax Error 100%
+ * 🔒 ป้องกัน XML Syntax Error 100% (escape อักขระพิเศษ)
  */
 const escapeXml = (str) => {
   if (!str) return "";
@@ -57,7 +57,7 @@ const safeGetIsoDate = (dateStr, fallbackIso) => {
 };
 
 /**
- * 🛡️ ฟังก์ชันสร้าง URL ที่ปลอดภัย 100% (ตัดช่องว่าง %20 + เอนโค้ด URL ถูกต้อง)
+ * 🛡️ ฟังก์ชันสร้าง URL ที่ปลอดภัย 100% (ตัดช่องว่าง %20 + เข้ารหัส Percent-encoded)
  */
 const buildSafeUrl = (baseDomain, path) => {
   const cleanPath = path
@@ -69,7 +69,7 @@ const buildSafeUrl = (baseDomain, path) => {
 };
 
 /**
- * 📸 ดึงรูปภาพหลักของโปรไฟล์
+ * 📸 ดึงรูปภาพหลักของโปรไฟล์สำหรับ Image Sitemap
  */
 const getProfileMainImage = (p) => {
   if (!p) return null;
@@ -84,7 +84,7 @@ const getProfileMainImage = (p) => {
 };
 
 /**
- * 💎 ปรับแต่ง URL รูปภาพสำหรับ Google Image Sitemap
+ * 💎 ปรับแต่ง URL รูปภาพผ่าน Cloudinary สำหรับ Google Image Sitemap
  */
 const optimizeImgForXml = (path) => {
   if (!path || typeof path !== "string" || !path.trim()) return null;
@@ -101,7 +101,7 @@ const optimizeImgForXml = (path) => {
   return cleanPath;
 };
 
-// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (Slug ภาษาอังกฤษตรงกับระบบ SSR และ 200 OK 100%)
+// 📍 รายชื่อโซนย่อยเป้าหมายทั่วประเทศ (ซิงค์ตรงกับ MASTER_ZONE_TO_SLUG ในระบบ SSR 100%)
 const TARGET_SUB_ZONES = [
   // 1. เชียงใหม่
   { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] },
@@ -198,11 +198,11 @@ export default async (request, _context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // 🟢 ดึงเฉพาะโปรไฟล์ที่ Active และมีรูปถ่ายจริงเท่านั้น (ไม่เอาโปรไฟล์ร้าง)
+    // 🟢 ดึงข้อมูลแบบ Lean คอลัมน์ที่จำเป็นเท่านั้น (โหลดไว ไม่ติด Timeout)
     const [provincesRes, profilesRes] = await Promise.all([
       supabase.from("provinces").select("*"),
       supabase.from("profiles")
-        .select("id, slug, name, location, description, styleTags, imagePath, image_url, provinceKey, province_key, province, updated_at, created_at, active")
+        .select("id, slug, name, location, imagePath, image_url, provinceKey, updated_at, created_at, active")
         .eq("active", true)
         .limit(3000)
     ]);
@@ -210,52 +210,17 @@ export default async (request, _context) => {
     const provinces = provincesRes.data || [];
     const profiles = profilesRes.data || [];
 
-    const provinceLatestDateMap = new Map();
-    const zoneLatestDateMap = new Map();
-
-    profiles.forEach(p => {
-      let pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
-      if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
-      if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
-
-      const pLoc = (p.location || "").toLowerCase();
-      const pDesc = (p.description || "").toLowerCase();
-      const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-      const fullText = `${pLoc} ${pDesc} ${pTags}`;
-      const pDateStr = p.updated_at || p.created_at;
-      
-      if (pDateStr) {
-        const pTime = new Date(pDateStr).getTime();
-        if (!isNaN(pTime)) {
-          if (pKey) {
-            const curProv = provinceLatestDateMap.get(pKey) || 0;
-            if (pTime > curProv) provinceLatestDateMap.set(pKey, pTime);
-          }
-          TARGET_SUB_ZONES.forEach(sz => {
-            if (pKey.includes(sz.province)) {
-              const isMatch = sz.matchWords.some(w => fullText.includes(w.toLowerCase()));
-              if (isMatch) {
-                const zoneKey = `${sz.province}_${sz.zone}`;
-                const curZone = zoneLatestDateMap.get(zoneKey) || 0;
-                if (pTime > curZone) zoneLatestDateMap.set(zoneKey, pTime);
-              }
-            }
-          });
-        }
-      }
-    });
-
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
     xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
-    // 1. หน้าคงที่หลัก (Static Pages)
+    // 1. Static Pages (หน้าหลักและหน้าสำคัญ)
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
       { path: "/profiles", priority: "0.9", changefreq: "daily" },
       { path: "/locations", priority: "0.9", changefreq: "daily" },
       { path: "/blog", priority: "0.8", changefreq: "weekly" },
-      { path: "/blog/what-is-trong-pok", priority: "0.8", changefreq: "monthly" },
+      { path: "/blog/what-is-gfe-fiwfan-guide", priority: "0.8", changefreq: "monthly" },
       { path: "/blog/safe-booking-anti-scam-guide", priority: "0.8", changefreq: "monthly" },
       { path: "/blog/vip-etiquette-how-to-book-companion", priority: "0.8", changefreq: "monthly" },
       { path: "/about", priority: "0.5", changefreq: "monthly" },
@@ -272,21 +237,22 @@ export default async (request, _context) => {
       xml += `  </url>\n`;
     });
 
-    // 2. หน้ารายจังหวัด (Province Hubs)
+    // 2. Province Hubs (หน้ารายจังหวัด - Normalize คีย์ให้ตรงกัน)
     if (provinces && provinces.length > 0) {
       provinces.forEach(p => {
         if (p && p.key) {
           let cleanKey = String(p.key).trim().toLowerCase();
           if (cleanKey === "chiang_mai" || cleanKey === "chiang-mai") cleanKey = "chiangmai";
           if (cleanKey === "khonkaen" || cleanKey === "khon_kaen") cleanKey = "khon-kaen";
+          if (cleanKey === "phra-nakhon-si-ayutthaya") cleanKey = "ayutthaya";
+          if (cleanKey === "nakhon-ratchasima" || cleanKey === "nakhonratchasima") cleanKey = "korat";
+          if (cleanKey === "hat-yai" || cleanKey === "hatyai") cleanKey = "songkhla";
+          if (cleanKey === "samui" || cleanKey === "surat-thani") cleanKey = "suratthani";
 
-          const latestTimestamp = provinceLatestDateMap.get(cleanKey);
-          const provIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
           const provUrl = buildSafeUrl(domain, `/location/${cleanKey}`);
-
           xml += `  <url>\n`;
           xml += `    <loc>${escapeXml(provUrl)}</loc>\n`;
-          xml += `    <lastmod>${provIsoDate}</lastmod>\n`;
+          xml += `    <lastmod>${nowIso}</lastmod>\n`;
           xml += `    <changefreq>daily</changefreq>\n`;
           xml += `    <priority>0.9</priority>\n`;
           xml += `  </url>\n`;
@@ -294,46 +260,34 @@ export default async (request, _context) => {
       });
     }
 
-    // 3. หน้ารายโซนย่อย (Sub-zones)
+    // 3. Sub-zones Hubs (หน้ารายย่าน - แสดงเฉพาะย่านที่มีน้องอยู่จริง)
     TARGET_SUB_ZONES.forEach(sz => {
       const hasActiveProfiles = profiles.some(p => {
-        let pKey = (p.provinceKey || p.province_key || p.province || "").toLowerCase().trim();
+        let pKey = (p.provinceKey || "").toLowerCase().trim();
         if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
         if (pKey === "khonkaen" || pKey === "khon_kaen") pKey = "khon-kaen";
 
         const pLoc = (p.location || "").toLowerCase();
-        const pDesc = (p.description || "").toLowerCase();
-        const pTags = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : String(p.styleTags || "")).toLowerCase();
-        const fullText = `${pLoc} ${pDesc} ${pTags}`;
-
-        const isSameProv = pKey.includes(sz.province.toLowerCase());
-        const isMatchZone = sz.matchWords.some(w => fullText.includes(w.toLowerCase()));
-        return isSameProv && isMatchZone;
+        return pKey.includes(sz.province.toLowerCase()) && sz.matchWords.some(w => pLoc.includes(w.toLowerCase()));
       });
 
       if (!hasActiveProfiles) return;
-
-      const zoneKey = `${sz.province}_${sz.zone}`;
-      const latestTimestamp = zoneLatestDateMap.get(zoneKey);
-      const zoneIsoDate = latestTimestamp ? new Date(latestTimestamp).toISOString() : nowIso;
       const zoneUrl = buildSafeUrl(domain, `/location/${sz.province}/${sz.zone}`);
-
       xml += `  <url>\n`;
       xml += `    <loc>${escapeXml(zoneUrl)}</loc>\n`;
-      xml += `    <lastmod>${zoneIsoDate}</lastmod>\n`;
+      xml += `    <lastmod>${nowIso}</lastmod>\n`;
       xml += `    <changefreq>daily</changefreq>\n`;
       xml += `    <priority>0.9</priority>\n`;
       xml += `  </url>\n`;
     });
 
-    // 4. หน้าโปรไฟล์น้องๆ (Individual Profiles - ปลายทาง 200 OK 100% ไม่ติด 301)
+    // 4. Profiles (หน้าโปรไฟล์น้องๆ - ปลายทาง 200 OK 100% ไม่ติด 301)
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
           let rawSlug = String(p.slug || p.id).trim();
 
-          // 🟢 ตรวจสอบเด็ดขาด: ถ้า Slug มีภาษาไทย ให้แปลงเป็น model-ID ทันที
-          // เพื่อให้ตรงกับ URL ปลายทางที่เป็น 200 OK ใน _redirects (ตัดปัญหา 301 ถาวร)
+          // 🟢 กฎเหล็กป้องกัน 301: ถ้า Slug ใน DB เป็นภาษาไทย ให้แปลงเป็น model-ID ทันที
           if (/[\u0E00-\u0E7F]/.test(rawSlug)) {
             rawSlug = `model-${p.id}`;
           }
@@ -342,13 +296,12 @@ export default async (request, _context) => {
           const modDate = safeGetIsoDate(p.updated_at || p.created_at, nowIso);
 
           let imageXml = "";
-          const imgPath = getProfileMainImage(p);
-          if (imgPath) {
+          let imgPath = p.imagePath || p.image_url;
+          if (imgPath && !imgPath.includes("firstmodelhub.webp")) {
             const imgUrl = optimizeImgForXml(imgPath);
             if (imgUrl) {
               const rawName = p.name ? String(p.name).trim().replace(/^(น้อง\s?)+/gi, "") : "สาวสวย";
-              const displayName = `น้อง${rawName}`;
-              imageXml = `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>${escapeXml(displayName)}</image:title>\n    </image:image>`;
+              imageXml = `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>น้อง${escapeXml(rawName)}</image:title>\n    </image:image>`;
             }
           }
 
@@ -368,7 +321,7 @@ export default async (request, _context) => {
     });
 
   } catch (err) {
-    console.error("Sitemap generation critical error:", err);
+    console.error("Sitemap critical error:", err);
     return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${domain}/</loc><lastmod>${nowIso}</lastmod></url></urlset>`, {
       status: 200,
       headers: { "Content-Type": "application/xml; charset=utf-8" }
