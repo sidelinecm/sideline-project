@@ -875,8 +875,8 @@ window.executeFilterAndRender = executeFilterAndRender;
 
 async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   if (!domCache.profilesDisplayArea) return;
-
-  // 1. เช็คว่ามี HTML การ์ดจาก Server หรือยัง และไม่ได้มีคำพิมพ์ค้นหาค้างไว้
+  
+  
   const hasExistingSSR = domCache.profilesDisplayArea.querySelector(".profile-card-new");
   const hasSearchQuery = Boolean(domCache.searchInput?.value?.trim());
 
