@@ -1199,18 +1199,7 @@ img {
 /* --------------------------------------------------------------------------
    8. PROFILE CARDS (GRID)
    -------------------------------------------------------------------------- */
-.profile-card-new-container {
-  width: 100% !important;
-  min-width: 0 !important;
-  position: relative !important;
-  contain: layout paint !important;
-  content-visibility: auto !important;
-  contain-intrinsic-size: auto 380px !important;
-  transform: translateZ(0) !important;
-  -webkit-transform: translateZ(0) !important;
-  will-change: transform !important;
-  backface-visibility: hidden !important;
-}
+
 @media (min-width: 768px) {
   .profile-card-new-container {
     contain-intrinsic-size: auto 420px !important;
@@ -3138,11 +3127,7 @@ i.fas, i.far, i.fab {
     width: 100% !important;
   }
 
-  html body .profile-card-new-container {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-}
+  
 .fa-share-alt {
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M384 336c-26.3 0-50 10.6-67.4 27.7L189.5 275.5c2.3-6.4 3.7-13.3 3.7-20.5s-1.4-14.1-3.7-20.5l127.1-88.2c17.4 17.1 41.1 27.7 67.4 27.7 53 0 96-43 96-96s-43-96-96-96-96 43-96 96c0 7.2 1.4 14.1 3.7 20.5L164.6 186.7C147.2 169.6 123.5 159 97.2 159c-53 0-96 43-96 96s43 96 96 96c26.3 0 50-10.6 67.4-27.7l127.1 88.2c-2.3 6.4-3.7 13.3-3.7 20.5 0 53 43 96 96 96s96-43 96-96-43-96-96-96z'/%3E%3C/svg%3E");
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M384 336c-26.3 0-50 10.6-67.4 27.7L189.5 275.5c2.3-6.4 3.7-13.3 3.7-20.5s-1.4-14.1-3.7-20.5l127.1-88.2c17.4 17.1 41.1 27.7 67.4 27.7 53 0 96-43 96-96s-43-96-96-96-96 43-96 96c0 7.2 1.4 14.1 3.7 20.5L164.6 186.7C147.2 169.6 123.5 159 97.2 159c-53 0-96 43-96 96s43 96 96 96c26.3 0 50-10.6 67.4-27.7l127.1 88.2c-2.3 6.4-3.7 13.3-3.7 20.5 0 53 43 96 96 96s96-43 96-96-43-96-96-96z'/%3E%3C/svg%3E");
@@ -5486,12 +5471,6 @@ body.fmh-app-page {
   transform: scale(0.96) !important;
 }
 
-/* ซ่อน Dock ล่างขณะเปิดหน้าต่างค้นหา */
-body:has(#search-bottom-sheet.active) .floating-app-dock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translate(-50%, 150%) !important;
-}
 
 /* ========================================================
    🎯 ONE-STOP ACCESSIBILITY & CONTRAST FIX (สมบูรณ์แบบ 100%)
@@ -5939,18 +5918,9 @@ nav.floating-app-dock,
   will-change: transform, opacity;
 }
 
-/* ล็อก Grid โปรไฟล์หลักไม่ให้กระตุกเวลาเปิด Pop-up */
-#profiles-display-area {
-  contain: style;
-}
 
-.vip-swiper-wrapper 
 
-/* ==========================================================================
-   📱 FLOATING APP DOCK (IOS LUXURY BLUR & DYNAMIC STATES)
-   ========================================================================== */
 
-/* 1. สไตล์เริ่มต้นของไอคอนและข้อความใน Dock (สถานะปกติ) */
 .floating-app-dock .dock-item .dock-icon-box {
   width: 34px;
   height: 30px;
@@ -6170,10 +6140,7 @@ select,
   -webkit-tap-highlight-color: transparent !important;
 }
 
-/* ------------------------------------------------------------------------------
-   4. แยก DOM เลย์เอาต์ (LAYOUT ISOLATION) ป้องกันหน้าจอกระตุกขณะเลื่อน
-   ------------------------------------------------------------------------------ */
-/* แถบสไลด์และฟีดการ์ด */
+
 .vip-swiper-wrapper,
 .stories-scroll-container,
 .filter-pills-scroll-row {
@@ -6182,13 +6149,16 @@ select,
   transform: translateZ(0) !important;
   overscroll-behavior-x: contain !important;
 }
-
-/* กักบริเวณการเรนเดอร์ของการ์ดแต่ละใบ ไม่ให้กระทบทั้งหน้า */
 .profile-card-new-container {
-  content-visibility: auto !important;
-  contain-intrinsic-size: 300px 420px !important;
-  contain: layout style paint !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  position: relative !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
 }
+
 
 .profile-card-new {
   transform: translateZ(0) !important;

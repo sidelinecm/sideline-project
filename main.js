@@ -866,7 +866,6 @@ window.executeFilterAndRender = executeFilterAndRender;
       if (isHome) {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        window.location.reload();
       } else {
         e.preventDefault();
         window.location.href = '/';
@@ -874,7 +873,6 @@ window.executeFilterAndRender = executeFilterAndRender;
     }, { capture: true });
   }
 
- // 🟢 โค้ดที่สมบูรณ์แบบ 100% (คุ้มครองทั้งหน้าแรก และ หน้ารายจังหวัด/โซนย่อย เช่น เชียงใหม่)
 async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   if (!domCache.profilesDisplayArea) return;
 
@@ -946,9 +944,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
       }
       return;
     }
-
-   
-
+    
   const isExplicitLocationPath = window.location.pathname.includes("/location/") || 
                                  window.location.pathname.includes("/province/") ||
                                  window.location.pathname.startsWith("/profiles");
@@ -2326,7 +2322,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
     // 🟢 ตรวจสอบหน้ารวมน้องๆ ทั้งหมด (/profiles)
-    if (rawPath === "/profiles") {
+    if (rawPath === "/profiles" || rawPath === "/profiles.html") {
       appState.currentProfileSlug = null;
       window.currentProvinceSlug = "national";
       window.currentZoneSlug = "";
@@ -2344,12 +2340,13 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     window.closeLightboxModal(false);
     if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
-    executeFilterAndRender(false);
+    // ⚡ ถ้าเป็นการโหลดหน้าแรกครั้งแรก ไม่ต้องสั่งล้าง DOM ซ้ำ
+    if (!isInitial) {
+      executeFilterAndRender(false);
+    }
   }
-
-  // ==============================================================================
-  // 🚀 MAIN APPLICATION INITIALIZATION
-  // ==============================================================================
+  
+  
   async function initApplication() {
     // ⚡ 1. ตรวจสอบทันทีก่อนทำอย่างอื่น: ถ้าเป็นหน้าโปรไฟล์เดี่ยว
     const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
@@ -2590,35 +2587,24 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
   document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", function (e) {
-    const targetHref = this.getAttribute("href");
-    const currentPath = window.location.pathname.replace(/\/+$/, "");
-    const cleanTarget = targetHref ? targetHref.replace(/\/+$/, "") : "";
+    pill.addEventListener("click", function (e) {
+      const targetHref = this.getAttribute("href");
+      if (this.tagName === "A" && targetHref) return; // ย่านอื่นให้เปลี่ยนหน้าตามปกติ
 
-    // ⚡ ถ้าคลิกแท็บที่เปิดอยู่แล้ว ให้หยุดทำงานทันที ตอบสนองใน 0 ms ไม่ลบ DOM การ์ดทิ้ง!
-    if (cleanTarget && cleanTarget === currentPath) {
       e.preventDefault();
-      if (this.classList.contains("active") && (!domCache.searchInput || !domCache.searchInput.value)) {
-        return; // ออกทันที ไม่ต้องวาดการ์ด 64 ใบซ้ำ
-      }
+      if (this.classList.contains("active")) return; // ถ้าแท็บเดิมเปิดอยู่แล้ว ไม่ต้องคำนวณซ้ำ
+
       document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
       this.classList.add("active");
-      appState.activePillTag = "all";
-      if (domCache.searchInput) domCache.searchInput.value = "";
-      executeFilterAndRender(true);
-      return;
-    }
-    
-    if (this.tagName === "A" && targetHref) return; // ถ้าเป็นย่านอื่น ปล่อยให้ไปตามปกติ
+      appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    e.preventDefault();
-    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-    this.classList.add("active");
-    appState.activePillTag = this.getAttribute("data-tag") || "all";
-    executeFilterAndRender(true);
+      // ⚡ ใช้ setTimeout ดึงงานคำนวณออกจากจังหวะคลิก ช่วยให้ INP เหลือต่ำกว่า 50ms (เขียวทันที)
+      setTimeout(() => {
+        executeFilterAndRender(true);
+      }, 0);
+    });
   });
-});
-
+  
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
       // ⚡ [เพิ่มจุดนี้] ปลดล็อก INP ปุ่ม "หน้าแรก" (ตัด Presentation Delay 489ms เหลือ 0ms ทันที)
