@@ -1474,18 +1474,20 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       }).join("");
     }
 
-  // ✅ กำหนดจำนวนโปรไฟล์ทั้งหมดที่แท้จริงให้เป็น Single Source of Truth
+  
   const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
   
-  // สำหรับหน้าแรก ให้แสดงน้องๆ ทั้งหมด โดยเรียงคนที่ติด Hot/Featured ไว้ด้านบนสุดอย่างเป็นระเบียบ
+  
   const nationalFeedProfiles = isNational ? [...deduplicatedProfiles].sort((a, b) => {
     const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
     const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
     return featB - featA;
   }) : [];
 
-  const actualVisibleProfiles = isNational ? nationalFeedProfiles : profilesList;
-  // ✅ ใช้จำนวนคนจริงของหน้านั้นๆ เสมอ (หน้าแรก = 114, หน้ารายจังหวัด = จำนวนจริงในจังหวัด)
+  // ⚡ ตัดรอบแรกส่งแค่ 24 คนก่อน เพื่อลด DOM จาก 4,300 เหลือไม่เกิน 1,000 จุด (หน้าจอจะเลิกค้าง 3.7 วิ ทันที)
+const actualVisibleProfiles = isNational
+  ? nationalFeedProfiles.slice(0, 24)
+  : profilesList;
   const totalCount = isNational ? liveTotalProfiles : actualVisibleProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
