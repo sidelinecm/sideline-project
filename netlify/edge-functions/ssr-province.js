@@ -2322,15 +2322,16 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  // 🟢 เปลี่ยนมา Preload การ์ดรูปแรกของ Grid ด้านล่าง (ขนาด 480px) ที่ Google ใช้วัด LCP จริง
-const lcpTargetProfile = (profilesList && profilesList.length > 0) ? profilesList[0] : (hotProfiles && hotProfiles[0]);
+  // ✅ Preload รูปแรกของแถบ "น้องๆ HOT (Swiper)" ซึ่งแสดงอยู่บนหน้าจอแรกของมือถือแน่นอน
+const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : null;
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  const lcpExactUrl = optimizeImg(rawLcpImg, "card"); // ดึงขนาดมาตรฐาน card (480px)
-  
-  const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
-  finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+  if (rawLcpImg) {
+    const lcpExactUrl = optimizeImg(rawLcpImg, 300); // ใช้ขนาด 300x420 พอดีกรอบ Swiper
+    const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
+    finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+  }
 }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
