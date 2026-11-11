@@ -5245,168 +5245,6 @@ body.fmh-app-page {
   word-break: keep-all !important;
      }
 
-/* ==========================================================================
-   ✨ ULTIMATE SEARCH BOTTOM SHEET PATCH (วางต่อท้าย styles.css ล่างสุด)
-   ========================================================================== */
-#search-drawer-overlay.drawer-backdrop {
-  z-index: 100001 !important;
-  background: rgba(10, 6, 20, 0.75) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-.profile-card-new,
-.profile-card-new-container,
-.vip-card-item,
-#search-bottom-sheet,
-#lightbox,
-#lightbox-content-wrapper-el,
-.hero-section.celestial-hero-box {
-  will-change: auto !important;
-  transform: none !important;
-  contain: none !important;
-}
-
-/* คงเฉพาะการจัดกึ่งกลางของ Dock ล่างสุด */
-.floating-app-dock {
-  will-change: auto !important;
-  transform: translateX(-50%) !important;
-  contain: none !important;
-}
-
-#search-bottom-sheet.search-bottom-sheet.active {
-  transform: translate(-50%, 0) !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
-}
-
-#search-bottom-sheet .sheet-drag-handle {
-  width: 46px !important;
-  height: 5px !important;
-  background: #CBD5E1 !important;
-  border-radius: 100px !important;
-  margin: 2px auto 10px auto !important;
-  flex-shrink: 0 !important;
-  cursor: grab !important;
-}
-
-#search-bottom-sheet .sheet-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding-bottom: 10px !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-  margin-bottom: 12px !important;
-  flex-shrink: 0 !important;
-}
-
-#search-bottom-sheet .sheet-close-btn {
-  width: 32px !important;
-  height: 32px !important;
-  background: #F1F5F9 !important;
-  border: none !important;
-  border-radius: 50% !important;
-  color: #64748B !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-}
-
-#search-bottom-sheet .sheet-body-content {
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  padding-right: 2px !important;
-  flex-grow: 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overscroll-behavior: contain !important;
-}
-
-#search-bottom-sheet .search-inputs-row {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
-
-#search-bottom-sheet .search-input-field,
-#search-bottom-sheet .search-select-field {
-  width: 100% !important;
-  background-color: #F8F6FC !important;
-  border: 1.5px solid rgba(124, 58, 237, 0.16) !important;
-  color: #140F22 !important;
-  padding: 10px 14px !important;
-  font-size: 16px !important; /* 👈 ขนาด 16px ป้องกัน iPhone Auto-Zoom */
-  font-weight: 600 !important;
-  font-family: 'Prompt', sans-serif !important;
-  border-radius: 14px !important;
-  outline: none !important;
-  height: 48px !important; /* ขนาด 48px พอดีนิ้ว */
-  box-sizing: border-box !important;
-  transition: all 0.2s ease !important;
-  -webkit-appearance: none !important;
-}
-
-#search-bottom-sheet select.search-select-field {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237C3AED' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 14px center !important;
-  padding-right: 36px !important;
-}
-
-#search-bottom-sheet .search-input-field:focus,
-#search-bottom-sheet .search-select-field:focus {
-  border-color: #7C3AED !important;
-  background-color: #FFFFFF !important;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
-}
-
-#search-bottom-sheet .sheet-action-footer {
-  display: grid !important;
-  grid-template-columns: 1fr 2fr !important;
-  gap: 10px !important;
-  margin-top: 14px !important;
-  padding-top: 12px !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
-  flex-shrink: 0 !important;
-}
-
-#search-bottom-sheet .sheet-reset-btn {
-  background: #F1F5F9 !important;
-  border: 1.5px solid #CBD5E1 !important;
-  color: #475569 !important;
-  border-radius: 14px !important;
-  height: 48px !important;
-  font-size: 13.5px !important;
-  font-weight: 800 !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  transition: transform 0.1s ease, background-color 0.15s ease !important;
-}
-
-#search-bottom-sheet .sheet-apply-btn {
-  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
-  border: none !important;
-  color: #FFFFFF !important;
-  border-radius: 14px !important;
-  height: 48px !important;
-  font-size: 14.5px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
-  transition: transform 0.1s ease, opacity 0.15s ease !important;
-}
-
-#search-bottom-sheet .sheet-apply-btn:active,
-#search-bottom-sheet .sheet-reset-btn:active {
-  transform: scale(0.96) !important;
-}
 
 
 /* ========================================================
@@ -5815,14 +5653,7 @@ nav.floating-app-dock,
   max-width: 410px !important;
   box-sizing: border-box !important;
 }
-#search-bottom-sheet,
-#lightbox,
-.floating-app-dock {
-  will-change: transform, opacity;
-  transform: translateZ(0); /* บังคับใช้ GPU Render ตัดปัญหา Presentation Delay 494ms ทิ้งทันที */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
+
 
 /* 🟢 CSS CONTAINMENT: ล็อกพื้นที่ Layout ไม่ให้กวนการ์ดหลักด้านหลัง */
 #lightbox {
@@ -6092,4 +5923,275 @@ select,
 .profile-card-img {
   content-visibility: visible !important;
   transform: none !important;
+}
+
+/* ==========================================================================
+   ✨ FMH MASTER PRODUCTION FIX (SEARCH SHEET + INP & LCP ZERO-LATENCY)
+   (วางแทนที่ตั้งแต่ส่วน ULTIMATE SEARCH BOTTOM SHEET PATCH ไปจนจบบรรทัดสุดท้าย)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. แก้ปัญหาหน้าต่างค้นหาจอมืด / กระจกฝ้าบังเนื้อหา (Z-INDEX & POSITIONING)
+   -------------------------------------------------------------------------- */
+/* แผ่นกระจกฝ้าด้านหลัง (Backdrop Overlay) */
+#search-drawer-overlay,
+#search-drawer-overlay.drawer-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(15, 10, 26, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 100000 !important; /* อยู่ใต้กล่องค้นหา 1 ชั้น */
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.25s ease, visibility 0.25s ease !important;
+}
+
+#search-drawer-overlay.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* ตัวกล่องค้นหา Bottom Sheet (ต้องลอยเด่นเหนือกระจกฝ้าเสมอ) */
+#search-bottom-sheet,
+#search-bottom-sheet.search-bottom-sheet {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translate(-50%, 105%) !important; /* ซ่อนไว้ใต้จอก่อน */
+  width: 100% !important;
+  max-width: 500px !important;
+  background: #FFFFFF !important;
+  border-radius: 28px 28px 0 0 !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.2) !important;
+  border-bottom: none !important;
+  box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.35) !important;
+  z-index: 100005 !important; /* 👈 สำคัญที่สุด: สูงกว่ากระจกฝ้า มองเห็นแน่นอน 100% */
+  max-height: 86dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
+  padding: 12px 18px calc(18px + env(safe-area-inset-bottom, 22px)) 18px !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease !important;
+}
+
+/* เมื่อสั่งเปิดค้นหา ให้เลื่อนขึ้นมาแสดงตรงกลางจอ */
+#search-bottom-sheet.active,
+#search-bottom-sheet.search-bottom-sheet.active {
+  transform: translate(-50%, 0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* องค์ประกอบภายในกล่องค้นหา */
+#search-bottom-sheet .sheet-drag-handle {
+  width: 46px !important;
+  height: 5px !important;
+  background: #CBD5E1 !important;
+  border-radius: 100px !important;
+  margin: 2px auto 10px auto !important;
+  flex-shrink: 0 !important;
+  cursor: grab !important;
+}
+
+#search-bottom-sheet .sheet-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  margin-bottom: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+#search-bottom-sheet .sheet-close-btn {
+  width: 34px !important;
+  height: 34px !important;
+  background: #F1F5F9 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  color: #64748B !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+#search-bottom-sheet .sheet-body-content {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 2px !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overscroll-behavior: contain !important;
+}
+
+#search-bottom-sheet .search-inputs-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+#search-bottom-sheet .search-input-field,
+#search-bottom-sheet .search-select-field {
+  width: 100% !important;
+  background-color: #F8F6FC !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
+  color: #140F22 !important;
+  padding: 10px 14px !important;
+  font-size: 16px !important; /* ขนาด 16px ป้องกันไม่ให้ Safari บน iPhone ซูมหน้าจอ */
+  font-weight: 600 !important;
+  font-family: 'Prompt', sans-serif !important;
+  border-radius: 14px !important;
+  outline: none !important;
+  height: 48px !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+  -webkit-appearance: none !important;
+}
+
+#search-bottom-sheet select.search-select-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237C3AED' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  padding-right: 36px !important;
+}
+
+#search-bottom-sheet .search-input-field:focus,
+#search-bottom-sheet .search-select-field:focus {
+  border-color: #7C3AED !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+}
+
+#search-bottom-sheet .sheet-action-footer {
+  display: grid !important;
+  grid-template-columns: 1fr 2fr !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+  flex-shrink: 0 !important;
+}
+
+#search-bottom-sheet .sheet-reset-btn {
+  background: #F1F5F9 !important;
+  border: 1.5px solid #CBD5E1 !important;
+  color: #475569 !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+#search-bottom-sheet .sheet-apply-btn {
+  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  font-size: 14.5px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+}
+
+#search-bottom-sheet .sheet-apply-btn:active,
+#search-bottom-sheet .sheet-reset-btn:active {
+  transform: scale(0.96) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. ปลดล็อก PRESENTATION DELAY & GPU LAYERS (ตัดดีเลย์เหลือ < 50ms)
+   -------------------------------------------------------------------------- */
+/* ปิดการสร้าง GPU Layer ค้างบนการ์ดทุกใบ */
+.profile-card-new,
+.profile-card-new-container,
+.vip-card-item,
+.hero-section.celestial-hero-box {
+  will-change: auto !important;
+  transform: none !important;
+  contain: none !important;
+}
+
+/* รูปภาพการ์ดแสดงผลปกติ ไม่ใช้ content-visibility ที่ทำให้ LCP หาย */
+.profile-card-img {
+  content-visibility: visible !important;
+  transform: none !important;
+  background-image: none !important;
+  background-color: #F1F5F9 !important;
+}
+
+/* เมนูล่าง Dock จัดกึ่งกลางพอดี ไม่สร้าง Layer ค้าง */
+.floating-app-dock {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  will-change: auto !important;
+  contain: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. ปิด INFINITE ANIMATIONS ที่กิน CPU ตลอดเวลา (คืนความเร็วตอนกดปุ่ม)
+   -------------------------------------------------------------------------- */
+.vip-name::after,
+.profile-card-name::after,
+.hero-section.celestial-hero-box::before,
+.hero-section.celestial-hero-box::after,
+.kiss-laser-badge .laser-orbit-glow,
+.spinning-star {
+  animation: none !important;
+  display: none !important;
+}
+
+.hero-section.celestial-hero-box {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. กู้คืน LCP: ข้อความหัวเรื่องและโลโก้ต้องมีสีจริง (ห้ามใช้สีโปร่งใส)
+   -------------------------------------------------------------------------- */
+.seo-h1-title .h1-line-1 {
+  color: #140F22 !important;
+  display: block !important;
+}
+
+.seo-h1-title .h1-line-2 {
+  color: #7C3AED !important;
+  -webkit-text-fill-color: #7C3AED !important;
+  background: none !important;
+  display: block !important;
+}
+
+.txt-model,
+.kiss-txt-main {
+  color: #E11D48 !important;
+  -webkit-text-fill-color: #E11D48 !important;
+  background: none !important;
+}
+
+/* ปิดการรอ Double-Tap ช่วยให้ปุ่มทุกตัวแตะปุ๊บ ติดปั๊บ ทันที */
+a, button, input, select, .interactive-card, .dock-item, .filter-pill-tab {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }

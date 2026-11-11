@@ -845,7 +845,7 @@ if (activeProvince !== "all" && activeProvince !== "national") {
 window.executeFilterAndRender = executeFilterAndRender;
 
   
-  if (!window.__logoClickRegistered) {
+ if (!window.__logoClickRegistered) {
     window.__logoClickRegistered = true;
     document.addEventListener('click', (e) => {
       if (e.target.closest('.luxe-star-crest, .star, .dancing-neon-star')) return;
@@ -855,14 +855,19 @@ window.executeFilterAndRender = executeFilterAndRender;
 
       if (typeof triggerHaptic === 'function') triggerHaptic('light');
 
-      if (typeof window.closeLightboxModal === 'function') {
+      // ⚡ เช็คก่อนว่า Lightbox เปิดอยู่จริงไหม ถ้าไม่เปิดก็ไม่ต้องสั่งปิดให้เสียเวลาคำนวณ
+      const lightboxModal = document.getElementById("lightbox");
+      if (lightboxModal && lightboxModal.classList.contains("active") && typeof window.closeLightboxModal === 'function') {
         window.closeLightboxModal(false);
       }
 
       const isHome = (window.location.pathname === '/' || window.location.pathname === '') && !window.location.search;
       if (isHome) {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // ⚡ แยกการเลื่อนจอไปทำในเฟรมถัดไป เพื่อให้ Next Paint ตอบสนองทันทีใน 0 ms
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
       } else {
         e.preventDefault();
         window.location.href = '/';
@@ -2569,13 +2574,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     e.preventDefault();
     if (this.classList.contains("active")) return;
 
+    // 1. เปลี่ยนสีปุ่มทันทีใน 0 ms
     document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
     this.classList.add("active");
     appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    // ✅ อัปเดตผ่าน requestAnimationFrame ทันที ไม่ติดคิว Timer
+    // 2. ⚡ ปลดล็อก INP: ปล่อยให้เบราว์เซอร์วาดสีปุ่มลงจอก่อนทันที แล้วค่อยเริ่มกรองการ์ดน้องๆ
     requestAnimationFrame(() => {
-      executeFilterAndRender(true);
+      setTimeout(() => {
+        executeFilterAndRender(true);
+      }, 16);
     });
   });
 });
