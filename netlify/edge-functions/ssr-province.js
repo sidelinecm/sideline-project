@@ -2283,7 +2283,7 @@ if (!isNational && pills) {
     });
 
   
-    const initialClientProfiles = clientProfilesData.slice(0, 150);
+    const initialClientProfiles = clientProfilesData.slice(0, 24);
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
