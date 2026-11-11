@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_24';
+let GLOBAL_VERSION = 'v_20261022_29';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -2322,13 +2322,13 @@ const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&
 finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}"`);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  // ✅ Preload รูปแรกของแถบ "น้องๆ HOT (Swiper)" ซึ่งแสดงอยู่บนหน้าจอแรกของมือถือแน่นอน
+  // ✅ Preload รูปแรกของแถบ HOT Swiper ที่โชว์บนหน้าจอแรก
 const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : null;
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
   if (rawLcpImg) {
-    const lcpExactUrl = optimizeImg(rawLcpImg, 300); // ใช้ขนาด 300x420 พอดีกรอบ Swiper
+    const lcpExactUrl = optimizeImg(rawLcpImg, 300);
     const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
     finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
   }
