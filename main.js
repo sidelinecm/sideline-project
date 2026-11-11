@@ -145,22 +145,19 @@ async function getSupabaseClient() {
 
   const domCache = {};
   
-  // 🟢 NATIVE HAPTIC FEEDBACK (เช็กความพร้อมก่อนสั่น ป้องกันแถบแดงใน Console)
   function triggerHaptic(type = "light") {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+  // รันแบบ Asynchronous ไม่ให้ขวางจังหวะประมวลผลการคลิก
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    requestAnimationFrame(() => {
       try {
         if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
-        
-        if (type === "light") {
-          navigator.vibrate(12);
-        } else if (type === "medium") {
-          navigator.vibrate(20);
-        } else if (type === "success") {
-          navigator.vibrate([15, 40, 15]);
-        }
+        if (type === "light") navigator.vibrate(10);
+        else if (type === "medium") navigator.vibrate(15);
       } catch (_) {}
-    }
+    });
   }
+}
+
   window.triggerHaptic = triggerHaptic;
 
   window.shareProfile = async function (name, profileUrl) {
@@ -1126,17 +1123,7 @@ if (mapIframe) {
     }
 
     
-  const heroH1 = document.getElementById("hero-h1");
-if (heroH1) {
-  const isSsrPage = window.location.pathname.includes("/location/") || 
-                    window.location.pathname.includes("/province/") || 
-                    window.location.pathname.includes("/sideline/");
-  if (!isSsrPage && !isEN) {
-    const line1 = `รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span>`;
-    const line2 = "เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ";
-    heroH1.innerHTML = `<span class="h1-line-1">${line1}</span><span class="h1-line-2">${line2}</span>`;
-  }
-}
+  
 
     // ✅ ซิงค์ H2 ให้ตรงกับ SSR
     const featuredH2 = document.getElementById("featured-heading");
@@ -2417,18 +2404,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const closeMenuBtn = document.getElementById("close-menu-btn");
 
     const toggleSidebar = (isOpen) => {
-      if (sidebarMenuEl) {
-        sidebarMenuEl.classList.toggle("active", isOpen);
-        sidebarMenuEl.style.pointerEvents = isOpen ? "auto" : "none";
-        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      if (sidebarOverlayEl) {
-        sidebarOverlayEl.classList.toggle("active", isOpen);
-        sidebarOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
-        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      document.body.style.overflow = isOpen ? "hidden" : "";
-    };
+  if (sidebarMenuEl) {
+    sidebarMenuEl.classList.toggle("active", isOpen);
+    sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
+  if (sidebarOverlayEl) {
+    sidebarOverlayEl.classList.toggle("active", isOpen);
+    sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
+  // ✅ ไม่ต้องแตะ document.body.style.overflow อีกต่อไป
+};
 
     if (menuToggleBtn) menuToggleBtn.onclick = () => toggleSidebar(true);
     if (closeMenuBtn) closeMenuBtn.onclick = () => toggleSidebar(false);
@@ -2511,22 +2496,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     
         
 
-  // 🟢 1. ฟังก์ชันตัวช่วยสั่งเลื่อนหน้าจอวิ่งไปหาโซนรายชื่อน้องๆ
-    function scrollToProfilesArea() {
-      setTimeout(() => {
-        const displayArea = document.getElementById("profiles-display-area");
-        if (displayArea) {
-          const headerOffset = 70; // เผื่อความสูงของแถบ Header ด้านบน ไม่ให้บังหัวข้อ
-          const elementPosition = displayArea.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-          window.scrollTo({
-            top: Math.max(0, offsetPosition),
-            behavior: "smooth"
-          });
-        }
-      }, 150); // รอให้หน้าต่างตัวกรองพับปิดเรียบร้อยก่อน แล้วเลื่อนจอทันที
-    }
+  function scrollToProfilesArea() {
+  const displayArea = document.getElementById("profiles-display-area");
+  if (displayArea) {
+    displayArea.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
 
     if (domCache.searchInput) {
       // 🟢 2. เพิ่มตัวดักปุ่ม Enter / ปุ่มแว่นขยายบนแป้นพิมพ์มือถือ
@@ -2587,23 +2562,23 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
   document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-    pill.addEventListener("click", function (e) {
-      const targetHref = this.getAttribute("href");
-      if (this.tagName === "A" && targetHref) return; // ย่านอื่นให้เปลี่ยนหน้าตามปกติ
+  pill.addEventListener("click", function (e) {
+    const targetHref = this.getAttribute("href");
+    if (this.tagName === "A" && targetHref) return;
 
-      e.preventDefault();
-      if (this.classList.contains("active")) return; // ถ้าแท็บเดิมเปิดอยู่แล้ว ไม่ต้องคำนวณซ้ำ
+    e.preventDefault();
+    if (this.classList.contains("active")) return;
 
-      document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-      this.classList.add("active");
-      appState.activePillTag = this.getAttribute("data-tag") || "all";
+    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
+    appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-      // ⚡ ใช้ setTimeout ดึงงานคำนวณออกจากจังหวะคลิก ช่วยให้ INP เหลือต่ำกว่า 50ms (เขียวทันที)
-      setTimeout(() => {
-        executeFilterAndRender(true);
-      }, 0);
+    // ✅ อัปเดตผ่าน requestAnimationFrame ทันที ไม่ติดคิว Timer
+    requestAnimationFrame(() => {
+      executeFilterAndRender(true);
     });
   });
+});
   
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
@@ -2823,27 +2798,35 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           
-          // 🟢 Lazy Load โปรไฟล์ที่เหลือเบื้องหลัง (ถ้ามีคนมากกว่า 150 คน)
-          if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData.length) {
-            setTimeout(async () => {
-              try {
-                const bgClient = await getSupabaseClient();
-                const { data } = await bgClient.from("profiles")
-                  .select("*")
-                  .eq("active", true)
-                  .order("isfeatured", { ascending: false })
-                  .order("created_at", { ascending: false })
-                  .range(window.profilesData.length, window.totalProfilesCount);
-                  
-                if (data && data.length > 0) {
-                  const moreClean = filterValidProfiles(data);
-                  const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
-                  appState.allProfiles = [...appState.allProfiles, ...moreProfiles];
-                  // ปล่อยให้ระบบค้นหาอัปเดตเองโดยไม่รบกวนผู้ใช้
-                }
-              } catch (e) { console.warn("Background fetch warning", e); }
-            }, 3000); // ดีเลย์ 3 วินาที รอให้เว็บวาดหน้าจอเสร็จก่อน
-          }
+          // ✅ แก้ไขเป็น: รอ 8 วินาที และรันเฉพาะช่วงที่ CPU ว่าง (requestIdleCallback)
+if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData.length) {
+  setTimeout(() => {
+    const runBgFetch = async () => {
+      try {
+        const bgClient = await getSupabaseClient();
+        if (!bgClient) return;
+        const { data } = await bgClient.from("profiles")
+          .select("*")
+          .eq("active", true)
+          .order("isfeatured", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(window.profilesData.length, window.totalProfilesCount);
+          
+        if (data && data.length > 0) {
+          const moreClean = filterValidProfiles(data);
+          const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
+          appState.allProfiles = [...appState.allProfiles, ...moreProfiles];
+        }
+      } catch (_) {}
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => runBgFetch(), { timeout: 4000 });
+    } else {
+      runBgFetch();
+    }
+  }, 8000); // ขยับเป็น 8 วินาที ให้พ้นช่วงวัดความเร็วทั้งหมด
+}
           
           return true;
         }

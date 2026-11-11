@@ -89,19 +89,6 @@ body, body.fmh-app-page {
   text-rendering: optimizeLegibility !important;
 }
 
-@media (max-width: 1024px) {
-  body, body.fmh-app-page {
-    background-attachment: scroll !important;
-  }
-}
-
-
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
 
 .container {
   width: 100% !important;
@@ -668,16 +655,6 @@ img {
   text-align: center !important;
 }
 
-.seo-h1-title .h1-line-2 {
-  font-size: clamp(14px, 4vw, 17px) !important;
-  font-weight: 800 !important;
-  background: linear-gradient(90deg, #E11D48 0%, #7C3AED 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  white-space: normal !important; /* 👈 อนุญาตให้ตัดบรรทัด */
-  line-height: 1.35 !important;
-  text-align: center !important;
-}
 
 .t-chunk {
   display: inline-block !important;
@@ -1200,29 +1177,17 @@ img {
    8. PROFILE CARDS (GRID)
    -------------------------------------------------------------------------- */
 
-@media (min-width: 768px) {
-  .profile-card-new-container {
-    contain-intrinsic-size: auto 420px !important;
-  }
+.profile-card-new-container {
+  width: 100% !important;
+  min-width: 0 !important;
+  position: relative !important;
+  transform: none !important;
+  will-change: auto !important;
 }
 
 .profile-card-new {
-  aspect-ratio: 3 / 4.2 !important;
-  width: 100% !important;
-  height: auto !important;
-  position: relative !important;
-  border-radius: 20px !important;
-  overflow: hidden !important;
-  background-color: #FAF8FE !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
-  outline: 1px solid rgba(251, 113, 133, 0.25) !important;
-  box-shadow: 0 20px 40px -10px rgba(225, 29, 72, 0.18), 0 10px 20px -5px rgba(124, 58, 237, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-  transform: translateZ(0) !important;
-  will-change: transform !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease !important;
-  cursor: pointer !important;
+  transform: none !important;
+  will-change: auto !important;
 }
 
 .profile-card-new:hover,
@@ -3319,15 +3284,13 @@ body, body.fmh-app-page {
   color: var(--text-body) !important;
 }
 
-@media (min-width: 1025px) {
-  body, body.fmh-app-page {
-    background-attachment: fixed !important; /* บนคอมพิวเตอร์จอใหญ่ ค่อยให้เป็น fixed */
-  }
+body, body.fmh-app-page {
+  background-attachment: scroll !important;
+  background-color: #F8F6FC !important;
+  background-image: none !important;
 }
-
-/* เพิ่มคำสั่งนี้ต่อท้ายลงไปด้วย เพื่อล็อกขอบเขตการ์ด Swiper ไม่ให้ดีเลย์ */
-.vip-card-item {
-  contain: layout paint !important;
+.profile-card-img {
+  content-visibility: visible !important;
 }
 
 /* กรอบเนื้อหาหลักในหน้าแรก ให้เป็นกระจกขาวนวล ลอยเด่น */
@@ -4801,14 +4764,7 @@ body.fmh-app-page {
     line-height: 1.3;
 }
 
-.h1-line-2 {
-    font-size: clamp(14px, 4vw, 16px);
-    font-weight: 800;
-    background: linear-gradient(135deg, #E11D48 0%, #D946EF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1.4;
-}
+
 
 /* กล่องข้อความสีขาวด้านล่างหัวข้อ */
 .hero-description-inset {
@@ -5020,19 +4976,7 @@ body.fmh-app-page {
     padding: 0 4px !important;
 }
 
-/* H1 บรรทัดสอง: Gradient ม่วง-ชมพู มีคำว่า (ไม่มีมัดจำ) */
-.seo-h1-title .h1-line-2 {
-    font-size: clamp(13px, 3.8vw, 16px) !important;
-    font-weight: 800 !important;
-    background: linear-gradient(90deg, #E11D48 0%, #7C3AED 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    line-height: 1.35 !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    text-align: center !important;
-    padding: 0 6px !important;
-}
+
 
 /* 4. คำอธิบายแบบย่อ 2 บรรทัด คลีนตา */
 .hero-description-inset {
@@ -5310,30 +5254,23 @@ body.fmh-app-page {
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
 }
+.profile-card-new,
+.profile-card-new-container,
+.vip-card-item,
+#search-bottom-sheet,
+#lightbox,
+#lightbox-content-wrapper-el,
+.hero-section.celestial-hero-box {
+  will-change: auto !important;
+  transform: none !important;
+  contain: none !important;
+}
 
-#search-bottom-sheet.search-bottom-sheet {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  transform: translate(-50%, 105%) !important;
-  width: 100% !important;
-  max-width: 500px !important;
-  background: #FFFFFF !important;
-  border-radius: 28px 28px 0 0 !important;
-  border: 1.5px solid rgba(124, 58, 237, 0.18) !important;
-  border-bottom: none !important;
-  box-shadow: 0 -18px 50px rgba(15, 10, 26, 0.3) !important;
-  z-index: 100002 !important; /* 👈 สูงกว่า Bottom Dock ป้องกันการกดทะลุ */
-  max-height: 86dvh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease !important;
-  box-sizing: border-box !important;
-  /* 🟢 แก้ปัญหาติดขอบล่าง: ดันปุ่มลอยขึ้นมาพ้นแถบควบคุมโทรศัพท์ทุกรุ่น */
-  padding: 12px 18px calc(18px + env(safe-area-inset-bottom, 22px)) 18px !important;
+/* คงเฉพาะการจัดกึ่งกลางของ Dock ล่างสุด */
+.floating-app-dock {
+  will-change: auto !important;
+  transform: translateX(-50%) !important;
+  contain: none !important;
 }
 
 #search-bottom-sheet.search-bottom-sheet.active {
@@ -5686,18 +5623,7 @@ a.kw-zone:hover {
   100% { transform: scale(2.2); opacity: 0; }
 }
 
-/* 🟢 ปิดอนิเมชันกิน CPU บนมือถือ คืนความลื่นไหลให้ระบบสัมผัส (INP < 100ms) */
-@media (max-width: 1023px) {
-  .vip-name, 
-  .profile-card-name, 
-  .profile-card-img,
-  .txt-model,
-  .h1-line-2,
-  .kiss-txt-main,
-  .vip-card-item img {
-    animation: none !important;
-  }
-}
+
 
 /* ==========================================================================
    ✨ FIRSTMODELHUB - MASTER PRODUCTION OVERRIDE (SOMATCH HYBRID V2)
@@ -5725,17 +5651,7 @@ a.kw-zone:hover {
   --line-green: #06C755 !important;
 }
 
-/* 1. พื้นหลังหน้าเว็บสว่าง นวลตา มิติ Mesh Gradient สไตล์โมเดิร์น */
-body, body.fmh-app-page {
-  background-color: #F8F5FF !important;
-  background-image: 
-    radial-gradient(circle at 10% 12%, rgba(255, 126, 200, 0.16) 0%, transparent 40%),
-    radial-gradient(circle at 90% 18%, rgba(106, 61, 255, 0.14) 0%, transparent 42%),
-    radial-gradient(circle at 50% 60%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 90%, rgba(157, 107, 255, 0.12) 0%, transparent 45%) !important;
-  background-attachment: fixed !important;
-  color: var(--text-body) !important;
-}
+
 
 /* 2. กล่องกระจกแก้ว (Glassmorphism Cards) หรูหราสะอาดตา */
 .hero-section.celestial-hero-box, 
@@ -6008,6 +5924,22 @@ div.footer-top-grid > div.footer-brand-col > a.brand-luxe-logo > span.luxe-star-
   background-color: #F1F5F9 !important;
 }
 
+.seo-h1-title .h1-line-1 {
+  color: #140F22 !important;
+  display: block !important;
+}
+.seo-h1-title .h1-line-2 {
+  color: #7C3AED !important;
+  -webkit-text-fill-color: #7C3AED !important;
+  background: none !important;
+  display: block !important;
+}
+.txt-model {
+  color: #E11D48 !important;
+  -webkit-text-fill-color: #E11D48 !important;
+  background: none !important;
+}
+
 /* ------------------------------------------------------------------------------
    2. เพิ่มแอนิเมชันอันใหม่: รันบน GPU 100% (0ms MAIN THREAD BLOCKING)
    ------------------------------------------------------------------------------ */
@@ -6069,21 +6001,15 @@ div.footer-top-grid > div.footer-brand-col > a.brand-luxe-logo > span.luxe-star-
   }
 }
 
-/* 🟢 C. ข้อความ H1, ชื่อโมเดล และโลโก้: ไล่เฉดสีทอง-ม่วงหรูหรา คมชัด ไม่กินแรงเครื่อง */
 .kiss-txt-main,
 .txt-model {
-  background: linear-gradient(135deg, #FFF0B3 0%, #F59E0B 50%, #D97706 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  background: none !important;
+  -webkit-text-fill-color: #E11D48 !important;
+  color: #E11D48 !important;
   display: inline-block !important;
 }
 
-.h1-line-2 {
-  background: linear-gradient(135deg, #140F22 0%, #7C3AED 55%, #E11D48 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  display: inline-block !important;
-}
+
 
 /* แสง Shimmer วิ่งผ่านตัวหนังสือแบบ Hardware Accelerated */
 .vip-name,
@@ -6093,24 +6019,21 @@ div.footer-top-grid > div.footer-brand-col > a.brand-luxe-logo > span.luxe-star-
   color: #140F22 !important;
   overflow: hidden !important;
 }
-
 .vip-name::after,
-.profile-card-name::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: -120% !important;
-  width: 80% !important;
-  height: 100% !important;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.45) 50%,
-    rgba(255, 255, 255, 0) 100%
-  ) !important;
-  transform: translate3d(0, 0, 0) skewX(-20deg) !important;
-  animation: gpuTextShine 3s infinite !important;
-  pointer-events: none !important;
+.profile-card-name::after,
+.hero-section.celestial-hero-box::before,
+.hero-section.celestial-hero-box::after,
+.kiss-laser-badge .laser-orbit-glow {
+  animation: none !important;
+  display: none !important;
+}
+
+.hero-section.celestial-hero-box {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 @keyframes gpuTextShine {
@@ -6166,8 +6089,7 @@ select,
   will-change: transform !important;
 }
 
-/* รูปภาพโหลดไว ไม่กระตุกเฟรม */
 .profile-card-img {
-  content-visibility: auto !important;
-  transform: translateZ(0) !important;
+  content-visibility: visible !important;
+  transform: none !important;
 }
