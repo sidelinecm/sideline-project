@@ -1453,7 +1453,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "low"}" decoding="${i === 0 ? "sync" : "async"}" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+                   <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="eager" fetchpriority="high" decoding="sync" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -2283,7 +2283,8 @@ if (!isNational && pills) {
     });
 
   
-    const initialClientProfiles = clientProfilesData.slice(0, 150);
+        
+    const initialClientProfiles = clientProfilesData.slice(0, 24);
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
