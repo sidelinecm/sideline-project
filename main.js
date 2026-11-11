@@ -1396,20 +1396,10 @@ if (mapIframe) {
     return container;
 }
 
-    async function renderProfilesBatch(containerEl, profilesList, renderId) {
+  async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
-
-    // ✅ [จุดที่เพิ่มเข้ามา] ถ้ามีการ์ดจาก SSR อยู่แล้ว และเป็นการโหลดครั้งแรก (ยังไม่เคยกดฟิลเตอร์) 
-    // ให้หยุดทำงานทันที! ห้ามลบ DOM ทิ้งเด็ดขาด
-    if (containerEl.children.length > 0 && (appState.renderId || 0) === 0) {
-        appState.renderId = 1; 
-        return; 
-    }
-
     containerEl.dataset.activeRenderId = renderId;
-    
-    // ✅ [จุดที่แก้] ลบของเก่าเฉพาะตอนที่ผู้ใช้กด "ฟิลเตอร์" หรือ "ค้นหา" เท่านั้น
-    containerEl.innerHTML = ""; 
+    containerEl.innerHTML = "";
 
     // ตัดแบ่ง: วาด 12 คนแรกที่ผู้ใช้มองเห็นก่อนทันที จอจะตอบสนองใน 0.05 วินาที
     const BATCH_SIZE = 12;
@@ -1437,7 +1427,7 @@ if (mapIframe) {
       });
     }
   }
-  
+    
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
     const wrapper = document.createElement("div");
     wrapper.className = "section-content-wrapper province-section";
@@ -2399,7 +2389,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       return; // 🛑 จบการทำงานตรงนี้ทันที ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
     }
 
-        domCache.body = document.body;
+    domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
     domCache.noResultsMessage = document.getElementById("no-results-message");
     domCache.fetchErrorMessage = document.getElementById("fetch-error-message");
@@ -2419,15 +2409,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const closeMenuBtn = document.getElementById("close-menu-btn");
 
     const toggleSidebar = (isOpen) => {
-      if (sidebarMenuEl) {
-        sidebarMenuEl.classList.toggle("active", isOpen);
-        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-      if (sidebarOverlayEl) {
-        sidebarOverlayEl.classList.toggle("active", isOpen);
-        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-      }
-    };
+  if (sidebarMenuEl) {
+    sidebarMenuEl.classList.toggle("active", isOpen);
+    sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
+  if (sidebarOverlayEl) {
+    sidebarOverlayEl.classList.toggle("active", isOpen);
+    sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+  }
+  // ✅ ไม่ต้องแตะ document.body.style.overflow อีกต่อไป
+};
 
     if (menuToggleBtn) menuToggleBtn.onclick = () => toggleSidebar(true);
     if (closeMenuBtn) closeMenuBtn.onclick = () => toggleSidebar(false);
@@ -2455,25 +2446,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
-      // ⚡ ไม่แตะ document.body.style.overflow เพื่อลด Presentation Delay
+      // ⚡ ตัด requestAnimationFrame และ body.style.overflow ทิ้งเด็ดขาดเพื่อกำจัด Presentation Delay 206ms
     };
 
-    // ✅ แก้จุดที่ 1: ใช้ addEventListener + passive: false
     if (openFilterDockBtn) {
-      openFilterDockBtn.addEventListener("click", (e) => {
+      openFilterDockBtn.onclick = (e) => {
         e.preventDefault();
-        e.stopPropagation(); // ตัดการทำงานของ BODY.onclick
+        e.stopPropagation();
         toggleSearchDrawer(true);
-      }, { passive: false });
+      };
     }
     
-    if (closeSearchDrawerBtn) {
-      closeSearchDrawerBtn.addEventListener("click", () => toggleSearchDrawer(false));
-    }
-    
-    if (searchDrawerOverlayEl) {
-      searchDrawerOverlayEl.addEventListener("click", () => toggleSearchDrawer(false));
-    }
+    if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
+    if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
     
     if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
@@ -2494,19 +2479,24 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         executeFilterAndRender(true);
         toggleSearchDrawer(false);
 
-        // ⚡ เลื่อนแบบ instant (ตัด animation ที่ทำให้เกิด Layout หลายรอบ)
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           const displayArea = document.getElementById("profiles-display-area");
           if (displayArea) {
-            const y = displayArea.getBoundingClientRect().top + window.pageYOffset - 70;
-            window.scrollTo(0, Math.max(0, y));
+            const headerOffset = 70;
+            const elementPosition = displayArea.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: Math.max(0, offsetPosition), behavior: "smooth" });
           }
-        });
+        }, 150);
       };
     }
 
-    
-    
+    // ✅ ให้เปลี่ยนหน้านำทางเฉพาะเมื่อผู้ใช้กดปุ่ม "แสดงผลลัพธ์" (applyFilterBtn) เท่านั้น
+    if (domCache.provinceSelect) {
+      domCache.provinceSelect.addEventListener("change", (e) => {
+        // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
+      });
+    }
 
     
         
@@ -2576,165 +2566,127 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-        const _allPillTabs = document.querySelectorAll(".filter-pill-tab");
-  _allPillTabs.forEach(pill => {
-    pill.addEventListener("click", function (e) {
-      const targetHref = this.getAttribute("href");
-      if (this.tagName === "A" && targetHref) return;
+  document.querySelectorAll(".filter-pill-tab").forEach(pill => {
+  pill.addEventListener("click", function (e) {
+    const targetHref = this.getAttribute("href");
+    if (this.tagName === "A" && targetHref) return;
 
-      e.preventDefault();
-      if (this.classList.contains("active")) return;
+    e.preventDefault();
+    if (this.classList.contains("active")) return;
 
-      _allPillTabs.forEach(p => p.classList.remove("active"));
-      this.classList.add("active");
-      appState.activePillTag = this.getAttribute("data-tag") || "all";
+    // 1. เปลี่ยนสีปุ่มทันทีใน 0 ms
+    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
+    appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-      // ⚡ เปลี่ยนเป็น requestAnimationFrame เพื่อให้ Browser วาดสีปุ่ม 1 เฟรมก่อน แล้วค่อยกรอง
-      requestAnimationFrame(() => executeFilterAndRender(true));
+    // 2. ⚡ ปลดล็อก INP: ปล่อยให้เบราว์เซอร์วาดสีปุ่มลงจอก่อนทันที แล้วค่อยเริ่มกรองการ์ดน้องๆ
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        executeFilterAndRender(true);
+      }, 16);
     });
   });
+});
   
-            
-
-    
-    let _cachedInputEl = null;
-    let _cachedSuggestionsEl = null;
-    let _cachedLightboxEl = null;
-
-    const _getSearchInput = () => {
-      if (_cachedInputEl && _cachedInputEl.isConnected) return _cachedInputEl;
-      return (_cachedInputEl = document.getElementById("search-keyword"));
-    };
-    const _getSuggestions = () => {
-      if (_cachedSuggestionsEl && _cachedSuggestionsEl.isConnected) return _cachedSuggestionsEl;
-      return (_cachedSuggestionsEl = document.getElementById("search-suggestions"));
-    };
-    const _getLightbox = () => {
-      if (_cachedLightboxEl && _cachedLightboxEl.isConnected) return _cachedLightboxEl;
-      return (_cachedLightboxEl = document.getElementById("lightbox"));
-    };
-
+    // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
-      const target = e.target;
-
-     
-      const cardElement = target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-      if (cardElement) {
-        
-        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
-
-        const profileId   = cardElement.getAttribute("data-profile-id");
-        const profileSlug = cardElement.getAttribute("data-profile-slug");
-
-        
-        
-        if (!profileId && !profileSlug) return;
-
-        e.preventDefault();
-        const searchId   = String(profileId || "");
-        const searchSlug = String(profileSlug || "");
-
-        let targetProfile = appState.allProfiles.find(p =>
-          String(p.id) === searchId ||
-          (p.slug && String(p.slug) === searchSlug) ||
-          (searchSlug && String(p.id) === searchSlug)
-        );
-
-        
-        if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-          const rawP = window.profilesData.find(p =>
-            String(p.id) === searchId || String(p.slug) === searchSlug
-          );
-          if (rawP) targetProfile = normalizeProfile(rawP);
-        }
-
-        if (targetProfile) {
-          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-          
-          window.openLightboxModal(targetProfile);
-        } else {
-          
-          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-        }
-        return;
-      }
-
-     
-      const closeLightboxBtn = target.closest("#closeLightboxBtn");
-      const lightboxModal    = _getLightbox();
-      if (closeLightboxBtn || target === lightboxModal) {
-        window.closeLightboxModal(true);
-        return;
-      }
-
-      
-      const homeDockBtn = target.closest('#dock-item-home, a[href="/"].dock-item');
+      // ⚡ [เพิ่มจุดนี้] ปลดล็อก INP ปุ่ม "หน้าแรก" (ตัด Presentation Delay 489ms เหลือ 0ms ทันที)
+      const homeDockBtn = e.target.closest('#dock-item-home, a[href="/"].dock-item');
       if (homeDockBtn) {
-        
+        // กรณีที่ 1: ถ้าผู้ใช้อยู่ที่หน้าแรก ("/") อยู่แล้ว (กรณีที่ DebugBear ชอบคลิกทดสอบ)
         if (window.location.pathname === "/" || window.location.pathname === "") {
-          e.preventDefault();
+          e.preventDefault(); // สกัดกั้นไม่ให้เบราว์เซอร์โหลดหน้าใหม่
           if (typeof triggerHaptic === "function") triggerHaptic("light");
-          // ⚡ ใช้ instant scroll (กำจัด 89% Layout ที่ DebugBear เห็น)
-          if (window.scrollY > 200) {
-            window.scrollTo(0, 0);
-          } else {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
-          return;
+          window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนจอขึ้นบนสุดแบบนุ่มนวล
+          return; // ตอบสนองทันทีใน 0 ms!
         }
-       
+
+        // กรณีที่ 2: ถ้าอยู่หน้าอื่น (เช่น /location/chiangmai) แล้วคลิกกลับหน้าแรก
         if (typeof triggerHaptic === "function") triggerHaptic("light");
-        return;
+        // ปล่อยให้เบราว์เซอร์ใช้ Speculation Rules (Instant Prerender) สลับหน้าจาก RAM ทันที
       }
 
-      
-      const shareBtn = target.closest('[data-action="share-profile"]');
+      // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
+      const shareBtn = e.target.closest('[data-action="share-profile"]');
       if (shareBtn) {
         e.preventDefault();
         e.stopPropagation();
         const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
-        const url  = shareBtn.getAttribute("data-profile-url")  || window.location.href;
-        if (typeof window.shareProfile === "function") {
-          window.shareProfile(name, url);
-        }
+        const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
+        window.shareProfile(name, url);
         return;
       }
 
-      
-      const suggestionTarget = target.closest('[data-action="suggestion"]');
-      if (suggestionTarget) {
-        const slug      = suggestionTarget.dataset.slug;
-        const isProfile = suggestionTarget.dataset.isProfile === "true";
-        const suggestionsEl = _getSuggestions();
-        if (suggestionsEl) suggestionsEl.style.display = "none";
-
-        if (isProfile) {
-          // คลิกโปรไฟล์แนะนำ → เปิด Lightbox
-          if (typeof toggleSearchDrawer === "function") toggleSearchDrawer(false);
-          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
-          if (typeof handleUrlRouting === "function") handleUrlRouting();
-        } else {
-          // คลิกคำแนะนำทั่วไป → ใส่ในช่องค้นหาแล้ว filter
-          const inputEl = _getSearchInput();
-          if (inputEl) {
-            inputEl.value = slug;
-            if (typeof executeFilterAndRender === "function") executeFilterAndRender(true);
-          }
-        }
-        return;
-      }
-
-      
-      const searchInputEl = _getSearchInput();
-      const suggestionsEl = _getSuggestions();
-      if (
-        suggestionsEl &&
-        suggestionsEl.style.display === "block" &&
-        searchInputEl &&
-        !searchInputEl.contains(target) &&
-        !suggestionsEl.contains(target)
-      ) {
+      const searchInputEl = document.getElementById("search-keyword");
+      const suggestionsEl = document.getElementById("search-suggestions");
+      if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
         suggestionsEl.style.display = "none";
+      }
+
+      const suggestionTarget = e.target.closest('[data-action="suggestion"]');
+      if (suggestionTarget) {
+        const slug = suggestionTarget.dataset.slug;
+        const isProfile = suggestionTarget.dataset.isProfile === "true";
+        if (isProfile) {
+          if (suggestionsEl) suggestionsEl.style.display = "none";
+          toggleSearchDrawer(false);
+          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
+          handleUrlRouting();
+          return;
+        } else {
+          if (domCache.searchInput) {
+            domCache.searchInput.value = slug;
+            if (suggestionsEl) suggestionsEl.style.display = "none";
+            executeFilterAndRender(true);
+          }
+          return;
+        }
+      }
+
+   // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
+    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+    if (cardElement) {
+      // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
+      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+        return;
+      }
+
+      const profileId = cardElement.getAttribute("data-profile-id");
+      const profileSlug = cardElement.getAttribute("data-profile-slug");
+
+      if (profileId || profileSlug) {
+        e.preventDefault();
+        const searchId = String(profileId || "");
+        const searchSlug = String(profileSlug || "");
+
+        let targetProfile = appState.allProfiles.find(p => 
+          String(p.id) === searchId || 
+          (p.slug && String(p.slug) === searchSlug) ||
+          (searchSlug && String(p.id) === searchSlug)
+        );
+
+        if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
+          const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+          if (rawP) targetProfile = normalizeProfile(rawP);
+        }
+
+       if (targetProfile) {
+          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+          // ⚡ ตอบสนองคลิกทันที แล้วปล่อยให้เนื้อหาเรนเดอร์ใน Microtask ถัดไป ตัดอาการ Layout ค้าง
+          setTimeout(() => {
+            window.openLightboxModal(targetProfile);
+          }, 0);
+        } else {
+          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+        }
+        return;
+      }
+    }
+    
+      const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
+      const lightboxModal = document.getElementById("lightbox");
+      if (closeLightboxBtn || e.target === lightboxModal) {
+        window.closeLightboxModal(true);
       }
     });
 
