@@ -1002,22 +1002,7 @@ body, body.fmh-app-page {
   display: none !important;
 }
 
-.filter-pill-tab {
-  background: var(--surface-pure) !important;
-  border: 1.5px solid var(--border-glass) !important;
-  color: var(--text-body) !important;
-  padding: 7px 16px !important;
-  border-radius: 100px !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  white-space: nowrap !important;
-  cursor: pointer !important;
-  box-shadow: var(--shadow-luxe-sm) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
+
 .filter-pill-tab:hover {
   transform: translateZ(0) translateY(-2px) !important;
   border-color: var(--violet-royal) !important;
@@ -6235,148 +6220,256 @@ a, button, input, select, .interactive-card, .dock-item, .filter-pill-tab {
   color: #FFFFFF !important;
 }
 
-/* ============================================================================
-   🚀 INP & LCP PERFORMANCE PATCH — v3 SAFE (VERIFIED FROM TRACE)
-   
-   ⚠️ หมายเหตุ: ลบ content-visibility ออกทั้งหมดเพราะทำให้เกิด Layout Thrashing
-      ทุกครั้งที่ filter re-render (ตาม Trace: BODY.onclick 162ms 72% Layout)
-   ============================================================================ */
+
 
 /* --------------------------------------------------------------------------
-   1) 🔥 LCP FIX — Gradient Text (Render Delay 1.91s → ~0.4s)
+   1. BASE RESETS & HARDWARE ACCELERATION
    -------------------------------------------------------------------------- */
-.seo-h1-title .h1-line-2,
-.txt-model,
-.kiss-txt-main,
-.vip-name,
-.profile-card-name,
-#lightbox-profile-name-main span {
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: currentColor !important;
-  animation: none !important;
-}
-
-.seo-h1-title .h1-line-2 { color: #E11D48 !important; }
-.txt-model               { color: #E11D48 !important; }
-.kiss-txt-main           { color: #FFFFFF !important; }
-.vip-name,
-.profile-card-name      { 
-  color: #FFFFFF !important; 
-  text-shadow: 0 2px 6px rgba(0,0,0,.85) !important; 
-}
-
-/* --------------------------------------------------------------------------
-   2) 🔥 backdrop-filter — ลด Presentation Delay
-   ⚠️ ไม่แตะ #search-drawer-overlay เพราะทำให้ overlay กระพริบ
-   -------------------------------------------------------------------------- */
-#page-header,
-.floating-app-dock,
-.hero-section.celestial-hero-box,
-.luxury-glass-stories-box,
-.luxury-bento-wrapper,
-#reviews-wrapper-block,
-#faq-wrapper-block,
-.editorial-digest-card,
-.search-bottom-sheet,
-#search-bottom-sheet,
-.sheet-header,
-.dock-item,
-.profile-card-badges-top .badge-status,
-.badge-hot-tag,
-.badge-verified-top {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-#page-header                     { background: #FFFFFF !important; }
-.floating-app-dock               { background: #FFFFFF !important; }
-.hero-section.celestial-hero-box { background: #FFFFFF !important; }
-.luxury-glass-stories-box        { background: #FFFFFF !important; }
-.luxury-bento-wrapper            { background: #FFFFFF !important; }
-#search-bottom-sheet             { background: #FFFFFF !important; }
-.badge-status                    { background: rgba(15,10,26,.92) !important; }
-.badge-hot-tag                   { background: #E11D48 !important; }
-.badge-verified-top              { background: #6D28D9 !important; }
-
-/* --------------------------------------------------------------------------
-   3) 🔥 ลบ Animation วนไม่หยุด
-   -------------------------------------------------------------------------- */
-.hero-section.celestial-hero-box::before,
-.hero-section.celestial-hero-box::after,
-.profile-card-new::after,
-.vip-card-item::after,
-.luxe-star-crest,
-.story-ring-glow,
-.kiss-laser-badge,
-.kiss-laser-badge .laser-orbit-glow,
-.spinning-star,
-.live-dot,
-.pulse-dot-el,
-.story-status-dot,
-.profile-card-img,
-.badge-status .status-dot,
-.hot-header-bar-classic,
-.stories-track-inner,
-.seo-h1-title .h1-line-2,
-.txt-model,
-.kiss-txt-main,
-.vip-name,
-.profile-card-name {
-  animation: none !important;
-  -webkit-animation: none !important;
-}
-
-.profile-card-img {
-  background-image: none !important;
-  background-color: #E5E7EB !important;
-}
-
-/* --------------------------------------------------------------------------
-   4) 🔥 Box-shadow — ลดความซับซ้อน
-   -------------------------------------------------------------------------- */
-.hero-section.celestial-hero-box,
-.luxury-glass-stories-box,
-.luxury-bento-wrapper,
-#reviews-wrapper-block,
-#faq-wrapper-block,
-.editorial-digest-card {
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.06) !important;
-}
-
-.profile-card-new,
-.vip-card-item {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10) !important;
-}
-
-/* --------------------------------------------------------------------------
-   5) 🔥 ปิด filter:drop-shadow บนตัวอักษร
-   -------------------------------------------------------------------------- */
-.vip-name,
-.profile-card-name,
-.kiss-txt-main,
-.badge-hot-tag,
-.badge-verified-top {
-  filter: none !important;
-  -webkit-filter: none !important;
-}
-
-/* --------------------------------------------------------------------------
-   6) 🔥 Touch Optimization (ลด 300ms tap delay)
-   -------------------------------------------------------------------------- */
-a, button, input, select, .interactive-card, .dock-item, .filter-pill-tab {
-  touch-action: manipulation !important;
+*, *::before, *::after {
+  box-sizing: border-box !important;
+  margin: 0;
+  padding: 0;
   -webkit-tap-highlight-color: transparent !important;
 }
 
-/* --------------------------------------------------------------------------
-   7) 🔥 FORCE HIDE MAP IFRAME UNTIL USER SCROLLS TO IT
-   (แก้ปัญหา IntersectionObserverCallback 69ms ที่เจอใน Trace)
-   -------------------------------------------------------------------------- */
-#map-section {
-  min-height: 200px !important;
-  content-visibility: auto;
-  contain-intrinsic-size: 200px; /* ← ตรงกับความจริง ไม่กระโดด */
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100% !important;
+  touch-action: manipulation !important;
+  scroll-behavior: auto !important; /* ป้องกัน Layout กระตุก */
 }
 
+body, body.fmh-app-page {
+  background-color: var(--bg-canvas) !important;
+  color: var(--text-body);
+  font-family: 'Prompt', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px)) !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.container {
+  width: 100% !important;
+  max-width: 1050px !important;
+  margin: 0 auto !important;
+  padding: 0 12px !important;
+}
+
+.hidden { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   2. HEADER & BRAND LOGO (ตัด Backdrop-filter ออก เพิ่มความเร็ว)
+   -------------------------------------------------------------------------- */
+#page-header {
+  position: sticky !important;
+  top: 0 !important;
+  height: 58px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 120 !important;
+  background: #FFFFFF !important; /* สีทึบ ไม่ใช้ blur */
+  border-bottom: 1px solid var(--border-glass) !important;
+  box-shadow: 0 4px 20px rgba(15, 10, 26, 0.04) !important;
+}
+
+.brand-luxe-logo {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  text-decoration: none !important;
+  line-height: 1 !important;
+}
+
+.luxe-star-crest {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 12px 10px !important;
+  margin: -12px -6px !important;
+  /* ตัดอนิเมชันออกเพื่อลดภาระ CPU */
+}
+
+.luxe-brand-text {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  font-weight: 900 !important;
+  font-size: 20px !important;
+  letter-spacing: -0.035em !important;
+}
+
+.txt-first { color: #0F0B1A !important; }
+.txt-model { color: #E11D48 !important; margin-left: 1px !important; } /* ใช้สีทึบแก้ LCP */
+
+.luxe-hub-badge {
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #E11D48 0%, #7C3AED 100%) !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  transform: translateY(-1.5px) !important;
+}
+
+.desktop-nav { display: none !important; }
+@media (min-width: 1024px) {
+  .desktop-nav { display: flex !important; align-items: center !important; gap: 22px !important; margin-right: 12px !important; }
+  .desktop-nav a { font-size: 13.5px !important; font-weight: 700 !important; color: var(--text-body) !important; text-decoration: none !important; }
+  .desktop-nav a:hover { color: var(--ruby-main) !important; }
+}
+
+.nav-controls { display: flex !important; align-items: center !important; gap: 8px !important; }
+.circle-btn-el {
+  width: 36px !important; height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important;
+  border-radius: 50% !important; border: 1px solid var(--border-glass) !important; background: #FFFFFF !important;
+  color: var(--text-headline) !important; cursor: pointer !important;
+}
+@media (min-width: 1024px) { .circle-btn-el { display: none !important; } }
+
+.lang-micro-toggle {
+  display: flex !important; align-items: center !important; gap: 5px !important; text-decoration: none !important;
+  color: var(--text-headline) !important; background: #FFFFFF !important; border: 1px solid var(--border-glass) !important;
+  padding: 5px 12px !important; border-radius: 100px !important; font-size: 11.5px !important; font-weight: 700 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. SIDEBAR NAVIGATION HUB
+   -------------------------------------------------------------------------- */
+#sidebar-menu {
+  position: fixed !important; top: 0 !important; bottom: 0 !important; right: 0 !important;
+  width: 82vw !important; max-width: 320px !important; height: 100dvh !important;
+  background: #FFFFFF !important; z-index: 3001 !important; box-shadow: -20px 0 50px rgba(15, 10, 26, 0.15) !important;
+  transform: translate3d(100%, 0, 0) !important; display: flex !important; flex-direction: column !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important; pointer-events: none;
+}
+#sidebar-menu.active { transform: translate3d(0, 0, 0) !important; pointer-events: auto !important; }
+
+.drawer-backdrop {
+  position: fixed !important; inset: 0 !important; background: rgba(15, 10, 26, 0.5) !important;
+  z-index: 3000 !important; display: none !important; opacity: 0 !important; transition: opacity 0.3s ease !important;
+}
+.drawer-backdrop.active { display: block !important; opacity: 1 !important; }
+
+.sidebar-header-div { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 20px !important; border-bottom: 1px solid var(--border-hairline) !important; }
+.sidebar-title { color: var(--text-headline) !important; font-size: 13.5px !important; font-weight: 800 !important; }
+.sidebar-close-btn { background: var(--surface-subtle) !important; border: none !important; width: 32px !important; height: 32px !important; border-radius: 50% !important; color: var(--text-headline) !important; cursor: pointer !important; }
+.sidebar-links-wrapper { flex-grow: 1 !important; overflow-y: auto !important; padding: 14px 16px !important; display: flex !important; flex-direction: column !important; gap: 8px !important; }
+.sidebar-links-wrapper a { display: flex !important; align-items: center !important; gap: 12px !important; min-height: 46px !important; padding: 0 16px !important; font-size: 13px !important; font-weight: 700 !important; color: var(--text-body) !important; text-decoration: none !important; border-radius: 14px !important; background: var(--surface-subtle) !important; }
+.sidebar-links-wrapper a:hover { background: #EDE9FE !important; color: var(--violet-royal) !important; }
+.sidebar-footer-cta { padding: 16px !important; margin-top: auto !important; }
+
+/* --------------------------------------------------------------------------
+   4. STORIES (Infinite Marquee - ปรับให้ใช้ GPU)
+   -------------------------------------------------------------------------- */
+.luxury-stories-wrapper { width: 100% !important; max-width: 1050px !important; margin: 16px auto 10px auto !important; padding: 0 12px !important; }
+.luxury-glass-stories-box { background: #FFFFFF !important; border: 1.5px solid var(--border-glass) !important; border-radius: 22px !important; padding: 10px 14px 12px 14px !important; box-shadow: var(--shadow-luxe-sm) !important; }
+.stories-header-micro { display: flex !important; justify-content: space-between !important; align-items: center !important; padding-bottom: 8px !important; border-bottom: 1px solid var(--border-hairline) !important; margin-bottom: 8px !important; }
+.stories-micro-title { font-size: 11px !important; font-weight: 800 !important; color: var(--text-headline) !important; }
+.stories-micro-hint { font-size: 10px !important; font-weight: 700 !important; color: var(--text-muted) !important; }
+.stories-scroll-container { width: 100% !important; overflow: hidden !important; position: relative !important; }
+.stories-track-inner { display: flex !important; gap: 14px !important; width: max-content !important; will-change: transform !important; animation: smoothStoryMarquee 28s linear infinite !important; }
+.stories-scroll-container:hover .stories-track-inner { animation-play-state: paused !important; }
+.story-item-el { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 5px !important; cursor: pointer !important; flex-shrink: 0 !important; text-decoration: none !important; }
+.story-ring-wrap { position: relative !important; display: inline-block !important; }
+.story-ring-glow { width: 54px !important; height: 54px !important; border-radius: 50% !important; padding: 2.5px !important; background: linear-gradient(135deg, #E11D48 0%, #7C3AED 50%, #F59E0B 100%) !important; }
+.story-ring-glow img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50% !important; border: 2px solid #FFFFFF !important; }
+.story-status-dot { position: absolute !important; bottom: 2px !important; right: 2px !important; width: 11px !important; height: 11px !important; background-color: #00E676 !important; border: 2px solid #FFFFFF !important; border-radius: 50% !important; }
+.story-status-dot.busy { background-color: #E11D48 !important; }
+.story-label { font-size: 10.5px !important; font-weight: 700 !important; color: var(--text-body) !important; white-space: nowrap !important; max-width: 58px !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+/* --------------------------------------------------------------------------
+   5. HERO SECTION (ลบ Gradient Text และ Backdrop-filter ออก แก้ LCP 100%)
+   -------------------------------------------------------------------------- */
+#main-content { padding-top: 10px !important; }
+.hero-section.celestial-hero-box {
+  background: #FFFFFF !important; /* ทึบ 100% */
+  border: 1.5px solid var(--border-glass) !important; border-radius: 26px !important;
+  padding: 16px 14px 18px 14px !important; margin: 6px auto 14px auto !important; max-width: 860px !important;
+  display: flex !important; flex-direction: column !important; align-items: center !important; gap: 10px !important;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08) !important;
+}
+.kiss-master-brand-wrapper { display: flex !important; justify-content: center !important; width: 100% !important; margin: 4px auto 10px auto !important; }
+.kiss-laser-badge { display: inline-flex !important; padding: 1.5px !important; border-radius: 999px !important; background: #140F22 !important; }
+.kiss-laser-inner { display: inline-flex !important; align-items: center !important; gap: 8px !important; padding: 5px 14px !important; border-radius: 999px !important; background: #140F22 !important; color: #FFFFFF !important; }
+.kiss-txt-main { font-size: 11.5px !important; font-weight: 900 !important; color: #FFFFFF !important; letter-spacing: 1.5px !important; }
+.kiss-verified-pill { background: #059669 !important; color: #FFFFFF !important; font-weight: 900 !important; font-size: 8.5px !important; padding: 2px 7px !important; border-radius: 999px !important; }
+
+.hero-headings-block { margin: 0 !important; width: 100% !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important; }
+.seo-h1-title .h1-line-1 { font-size: clamp(22px, 6vw, 30px) !important; font-weight: 900 !important; color: #000000 !important; line-height: 1.25 !important; text-align: center !important; }
+.seo-h1-title .h1-line-2 { font-size: clamp(18px, 5vw, 24px) !important; font-weight: 900 !important; color: #E11D48 !important; text-align: center !important; } /* ลบ Gradient ออก */
+
+.hero-description-inset { background: #FAF8FE !important; border: 1.5px solid rgba(124, 58, 237, 0.16) !important; border-radius: 20px !important; padding: 14px 18px !important; max-width: 620px !important; margin: 2px auto !important; }
+.hero-subtitle-p { color: #1F172E !important; font-size: 12.5px !important; line-height: 1.65 !important; font-weight: 600 !important; margin: 0 !important; }
+.hero-subtitle-p strong { color: #0F0B1A !important; font-weight: 900 !important; }
+
+.hero-metric-strip { display: flex !important; justify-content: center !important; margin-top: 10px !important; width: 100% !important; }
+.metric-pill.pill-stats { background: #FFFFFF !important; border: 1.5px solid rgba(124, 58, 237, 0.25) !important; border-radius: 100px !important; padding: 6px 16px !important; color: #475569 !important; font-size: 11px !important; font-weight: 700 !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; }
+.metric-pill.pill-stats #live-profile-count { color: #7C3AED !important; font-weight: 900 !important; font-size: 12.5px !important; }
+.metric-pill.pill-stats #live-province-count { color: #E11D48 !important; font-weight: 900 !important; font-size: 12px !important; }
+
+/* --------------------------------------------------------------------------
+   6. HOT PROFILES SWIPER
+   -------------------------------------------------------------------------- */
+.hot-swiper-section { width: 100% !important; max-width: 1050px !important; margin: 20px auto 16px auto !important; }
+.hot-header-bar-classic { background: #FFFFFF !important; border: 1.5px solid rgba(225, 29, 72, 0.3) !important; border-radius: 16px !important; padding: 8px 12px !important; margin-bottom: 12px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; }
+.hot-main-title { font-size: 16px !important; font-weight: 900 !important; color: #0F0B1A !important; margin: 0 !important; }
+.hot-monthly-pill { background: #E11D48 !important; color: #FFFFFF !important; font-size: 10px !important; font-weight: 900 !important; padding: 3px 10px !important; border-radius: 100px !important; }
+.vip-swiper-wrapper { display: flex !important; overflow-x: auto !important; gap: 12px !important; padding: 4px 4px 14px 4px !important; scroll-snap-type: x mandatory !important; scrollbar-width: none !important; }
+.vip-swiper-wrapper::-webkit-scrollbar { display: none !important; }
+.vip-card-item { flex: 0 0 172px !important; width: 172px !important; aspect-ratio: 3 / 4.2 !important; scroll-snap-align: start !important; position: relative !important; overflow: hidden !important; border-radius: 20px !important; background-color: #FFFFFF !important; border: 1.5px solid #FFFFFF !important; box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15) !important; }
+.vip-card-item img { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
+.vip-card-overlay { position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.35) 26%, transparent 60%) !important; z-index: 5 !important; }
+.vip-status-chip { position: absolute !important; top: 8px !important; left: 8px !important; background: rgba(15, 10, 26, 0.75) !important; border: 1.2px solid #00E676 !important; color: #00E676 !important; font-size: 9.5px !important; font-weight: 900 !important; padding: 3px 9px !important; border-radius: 100px !important; z-index: 15 !important; }
+.hot-rank-badge { position: absolute !important; top: 8px !important; right: 8px !important; background: #E11D48 !important; color: #FFFFFF !important; font-size: 9px !important; font-weight: 900 !important; padding: 3px 9px !important; border-radius: 100px !important; z-index: 15 !important; }
+.vip-card-info { position: absolute !important; bottom: 8px !important; left: 10px !important; right: 10px !important; z-index: 10 !important; text-align: left !important; pointer-events: none !important; }
+.vip-name { color: #FFFFFF !important; font-size: 15px !important; font-weight: 900 !important; text-shadow: 0 2px 6px rgba(0,0,0,.85) !important; margin: 0 !important; }
+.vip-location { color: #FFFFFF !important; font-size: 11px !important; font-weight: 700 !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+/* --------------------------------------------------------------------------
+   7. FILTER PILLS & SECTIONS
+   -------------------------------------------------------------------------- */
+.filter-pills-scroll-row { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding: 6px 4px 14px 4px !important; margin: 14px 0 6px 0 !important; scrollbar-width: none !important; }
+.filter-pills-scroll-row::-webkit-scrollbar { display: none !important; }
+.filter-pill-tab { background: #FFFFFF !important; border: 1.5px solid var(--border-glass) !important; color: var(--text-body) !important; padding: 7px 16px !important; border-radius: 100px !important; font-size: 12px !important; font-weight: 800 !important; white-space: nowrap !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; transition: background-color 0.2s, border-color 0.2s, color 0.2s !important; text-decoration: none !important; }
+.filter-pill-tab.active { background: #7C3AED !important; border-color: #7C3AED !important; color: #FFFFFF !important; }
+.filter-pill-tab .badge-count { background: rgba(124,58,237,0.1) !important; color: #7C3AED !important; padding: 2px 7.5px !important; border-radius: 100px !important; font-size: 10.5px !important; font-weight: 900 !important; }
+.filter-pill-tab.active .badge-count { background: rgba(255,255,255,0.25) !important; color: #FFFFFF !important; }
+
+/* --------------------------------------------------------------------------
+   8. PROFILE CARDS (GRID)
+   -------------------------------------------------------------------------- */
+#profiles-display-area { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 32px !important; margin-top: 20px !important; margin-bottom: 36px !important; }
+.profile-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; width: 100% !important; max-width: 1050px !important; margin: 0 auto !important; }
+@media (min-width: 768px) { .profile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 16px !important; } }
+@media (min-width: 1024px) { .profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 20px !important; } }
+
+.profile-card-new-container { width: 100% !important; min-width: 0 !important; position: relative !important; }
+.profile-card-new { position: relative !important; width: 100% !important; aspect-ratio: 3 / 4.2 !important; ove
+
+/* ⚡ ล้าง Layerize ส่วนเกิน และล็อก Layout ไม่ให้กระตุก */
+.profile-card-new-container,
+.profile-card-new,
+.vip-swiper-wrapper,
+.stories-track-inner {
+  will-change: auto !important;
+  transform: none !important;
+}
+
+/* ล็อกไม่ให้เนื้อหาด้านในดันหน้าจอออกไป (Prevent Layout Shift) */
+#profiles-display-area {
+  contain: layout style paint !important;
+  min-height: 800px !important; 
+}
+
+#hero-section {
+  contain: layout style !important;
+}
+
+/* ไอคอน SVG Mask ไม่ต้องใช้ GPU Layer */
+i.fas, i.far, i.fab {
+  transform: none !important;
+  will-change: auto !important;
+}

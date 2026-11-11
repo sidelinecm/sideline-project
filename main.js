@@ -1396,10 +1396,20 @@ if (mapIframe) {
     return container;
 }
 
-  async function renderProfilesBatch(containerEl, profilesList, renderId) {
+    async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
+
+    // ✅ [จุดที่เพิ่มเข้ามา] ถ้ามีการ์ดจาก SSR อยู่แล้ว และเป็นการโหลดครั้งแรก (ยังไม่เคยกดฟิลเตอร์) 
+    // ให้หยุดทำงานทันที! ห้ามลบ DOM ทิ้งเด็ดขาด
+    if (containerEl.children.length > 0 && (appState.renderId || 0) === 0) {
+        appState.renderId = 1; 
+        return; 
+    }
+
     containerEl.dataset.activeRenderId = renderId;
-    containerEl.innerHTML = "";
+    
+    // ✅ [จุดที่แก้] ลบของเก่าเฉพาะตอนที่ผู้ใช้กด "ฟิลเตอร์" หรือ "ค้นหา" เท่านั้น
+    containerEl.innerHTML = ""; 
 
     // ตัดแบ่ง: วาด 12 คนแรกที่ผู้ใช้มองเห็นก่อนทันที จอจะตอบสนองใน 0.05 วินาที
     const BATCH_SIZE = 12;
@@ -1427,7 +1437,7 @@ if (mapIframe) {
       });
     }
   }
-    
+  
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
     const wrapper = document.createElement("div");
     wrapper.className = "section-content-wrapper province-section";
@@ -2389,7 +2399,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       return; // 🛑 จบการทำงานตรงนี้ทันที ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
     }
 
-    domCache.body = document.body;
+        domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
     domCache.noResultsMessage = document.getElementById("no-results-message");
     domCache.fetchErrorMessage = document.getElementById("fetch-error-message");
@@ -2409,16 +2419,15 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const closeMenuBtn = document.getElementById("close-menu-btn");
 
     const toggleSidebar = (isOpen) => {
-  if (sidebarMenuEl) {
-    sidebarMenuEl.classList.toggle("active", isOpen);
-    sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
-  }
-  if (sidebarOverlayEl) {
-    sidebarOverlayEl.classList.toggle("active", isOpen);
-    sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-  }
-  // ✅ ไม่ต้องแตะ document.body.style.overflow อีกต่อไป
-};
+      if (sidebarMenuEl) {
+        sidebarMenuEl.classList.toggle("active", isOpen);
+        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+      if (sidebarOverlayEl) {
+        sidebarOverlayEl.classList.toggle("active", isOpen);
+        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+    };
 
     if (menuToggleBtn) menuToggleBtn.onclick = () => toggleSidebar(true);
     if (closeMenuBtn) closeMenuBtn.onclick = () => toggleSidebar(false);
@@ -2446,21 +2455,27 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
-      // ⚡ ตัด requestAnimationFrame และ body.style.overflow ทิ้งเด็ดขาดเพื่อกำจัด Presentation Delay 206ms
+      // ⚡ ไม่แตะ document.body.style.overflow เพื่อลด Presentation Delay
     };
 
+    // ✅ แก้จุดที่ 1: ใช้ addEventListener + passive: false
     if (openFilterDockBtn) {
-      openFilterDockBtn.onclick = (e) => {
+      openFilterDockBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        e.stopPropagation();
+        e.stopPropagation(); // ตัดการทำงานของ BODY.onclick
         toggleSearchDrawer(true);
-      };
+      }, { passive: false });
     }
     
-    if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
-    if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
+    if (closeSearchDrawerBtn) {
+      closeSearchDrawerBtn.addEventListener("click", () => toggleSearchDrawer(false));
+    }
     
-        if (applyFilterBtn) {
+    if (searchDrawerOverlayEl) {
+      searchDrawerOverlayEl.addEventListener("click", () => toggleSearchDrawer(false));
+    }
+    
+    if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         const selectedProv = domCache.provinceSelect?.value;
         const searchKeyword = (domCache.searchInput?.value || "").trim();
@@ -2490,12 +2505,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       };
     }
 
-    // ✅ ให้เปลี่ยนหน้านำทางเฉพาะเมื่อผู้ใช้กดปุ่ม "แสดงผลลัพธ์" (applyFilterBtn) เท่านั้น
-    if (domCache.provinceSelect) {
-      domCache.provinceSelect.addEventListener("change", (e) => {
-        // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
-      });
-    }
+    
+    
 
     
         
@@ -2565,8 +2576,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-      // 🚀 OPTIMIZED FILTER PILL HANDLER (ตัด requestAnimationFrame + setTimeout ซ้ำซ้อน)
-  const _allPillTabs = document.querySelectorAll(".filter-pill-tab");
+        const _allPillTabs = document.querySelectorAll(".filter-pill-tab");
   _allPillTabs.forEach(pill => {
     pill.addEventListener("click", function (e) {
       const targetHref = this.getAttribute("href");
@@ -2575,12 +2585,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       e.preventDefault();
       if (this.classList.contains("active")) return;
 
-      // อัปเดต class ทันที (GPU-bound ไม่มี Layout)
       _allPillTabs.forEach(p => p.classList.remove("active"));
       this.classList.add("active");
       appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-      // ⚡ Yield 1 frame ให้ browser วาดสีปุ่มก่อน แล้วค่อยกรอง (ตัด setTimeout 16ms ออก)
+      // ⚡ เปลี่ยนเป็น requestAnimationFrame เพื่อให้ Browser วาดสีปุ่ม 1 เฟรมก่อน แล้วค่อยกรอง
       requestAnimationFrame(() => executeFilterAndRender(true));
     });
   });

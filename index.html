@@ -106,7 +106,7 @@
   </script>
   
     
-  <script>
+      <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ window.dataLayer.push(arguments); }
     window.gtag = gtag;
@@ -123,25 +123,20 @@
         gtag('js', new Date());
         gtag('config', 'G-PG0QFDWTTG', {
           'send_page_view': true,
-          'link_attribution': false,   // ⚡ ปิดตัวที่ทำให้ GTM เกาะ onclick ทุกคลิก
+          'link_attribution': false,
           'cookie_flags': 'SameSite=None;Secure'
         });
       };
-
-      // โหลดทันทีเมื่อผู้ใช้มี interaction แรก (ตัด Delay 85ms ใน DebugBear)
+      
+      // โหลดทันทีเมื่อผู้ใช้มี interaction แรก
       ['click','touchstart','keydown','scroll'].forEach(function(evt){
         window.addEventListener(evt, loadGTM, { once: true, passive: true });
       });
-
-      // Fallback: ถ้าไม่มี interaction เลย ให้โหลดตอน idle (ไม่บล็อก LCP)
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadGTM, { timeout: 6000 });
-      } else {
-        setTimeout(loadGTM, 6000);
-      }
+      
+      // ⚡ หน่วงเวลา 8 วินาที ป้องกัน GTM มากวน Layout ตอนที่ Google กำลังวัด LCP
+      setTimeout(loadGTM, 8000);
     })();
   </script>
-
   <style>
     .seo-h1-title, .h1-line-1, .h1-line-2 {
       content-visibility: visible !important;
