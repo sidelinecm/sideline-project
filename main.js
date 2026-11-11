@@ -2460,7 +2460,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
     if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
     
-    if (applyFilterBtn) {
+        if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         const selectedProv = domCache.provinceSelect?.value;
         const searchKeyword = (domCache.searchInput?.value || "").trim();
@@ -2479,15 +2479,14 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         executeFilterAndRender(true);
         toggleSearchDrawer(false);
 
-        setTimeout(() => {
+        // ⚡ เลื่อนแบบ instant (ตัด animation ที่ทำให้เกิด Layout หลายรอบ)
+        requestAnimationFrame(() => {
           const displayArea = document.getElementById("profiles-display-area");
           if (displayArea) {
-            const headerOffset = 70;
-            const elementPosition = displayArea.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: Math.max(0, offsetPosition), behavior: "smooth" });
+            const y = displayArea.getBoundingClientRect().top + window.pageYOffset - 70;
+            window.scrollTo(0, Math.max(0, y));
           }
-        }, 150);
+        });
       };
     }
 
@@ -2566,127 +2565,167 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-  document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", function (e) {
-    const targetHref = this.getAttribute("href");
-    if (this.tagName === "A" && targetHref) return;
+      // 🚀 OPTIMIZED FILTER PILL HANDLER (ตัด requestAnimationFrame + setTimeout ซ้ำซ้อน)
+  const _allPillTabs = document.querySelectorAll(".filter-pill-tab");
+  _allPillTabs.forEach(pill => {
+    pill.addEventListener("click", function (e) {
+      const targetHref = this.getAttribute("href");
+      if (this.tagName === "A" && targetHref) return;
 
-    e.preventDefault();
-    if (this.classList.contains("active")) return;
+      e.preventDefault();
+      if (this.classList.contains("active")) return;
 
-    // 1. เปลี่ยนสีปุ่มทันทีใน 0 ms
-    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-    this.classList.add("active");
-    appState.activePillTag = this.getAttribute("data-tag") || "all";
+      // อัปเดต class ทันที (GPU-bound ไม่มี Layout)
+      _allPillTabs.forEach(p => p.classList.remove("active"));
+      this.classList.add("active");
+      appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    // 2. ⚡ ปลดล็อก INP: ปล่อยให้เบราว์เซอร์วาดสีปุ่มลงจอก่อนทันที แล้วค่อยเริ่มกรองการ์ดน้องๆ
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        executeFilterAndRender(true);
-      }, 16);
+      // ⚡ Yield 1 frame ให้ browser วาดสีปุ่มก่อน แล้วค่อยกรอง (ตัด setTimeout 16ms ออก)
+      requestAnimationFrame(() => executeFilterAndRender(true));
     });
   });
-});
   
-    // 🟢 Global Click Delegation
+            
+
+    
+    let _cachedInputEl = null;
+    let _cachedSuggestionsEl = null;
+    let _cachedLightboxEl = null;
+
+    const _getSearchInput = () => {
+      if (_cachedInputEl && _cachedInputEl.isConnected) return _cachedInputEl;
+      return (_cachedInputEl = document.getElementById("search-keyword"));
+    };
+    const _getSuggestions = () => {
+      if (_cachedSuggestionsEl && _cachedSuggestionsEl.isConnected) return _cachedSuggestionsEl;
+      return (_cachedSuggestionsEl = document.getElementById("search-suggestions"));
+    };
+    const _getLightbox = () => {
+      if (_cachedLightboxEl && _cachedLightboxEl.isConnected) return _cachedLightboxEl;
+      return (_cachedLightboxEl = document.getElementById("lightbox"));
+    };
+
     document.body.addEventListener("click", (e) => {
-      // ⚡ [เพิ่มจุดนี้] ปลดล็อก INP ปุ่ม "หน้าแรก" (ตัด Presentation Delay 489ms เหลือ 0ms ทันที)
-      const homeDockBtn = e.target.closest('#dock-item-home, a[href="/"].dock-item');
-      if (homeDockBtn) {
-        // กรณีที่ 1: ถ้าผู้ใช้อยู่ที่หน้าแรก ("/") อยู่แล้ว (กรณีที่ DebugBear ชอบคลิกทดสอบ)
-        if (window.location.pathname === "/" || window.location.pathname === "") {
-          e.preventDefault(); // สกัดกั้นไม่ให้เบราว์เซอร์โหลดหน้าใหม่
-          if (typeof triggerHaptic === "function") triggerHaptic("light");
-          window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนจอขึ้นบนสุดแบบนุ่มนวล
-          return; // ตอบสนองทันทีใน 0 ms!
-        }
+      const target = e.target;
 
-        // กรณีที่ 2: ถ้าอยู่หน้าอื่น (เช่น /location/chiangmai) แล้วคลิกกลับหน้าแรก
-        if (typeof triggerHaptic === "function") triggerHaptic("light");
-        // ปล่อยให้เบราว์เซอร์ใช้ Speculation Rules (Instant Prerender) สลับหน้าจาก RAM ทันที
-      }
+     
+      const cardElement = target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+      if (cardElement) {
+        
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
 
-      // 🟢 ดักจับปุ่มแชร์ data-action="share-profile" แก้ปัญหาปุ่มกดไม่ติด
-      const shareBtn = e.target.closest('[data-action="share-profile"]');
-      if (shareBtn) {
+        const profileId   = cardElement.getAttribute("data-profile-id");
+        const profileSlug = cardElement.getAttribute("data-profile-slug");
+
+        
+        
+        if (!profileId && !profileSlug) return;
+
         e.preventDefault();
-        e.stopPropagation();
-        const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
-        const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
-        window.shareProfile(name, url);
-        return;
-      }
-
-      const searchInputEl = document.getElementById("search-keyword");
-      const suggestionsEl = document.getElementById("search-suggestions");
-      if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
-        suggestionsEl.style.display = "none";
-      }
-
-      const suggestionTarget = e.target.closest('[data-action="suggestion"]');
-      if (suggestionTarget) {
-        const slug = suggestionTarget.dataset.slug;
-        const isProfile = suggestionTarget.dataset.isProfile === "true";
-        if (isProfile) {
-          if (suggestionsEl) suggestionsEl.style.display = "none";
-          toggleSearchDrawer(false);
-          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
-          handleUrlRouting();
-          return;
-        } else {
-          if (domCache.searchInput) {
-            domCache.searchInput.value = slug;
-            if (suggestionsEl) suggestionsEl.style.display = "none";
-            executeFilterAndRender(true);
-          }
-          return;
-        }
-      }
-
-   // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
-    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-    if (cardElement) {
-      // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
-      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
-        return;
-      }
-
-      const profileId = cardElement.getAttribute("data-profile-id");
-      const profileSlug = cardElement.getAttribute("data-profile-slug");
-
-      if (profileId || profileSlug) {
-        e.preventDefault();
-        const searchId = String(profileId || "");
+        const searchId   = String(profileId || "");
         const searchSlug = String(profileSlug || "");
 
-        let targetProfile = appState.allProfiles.find(p => 
-          String(p.id) === searchId || 
+        let targetProfile = appState.allProfiles.find(p =>
+          String(p.id) === searchId ||
           (p.slug && String(p.slug) === searchSlug) ||
           (searchSlug && String(p.id) === searchSlug)
         );
 
+        
         if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-          const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+          const rawP = window.profilesData.find(p =>
+            String(p.id) === searchId || String(p.slug) === searchSlug
+          );
           if (rawP) targetProfile = normalizeProfile(rawP);
         }
 
-       if (targetProfile) {
+        if (targetProfile) {
           history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-          // ⚡ ตอบสนองคลิกทันที แล้วปล่อยให้เนื้อหาเรนเดอร์ใน Microtask ถัดไป ตัดอาการ Layout ค้าง
-          setTimeout(() => {
-            window.openLightboxModal(targetProfile);
-          }, 0);
+          
+          window.openLightboxModal(targetProfile);
         } else {
+          
           window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
         }
         return;
       }
-    }
-    
-      const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
-      const lightboxModal = document.getElementById("lightbox");
-      if (closeLightboxBtn || e.target === lightboxModal) {
+
+     
+      const closeLightboxBtn = target.closest("#closeLightboxBtn");
+      const lightboxModal    = _getLightbox();
+      if (closeLightboxBtn || target === lightboxModal) {
         window.closeLightboxModal(true);
+        return;
+      }
+
+      
+      const homeDockBtn = target.closest('#dock-item-home, a[href="/"].dock-item');
+      if (homeDockBtn) {
+        
+        if (window.location.pathname === "/" || window.location.pathname === "") {
+          e.preventDefault();
+          if (typeof triggerHaptic === "function") triggerHaptic("light");
+          // ⚡ ใช้ instant scroll (กำจัด 89% Layout ที่ DebugBear เห็น)
+          if (window.scrollY > 200) {
+            window.scrollTo(0, 0);
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+          return;
+        }
+       
+        if (typeof triggerHaptic === "function") triggerHaptic("light");
+        return;
+      }
+
+      
+      const shareBtn = target.closest('[data-action="share-profile"]');
+      if (shareBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
+        const url  = shareBtn.getAttribute("data-profile-url")  || window.location.href;
+        if (typeof window.shareProfile === "function") {
+          window.shareProfile(name, url);
+        }
+        return;
+      }
+
+      
+      const suggestionTarget = target.closest('[data-action="suggestion"]');
+      if (suggestionTarget) {
+        const slug      = suggestionTarget.dataset.slug;
+        const isProfile = suggestionTarget.dataset.isProfile === "true";
+        const suggestionsEl = _getSuggestions();
+        if (suggestionsEl) suggestionsEl.style.display = "none";
+
+        if (isProfile) {
+          // คลิกโปรไฟล์แนะนำ → เปิด Lightbox
+          if (typeof toggleSearchDrawer === "function") toggleSearchDrawer(false);
+          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
+          if (typeof handleUrlRouting === "function") handleUrlRouting();
+        } else {
+          // คลิกคำแนะนำทั่วไป → ใส่ในช่องค้นหาแล้ว filter
+          const inputEl = _getSearchInput();
+          if (inputEl) {
+            inputEl.value = slug;
+            if (typeof executeFilterAndRender === "function") executeFilterAndRender(true);
+          }
+        }
+        return;
+      }
+
+      
+      const searchInputEl = _getSearchInput();
+      const suggestionsEl = _getSuggestions();
+      if (
+        suggestionsEl &&
+        suggestionsEl.style.display === "block" &&
+        searchInputEl &&
+        !searchInputEl.contains(target) &&
+        !suggestionsEl.contains(target)
+      ) {
+        suggestionsEl.style.display = "none";
       }
     });
 

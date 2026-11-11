@@ -51,13 +51,16 @@
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
 
-  <!-- Local Fonts Preload -->
+  
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
-  <!-- Stylesheet & Script (Bump เป็นเวอร์ชันใหม่เพื่อล้าง Cache เดิม) -->
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_29">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_29">
+  
+<link rel="stylesheet" href="/styles.css?v=v_20261112_01">
+<link rel="modulepreload" href="/main.js?v=v_20261112_01">
+
+
+
 
   <script type="speculationrules">
   {
@@ -102,27 +105,41 @@
   }
   </script>
   
-  <!-- GTM: ประกาศ Queue ล่วงหน้าเพื่อป้องกัน Script Error + ตัด Click Lag 164ms -->
+    
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ window.dataLayer.push(arguments); }
     window.gtag = gtag;
 
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        var gtmScript = document.createElement('script');
-        gtmScript.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
-        gtmScript.async = true;
-        document.head.appendChild(gtmScript);
-
+    (function() {
+      let gtmLoaded = false;
+      const loadGTM = function() {
+        if (gtmLoaded) return;
+        gtmLoaded = true;
+        var s = document.createElement('script');
+        s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
+        s.async = true;
+        document.head.appendChild(s);
         gtag('js', new Date());
-        gtag('config', 'G-PG0QFDWTTG', { 
+        gtag('config', 'G-PG0QFDWTTG', {
           'send_page_view': true,
-          'link_attribution': false,
+          'link_attribution': false,   // ⚡ ปิดตัวที่ทำให้ GTM เกาะ onclick ทุกคลิก
           'cookie_flags': 'SameSite=None;Secure'
         });
-      }, 2500);
-    });
+      };
+
+      // โหลดทันทีเมื่อผู้ใช้มี interaction แรก (ตัด Delay 85ms ใน DebugBear)
+      ['click','touchstart','keydown','scroll'].forEach(function(evt){
+        window.addEventListener(evt, loadGTM, { once: true, passive: true });
+      });
+
+      // Fallback: ถ้าไม่มี interaction เลย ให้โหลดตอน idle (ไม่บล็อก LCP)
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 6000 });
+      } else {
+        setTimeout(loadGTM, 6000);
+      }
+    })();
   </script>
 
   <style>
@@ -693,11 +710,12 @@
   </div>
 
  <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_29"></script>
+ <script type="module" src="/main.js?v=v_20261112_01"></script>
+
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      const CURRENT_SW_VER = 'v_20261022_29';
+      const CURRENT_SW_VER = 'v_20261112_01';
       navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
         .then(function(reg) {
           reg.onupdatefound = function() {
