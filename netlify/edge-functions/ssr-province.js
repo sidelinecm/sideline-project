@@ -2656,21 +2656,25 @@ if (!isNational && pills) {
       };
     });
 
-  
+    const initialClientProfiles = profilesList; // ใช้ profilesList ทั้งหมดของหน้านั้น
+    const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
-const initialClientProfiles = profilesList; // ใช้ profilesList ทั้งหมดของหน้านั้น
-const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
+    // 🟢 ประกาศตัวแปร serializedProvinces ตรงนี้เพื่อแก้ปัญหา ReferenceError
+    const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
+      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
+      nameThai: p.nameThai || p.name
+    }));
 
-const ssrDataScript = `
-  <script id="ssr-profiles-data">
-    window.profilesData = ${serializedProfilesJson};
-    window.totalProfilesCount = ${totalCount}; // ออโต้ 100% ตามจริง
-    window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
-    window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
-    window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
-    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
-  </script>
-`;
+    const ssrDataScript = `
+      <script id="ssr-profiles-data">
+        window.profilesData = ${serializedProfilesJson};
+        window.totalProfilesCount = ${totalCount}; // ออโต้ 100% ตามจริง
+        window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
+        window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
+        window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
+        window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
+      </script>
+    `;
     
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
