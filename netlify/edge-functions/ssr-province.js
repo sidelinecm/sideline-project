@@ -267,9 +267,25 @@ const MASTER_ZONE_TO_SLUG = {
 
   // 10. โคราช, หาดใหญ่, สุราษฎร์-สมุย
   "ในเมืองโคราช": "mueang-korat", "เซ็นทรัลโคราช": "central-korat", "เขาใหญ่": "khaoyai", "ปากช่อง": "pakchong",
-  "ตัวเมืองหาดใหญ่": "hatyai", "ม.อ.หาดใหญ่": "psu", "ด่านนอก": "dannok",
+  "มทส.": "sut", "มทส": "sut", "จอหอ": "joho",
+  "ตัวเมืองหาดใหญ่": "hatyai", "ม.อ.หาดใหญ่": "psu", "ม.อ.": "psu", "ด่านนอก": "dannok",
   "ตัวเมืองสุราษฎร์": "mueang-surat", "เกาะสมุย": "samui", "เฉวง": "chaweng", "ละไม": "lamai"
 };
+
+// 🟢 ฟังก์ชันแปลงชื่อโซนเป็น Slug อย่างปลอดภัย ป้องกัน ReferenceError เว็บล่ม 100%
+function getSafeZoneSlug(zoneName) {
+  if (!zoneName || typeof zoneName !== "string") return "";
+  const raw = zoneName.trim().replace(/^โซน/g, "").trim();
+  const noDot = raw.replace(/\./g, "");
+  const noSpace = raw.replace(/\s+/g, "");
+  const noDotSpace = raw.replace(/[\.\s]/g, "");
+
+  return MASTER_ZONE_TO_SLUG[raw] ||
+         MASTER_ZONE_TO_SLUG[noDot] ||
+         MASTER_ZONE_TO_SLUG[noSpace] ||
+         MASTER_ZONE_TO_SLUG[noDotSpace] ||
+         encodeURIComponent(raw.replace(/\s+/g, "-"));
+}
 
 function getRealTimeAgo(dateInput) {
   if (!dateInput) return "วันนี้";
@@ -962,10 +978,10 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
   const zoneText = loc && loc !== provinceName ? ` โซน${loc}` : "";
   return `น้อง${cleanName}${zoneText} ${provinceName} - FirstModelHub`;
 }
+
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   
-  // ✅ ต้องเป็น p.location ให้ตรงกับตัวแปร p ของฟังก์ชัน
   let rawLoc = sanitizeThaiText(p.location || "");
   let cleaned = rawLoc
     .replace(/[\r\n\t]+/g, " ")
@@ -973,8 +989,14 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     .replace(new RegExp(`^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|${provinceName})\\s*(\\/|และ)?\\s*`, "gi"), "")
     .trim();
   let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
-  let loc = escapeHTML(firstPart.split(/\s+/)[0].trim() || currentZone || provinceName);
-
+  
+  // 🟢 แก้ไข: ถ้าเปิดหน้าโซนย่อยอยู่ (currentZone มีค่า) และน้องคนนั้นมีชื่อโซนนี้อยู่ในประวัติ ให้แสดงชื่อโซนปัจจุบันเป็นหลัก
+  let displayLoc = firstPart.split(/\s+/)[0].trim();
+  if (currentZone && rawLoc.includes(currentZone)) {
+    displayLoc = currentZone;
+  }
+  let loc = escapeHTML(displayLoc || currentZone || provinceName);
+  
   const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
@@ -1388,6 +1410,32 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       });
     }
 
+    // 🟢 ระบบคำนวณคะแนนพิกัด: แยกตัวจริงประจำพื้นที่ (Primary = 3 คะแนน) ออกจากคนข้ามโซน (Secondary = 2 คะแนน)
+    function getZoneRelevanceScore(p, targetZone) {
+      if (!p || !targetZone) return 0;
+      const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
+      if (!rawLoc) return 0;
+
+      // สกัดเฉพาะพิกัดคำแรกสุดก่อนเครื่องหมายจุลภาค
+      const primaryLoc = rawLoc
+        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+        .split(/[,/]|และ/)[0]
+        .trim();
+
+      // ระดับ 3: พิกัดคำแรกตรงกับย่านนี้โดยตรง (เช่น อยู่นิมมานแท้ๆ)
+      if (primaryLoc.includes(targetZone)) return 3;
+
+      // ระดับ 2: มีชื่อย่านอยู่ในลิสต์ (เช่น "เจ็ดยอด, นิมมาน" เดินทางข้ามมาได้)
+      if (rawLoc.includes(targetZone)) return 2;
+
+      // ระดับ 1: มีแค่ในคำบรรยายหรือแท็ก
+      const desc = sanitizeThaiText(p.description || "").toLowerCase();
+      const tags = (Array.isArray(p.style_tags) ? p.style_tags.join(" ") : String(p.style_tags || "")).toLowerCase();
+      if (desc.includes(targetZone) || tags.includes(targetZone)) return 1;
+
+      return 0;
+    }
+
     // กรองต่อตามโซนย่อย (สำหรับรายการโปรไฟล์ด้านล่าง)
     let profilesList = provinceProfiles;
     const zoneSlug = activeZoneName || null;
@@ -1397,14 +1445,23 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
       const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
-    if (matchedZoneProfiles.length === 0) { 
-      isZoneEmpty = false;
-      // ถ้าย่านนั้นยังไม่มีน้อง ให้เอาน้องในจังหวัดเดียวกันมาแสดงขัดตาทัพ 6 คน ป้องกัน Thin Content
-      profilesList = provinceProfiles.slice(0, 6); 
-    } else { 
-      profilesList = matchedZoneProfiles; 
+      if (matchedZoneProfiles.length === 0) { 
+        isZoneEmpty = false;
+        profilesList = provinceProfiles.slice(0, 6); 
+      } else { 
+        // 🟢 เรียงลำดับ: ใครพิกัดหลักคำแรกตรงกับย่าน (Score 3) ขึ้นก่อนคนเดินทางมาหา (Score 2)
+        matchedZoneProfiles.sort((a, b) => {
+          const scoreA = getZoneRelevanceScore(a, cleanZoneLower);
+          const scoreB = getZoneRelevanceScore(b, cleanZoneLower);
+          if (scoreA !== scoreB) return scoreB - scoreA;
+
+          const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
+          const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
+          return featB - featA;
+        });
+        profilesList = matchedZoneProfiles; 
+      }
     }
-  }
     
     let hotSwiperCardsHtml = "";
     let featuredCardsHtml = "";
@@ -2095,9 +2152,18 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
 
       const zonesHtml = p.zones.map(z => {
         const cleanZ = sanitizeThaiText(z).replace(/^โซน/g, "").trim().split(/[-–,]/)[0].trim();
-        const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
         
-        // ✅ ปลดล็อคให้ทุกจังหวัด (กทม., ชลบุรี, ภูเก็ต, ขอนแก่น ฯลฯ) ได้ Slug ภาษาอังกฤษเหมือนกัน 100%
+        // 🟢 แก้ไข: ดักจับคำย่อเฉพาะของแต่ละภูมิภาคใน Footer ไม่ให้หลุดเป็นภาษาไทย
+        let lookupKey = cleanZ;
+        if (p.key === "lampang" && cleanZ === "ในเมือง") lookupKey = "ตัวเมืองลำปาง";
+        if (p.key === "lampang" && (cleanZ === "ม.ราชภัฏ" || cleanZ === "ม.ราชภัฏลำปาง")) lookupKey = "ม.ราชภัฏลำปาง";
+        if (p.key === "khon-kaen" && cleanZ === "เซ็นทรัล") lookupKey = "เซ็นทรัลขอนแก่น";
+        if (p.key === "phitsanulok" && cleanZ === "ตัวเมือง") lookupKey = "ตัวเมืองพิษณุโลก";
+        if (p.key === "lamphun" && cleanZ === "ตัวเมือง") lookupKey = "ตัวเมืองลำพูน";
+        if (p.key === "ayutthaya" && cleanZ === "ตัวเมือง") lookupKey = "ตัวเมืองอยุธยา";
+        if (p.key === "songkhla" && cleanZ === "ม.อ.") lookupKey = "ม.อ.หาดใหญ่";
+
+        const slugPart = getSafeZoneSlug(lookupKey);
         const zoneHref = `/location/${p.key}/${slugPart}`;
 
         return `
@@ -2491,8 +2557,18 @@ if (!isNational && pills) {
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    // 🟢 1. ดึงรายชื่อน้องๆ แนะนำ 5 คนแรกมาทำเป็น Mini-Avatar Badges
-    const liveTopModels = profilesList.slice(0, 5).map(p => {
+    
+    
+    let topModelCandidates = profilesList;
+    if (zoneSlug) {
+      const cleanZ = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
+      const primaryZoneModels = profilesList.filter(p => getZoneRelevanceScore(p, cleanZ) === 3);
+      if (primaryZoneModels.length > 0) {
+        topModelCandidates = primaryZoneModels;
+      }
+    }
+
+    const liveTopModels = topModelCandidates.slice(0, 5).map(p => {
       const cleanN = escapeHTML((p.name || "").replace(/^(น้อง|สาว)\s*/gi, "").trim());
       const pSlug = encodeURIComponent(p.slug || p.id);
       return `<a href="/sideline/${pSlug}" style="display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.2); color: #4C1D95; font-size: 11.5px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-decoration: none;">✨ น้อง${cleanN}</a>`;
@@ -2500,7 +2576,7 @@ if (!isNational && pills) {
 
     const dynamicRosterBlock = liveTopModels ? `
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px;">
-        <span style="font-weight: 800; color: #1E1B4B; font-size: 11.5px;">🔥 แนะนำวันนี้:</span>
+        <span style="font-weight: 800; color: #1E1B4B; font-size: 11.5px;">🔥 แนะนำวันนี้${zoneSlug ? ` (${escapeHTML(zoneSlug)})` : ""}:</span>
         ${liveTopModels}
       </div>
     ` : "";

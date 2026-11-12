@@ -170,18 +170,19 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // ไซส์มาตรฐาน 5:7 (480x672) + g_auto (AI โฟกัสจุดเด่น/ใบหน้า ไม่ให้หลุดเฟรม)
   let transform = "f_auto,q_auto:good,w_480,h_672,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
     transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
     transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+  // 🟢 เพิ่ม: รองรับตัวเลขระบุความกว้าง เช่น 400, 600 สำหรับ srcset โดยคำนวณสัดส่วน 5:7 อัตโนมัติ
+  } else if (typeof mode === "number") {
+    const w = mode;
+    const h = Math.round(mode * 1.4);
+    transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -606,7 +607,8 @@ const zoneHubUrl = hasDistinctZone
   : provinceHubUrl;
 
     const cityContext = cleanProvince.includes("กรุงเทพ") ? "กรุงเทพฯ" : `ตัวเมือง${cleanProvince}`;
-    const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)}` : `ในเมือง`;
+    // 🟢 ตัดคำว่า "ย่าน" ออก เพราะในฟังก์ชัน generateDynamicPersonaDesc มีคำว่า ย่าน/โซน อยู่แล้ว
+    const localizedZone = profile.location ? sanitizeThaiText(profile.location) : `ในเมือง`;
     const naturalDesc = generateDynamicPersonaDesc(profile, displayName, cleanProvince, localizedZone, stats, age, height, weight);
 
     const actualDateText = getProfileActualDate(profile.updated_at || profile.created_at); // 👈 เพิ่มบรรทัดนี้
