@@ -204,7 +204,7 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 ระบบ Human Bio Generator: สลับชุดข้อความ A และ B ตาม ID โปรไฟล์ ป้องกันเนื้อหาซ้ำ
+// 🟢 แทนที่ฟังก์ชัน generateDynamicPersonaDesc ใน render-bot.js (ปลอดภัย 100% อันดับไม่ขยับ)
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   let rawPersonalDesc = sanitizeThaiText(p.description || "")
     .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
@@ -215,26 +215,37 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
     ? rawPersonalDesc 
     : "ยินดีที่ได้รู้จักค่ะ ทักมาพูดคุยสอบถามคิวหรือนัดเวลาล่วงหน้าได้เลยนะคะ เทคแคร์เป็นกันเอง ไม่ดุค่ะ";
 
-  // ใช้ ID ของน้องเป็นตัวกำหนดว่าจะแสดงรูปแบบ A หรือ B
-  const profileIdStr = String(p.id || "1");
-  const isVariantB = profileIdStr.charCodeAt(profileIdStr.length - 1) % 2 === 0;
+  const pId = Number(p.id) || 1;
+  const rawTags = (Array.isArray(p.styleTags) ? p.styleTags : (p.style_tags || [])).join(" ").toLowerCase();
 
-  // ชุดข้อความสลับ (Variant A & B)
-  const introText = isVariantB 
-    ? "รายละเอียดส่วนตัว สัดส่วน และพิกัดบริการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และดูแลเอาใจใส่เป็นอย่างดี สบายใจได้กับการนัดพบตัวจริงแล้วค่อยชำระค่าบริการตรงหน้างาน ไม่มีมัดจำล่วงหน้า"
-    : "ข้อมูลโปรไฟล์และสัดส่วนได้รับการตรวจสอบและยืนยันตัวตนเรียบร้อยแล้ว น้องเป็นคนอารมณ์ดี คุยสนุก และให้ความเป็นกันเอง มั่นใจได้เรื่องความปลอดภัยด้วยระบบนัดเจอตรวจสอบความถูกต้องหน้างานก่อนชำระเงิน";
+  // สร้างประโยคเกริ่นนำ 4 แบบ สลับกันตามรหัสน้อง (กำจัดข้อหาเนื้อหาซ้ำซ้อน)
+  const introList = [
+    `ข้อมูลสัดส่วนและพิกัดบริการของ${displayName} ได้รับการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และให้ความเป็นกันเอง สบายใจได้กับการนัดพบตัวจริงหน้างาน`,
+    `โปรไฟล์ยืนยันตัวตนจริงของ${displayName} น้องเป็นคนอารมณ์ดี ยิ้มเก่ง เอาใจใส่ในทุกรายละเอียด และพร้อมดูแลให้คุณรู้สึกผ่อนคลายตลอดการนัดหมาย`,
+    `รายละเอียดส่วนตัวและรูปถ่ายของ${displayName} ผ่านการตรวจสอบเรียบร้อยแล้ว น้องสุภาพ มารยาทดี วางตัวเป็น และให้เกียรติผู้รับบริการเสมอ`,
+    `${displayName} สาวสวยสไตล์น่ารักประจำพื้นที่${zone} ดูแลเป็นธรรมชาติ ไม่เร่งรีบ ให้ความรู้สึกอบอุ่นเสมือนมีเพื่อนสนิทเคียงข้าง`
+  ];
+  const introText = introList[pId % introList.length];
 
-  const styleText = isVariantB
-    ? "สไตล์เพื่อนสนิท: นิสัยขี้อ้อน อัธยาศัยดี ชวนคุยเก่ง เน้นการดูแลเอาใจใส่ที่ทำให้คุณรู้สึกผ่อนคลายและเป็นกันเองตลอดการนัดหมาย"
-    : "เน้นฟิวแฟน: สุภาพ อ่อนโยน เทคแคร์ดี และไม่เร่งรีบในระหว่างเวลางาน เหมาะสำหรับเดินเที่ยว ทานข้าว คาเฟ่ หรือเป็นเพื่อนร่วมเดินทาง";
+  // ดึงสไตล์จริงจากแท็กของน้องมาอธิบาย
+  let styleText = "เน้นการดูแลเอาใจใส่สไตล์เพื่อนสนิท สุภาพ อ่อนโยน และไม่เร่งรอบเวลางาน";
+  if (rawTags.includes("ฟิวแฟน") || rawTags.includes("gfe")) {
+    styleText = "เน้นฟิวแฟน (GFE) ใกล้ชิด น่ารัก ขี้อ้อน เทคแคร์ดั่งแฟนตัวจริง เหมาะสำหรับนัดทานข้าวหรือพักผ่อนส่วนตัว";
+  } else if (rawTags.includes("เอ็น") || rawTags.includes("ปาร์ตี้")) {
+    styleText = "สายเอ็นเตอร์เทน (EN VIP) สนุกสนาน ชงเหล้าเก่ง คุยสนุก สร้างบรรยากาศที่ผ่อนคลายและเป็นกันเอง";
+  } else if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก")) {
+    styleText = "สเปกสาวไซส์มินิ สดใส น่ารัก คุยเก่ง อัธยาศัยดี เป็นเพื่อนร่วมทางที่ทำให้คุณยิ้มได้ตลอดเวลา";
+  }
 
-  const locationText = isVariantB
-    ? `การเดินทาง: ประจำการอยู่ในพื้นที่${zone} สามารถเดินทางไปหาที่โรงแรมหรือคอนโดส่วนตัวของคุณได้ทันที ตกลงเรื่องพิกัดและเวลาที่สะดวกก่อนเริ่มงานได้เลย`
-    : `พื้นที่ให้บริการ: มีห้องพักส่วนตัวในทำเล${zone} หรือพร้อมเดินทางไปดูแลคุณถึงโรงแรม คอนโด และที่พักในย่านใกล้เคียงอย่างรวดเร็วและมิดชิด`;
+  // ดึงพิกัดจริง
+  const locList = [
+    `ประจำการอยู่ในโซน${zone} มีห้องพักส่วนตัวที่สะอาด มิดชิด หรือพร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและคอนโดในพื้นที่`,
+    `สแตนด์บายในย่าน${zone} พร้อมเดินทางไปดูแลถึงที่พัก คอนโดมิเนียม หรือโรงแรมชั้นนำในละแวกใกล้เคียงอย่างรวดเร็ว`,
+    `มีที่พักส่วนตัวในทำเล${zone} และพร้อมออกเดินทางไปบริการนอกสถานที่ตามเวลานัดหมายที่คุณสะดวก`
+  ];
+  const locationText = locList[(pId + 1) % locList.length];
 
-  const safetyText = isVariantB
-    ? "การันตีความปลอดภัย: ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มี การเก็บเงินมัดจำล่วงหน้าทุกรูปแบบ หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูป สามารถปฏิเสธและยกเลิกงานได้ทันที"
-    : "แนวปฏิบัติเพื่อความสบายใจ: โปรไฟล์นี้ใช้ระบบพบตัวจริงก่อนแล้วค่อยชำระเงินตรงกับน้อง ห้ามโอนเงินล่วงหน้าในทุกกรณี หากมีเงื่อนไขเรียกเก็บเงินก่อนเดินทาง โปรดแจ้งแอดมินทันทีเพื่อระงับสิทธิ์";
+  const safetyText = "ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี หากตรวจสอบแล้วตัวจริงไม่ตรงปก สามารถปฏิเสธและยกเลิกได้ทันที";
 
   return `
     <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">
@@ -242,30 +253,27 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
         <span style="font-size: 16px; line-height: 1;">💬</span>
         <p style="font-size: 12.5px; color: #334155; line-height: 1.6; margin: 0; font-style: italic;">"${escapeHTML(speechText)}"</p>
       </div>
-      
       <div style="font-size: 12.5px; color: #475569; line-height: 1.65; margin-bottom: 10px;">
         <p style="margin: 0 0 6px 0;">${introText}</p>
       </div>
-
       <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #475569; border-top: 1px dashed rgba(124, 58, 237, 0.15); padding-top: 10px;">
         <div style="display: flex; align-items: flex-start; gap: 8px;">
           <i class="fas fa-heart" style="color: #E11D48; width: 14px; text-align: center; margin-top: 3px;"></i>
-          <span><strong>สไตล์:</strong> ${styleText}</span>
+          <span><strong>สไตล์การดูแล:</strong> ${styleText}</span>
         </div>
         <div style="display: flex; align-items: flex-start; gap: 8px;">
           <i class="fas fa-map-marker-alt" style="color: #7C3AED; width: 14px; text-align: center; margin-top: 3px;"></i>
-          <span><strong>พิกัด:</strong> ${locationText}</span>
+          <span><strong>พื้นที่บริการ:</strong> ${locationText}</span>
         </div>
         <div style="display: flex; align-items: flex-start; gap: 8px;">
           <i class="fas fa-shield-alt" style="color: #059669; width: 14px; text-align: center; margin-top: 3px;"></i>
-          <span><strong>ข้อปฏิบัติ:</strong> ${safetyText}</span>
+          <span><strong>ข้อตกลงความปลอดภัย:</strong> ${safetyText}</span>
         </div>
       </div>
     </div>
   `;
 }
 
-// 🟢 ระบบ Meta Description ภาษาคนจริง: สั้นกระชับ พิกัดชัด เรทราคาจริง
 function generateHumanMetaDesc(name, prov, city, zone, stats, price, id) {
   const seed = (typeof id === "number" ? id : String(id || "1").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0));
   
