@@ -20,7 +20,6 @@
   <link rel="alternate" hreflang="en" href="https://firstmodelhub.com/index-en" />
   <link rel="alternate" hreflang="x-default" href="https://firstmodelhub.com/" />
 
-  
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="FirstModelHub">
   <meta property="og:type" content="website">
@@ -33,30 +32,27 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FirstModelHub ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟนทั่วไทย">
 
- 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub">
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนทั่วไทย ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ">
   <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
 
-  
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  
-<link rel="preconnect" href="https://res.cloudinary.com">
-<link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="preconnect" href="https://res.cloudinary.com">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
 
-  
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
-  
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_33">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_33">
+  <!-- 🟢 โหลด Font Awesome แก้ไอคอนสี่เหลี่ยม -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_34">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_34">
 
   <script type="speculationrules">
   {
@@ -101,7 +97,7 @@
   }
   </script>
   
-    <script>
+  <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ window.dataLayer.push(arguments); }
     window.gtag = gtag;
@@ -123,13 +119,12 @@
         });
       };
       
-      // โหลดทันทีเมื่อผู้ใช้มี interaction แรก
       ['click','touchstart','keydown','scroll'].forEach(function(evt){
         window.addEventListener(evt, loadGTM, { once: true, passive: true });
       });
       
-      // ⚡ หน่วงเวลา 8 วินาที ป้องกัน GTM มากวน Layout ตอนที่ Google กำลังวัด LCP
-      setTimeout(loadGTM, 8000);
+      // 🟢 ตั้งเวลา 2.5 วินาที เก็บสถิติ Analytics ได้แม่นยำ ไม่สูญหาย
+      setTimeout(loadGTM, 2500);
     })();
   </script>
 
@@ -142,10 +137,8 @@
 <body class="fmh-app-page">
     
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ" 
-     style="position: fixed !important; bottom: 16px !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; width: calc(100% - 28px) !important; max-width: 410px !important; margin: 0 !important; height: 66px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; border: 1.5px solid rgba(255, 255, 255, 0.95) !important; box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0,0,0,0.04) !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 0 8px 0 10px !important; z-index: 99999 !important;">
+     style="position: fixed !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; width: calc(100% - 28px) !important; max-width: 410px !important; margin: 0 !important; height: 66px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; border: 1.5px solid rgba(255, 255, 255, 0.95) !important; box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0,0,0,0.04) !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 0 8px 0 10px !important; z-index: 99999 !important;">
   
-  
- 
   <a href="/" class="dock-item" id="dock-item-home" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 3px; -webkit-tap-highlight-color: transparent;">
     <div class="dock-icon-box" style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
       <i class="fas fa-home" style="font-size: 15px; color: #475569;"></i>
@@ -169,13 +162,11 @@
     <span style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">รวมน้องๆ</span>
   </a>
 
-  
   <div style="width: 1px; height: 26px; background: rgba(148, 163, 184, 0.3); margin: 0 4px;" aria-hidden="true"></div>
 
   <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" 
      onclick="event.stopPropagation();"
      style="display: inline-flex;align-items: center; justify-content: center; gap: 5px; height: 42px; padding: 0 13px; border-radius: 100px; text-decoration: none; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 4px 12px rgba(5, 150, 105, 0.35); color: #FFFFFF !important; -webkit-tap-highlight-color: transparent; margin-left: 2px;">
-    
     <span style="width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; box-shadow: 0 0 6px #4ADE80; display: inline-block;"></span>
     <i class="fab fa-line" style="font-size: 18px; color: #FFFFFF;"></i>
     <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1px;">ติดต่อ</span>
@@ -233,7 +224,7 @@
       <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
       <a href="/profiles"><i class="fas fa-user-check icon-green"></i> สาวๆที่แนะนำ</a>
       <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
-   <a href="/profiles"><i class="fas fa-gem icon-pink"></i> โปรไฟล์สาวๆ ทั้งหมด</a>
+      <a href="/profiles"><i class="fas fa-gem icon-pink"></i> โปรไฟล์สาวๆ ทั้งหมด</a>
       <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
       <a href="/about"><i class="fas fa-shield-alt icon-lightpurple"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
       <a href="/faq"><i class="fas fa-question-circle icon-red"></i> คำถามที่พบบ่อย (FAQ)</a>
@@ -257,46 +248,44 @@
       </nav>
     </div>
 
-   
-<section id="hero-section" class="hero-section fmh-hero-surface celestial-hero-box" aria-label="ศูนย์รวมสาวรับงานและไซด์ไลน์ทั่วไทย">
-    
- <div class="kiss-master-brand-wrapper">
-    <div class="kiss-laser-badge" role="status" aria-label="FirstModelHub Verified">
-      <span class="laser-orbit-glow" aria-hidden="true"></span>
-      <div class="kiss-laser-inner">
-        <span class="spinning-star" aria-hidden="true">🔥</span>
-        <span class="kiss-txt-main">kissmodel✦</span>
-        <span class="kiss-pipe-sep" aria-hidden="true"></span>
-        <span class="kiss-verified-pill"><i class="fas fa-check-circle"></i>🇹🇭</span>
-   
+    <section id="hero-section" class="hero-section fmh-hero-surface celestial-hero-box" aria-label="ศูนย์รวมสาวรับงานและไซด์ไลน์ทั่วไทย">
+      <div class="kiss-master-brand-wrapper">
+        <div class="kiss-laser-badge" role="status" aria-label="FirstModelHub Verified">
+          <span class="laser-orbit-glow" aria-hidden="true"></span>
+          <div class="kiss-laser-inner">
+            <span class="spinning-star" aria-hidden="true">🔥</span>
+            <span class="kiss-txt-main">kissmodel✦</span>
+            <span class="kiss-pipe-sep" aria-hidden="true"></span>
+            <span class="kiss-verified-pill"><i class="fas fa-check-circle"></i>🇹🇭</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
- <div class="hero-headings-block">
-    <h1 class="seo-h1-title" id="hero-h1">
-      <span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
-      <span class="h1-line-2">รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>
-    </h1>
-  </div>
+      <div class="hero-headings-block">
+        <h1 class="seo-h1-title" id="hero-h1">
+          <span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span>
+          <span class="h1-line-2">รูปจริง ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>
+        </h1>
+      </div>
 
-  <div class="hero-description-inset">
-  <p class="hero-subtitle-p">
-    <strong>FirstModelHub</strong> แพลตฟอร์มศูนย์รวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็น (EN VIP) ครอบคลุมทั่วประเทศ คัดสรรเฉพาะโปรไฟล์ที่ผ่านการยืนยันรูปถ่ายตัวจริง 100% สไตล์เพื่อนเที่ยวฟิวแฟน น่ารัก เอาใจใส่ ปลอดภัยขั้นสูงสุดด้วยระบบนัดพบเช็กความตรงปกก่อนแล้วค่อยชำระเงินหน้างาน ไร้ความเสี่ยง ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ
-  </p>
-</div>
+      <div class="hero-description-inset">
+        <p class="hero-subtitle-p">
+          <strong>FirstModelHub</strong> แพลตฟอร์มศูนย์รวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็น (EN VIP) ครอบคลุมทั่วประเทศ คัดสรรเฉพาะโปรไฟล์ที่ผ่านการยืนยันรูปถ่ายตัวจริง 100% สไตล์เพื่อนเที่ยวฟิวแฟน น่ารัก เอาใจใส่ ปลอดภัยขั้นสูงสุดด้วยระบบนัดพบเช็กความตรงปกก่อนแล้วค่อยชำระเงินหน้างาน ไร้ความเสี่ยง ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ
+        </p>
+      </div>
 
-  <div class="hero-metric-strip">
-    <div class="metric-pill pill-stats">
-      <span class="live-dot"></span>
-      <span><strong id="live-profile-count" class="stat-number">--</strong> โปรไฟล์</span>
-      <span class="sep-dot">•</span>
-     <span>แสดงรูปจริงตามที่ส่งประกาศ</span>
-      <span class="sep-dot">•</span>
-      <span>ครอบคลุม <strong id="live-province-count" class="stat-number">--</strong> จังหวัด</span>
-    </div>
-  </div>
-</section>
+      <div class="hero-metric-strip">
+        <div class="metric-pill pill-stats">
+          <span class="live-dot"></span>
+          <span><strong id="live-profile-count" class="stat-number">--</strong> โปรไฟล์</span>
+          <span class="sep-dot">•</span>
+          <span>แสดงรูปจริงตามที่ส่งประกาศ</span>
+          <span class="sep-dot">•</span>
+          <span>ครอบคลุม <strong id="live-province-count" class="stat-number">--</strong> จังหวัด</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Hot Swiper Section -->
     <section id="hot-profiles-section" class="hot-swiper-section" aria-labelledby="hot-profiles-heading">
       <div class="hot-header-bar-classic">
@@ -309,21 +298,19 @@
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
     </section>
 
-  <!-- 🟢 โค้ดที่ถูกต้อง: -->
-<div class="filter-pills-scroll-row" id="quick-filter-pills">
-  <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั้งหมด</button>
- 
-<a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;" title="รับงานเชียงใหม่">📍 รับงานเชียงใหม่</a>
-<a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;" title="รับงานขอนแก่น">📍 รับงานขอนแก่น</a>
-<a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;" title="รับงานภูเก็ต">📍 รับงานภูเก็ต</a>
-<a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;" title="รับงานอุดรธานี">📍 รับงานอุดรธานี</a>
-  
-  <button class="filter-pill-tab" type="button" data-tag="ฟิวแฟน">☕ เพื่อนเที่ยว (GFE)</button>
-  <button class="filter-pill-tab" type="button" data-tag="เอ็นเตอร์เทน">🥂 เด็กเอ็นปาร์ตี้ (EN)</button>
-  <button class="filter-pill-tab" type="button" data-tag="ค้างคืน">🌙 ดูแลค้างคืน</button>
-  <button class="filter-pill-tab" type="button" data-tag="ตัวเล็ก">🎀 น่ารักตัวเล็ก</button>
-  <button class="filter-pill-tab" type="button" data-tag="เอาใจเก่ง">🥰 เอาใจเก่ง</button>
-</div>
+    <div class="filter-pills-scroll-row" id="quick-filter-pills">
+      <button class="filter-pill-tab active" type="button" data-tag="all">✨ ทั้งหมด</button>
+      <a href="/location/chiangmai" class="filter-pill-tab" style="text-decoration: none;" title="รับงานเชียงใหม่">📍 รับงานเชียงใหม่</a>
+      <a href="/location/khon-kaen" class="filter-pill-tab" style="text-decoration: none;" title="รับงานขอนแก่น">📍 รับงานขอนแก่น</a>
+      <a href="/location/phuket" class="filter-pill-tab" style="text-decoration: none;" title="รับงานภูเก็ต">📍 รับงานภูเก็ต</a>
+      <a href="/location/udonthani" class="filter-pill-tab" style="text-decoration: none;" title="รับงานอุดรธานี">📍 รับงานอุดรธานี</a>
+      <button class="filter-pill-tab" type="button" data-tag="ฟิวแฟน">☕ เพื่อนเที่ยว (GFE)</button>
+      <button class="filter-pill-tab" type="button" data-tag="เอ็นเตอร์เทน">🥂 เด็กเอ็นปาร์ตี้ (EN)</button>
+      <button class="filter-pill-tab" type="button" data-tag="ค้างคืน">🌙 ดูแลค้างคืน</button>
+      <button class="filter-pill-tab" type="button" data-tag="ตัวเล็ก">🎀 น่ารักตัวเล็ก</button>
+      <button class="filter-pill-tab" type="button" data-tag="เอาใจเก่ง">🥰 เอาใจเก่ง</button>
+    </div>
+
     <!-- Featured Profiles Section -->
     <section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading">
       <div class="featured-header-clean-row">
@@ -417,7 +404,6 @@
           </div>
         </div>
 
-     
         <div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px;">
           <div class="seo-content-inner" style="font-size: 12.5px; color: #334155; line-height: 1.75;">
             <h3 style="font-size: 15px; font-weight: 800; color: #4C1D95; margin: 0 0 8px 0;">ข้อมูลการหาเพื่อนเที่ยวและน้องๆ รับงานทั่วไทย (ปลอดภัย ไร้มัดจำ)</h3>
@@ -468,15 +454,13 @@
       </div>
     </section>
 
-   <section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ">
-  
-  <iframe id="google-map" src="about:blank" title="แผนที่พื้นที่ให้บริการ First Model Hub" loading="lazy" allowfullscreen style="width: 100%; height: 100%; border: 0;"></iframe>
-</section>
+    <section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ" style="min-height: 350px;">
+      <iframe id="google-map" src="about:blank" title="แผนที่พื้นที่ให้บริการ First Model Hub" loading="lazy" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;"></iframe>
+    </section>
   </main>
 
-  
   <div id="search-drawer-overlay" class="drawer-backdrop"></div>
-<div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-label="ตัวกรองการค้นหา">
+  <div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-label="ตัวกรองการค้นหา">
     <div class="sheet-drag-handle"></div>
     <div class="sheet-header">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -568,7 +552,7 @@
             <span class="luxe-brand-text"><span class="txt-first">First</span><span class="txt-model">Model</span></span>
             <span class="luxe-hub-badge">HUB</span>
           </a>
-        <p class="footer-brand-desc"><strong>FirstModelHub</strong> ไดเรกทอรีรวบรวมข้อมูลเพื่อนเที่ยวและสาวรับงาน ข้อมูลจัดส่งโดยผู้ลงประกาศ ชำระค่าบริการโดยตรง ณ สถานที่นัดหมาย</p>
+          <p class="footer-brand-desc"><strong>FirstModelHub</strong> ไดเรกทอรีรวบรวมข้อมูลเพื่อนเที่ยวและสาวรับงาน ข้อมูลจัดส่งโดยผู้ลงประกาศ ชำระค่าบริการโดยตรง ณ สถานที่นัดหมาย</p>
           <div class="footer-social-wrapper">
             <span class="footer-social-label">OFFICIAL CHANNELS:</span>
             <div class="footer-social-icons">
@@ -585,9 +569,7 @@
           <ul class="footer-nav-links">
             <li><a href="/">หน้าแรก</a></li>
             <li><a href="/profiles">รวมโปรไฟล์</a></li>
-           
             <li><a href="/locations">พื้นที่บริการทั้งหมด</a></li>
-          
             <li><a href="/blog">บทความ</a></li>
             <li><a href="/faq">คำถามที่พบบ่อย</a></li>
           </ul>
@@ -634,7 +616,13 @@
         <div class="lightbox-grid-layout">
           <div class="lightbox-image-column">
             <div class="lightbox-hero-container">
-              <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5.6'%3E%3C/svg%3E" alt="รูปโปรไฟล์ตัวจริงตรงปก" width="400" height="560">
+              <!-- 🟢 แก้ไข Placeholder เป็น Native SVG แบบสมบูรณ์ ไม่ยิงผ่าน Cloudinary Fetch -->
+              <img id="lightboxHeroImage" 
+                   src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 560'%3E%3Crect width='400' height='560' fill='%23F8F6FC'/%3E%3C/svg%3E" 
+                   alt="รูปโปรไฟล์ตัวจริงตรงปก" 
+                   width="400" 
+                   height="560" 
+                   style="width: 100%; height: 100%; object-fit: cover;">
             </div>
             <div id="lightboxThumbnailStrip"></div>
           </div>
@@ -667,23 +655,18 @@
               <div id="lightboxDescriptionContent" style="font-size: 12px; color: var(--text-sub); line-height: 1.6; white-space: pre-wrap;"></div>
             </div>
 
-            <!-- ส่วนขยายภายใน Lightbox (สลับ Related ไว้ก่อน FAQ แล้ว) -->
             <div id="lightboxExtendedSections" style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 16px;">
-              
-              <!-- 1. น้องๆ แนะนำเพิ่มเติม (ขึ้นมาก่อน) -->
               <section id="lightboxRelatedSection" style="padding-top: 0.25rem;">
                 <h4 id="lightboxRelatedTitle" style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติม</h4>
                 <div id="lightboxRelatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;"></div>
                 <div id="lightboxRelatedMoreLink" style="text-align: center;"></div>
               </section>
 
-              <!-- 2. คำถามที่พบบ่อย (ตามมาทีหลัง) -->
               <section id="lightboxFaqSection" style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1.25rem;">
                 <h4 id="lightboxFaqTitle" style="color: #140F22; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">คำถามพบบ่อยเกี่ยวกับการนัดหมาย</h4>
                 <div id="lightboxFaqList" style="display: flex; flex-direction: column; gap: 8px;"></div>
               </section>
 
-              <!-- 3. มาตรฐานความปลอดภัยเหมือนเดิม -->
               <section id="lightboxSafetySection" style="border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 1rem;">
                 <div style="background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 14px; padding: 13px 14px; font-size: 11px; color: #64748B; line-height: 1.65;">
                   <h4 style="color: #7C3AED; font-size: 12.5px; font-weight: 900; text-align: center; margin: 0 0 8px 0;">🛡️ มาตรฐานความปลอดภัยและข้อกำหนดการใช้งาน</h4>
@@ -692,7 +675,6 @@
                   <p style="margin: 0;"><strong style="color: #140F22;">✓ การรักษาความลับ (Zero-Log):</strong> ข้อมูลการติดต่อทั้งหมดจะถูกเก็บเป็นความลับสูงสุด</p>
                 </div>
               </section>
-
             </div>
           </div>
         </div>
@@ -700,31 +682,30 @@
     </div>
   </div>
 
- <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_33"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      const CURRENT_SW_VER = 'v_20261022_33';
-      navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
-        .then(function(reg) {
-          reg.onupdatefound = function() {
-            const installingWorker = reg.installing;
-            if (installingWorker) {
-              installingWorker.onstatechange = function() {
-                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // อัปเดตแคชเงียบๆ ในพื้นหลัง ข้อมูลใหม่จะแสดงอัตโนมัติรอบถัดไป ไม่บังคับรีโหลดให้กระตุก
-                  console.log('FirstModelHub ServiceWorker updated successfully.');
-                }
-              };
-            }
-          };
-        })
-        .catch(function(err) {
-          console.warn('SW registration bypassed:', err);
-        });
-    });
-  }
-</script>
+  <script id="ssr-profiles-data"> window.profilesData = null;</script>
+  <script type="module" src="/main.js?v=v_20261022_34"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        const CURRENT_SW_VER = 'v_20261022_34';
+        navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
+          .then(function(reg) {
+            reg.onupdatefound = function() {
+              const installingWorker = reg.installing;
+              if (installingWorker) {
+                installingWorker.onstatechange = function() {
+                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('FirstModelHub ServiceWorker updated successfully.');
+                  }
+                };
+              }
+            };
+          })
+          .catch(function(err) {
+            console.warn('SW registration bypassed:', err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -150,3 +150,88 @@
   background: #FFFFFF !important;
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.8) !important;
 }
+/* ========================================================================== */
+/* 🟢 LIGHTBOX & INSTAGRAM-STYLE DOTS INDICATOR STYLES                        */
+/* ========================================================================== */
+
+/* ปรับแต่งกล่องแสดงรูปภาพหลักใน Lightbox ให้รองรับตำแหน่ง Absolute ของ Dots */
+.lightbox-hero-container {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0D081B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-hero-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* ดีไซน์แถบจุดไข่ปลา (Dots Wrapper) สไตล์ Instagram */
+.lightbox-dots-wrapper {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  z-index: 20;
+  pointer-events: none; /* ป้องกันไม่ให้จุดบังการกดคลิกปัดรูป */
+}
+
+/* ดีไซน์ตัวจุดแต่ละเม็ด */
+.gallery-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* จุดที่กำลังแอคทีฟ (รูปปัจจุบัน) จะยืดออกเป็นแคปซูลยาวขึ้น */
+.gallery-dot.active {
+  width: 18px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* แถบ Thumbnail รูปย่อยด้านล่าง */
+#lightboxThumbnailStrip {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 6px 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* ซ่อน Scrollbar บน Firefox */
+}
+
+#lightboxThumbnailStrip::-webkit-scrollbar {
+  display: none; /* ซ่อน Scrollbar บน Chrome/Safari */
+}
+
+.lightbox-thumb-item {
+  width: 58px;
+  height: 76px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.lightbox-thumb-item.active {
+  border-color: #7C3AED !important;
+  transform: scale(1.04);
+}
