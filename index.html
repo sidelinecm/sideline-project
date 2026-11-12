@@ -51,8 +51,8 @@
 
   <!-- 🟢 โหลด Font Awesome แก้ไอคอนสี่เหลี่ยม -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_34">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_34">
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_35">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_35">
 
   <script type="speculationrules">
   {
@@ -623,7 +623,11 @@
                    width="400" 
                    height="560" 
                    style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
+                   <!-- 🟢 ใส่ 2 บรรทัดนี้เพิ่มเข้าไป -->
+  <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
+  <div id="lightbox-photo-counter" class="lightbox-photo-counter-badge" style="display: none;"></div>
+</div>
+
             <div id="lightboxThumbnailStrip"></div>
           </div>
           
@@ -683,11 +687,11 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_34"></script>
+  <script type="module" src="/main.js?v=v_20261022_35"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        const CURRENT_SW_VER = 'v_20261022_34';
+        const CURRENT_SW_VER = 'v_20261022_35';
         navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
           .then(function(reg) {
             reg.onupdatefound = function() {

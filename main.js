@@ -1073,36 +1073,38 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   }
 
   const mapIframe = document.getElementById("google-map");
-if (mapIframe) {
-  // 🟢 ถ้าเซิร์ฟเวอร์ใส่ URL มาเรียบร้อยแล้ว ให้ข้ามทันที ประหยัดเน็ต ไม่กระตุก
-  if (mapIframe.src && mapIframe.src !== "about:blank" && !mapIframe.src.endsWith("about:blank")) {
-    // ข้าม ไม่ต้องทำอะไรเพิ่ม
-  } else {
-    const pathSegments = window.location.pathname.split("/").filter(Boolean);
-    const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
-    const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
-    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
-    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
-    const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
-    const queryText = isAllOrNational ? "ประเทศไทย" : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
-    const targetMapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
-
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            mapIframe.src = targetMapSrc;
-            observer.disconnect();
-          }
-        });
-      }, { rootMargin: "250px" });
-      observer.observe(mapIframe);
+  if (mapIframe) {
+    if (mapIframe.src && mapIframe.src !== "about:blank" && !mapIframe.src.endsWith("about:blank")) {
+      // โหลดแล้ว ข้าม
     } else {
-      mapIframe.src = targetMapSrc;
+      const serverDataSrc = mapIframe.getAttribute("data-src");
+      const pathSegments = window.location.pathname.split("/").filter(Boolean);
+      const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
+      const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
+      const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+      const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+      const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
+      const queryText = isAllOrNational ? "ประเทศไทย" : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
+      
+      // ดึง data-src จาก SSR เป็นหลัก
+      const targetMapSrc = serverDataSrc || `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              mapIframe.src = targetMapSrc;
+              observer.disconnect();
+            }
+          });
+        }, { rootMargin: "250px" });
+        observer.observe(mapIframe);
+      } else {
+        mapIframe.src = targetMapSrc;
+      }
     }
   }
-}
-    // 🛡️ 2. ป้องกันหน้าโซนย่อย: ตัดจบเฉพาะส่วนเขียนทับ Title/H1 เพื่อคงค่า SSR
+    
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
 
@@ -1512,9 +1514,12 @@ function updateLightboxPhoto(idx) {
         dot.classList.toggle("active", i === idx);
       });
     }
-  }
-  // ระบบตรวจจับการปัดรูปซ้าย-ขวา และแตะรูปสไตล์ Instagram
-  function initLightboxImageSwipe() {
+
+    const counterBadge = document.getElementById("lightbox-photo-counter"); if (counterBadge && currentActivePhotoList && currentActivePhotoList.length > 1) { counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>${idx + 1}/${currentActivePhotoList.length}</span>`; 
+    } 
+   } 
+    
+    function initLightboxImageSwipe() {
     const heroContainer = document.querySelector(".lightbox-hero-container");
     if (!heroContainer || heroContainer.dataset.swipeBound === "true") return;
     heroContainer.dataset.swipeBound = "true";
@@ -1722,7 +1727,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
-    // 🟢 3. จัดการรูปภาพหลัก (Hero Image)
+    
+
+
+// 🟢 3. จัดการรูปภาพหลัก + จุดไข่ปลา + ตัวนับรูป
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: fallbackImg, fullSrc: fallbackImg }];
@@ -1732,6 +1740,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
+      // รีเซ็ต Opacity ป้องกันรูปค้างจางตอนสลับคน
+      heroImg.style.opacity = "1";
+      heroImg.style.transform = "scale(1)";
+      heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+
       const optimizedModalSrc = images[0]?.src 
         ? images[0].src.replace("w_300,h_420", "w_480,h_672").replace("w_400,h_560", "w_480,h_672") 
         : (images[0]?.fullSrc || fallbackImg);
@@ -1742,6 +1755,26 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       };
       heroImg.src = optimizedModalSrc;
       heroImg.alt = `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} โซน${primaryZone} ตรงปก 100% - FirstModelHub`;
+    }
+
+    // สร้างเม็ดไข่ปลาและ Badge ตัวเลขนับรูป (1/N)
+    const dotsContainer = document.getElementById("lightbox-dots-indicator");
+    const counterBadge = document.getElementById("lightbox-photo-counter");
+
+    if (images.length > 1) {
+      if (dotsContainer) {
+        dotsContainer.innerHTML = images.map((_, i) => 
+          `<span class="gallery-dot ${i === 0 ? 'active' : ''}"></span>`
+        ).join("");
+        dotsContainer.style.display = "flex";
+      }
+      if (counterBadge) {
+        counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>1/${images.length}</span>`;
+        counterBadge.style.display = "flex";
+      }
+    } else {
+      if (dotsContainer) dotsContainer.style.display = "none";
+      if (counterBadge) counterBadge.style.display = "none";
     }
 
     // 🟢 4. สเปกย่อ 3 ช่อง และเรทราคา
@@ -1780,7 +1813,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
-    // 🟢 5. ตารางเรทราคา 3 ช่อง (แสดงทันที ไม่ดองในคิว)
+    
     const parseFn = window.parseRateToNumber || ((r) => 1500);
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
     const ratesGrid = document.getElementById("lightboxRatesGrid");
@@ -2801,8 +2834,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           
-          // ✅ แก้ไขเป็น: รอ 8 วินาที และรันเฉพาะช่วงที่ CPU ว่าง (requestIdleCallback)
-if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData.length) {
+if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length) {
   setTimeout(() => {
     const runBgFetch = async () => {
       try {
@@ -2828,7 +2860,7 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
     } else {
       runBgFetch();
     }
-  }, 8000); // ขยับเป็น 8 วินาที ให้พ้นช่วงวัดความเร็วทั้งหมด
+  }, 8000);
 }
           
           return true;
@@ -3009,7 +3041,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
       star.style.touchAction = "manipulation";
 
       const handleTap = (e) => {
-        // 🔒 สกัดกั้นทุกทาง ไม่ให้ลิงก์ <a> นำทางหรือรีโหลดหน้าเว็บเด็ดขาด!
         e.preventDefault();
         e.stopPropagation();
 
@@ -3020,7 +3051,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
         tapCount++;
         if (typeof triggerHaptic === "function") triggerHaptic("light");
 
-        // แอนิเมชันดาวดิ้นตอบสนองนิ้วมือ
         star.style.transition = "transform 0.15s ease";
         star.style.transform = "scale(1.4) rotate(20deg)";
         setTimeout(() => { star.style.transform = ""; }, 150);
@@ -3028,22 +3058,18 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
         clearTimeout(resetTimer);
         resetTimer = setTimeout(() => { tapCount = 0; }, 1800);
 
-        // เมื่อแตะครบ 5 ครั้ง
         if (tapCount >= 5) {
           tapCount = 0;
           clearTimeout(resetTimer);
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
-
-          // ⚡ เปิดหน้าต่างใส่รหัส PIN สุดหรู (ไม่พึ่ง prompt ของเบราว์เซอร์ ปลอดภัย 100%)
           openAdminPinDialog(ADMIN_PIN, ADMIN_SECRET);
         }
       };
 
-      // 🟢 ผูก Event ให้แตะได้อย่างแม่นยำ
       star.addEventListener("pointerdown", handleTap, { passive: false });
       star.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-    }); // 👈 ปิด forEach ให้สมบูรณ์ (มีวงเล็บปิดตามที่ Console ฟ้อง)
-  } 
+    });
+  }
 
   // 🟢 หน้าต่าง Modal ใส่รหัส PIN สไตล์ Luxury Glassmorphic
   function openAdminPinDialog(correctPin, secretKey) {
@@ -3143,7 +3169,7 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
 
     cancelBtn.onclick = closeDialog;
 
-   const executePurge = async () => {
+    const executePurge = async () => {
       const val = pinInput.value.trim();
       if (val === correctPin) {
         closeDialog();
@@ -3161,7 +3187,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
             await Promise.all(cacheKeys.map(k => caches.delete(k)));
           }
 
-          // ⚡ ตรวจจับว่าถ้ากำลังรันบน Localhost ไม่ต้องยิง Netlify ให้เออเร่อ
           const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
           
           if (!isLocal) {
@@ -3186,44 +3211,43 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
 
         } catch (err) {
           window.location.reload();
-         } 
-          } else {
-            pinInput.value = "";
-            pinInput.style.borderColor = "#FF1493";
-            if (typeof triggerHaptic === "function") triggerHaptic("medium");
-            pinInput.placeholder = "รหัสผิด!";
-          }
-        };
-
-        // 🟢 1. ผูกปุ่มกดยืนยัน และผูกปุ่ม Enter บนแป้นพิมพ์
-        submitBtn.onclick = executePurge;
-        pinInput.onkeydown = (e) => {
-          if (e.key === "Enter") executePurge();
-        };
-      }
-      
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-          initApplication();
-          initLightboxSwipeDown();
-          initStealthAdminPurge();
-          updateLiveRelativeTimestamps(); // 👈 คำนวณเวลาสดทันที
-        });
+        } 
       } else {
-        initApplication();
-        initLightboxSwipeDown();
-        initStealthAdminPurge();
-        updateLiveRelativeTimestamps();
+        pinInput.value = "";
+        pinInput.style.borderColor = "#FF1493";
+        if (typeof triggerHaptic === "function") triggerHaptic("medium");
+        pinInput.placeholder = "รหัสผิด!";
       }
-    })();
+    };
+
+    submitBtn.onclick = executePurge;
+    pinInput.onkeydown = (e) => {
+      if (e.key === "Enter") executePurge();
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initApplication();
+      initLightboxSwipeDown();
+      initStealthAdminPurge();
+      updateLiveRelativeTimestamps();
+    });
+  } else {
+    initApplication();
+    initLightboxSwipeDown();
+    initStealthAdminPurge();
+    updateLiveRelativeTimestamps();
+  }
+})();
 
 // ==========================================================================
 // 🚀 SEARCH BOTTOM SHEET & RUNTIME INTEGRITY PATCH (วางต่อท้าย main.js ล่างสุด)
 // ==========================================================================
+
 (function initSearchBottomSheetUXEnhancements() {
   "use strict";
 
-  // 🛡️ ป้องกันบั๊ก Runtime ReferenceError: zoneSlug is not defined ทั่วทั้งระบบ
   if (typeof window.zoneSlug === "undefined") {
     Object.defineProperty(window, "zoneSlug", {
       get: function() { return window.currentZoneSlug || ""; },
@@ -3242,13 +3266,11 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
 
     if (!sheetEl) return;
 
-    // 1. ระบบรูดลงเพื่อปิด (Native-like Swipe Down to Dismiss)
     let touchStartY = 0;
     let touchCurrentY = 0;
     let isDragging = false;
 
     sheetEl.addEventListener("touchstart", (e) => {
-      // อนุญาตให้รูดลงเมื่อ Scroll อยู่ตำแหน่งบนสุดเท่านั้น
       if (!bodyContent || bodyContent.scrollTop <= 0) {
         touchStartY = e.touches[0].clientY;
         touchCurrentY = touchStartY;
@@ -3264,7 +3286,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
       const deltaY = touchCurrentY - touchStartY;
 
       if (deltaY > 0) {
-        // มีแรงหน่วงเล็กน้อยเพื่อให้สัมผัสเป็นธรรมชาติ
         sheetEl.style.transition = "none";
         const dampenedY = Math.pow(deltaY, 0.88);
         sheetEl.style.transform = `translate(-50%, ${dampenedY}px)`;
@@ -3277,7 +3298,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
       const deltaY = touchCurrentY - touchStartY;
       sheetEl.style.transition = "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)";
 
-      // ถ้ารูดลงเกิน 80px ให้ปิดทันที
       if (deltaY > 80) {
         if (typeof window.triggerHaptic === "function") window.triggerHaptic("light");
         sheetEl.classList.remove("active");
@@ -3294,22 +3314,18 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
       }
     }, { passive: true });
 
-    // 2. ปรับปรุงปุ่ม "🔄 ล้างค่า" ให้เคลียร์ฟอร์มแบบคลีน 100%
     if (resetBtn && !resetBtn.dataset.patchBound) {
       resetBtn.dataset.patchBound = "true";
       resetBtn.addEventListener("click", () => {
         if (typeof window.triggerHaptic === "function") window.triggerHaptic("medium");
 
-        // เคลียร์ค่าในช่องพิมพ์
         if (searchInput) searchInput.value = "";
         const clearBtn = document.getElementById("clear-search-btn");
         if (clearBtn) clearBtn.style.display = "none";
 
-        // เคลียร์คำแนะนำค้นหา
         const popover = document.getElementById("search-suggestions");
         if (popover) popover.style.display = "none";
 
-        // รีเซ็ต Dropdown ทั้งหมด
         const provSelect = document.getElementById("search-province");
         if (provSelect) provSelect.value = "";
 
@@ -3322,12 +3338,10 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
         const sortSelect = document.getElementById("sort-select");
         if (sortSelect) sortSelect.value = "featured";
 
-        // รีเซ็ตปุ่ม Pill Tabs ให้กลับมาที่ "ทั้งหมด"
         document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
         const allPill = document.querySelector('.filter-pill-tab[data-tag="all"]');
         if (allPill) allPill.classList.add("active");
 
-        // เรียกค้นหาและอัปเดตหน้าจอใหม่ทันที
         if (typeof window.executeFilterAndRender === "function") {
           window.executeFilterAndRender(true);
         }
@@ -3335,7 +3349,6 @@ if (window.totalProfilesCount && window.totalProfilesCount > window.profilesData
     }
   }
 
-  // ผูกการทำงานทันทีเมื่อหน้าเว็บพร้อม
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", setupSheetGestures);
   } else {
