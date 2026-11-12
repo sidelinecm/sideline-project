@@ -110,3 +110,43 @@
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+/* 1. ดีไซน์หน้าตาแถบจุดไข่ปลาทรงแคปซูลสไตล์ IG */
+.lightbox-hero-container {
+  position: relative !important;
+}
+
+.lightbox-dots-wrapper {
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  padding: 4px 8px !important;
+  border-radius: 100px !important;
+  z-index: 20 !important;
+  pointer-events: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* จุดกลมทั่วไป */
+.lightbox-dots-wrapper .gallery-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-block !important;
+}
+
+/* จุดที่แอคทีฟ (ขยายเป็นแคปซูลขาว) */
+.lightbox-dots-wrapper .gallery-dot.active {
+  width: 14px !important;
+  border-radius: 100px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8) !important;
+}
