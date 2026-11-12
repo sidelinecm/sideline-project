@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_34`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_35`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -841,20 +841,34 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
  
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+    <!-- 🟢 แทนที่บล็อก GTM เดิมใน render-bot.js (บรรทัด 468-479): -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+
+  (function() {
+    let gtmLoaded = false;
+    const loadGTM = function() {
+      if (gtmLoaded) return;
+      gtmLoaded = true;
+      var s = document.createElement('script');
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
+      s.async = true;
+      document.head.appendChild(s);
       gtag('js', new Date());
-      gtag('config', 'G-PG0QFDWTTG');
-      
-      window.trackLineClick = window.trackLineClick || function(id) {
-        try {
-          var k = 'line_click_' + id;
-          sessionStorage.setItem(k, Date.now());
-        } catch(e) {}
-      };
-    </script>
+      gtag('config', 'G-PG0QFDWTTG', {
+        'send_page_view': true,
+        'cookie_flags': 'SameSite=None;Secure'
+      });
+    };
+    
+    ['click','touchstart','keydown','scroll'].forEach(function(evt){
+      window.addEventListener(evt, loadGTM, { once: true, passive: true });
+    });
+    setTimeout(loadGTM, 2500);
+  })();
+</script>
 </head>
 <body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">

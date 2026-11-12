@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_34';
+let GLOBAL_VERSION = 'v_20261022_35';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -2458,10 +2458,7 @@ if (!isNational && pills) {
     // 🟢 3. เข้าสู่ส่วนแสดงโปรไฟล์หลักต่อไปตามปกติ
     let displayAreaHtml = "";
     if (isNational) {
-      const feedCardsHtml = nationalFeedProfiles.map((p, i) => {
-        const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
-        return renderCardHtml(p, i === 0, pName);
-      }).join("");
+     const feedCardsHtml = actualVisibleProfiles.map((p, i) => { const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย"; return renderCardHtml(p, i === 0, pName); }).join("");
 
       
       const popularProvinces = [
