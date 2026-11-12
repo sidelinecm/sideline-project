@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_33`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_34`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -205,7 +205,7 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
-// 🟢 แทนที่ฟังก์ชัน generateDynamicPersonaDesc ใน render-bot.js (ปลอดภัย 100% อันดับไม่ขยับ)
+
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   let rawPersonalDesc = sanitizeThaiText(p.description || "")
     .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
@@ -219,7 +219,6 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
   const pId = Number(p.id) || 1;
   const rawTags = (Array.isArray(p.styleTags) ? p.styleTags : (p.style_tags || [])).join(" ").toLowerCase();
 
-  // สร้างประโยคเกริ่นนำ 4 แบบ สลับกันตามรหัสน้อง (กำจัดข้อหาเนื้อหาซ้ำซ้อน)
   const introList = [
     `ข้อมูลสัดส่วนและพิกัดบริการของ${displayName} ได้รับการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และให้ความเป็นกันเอง สบายใจได้กับการนัดพบตัวจริงหน้างาน`,
     `โปรไฟล์ยืนยันตัวตนจริงของ${displayName} น้องเป็นคนอารมณ์ดี ยิ้มเก่ง เอาใจใส่ในทุกรายละเอียด และพร้อมดูแลให้คุณรู้สึกผ่อนคลายตลอดการนัดหมาย`,
@@ -228,7 +227,6 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
   ];
   const introText = introList[pId % introList.length];
 
-  // ดึงสไตล์จริงจากแท็กของน้องมาอธิบาย
   let styleText = "เน้นการดูแลเอาใจใส่สไตล์เพื่อนสนิท สุภาพ อ่อนโยน และไม่เร่งรอบเวลางาน";
   if (rawTags.includes("ฟิวแฟน") || rawTags.includes("gfe")) {
     styleText = "เน้นฟิวแฟน (GFE) ใกล้ชิด น่ารัก ขี้อ้อน เทคแคร์ดั่งแฟนตัวจริง เหมาะสำหรับนัดทานข้าวหรือพักผ่อนส่วนตัว";
@@ -238,15 +236,13 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
     styleText = "สเปกสาวไซส์มินิ สดใส น่ารัก คุยเก่ง อัธยาศัยดี เป็นเพื่อนร่วมทางที่ทำให้คุณยิ้มได้ตลอดเวลา";
   }
 
-  // ดึงพิกัดจริง
   const locList = [
     `ประจำการอยู่ในโซน${zone} มีห้องพักส่วนตัวที่สะอาด มิดชิด หรือพร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและคอนโดในพื้นที่`,
     `สแตนด์บายในย่าน${zone} พร้อมเดินทางไปดูแลถึงที่พัก คอนโดมิเนียม หรือโรงแรมชั้นนำในละแวกใกล้เคียงอย่างรวดเร็ว`,
-    `มีที่พักส่วนตัวในทำเล${zone} และพร้อมออกเดินทางไปบริการนอกสถานที่ตามเวลานัดหมายที่คุณสะดวก`
+    `มีห้องพักส่วนตัวในทำเล${zone} และพร้อมออกเดินทางไปบริการนอกสถานที่ตามเวลานัดหมายที่คุณสะดวก`
   ];
   const locationText = locList[(pId + 1) % locList.length];
-
-  const safetyText = "ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี หากตรวจสอบแล้วตัวจริงไม่ตรงปก สามารถปฏิเสธและยกเลิกได้ทันที";
+  const safetyText = "ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มีนโยบายโอนเงินมัดจำล่วงหน้าทุกกรณี หากตรวจสอบแล้วตัวจริงไม่ตรงปก สามารถปฏิเสธและยกเลิกได้ทันที";
 
   return `
     <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">

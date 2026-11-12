@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_33';
+let GLOBAL_VERSION = 'v_20261022_34';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -1609,6 +1609,7 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
               : `รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมย่านนิมมาน เจ็ดยอด สันติธรรม หลังมช. นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
 
     const cleanMetaDesc = stripHTML(metaDescription);
+    // 1. จัดการ Breadcrumb List ให้สะอาดและเป็นมิตรกับ Googlebot
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
     ];
@@ -1617,7 +1618,7 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       breadcrumbItems.push({
         "@type": "ListItem",
         "position": 2,
-        "name": `ไซด์ไลน์${provinceNameThai}`,
+        "name": provinceNameThai, // 🟢 ใช้ชื่อจังหวัดตรงๆ (ไม่ต้องมีคำว่าไซด์ไลน์ปะปน)
         "item": `${primaryDomain}/location/${provinceSlug}`
       });
       if (zoneSlug) {
@@ -1630,13 +1631,13 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       }
     }
 
-    // 🟢 4. WebPage Schema (CollectionPage) ตอนนี้เรียกใช้ metaTitle ได้ถูกต้องแล้ว 100%
+    // 2. WebPage Schema (CollectionPage)
     const webpageSchema = {
       "@type": "CollectionPage",
       "@id": `${canonicalUrl}#webpage`,
+      "url": canonicalUrl,
       "name": stripHTML(metaTitle),
       "description": cleanMetaDesc,
-      "url": canonicalUrl,
       "inLanguage": isEnglishHome ? "en-US" : "th-TH",
       "dateModified": latestActualIso,
       "isPartOf": { "@id": `${primaryDomain}/#website` },
@@ -1654,12 +1655,11 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
           }
     };
     
-    
     if (totalCount > 0) {
       webpageSchema.mainEntity = { "@id": `${canonicalUrl}#itemlist` };
     }
 
-    // 🟢 5. โครงสร้าง Schema Graph หลัก
+    // 3. โครงสร้าง Schema Graph หลัก
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -1704,35 +1704,32 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     }
 
     if (totalCount > 0) {
-      // ✅ ให้อ่านจาก actualVisibleProfiles ทั้งหมดโดยตรง ไม่ต้องตัดทอน 30 คนอีกต่อไป
-      const schemaProfiles = actualVisibleProfiles;
-
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonicalUrl}#itemlist`,
-        "name": isNational 
-          ? "รายชื่อสาวรับงานและไซด์ไลน์ทั้งหมดทั่วไทย" 
-          : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-        "numberOfItems": schemaProfiles.length, // นับจำนวนจริงอัตโนมัติ (เช่น 114, 65, 18)
-        "itemListElement": schemaProfiles.map((p, idx) => {
-          const pSlug = p.slug || String(p.id);
-          const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
-          return {
-            "@type": "ListItem",
-            "position": idx + 1,
-            "item": {
-              "@type": "Person",
-              "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
-              "image": pImg,
-              "url": `https://firstmodelhub.com/sideline/${pSlug}`
-            }
-          };
-        })
-      });
-    }
+  schemaGraph.push({
+    "@type": "ItemList",
+    "@id": `${canonicalUrl}#itemlist`,
+    "name": isNational 
+      ? "รายชื่อสาวรับงานและไซด์ไลน์ทั้งหมดทั่วไทย" 
+      : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
+    "numberOfItems": totalCount, // ✅ ดึงค่าออโต้จาก totalCount
+    "itemListElement": profilesList.map((p, idx) => {
+      const pSlug = p.slug || String(p.id);
+      const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
+      return {
+        "@type": "ListItem",
+        "position": idx + 1,
+        "item": {
+          "@type": "Person",
+          "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
+          "image": pImg,
+          "url": `https://firstmodelhub.com/sideline/${encodeURIComponent(pSlug)}`
+        }
+      };
+    })
+  });
+}
 
    
-    // 🟢 คลังคำถาม FAQ ประจำย่านที่มี Entity สถานที่จริง (แก้ Doorway Pages สมบูรณ์ 100%)
+    
     const ZONE_LOCAL_ENTITY_FAQS = {
       // ==========================================
       // 1. จังหวัดเชียงใหม่ (ครบ 17 ย่านจริง)
@@ -2660,24 +2657,20 @@ if (!isNational && pills) {
     });
 
   
-    const initialClientProfiles = clientProfilesData.slice(0, 24);
-    const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
-    const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
-      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
-      nameThai: p.nameThai || p.name
-    }));
+const initialClientProfiles = profilesList; // ใช้ profilesList ทั้งหมดของหน้านั้น
+const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
-    const ssrDataScript = `
-      <script id="ssr-profiles-data">
-        window.profilesData = ${serializedProfilesJson};
-        window.totalProfilesCount = ${totalCount}; // ✅ ซิงค์ให้ตรงกับตัวเลขบนหน้าจอและ Meta Description 100%
-        window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
-        window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
-        window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
-        window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
-      </script>
-    `;
+const ssrDataScript = `
+  <script id="ssr-profiles-data">
+    window.profilesData = ${serializedProfilesJson};
+    window.totalProfilesCount = ${totalCount}; // ออโต้ 100% ตามจริง
+    window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
+    window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
+    window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
+    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
+  </script>
+`;
     
     finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
@@ -2706,7 +2699,8 @@ if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
   if (rawLcpImg) {
     const lcpExactUrl = optimizeImg(rawLcpImg, 300);
-    const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high" type="image/webp">\n</head>`;
+    // 🟢 แก้ไข: ตัด type ออก ป้องกันเบราว์เซอร์เมินการพรีโหลด
+    const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
     finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
   }
 }
