@@ -297,8 +297,11 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 แก้ให้ตรงกับ ssr-province.js (ดึงแคชรูปเดียวกันเป๊ะ ไม่โหลดซ้ำ)
-let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+  // 🟢 ดักจับ Inline Data-URI ทันที ไม่ส่งไป Cloudinary
+  if (cleanPath.startsWith("data:")) return cleanPath;
+
+  let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง

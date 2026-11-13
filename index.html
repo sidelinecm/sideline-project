@@ -6,20 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
+  
+  <!-- PWA & Mobile Web App Meta -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="FirstModelHub">
 
+  <!-- Primary SEO Meta Tags -->
   <title>รับงานไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง100% จ่ายหน้างานไม่มีมัดจำ | FirstModelHub</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย คัดรูปจริงตรงปก 100% นัดเจอง่าย จ่ายเงินหน้างานตรงกับน้อง ปลอดภัย ไร้มัดจำล่วงหน้าทุกกรณี" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
+  <!-- Canonical & Hreflang Tags -->
   <link rel="canonical" id="canonical-link" href="https://firstmodelhub.com/">
   <link rel="alternate" hreflang="th" href="https://firstmodelhub.com/" />
   <link rel="alternate" hreflang="en" href="https://firstmodelhub.com/index-en" />
   <link rel="alternate" hreflang="x-default" href="https://firstmodelhub.com/" />
 
+  <!-- Open Graph Meta Tags (Facebook & LINE) -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="FirstModelHub">
   <meta property="og:type" content="website">
@@ -32,44 +37,57 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FirstModelHub ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟนทั่วไทย">
 
+  <!-- Twitter Cards (X / Twitter) -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub">
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนทั่วไทย ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ">
   <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
 
+  <!-- Favicons & App Icons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <link rel="preconnect" href="https://res.cloudinary.com">
+  <!-- 🟢 1. Resource Hints & Preconnect (เปิดท่อเชื่อมต่อล่วงหน้า) -->
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
+  <!-- 🟢 2. Font Preload (ดึงฟอนต์มาทันที ป้องกันตัวหนังสือกระตุก CLS = 0) -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
-  <!-- 🟢 โหลด Font Awesome แก้ไอคอนสี่เหลี่ยม -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- 🟢 3. Asynchronous Font Awesome (ไม่ขวางการเรนเดอร์หน้าจอ FCP ไวที่สุด) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
+
+  <!-- Main Stylesheet & JS Preload -->
   <link rel="stylesheet" href="/styles.css?v=v_20261022_40">
   <link rel="modulepreload" href="/main.js?v=v_20261022_40">
 
- <script type="speculationrules">
-{
-  "prerender": [
-    {
-      "where": {
-        "or": [
-          { "href_matches": "/sideline/*" },
-          { "href_matches": "/location/*" }
-        ]
-      },
-      "eagerness": "moderate"
-    }
-  ]
-}
-</script>
+  <!-- Speculation Rules API (Prerender หน้าถัดไปไว้ในแรมล่วงหน้า) -->
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": {
+          "or": [
+            { "href_matches": "/sideline/*" },
+            { "href_matches": "/location/*" }
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+  </script>
 
+  <!-- Schema.org JSON-LD Structured Data -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -98,6 +116,7 @@
   }
   </script>
   
+  <!-- 🟢 4. Google Tag Manager (Lazy-load หน่วงเวลา 3 วิ / รอการสัมผัสจอ ไม่บล็อกเธรดหลัก) -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ window.dataLayer.push(arguments); }
@@ -124,11 +143,11 @@
         window.addEventListener(evt, loadGTM, { once: true, passive: true });
       });
       
-      // 🟢 ตั้งเวลา 3 วินาที เก็บสถิติ Analytics ได้แม่นยำ ไม่สูญหาย
       setTimeout(loadGTM, 3000);
     })();
   </script>
 
+  <!-- Critical CSS -->
   <style>
     .seo-h1-title, .h1-line-1, .h1-line-2 {
       content-visibility: visible !important;
@@ -138,7 +157,7 @@
 <body class="fmh-app-page">
     
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <!-- 1. หน้าแรก -->
+ 
   <a href="/" class="dock-item" id="dock-item-home">
     <div class="dock-icon-box">
       <i class="fas fa-home"></i>
@@ -615,15 +634,17 @@
       <div class="lightbox-scroll-body" id="lightboxScrollBody" style="-webkit-overflow-scrolling: touch;">
         <div class="lightbox-grid-layout">
           <div class="lightbox-image-column">
+            
             <div class="lightbox-hero-container">
-              <!-- 🟢 แก้ไข Placeholder เป็น Native SVG แบบสมบูรณ์ ไม่ยิงผ่าน Cloudinary Fetch -->
-              <img id="lightboxHeroImage" 
-                   src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 560'%3E%3Crect width='400' height='560' fill='%23F8F6FC'/%3E%3C/svg%3E" 
-                   alt="รูปโปรไฟล์ตัวจริงตรงปก" 
-                   width="400" 
-                   height="560" 
-                   style="width: 100%; height: 100%; object-fit: cover;">
-                   <!-- 🟢 ใส่ 2 บรรทัดนี้เพิ่มเข้าไป -->
+  
+  <img id="lightboxHeroImage" 
+       src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 560'%3E%3Crect width='400' height='560' fill='%23F8F6FC'/%3E%3C/svg%3E" 
+       alt="รูปโปรไฟล์ตัวจริงตรงปก" 
+       width="400" 
+       height="560" 
+       loading="lazy"
+       decoding="async"
+       style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
   <div id="lightbox-photo-counter" class="lightbox-photo-counter-badge" style="display: none;"></div>
 </div>
