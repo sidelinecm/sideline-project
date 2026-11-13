@@ -170,7 +170,11 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  let transform = "f_auto,q_auto:good,w_480,h_672,c_fill,g_auto";
+  // 🟢 ดักจับ Inline Data-URI ทันที ไม่ส่งไป Cloudinary
+  if (cleanPath.startsWith("data:")) return cleanPath;
+
+  let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+ 
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
@@ -802,8 +806,13 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
 
+    <!-- Resource Hints & Preconnect -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Fonts Preload -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     ${heroSrcSet 
@@ -811,7 +820,12 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- 🟢 Font Awesome Async (Non-blocking) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </noscript>
+
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
@@ -839,35 +853,34 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
- 
-    
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ window.dataLayer.push(arguments); }
-  window.gtag = gtag;
+    <!-- Google Tag Manager Lazy-load (ถูกต้อง ไม่โหลดทันที ไม่ซ้ำซ้อน) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      window.gtag = gtag;
 
-  (function() {
-    let gtmLoaded = false;
-    const loadGTM = function() {
-      if (gtmLoaded) return;
-      gtmLoaded = true;
-      var s = document.createElement('script');
-      s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
-      s.async = true;
-      document.head.appendChild(s);
-      gtag('js', new Date());
-      gtag('config', 'G-PG0QFDWTTG', {
-        'send_page_view': true,
-        'cookie_flags': 'SameSite=None;Secure'
-      });
-    };
-    
-    ['click','touchstart','keydown','scroll'].forEach(function(evt){
-      window.addEventListener(evt, loadGTM, { once: true, passive: true });
-    });
-    setTimeout(loadGTM, 3000);
-  })();
-</script>
+      (function() {
+        let gtmLoaded = false;
+        const loadGTM = function() {
+          if (gtmLoaded) return;
+          gtmLoaded = true;
+          var s = document.createElement('script');
+          s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
+          s.async = true;
+          document.head.appendChild(s);
+          gtag('js', new Date());
+          gtag('config', 'G-PG0QFDWTTG', {
+            'send_page_view': true,
+            'cookie_flags': 'SameSite=None;Secure'
+          });
+        };
+        
+        ['click','touchstart','keydown','scroll'].forEach(function(evt){
+          window.addEventListener(evt, loadGTM, { once: true, passive: true });
+        });
+        setTimeout(loadGTM, 3000);
+      })();
+    </script>
 </head>
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
