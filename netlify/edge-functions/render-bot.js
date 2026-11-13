@@ -840,7 +840,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
  
-    <!-- 🟢 แทนที่บล็อก GTM เดิมใน render-bot.js (บรรทัด 468-479): -->
+    
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){ window.dataLayer.push(arguments); }
@@ -865,7 +865,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     ['click','touchstart','keydown','scroll'].forEach(function(evt){
       window.addEventListener(evt, loadGTM, { once: true, passive: true });
     });
-    setTimeout(loadGTM, 2500);
+    setTimeout(loadGTM, 3000);
   })();
 </script>
 </head>

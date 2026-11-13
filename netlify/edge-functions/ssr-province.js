@@ -1581,7 +1581,6 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     const realProvinceTimeText = latestUpdateMillis > 0 ? getRealTimeAgo(latestUpdateMillis) : "วันนี้";
     const realFreshnessDate = formatActualDateText(latestActualIso);
 
-    // 🟢 [ย้ายขึ้นมาตรงนี้] ประกาศและสร้าง metaTitle + H1 ก่อน เพื่อให้ Schema และ Tag ด้านล่างเรียกใช้ได้ ไม่พัง!
     let metaTitle = "";
     let ssrH1Html = "";
     let dynamicSubheadline = "";
@@ -1589,16 +1588,24 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
     if (isEnglishHome) {
       metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
       ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
-    } else if (isNational) { metaTitle = `รับงานไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง100% จ่ายหน้างานไม่มีมัดจำ | FirstModelHub`; ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span> <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
+      dynamicSubheadline = "Verified companions across Thailand";
+    } else if (isNational) { 
+      metaTitle = `รับงานไซด์ไลน์ เด็กเอ็นทั่วไทย รูปจริง100% จ่ายหน้างานไม่มีมัดจำ | FirstModelHub`; 
+      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span> <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
+      dynamicSubheadline = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
     } else if (zoneSlug) {
       metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
       ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
                    <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
+      dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
     } else {
       metaTitle = `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
       ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
                    <span class="h1-line-2">สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน</span>`;
+      dynamicSubheadline = `ศูนย์รวมสาวรับงานและไซด์ไลน์ จ.${escapeHTML(provinceNameThai)}`;
     }
+
+    
 
     const metaDescription = isEnglishHome
       ? `Premium verified escorts and sidelines across Thailand (${totalCount} profiles). 100% real photos, pay directly on arrival, zero advance deposit.`
@@ -2237,6 +2244,7 @@ const hreflangBlock = isNational
    
 
    finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
+   
 finalHtml = finalHtml.replace(/<span class=["']hero-subheadline["']>[\s\S]*?<\/span>/i, dynamicSubheadline ? `<span class="hero-subheadline">${dynamicSubheadline}</span>` : "");
 
 // 🟢 1. สร้างข้อความ aria-label และข้อความคอมเมนต์ตามหน้าที่กำลังเปิดอยู่
@@ -2595,13 +2603,13 @@ if (!isNational && pills) {
 
     
    finalHtml = finalHtml.replace(
-      /<div id="seo-drawer-wrapper"[\s\S]*?<\/div>\s*(?=<div id="faq-wrapper-block">)/i, 
+      /<div id="seo-drawer-wrapper"[\s\S]*?(?=<div\s+id=["']faq-wrapper-block["'])/i, 
       `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.04);">
           <div class="seo-content-inner">
               ${freshnessBox}
               ${linkedIntro}
           </div>
-       </div>\n        `
+       </div>\n\n        `
     );
 
     if (faqsHtml) finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
@@ -2656,24 +2664,24 @@ if (!isNational && pills) {
     const initialClientProfiles = profilesList; // ใช้ profilesList ทั้งหมดของหน้านั้น
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
-    // 🟢 ประกาศตัวแปร serializedProvinces ตรงนี้เพื่อแก้ปัญหา ReferenceError
+    
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name
     }));
 
-    const ssrDataScript = `
-      <script id="ssr-profiles-data">
-        window.profilesData = ${serializedProfilesJson};
-        window.totalProfilesCount = ${totalCount}; // ออโต้ 100% ตามจริง
-        window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
-        window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
-        window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
-        window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
-      </script>
-    `;
     
-    finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
+const ssrDataScript = `
+  <script id="ssr-profiles-data">
+    window.profilesData = ${serializedProfilesJson};
+    window.totalProfilesCount = ${totalCount};
+    window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
+    window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
+    window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
+    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
+  </script>
+`;
+finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
@@ -2683,7 +2691,7 @@ if (!isNational && pills) {
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
 finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
-// ✅ แก้ไข: ประกาศและสร้าง URL แผนที่ Google Maps ตามจังหวัด/พื้นที่จริง
+
 const mapQuery = isNational 
   ? encodeURIComponent("ประเทศไทย") 
   : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
