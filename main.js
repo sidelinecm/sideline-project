@@ -2,17 +2,22 @@
 function parseRateToNumber(rate) {
   if (!rate) return 1500;
   const str = String(rate).trim().toLowerCase();
+  if (str.includes("ฟรี") || str === "free") return 0;
+  if (str.includes("ตกลง") || str.includes("สอบถาม")) return 1500;
+
   if (str.includes("k")) {
     const floatVal = parseFloat(str.replace(/[^0-9.]/g, ""));
     return isNaN(floatVal) ? 1500 : Math.round(floatVal * 1000);
   }
-  // ✅ ตัดข้อความข้างหลัง เช่น /1ชม. หรือ (1 ชม.) ออกก่อนดึงตัวเลข ป้องกันกลายเป็น 15001
+
   const pricePart = str.split(/[\/\(\s]/)[0];
   const cleanDigits = pricePart.replace(/\D/g, "");
   const num = parseInt(cleanDigits, 10);
   if (isNaN(num) || num <= 0) return 1500;
-  if (num < 10) return num * 1000;
-  if (num < 500) return num * 10;
+
+  if (num < 10) return num * 1000;              // กรอก 2 -> 2000
+  if (num >= 10 && num < 100) return num * 100; // กรอก 15 -> 1500 (แก้บั๊ก 150.-)
+  if (num < 500) return num * 10;               // กรอก 150 -> 1500
   return num;
 }
 window.parseRateToNumber = parseRateToNumber;
@@ -324,48 +329,55 @@ let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
 
     const rawName = raw.n || raw.name || raw.displayName || raw.title || "Model";
     const displayName = formatDisplayName(rawName);
-    const mainImg = raw.img || raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
+    const mainImg = (raw.img || raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar || "").trim();
     
-   let gallery = raw.g || raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+    let gallery = raw.g || raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
     if (typeof gallery === "string") {
       const trimmed = gallery.trim();
-      if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-        try { gallery = JSON.parse(trimmed); } catch (_) { gallery = trimmed.split(",").map(s => s.trim()); }
-      } else if (trimmed) {
-        gallery = trimmed.split(",").map(s => s.trim());
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try { 
+          gallery = JSON.parse(trimmed); 
+        } catch (_) { 
+          gallery = []; 
+        }
+      } else if (trimmed.startsWith("http") || trimmed.startsWith("/")) {
+        // 🔒 ถ้าเป็น URL เดียว ห้าม split ด้วยเครื่องหมายจุลภาคเด็ดขาด!
+        gallery = [trimmed];
       } else {
         gallery = [];
       }
     }
-    const galleryArr = Array.isArray(gallery) ? gallery : [];
 
-    // รวมรูปหน้าปก + ทุกรูปในอัลบั้มเข้าด้วยกัน
-    const combinedPhotos = [
-      mainImg,
-      ...galleryArr
-    ].filter(Boolean);
+    // กรองเฉพาะ URL ที่ถูกต้องจริงเท่านั้น
+    const galleryArr = (Array.isArray(gallery) ? gallery : [])
+      .map(item => (typeof item === "object" && item !== null) ? (item.src || item.url || item.imagePath || "") : String(item || ""))
+      .map(s => s.trim())
+      .filter(s => s.startsWith("http") || s.startsWith("/"));
 
-    let images = [...new Set(combinedPhotos)].map(img => {
-      let srcUrl = DEFAULT_FALLBACK_IMG;
-      let fullSrcUrl = DEFAULT_FALLBACK_IMG;
+    const combinedPhotos = [mainImg, ...galleryArr].filter(s => s && (s.startsWith("http") || s.startsWith("/")));
 
-      if (typeof img === "object" && img !== null) {
-        srcUrl = img.src || img.url || img.imagePath || img.image_url || DEFAULT_FALLBACK_IMG;
-        fullSrcUrl = img.fullSrc || img.fullUrl || srcUrl;
-      } else if (typeof img === "string" && img.trim()) {
-        srcUrl = img.trim();
-        fullSrcUrl = img.trim();
+    // 🔒 ลบรูปซ้ำโดยเช็คจากชื่อไฟล์ภาพจริง (Image Signature) ป้องกัน Cloudinary URL เขียนต่างกันแต่วิ่งไปรูปเดียวกัน
+    const seenSignatures = new Set();
+    const uniquePhotos = [];
+
+    for (const urlStr of combinedPhotos) {
+      const fileSig = urlStr.split("?")[0].split("/").pop(); // ดึงชื่อไฟล์ เช่น gaseshmf633n3c3hcrhh.png
+      if (fileSig && !seenSignatures.has(fileSig)) {
+        seenSignatures.add(fileSig);
+        uniquePhotos.push(urlStr);
       }
+    }
 
-    return {
-  src: optimizeImg(srcUrl, 300),
-  fullSrc: optimizeImg(fullSrcUrl, 300)
-};
-    });
+    let images = uniquePhotos.map(urlStr => ({
+      src: optimizeImg(urlStr, 300),
+      fullSrc: optimizeImg(urlStr, 600)
+    }));
 
     if (images.length === 0) {
       images.push({ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG });
     }
+
+    
 
   let pKey = (raw.pk || raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "").toString().toLowerCase().trim();
     if (pKey === "chiang_mai" || pKey === "chiang-mai") pKey = "chiangmai";
@@ -706,10 +718,12 @@ for (const p of hotCandidate) {
 
     let results = [...appState.allProfiles];
 
-// 🟢 ตัดคนที่ติด Hot Swiper ออกจากรายการด้านล่าง ไม่ให้หน้าจอกระตุกและแสดงซ้ำ
-if (window.__hotProfileIds && window.__hotProfileIds.size > 0 && !currentCriteria.text && (!currentCriteria.zone || currentCriteria.zone === "ทั้งหมด")) {
-  results = results.filter(p => !window.__hotProfileIds.has(String(p.id)));
-}
+    // 🟢 ถ้าผู้ใช้กดเลือกหมวดหมู่แท็บ (เช่น #ฟิวแฟน) ให้แสดงคนทั้งหมด ห้ามตัด Hot Profiles ทิ้ง
+    const isPillFiltered = appState.activePillTag && appState.activePillTag !== "all";
+
+    if (window.__hotProfileIds && window.__hotProfileIds.size > 0 && !currentCriteria.text && (!currentCriteria.zone || currentCriteria.zone === "ทั้งหมด") && !isPillFiltered) {
+      results = results.filter(p => !window.__hotProfileIds.has(String(p.id)));
+    }
 
 // 1. กรองตามจังหวัด
 if (activeProvince !== "all" && activeProvince !== "national") {
@@ -1530,6 +1544,7 @@ function updateLightboxPhoto(idx) {
     let touchEndY = 0;
     let isSwiping = false;
 
+    // 🟢 [เพิ่ม] เก็บพิกัดเริ่มต้นตอนนิ้วแตะจอ
     heroContainer.addEventListener("touchstart", (e) => {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
@@ -1538,34 +1553,35 @@ function updateLightboxPhoto(idx) {
       isSwiping = false;
     }, { passive: true });
 
+    // 🟢 [เพิ่ม] อัปเดตพิกัดตามการลากนิ้ว เพื่อเช็คว่าเป็นการปัด (Swipe) หรือแค่แตะ (Tap)
     heroContainer.addEventListener("touchmove", (e) => {
       touchEndX = e.touches[0].clientX;
       touchEndY = e.touches[0].clientY;
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
-      if (Math.abs(diffX) > 15 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (Math.abs(touchEndX - touchStartX) > 10 || Math.abs(touchEndY - touchStartY) > 10) {
         isSwiping = true;
       }
     }, { passive: true });
 
     heroContainer.addEventListener("touchend", (e) => {
+      // 🔒 ถ้ามีรูปเดียว ไม่ต้องคำนวณการปัดหรือแตะรูปใดๆ ทั้งสิ้น ป้องกันตัวเลขเด้ง
+      if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
+
       const diffX = touchEndX - touchStartX;
       const diffY = touchEndY - touchStartY;
 
       // 1. ตรวจจับการปัดนิ้วซ้าย / ขวา (Swipe)
       if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
         if (diffX < 0) {
-          updateLightboxPhoto(currentActivePhotoIdx + 1); // ปัดซ้าย -> รูปถัดไป
+          updateLightboxPhoto(currentActivePhotoIdx + 1);
         } else {
-          updateLightboxPhoto(currentActivePhotoIdx - 1); // ปัดขวา -> รูปก่อนหน้า
+          updateLightboxPhoto(currentActivePhotoIdx - 1);
         }
       } 
-      // 2. ตรวจจับการแตะที่รูปสไตล์ Instagram (Tap Left = Prev, Tap Right = Next)
+      // 2. ตรวจจับการแตะรูปซ้าย/ขวา
       else if (!isSwiping && Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
         if (e.target.closest(".lightbox-dots-wrapper, .lightbox-top-brand, .lightbox-close-circle-btn, .sheet-drag-pill-bar")) {
           return;
         }
-        if (!currentActivePhotoList || currentActivePhotoList.length <= 1) return;
         const rect = heroContainer.getBoundingClientRect();
         const tapX = touchEndX - rect.left;
         if (tapX < rect.width * 0.35) {
@@ -1575,10 +1591,9 @@ function updateLightboxPhoto(idx) {
         }
       }
     }, { passive: true });
-
-    // รองรับการคลิกเปลี่ยนรูปบนคอมพิวเตอร์
     
     heroContainer.addEventListener("click", (e) => {
+      if (e.pointerType === "touch") return; // ข้ามถ้ารับสัมผัสมาจากทัชสกรีนแล้ว
       if (e.target.closest(".lightbox-dots-wrapper, .lightbox-top-brand, .lightbox-close-circle-btn, .sheet-drag-pill-bar")) {
         return;
       }
@@ -1761,6 +1776,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const dotsContainer = document.getElementById("lightbox-dots-indicator");
     const counterBadge = document.getElementById("lightbox-photo-counter");
 
+    // 🔒 รีเซ็ตตัวแปรตำแหน่งรูปภาพให้เป็นรูปที่ 0 เสมอทุกครั้งที่เปิด Modal
+    currentActivePhotoIdx = 0;
+
     if (images.length > 1) {
       if (dotsContainer) {
         dotsContainer.innerHTML = images.map((_, i) => 
@@ -1773,8 +1791,15 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         counterBadge.style.display = "flex";
       }
     } else {
-      if (dotsContainer) dotsContainer.style.display = "none";
-      if (counterBadge) counterBadge.style.display = "none";
+      // 🔒 เคลียร์ข้อความทิ้งให้สะอาด 100% ป้องกันตัวเลข 2/5 ค้างมาจากคนก่อนหน้า
+      if (dotsContainer) {
+        dotsContainer.innerHTML = "";
+        dotsContainer.style.display = "none";
+      }
+      if (counterBadge) {
+        counterBadge.innerHTML = "";
+        counterBadge.style.display = "none";
+      }
     }
 
     // 🟢 4. สเปกย่อ 3 ช่อง และเรทราคา
@@ -2208,24 +2233,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
   }
   window.hideGlobalLoader = hideGlobalLoader;
 
-  // 2. ฟังก์ชันระบบ Auto-Hide ของแถบ Dock เมื่อเลื่อนจอ (ดึงมาไว้ Scope นอก เพื่อไม่ให้เกิดบั๊กหาฟังก์ชันไม่เจอ)
-  function initDockAutoHide() {
-    const floatingDock = document.querySelector('.floating-app-dock');
-    if (!floatingDock || floatingDock.dataset.scrollBound === "true") return;
-    floatingDock.dataset.scrollBound = "true";
-
-    let lastScrollY = window.scrollY;
-    window.addEventListener('scroll', function () {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        floatingDock.classList.add('dock-hidden');
-      } else if (currentScrollY < lastScrollY) {
-        floatingDock.classList.remove('dock-hidden');
-      }
-      lastScrollY = Math.max(0, currentScrollY);
-    }, { passive: true });
-  }
-  window.initDockAutoHide = initDockAutoHide;
+  // 🟢 ลบฟังก์ชันซ้ำซ้อนออก แล้วเรียกใช้ฟังก์ชัน initDockAutoHide() หลักที่สร้างไว้ด้านบนทันที
+    if (typeof initDockAutoHide === "function") {
+      initDockAutoHide();
+    }
 
   // ==============================================================================
   // 🧭 URL ROUTING & NAVIGATION HANDLER
@@ -3357,5 +3368,62 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     document.addEventListener("DOMContentLoaded", setupSheetGestures);
   } else {
     setupSheetGestures();
+  }
+})();
+
+// ==========================================================================
+// 🟢 SOCIAL PROOF LIVE TICKER (โมดูลแจ้งเตือนผู้ใช้งานแบบเรียลไทม์)
+// ==========================================================================
+(function initSocialProofTicker() {
+  "use strict";
+
+  function runTicker() {
+    const toastEl = document.getElementById("social-proof-toast");
+    const nameEl = document.getElementById("toast-model-name");
+    if (!toastEl || !nameEl) return;
+
+    const getLiveProfiles = () => {
+      if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+        return window.profilesData;
+      }
+      if (window.appState && Array.isArray(window.appState.allProfiles) && window.appState.allProfiles.length > 0) {
+        return window.appState.allProfiles;
+      }
+      return [];
+    };
+
+    const profiles = getLiveProfiles();
+    if (profiles.length === 0) return;
+
+    // สลับข้อความแสดงผลทุกๆ 30 วินาที
+    setInterval(() => {
+      const liveList = getLiveProfiles();
+      if (liveList.length === 0) return;
+
+      const randomProfile = liveList[Math.floor(Math.random() * liveList.length)];
+      const rawName = randomProfile.name || randomProfile.displayName || "โมเดล";
+      const cleanName = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
+      const provName = randomProfile.provinceNameThai || (window.currentProvinceName !== "ทั่วไทย" ? window.currentProvinceName : "เชียงใหม่");
+
+      nameEl.textContent = `น้อง${cleanName} (${provName})`;
+
+      // สั่งแสดงกล่องแจ้งเตือนขึ้นมา
+      toastEl.style.transform = "translateY(0)";
+      toastEl.style.opacity = "1";
+
+      // ซ่อนกล่องลงไปหลังจากผ่านไป 5 วินาที
+      setTimeout(() => {
+        toastEl.style.transform = "translateY(120px)";
+        toastEl.style.opacity = "0";
+      }, 5000);
+
+    }, 30000);
+  }
+
+  // หน่วงเวลา 4 วินาทีหลังเว็บโหลดเสร็จ เพื่อให้ระบบหลักทำงานให้เสร็จก่อน 100%
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(runTicker, 4000));
+  } else {
+    setTimeout(runTicker, 4000);
   }
 })();

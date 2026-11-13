@@ -54,20 +54,21 @@
   <link rel="stylesheet" href="/styles.css?v=v_20261022_40">
   <link rel="modulepreload" href="/main.js?v=v_20261022_40">
 
-  <script type="speculationrules">
-  {
-    "prefetch": [
-      {
-        "where": {
-          "or": [
-            { "href_matches": "/location/*" }
-          ]
-        },
-        "eagerness": "conservative"
-      }
-    ]
-  }
-  </script>
+ <script type="speculationrules">
+{
+  "prerender": [
+    {
+      "where": {
+        "or": [
+          { "href_matches": "/sideline/*" },
+          { "href_matches": "/location/*" }
+        ]
+      },
+      "eagerness": "moderate"
+    }
+  ]
+}
+</script>
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -136,40 +137,39 @@
 </head>
 <body class="fmh-app-page">
     
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ" 
-     style="position: fixed !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; width: calc(100% - 28px) !important; max-width: 410px !important; margin: 0 !important; height: 66px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; border: 1.5px solid rgba(255, 255, 255, 0.95) !important; box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0,0,0,0.04) !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 0 8px 0 10px !important; z-index: 99999 !important;">
-  
-  <a href="/" class="dock-item" id="dock-item-home" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 3px; -webkit-tap-highlight-color: transparent;">
-    <div class="dock-icon-box" style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
-      <i class="fas fa-home" style="font-size: 15px; color: #475569;"></i>
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <!-- 1. หน้าแรก -->
+  <a href="/" class="dock-item" id="dock-item-home">
+    <div class="dock-icon-box">
+      <i class="fas fa-home"></i>
     </div>
-    <span class="dock-label" style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">หน้าแรก</span>
+    <span class="dock-label">หน้าแรก</span>
   </a>
 
   <!-- 2. ตัวกรอง -->
-  <button type="button" id="open-filter-dock-btn" class="dock-item" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; padding: 0; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent;">
-    <div style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
-      <i class="fas fa-sliders-h" style="font-size: 15px; color: #475569;"></i>
+  <button type="button" id="open-filter-dock-btn" class="dock-item">
+    <div class="dock-icon-box">
+      <i class="fas fa-sliders-h"></i>
     </div>
-    <span style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">ตัวกรอง</span>
+    <span class="dock-label">ตัวกรอง</span>
   </button>
 
   <!-- 3. รวมน้องๆ -->
-  <a href="/profiles" class="dock-item" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 3px; -webkit-tap-highlight-color: transparent;">
-    <div style="width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.2s;">
-      <i class="fas fa-user-friends" style="font-size: 15px; color: #475569;"></i>
+  <a href="/profiles" class="dock-item">
+    <div class="dock-icon-box">
+      <i class="fas fa-user-friends"></i>
     </div>
-    <span style="font-size: 10px; font-weight: 700; color: #475569; letter-spacing: -0.2px;">รวมน้องๆ</span>
+    <span class="dock-label">รวมน้องๆ</span>
   </a>
 
-  <div style="width: 1px; height: 26px; background: rgba(148, 163, 184, 0.3); margin: 0 4px;" aria-hidden="true"></div>
+  <!-- เส้นคั่นกลาง -->
+  <div class="dock-divider" aria-hidden="true"></div>
 
-  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" 
-     onclick="event.stopPropagation();"
-     style="display: inline-flex;align-items: center; justify-content: center; gap: 5px; height: 42px; padding: 0 13px; border-radius: 100px; text-decoration: none; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 4px 12px rgba(5, 150, 105, 0.35); color: #FFFFFF !important; -webkit-tap-highlight-color: transparent; margin-left: 2px;">
-    <span style="width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; box-shadow: 0 0 6px #4ADE80; display: inline-block;"></span>
-    <i class="fab fa-line" style="font-size: 18px; color: #FFFFFF;"></i>
-    <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1px;">ติดต่อ</span>
+  <!-- 4. ปุ่มติดต่อ LINE -->
+  <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="dock-btn-line" onclick="event.stopPropagation();">
+    <span class="status-dot-live"></span>
+    <i class="fab fa-line"></i>
+    <span class="dock-btn-text">ติดต่อ</span>
   </a>
 </nav>
 
@@ -685,6 +685,15 @@
       </div>
     </div>
   </div>
+
+<!-- Social Proof Toast Container -->
+<div id="social-proof-toast" class="fmh-social-toast">
+  <span class="toast-icon">🔥</span>
+  <div class="toast-content">
+    <div id="toast-model-name" class="toast-title">กำลังโหลดข้อมูล...</div>
+    <div class="toast-sub">มีผู้สนใจติดต่อสอบถามคิวเมื่อสักครู่</div>
+  </div>
+</div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
   <script type="module" src="/main.js?v=v_20261022_40"></script>
