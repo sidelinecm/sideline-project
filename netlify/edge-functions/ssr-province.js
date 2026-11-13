@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_40';
+let GLOBAL_VERSION = 'v_20261022_41';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
@@ -2643,10 +2643,10 @@ if (!isNational && pills) {
         slug: p.slug || String(p.id),
         name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
         imagePath: sanitizedImgPath,
-        galleryPaths: sanitizedGallery,
+        galleryPaths: sanitizedGallery.slice(0, 3), // ตัดรูปส่วนเกินในก้อน JSON ของหน้าแรกออก
         provinceKey: p.provinceKey || "chiangmai",
         location: sanitizeThaiText(p.location || ""),
-        description: sanitizeThaiText(p.description || ""),
+        description: sanitizeThaiText(p.description || "").slice(0, 100), // ตัดข้อความยาวเหยียดออก เพื่อลดขนาด HTML เหลือไม่ถึง 80 KB
         quote: sanitizeThaiText(p.slogan || p.quote || ""),
         rate: extractCleanNumber(p.rate || p.price),
         age: p.age || "",
@@ -2658,11 +2658,12 @@ if (!isNational && pills) {
         availability: p.availability || "รับงาน",
         isfeatured: Boolean(p.isfeatured),
         verified: Boolean(p.verified),
-        styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 5) : []
+        styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : []
       };
     });
 
-    const initialClientProfiles = profilesList; // ใช้ profilesList ทั้งหมดของหน้านั้น
+    // ✅ แก้ไข: ดึง clientProfilesData ที่ถูกบีบอัดแล้ว แทนที่จะดึง profilesList ดิบจากฐานข้อมูล
+    const initialClientProfiles = clientProfilesData;
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     

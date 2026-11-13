@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_40`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_41`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -806,25 +806,15 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     <link rel="alternate" hreflang="th" href="${canonicalUrl}">
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
 
-    <!-- Resource Hints & Preconnect -->
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-    <!-- Fonts Preload -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     ${heroSrcSet 
       ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">`
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
-
-    <!-- 🟢 Font Awesome Async (Non-blocking) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <noscript>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    </noscript>
 
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
     <link rel="shortcut icon" href="/images/favicon.ico">
@@ -843,7 +833,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHTML(displayName)} ตัวจริงตรงปก 100%">
 
-    <!-- Twitter Cards (ครบสูตร X/Twitter) -->
+    
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@sidelinecm">
     <meta name="twitter:creator" content="@sidelinecm">
@@ -853,7 +843,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
-    <!-- Google Tag Manager Lazy-load (ถูกต้อง ไม่โหลดทันที ไม่ซ้ำซ้อน) -->
+    
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ window.dataLayer.push(arguments); }
