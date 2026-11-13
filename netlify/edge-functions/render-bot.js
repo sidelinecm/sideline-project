@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_35`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_40`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -368,15 +368,14 @@ export default async (req, context) => {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let query = supabase.from("profiles").select("*").eq("active", true);
 
-    // 🟢 ดักจับทั้ง ID ล้วน, Slug ตรงๆ, หรือ Slug ที่ลงท้ายด้วย -ID เช่น bumbim-155 ไม่หลุด 404
-    const extractedId = rawSlug.match(/-(\d+)$/);
-    if (/^\d+$/.test(rawSlug)) {
-      query = query.eq("id", rawSlug);
-    } else if (extractedId && extractedId[1]) {
-      query = query.or(`slug.eq.${rawSlug},id.eq.${extractedId[1]}`);
-    } else {
-      query = query.eq("slug", rawSlug);
-    }
+    
+const numericIdMatch = rawSlug.match(/-(\d+)$/) || (/^\d+$/.test(rawSlug) && [null, rawSlug]);
+
+if (numericIdMatch && numericIdMatch[1]) {
+  query = query.eq("id", numericIdMatch[1]);
+} else {
+  query = query.eq("slug", rawSlug);
+}
     
     const { data: profile } = await query.maybeSingle();
     if (!profile) {
@@ -870,7 +869,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
   })();
 </script>
 </head>
-<body class="fmh-app-page" style="background-color: #F8F6FC; color: #140F22;">
+<body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
