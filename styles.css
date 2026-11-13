@@ -137,3 +137,8 @@
   z-index: 25 !important;
   pointer-events: none !important;
 }
+body.lightbox-open .floating-app-dock,
+body.is-profile-page .floating-app-dock {
+  display: none !important;
+  pointer-events: none !important;
+}

@@ -51,8 +51,8 @@
 
   <!-- 🟢 โหลด Font Awesome แก้ไอคอนสี่เหลี่ยม -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="/styles.css?v=v_20261022_35">
-  <link rel="modulepreload" href="/main.js?v=v_20261022_35">
+  <link rel="stylesheet" href="/styles.css?v=v_20261022_40">
+  <link rel="modulepreload" href="/main.js?v=v_20261022_40">
 
   <script type="speculationrules">
   {
@@ -123,8 +123,8 @@
         window.addEventListener(evt, loadGTM, { once: true, passive: true });
       });
       
-      // 🟢 ตั้งเวลา 2.5 วินาที เก็บสถิติ Analytics ได้แม่นยำ ไม่สูญหาย
-      setTimeout(loadGTM, 2500);
+      // 🟢 ตั้งเวลา 3 วินาที เก็บสถิติ Analytics ได้แม่นยำ ไม่สูญหาย
+      setTimeout(loadGTM, 3000);
     })();
   </script>
 
@@ -687,11 +687,11 @@
   </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261022_35"></script>
+  <script type="module" src="/main.js?v=v_20261022_40"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        const CURRENT_SW_VER = 'v_20261022_35';
+        const CURRENT_SW_VER = 'v_20261022_40';
         navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
           .then(function(reg) {
             reg.onupdatefound = function() {

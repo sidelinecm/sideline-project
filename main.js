@@ -2671,11 +2671,15 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       }
 
-   // 🟢 ค้นหาท่อนนี้ใน main.js แล้วแทนที่ด้วยโค้ดด้านล่าง:
-    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+   const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
     if (cardElement) {
       // หากผู้ใช้คลิกล้อกลาง หรือกด Ctrl/Cmd เพื่อเปิดแท็บใหม่ ให้เบราว์เซอร์ทำงานตามปกติ
       if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+        return;
+      }
+
+      
+      if (e.target.closest('button, a:not(.card-link)')) {
         return;
       }
 

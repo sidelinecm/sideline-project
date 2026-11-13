@@ -4,10 +4,10 @@
  */
 
 const swUrl = new URL(self.location);
-const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261022_35';
+const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261022_40';
 const CACHE_NAME = `firstmodelhub-cache-${CURRENT_VERSION}`;
 
-// แคชเฉพาะไฟล์ Asset คงที่พื้นฐาน (ไม่แคช HTML เพื่อให้ข้อมูลสดเสมอ)
+
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
   '/images/favicon.ico',
@@ -26,7 +26,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// ล้างแคชเวอร์ชันเก่าทิ้งทันทีเมื่อมีการอัปเดตเวอร์ชันใหม่
+
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -43,22 +43,29 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 1. ข้าม Supabase API, Analytics และคำขอที่ไม่ใช่ GET
+  
   if (url.origin.includes('supabase.co') || url.origin.includes('googletagmanager.com') || event.request.method !== 'GET') {
     return;
   }
 
-  // 2. ถ้าเป็นเอกสาร HTML (หน้ารายการ, หน้าโปรไฟล์) -> ใช้ Network-First เสมอ
+  
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/offline.html');
+      fetch(event.request).catch(async () => {
+        const cachedOffline = await caches.match('/offline.html');
+        if (cachedOffline) return cachedOffline;
+        
+        
+        return new Response(
+          '<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>ออฟไลน์ - FirstModelHub</title></head><body style="text-align:center;padding:50px;font-family:Prompt,sans-serif;background:#F8F6FC;color:#140F22;"><h2>🔌 ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h2><p>กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตของคุณ แล้วลองใหม่อีกครั้ง</p></body></html>',
+          { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
       })
     );
     return;
   }
 
-  // 3. รูปภาพจาก Cloudinary -> Cache-First พร้อมอัปเดตเบื้องหลัง
+  
   if (url.origin.includes('res.cloudinary.com')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
@@ -77,11 +84,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 4. ไฟล์ Static (CSS, JS, Fonts) -> ตัด ignoreSearch ออกเพื่อให้ Query Versioning (?v=...) ทำงานถูกต้อง
+  
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) {
-        // อัปเดตในพื้นหลัง
+        
         fetch(event.request).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
