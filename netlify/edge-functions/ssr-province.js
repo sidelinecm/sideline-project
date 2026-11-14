@@ -5,7 +5,7 @@ const MAX_PAGE_CACHE_ENTRIES = 80;
 let GLOBAL_VERSION = 'v_20261022_41';
 let TEMPLATE_HTML_CACHE = null;
 
-const ONE_DAY_MS = 86400 * 1000; // ✅ คงค่าเดิม 1 วัน
+const ONE_DAY_MS = 86400 * 1000; 
 
 function setSafePageCache(key, data) {
   if (PAGE_CACHE.size >= MAX_PAGE_CACHE_ENTRIES) {
@@ -42,14 +42,11 @@ const CONFIG = {
   DEFAULT_TELEPHONE: "+66926997044",
   SOCIAL_LINKS: [
     "https://line.me/ti/p/u8Bz9HsaY8",
-    "https://twitter.com/sidelinechiangmai",
-    "https://tiktok.com/@sidelinecm",
-    "https://linktr.ee/kissmodel",
-    "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+    "https://x.com/Timedamdam",
+    "https://bsky.app/profile/sidelinechiangmai.bsky.social",
+    "https://linktr.ee/kissmodel"
   ]
 };
-
-// 🟢 ข้อมูลครบทั้ง 15 จังหวัดดั้งเดิม
 const PROVINCE_SEO_DATA = {
 chiangmai: {
   name: "เชียงใหม่",
@@ -1555,12 +1552,9 @@ const actualVisibleProfiles = isNational
 
     
     
-let safeZoneSlugPart = "";
-if (zoneSlug) {
-  safeZoneSlugPart = MASTER_ZONE_TO_SLUG[zoneSlug] || MASTER_ZONE_TO_SLUG[zoneSlug.replace(/\./g, "")] || zoneSlug.replace(/\s+/g, "-");
-}
 
-// ✅ ตัว rawCanonicalUrl ตัวจริงต้องอยู่ที่นี่ (หลังประกาศ safeZoneSlugPart แล้ว)
+const safeZoneSlugPart = zoneSlug ? getSafeZoneSlug(zoneSlug) : "";
+
 const rawCanonicalUrl = isEnglishHome
   ? `${primaryDomain}/index-en`
   : (cleanPath === "/profiles" 
@@ -1570,7 +1564,9 @@ const rawCanonicalUrl = isEnglishHome
           : (zoneSlug 
               ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}` 
               : `${primaryDomain}/location/${provinceSlug}`))); 
-const canonicalUrl = encodeURI(rawCanonicalUrl);
+
+const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
+
     
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
       const t = new Date(p.updated_at || p.created_at || 0).getTime();
@@ -1711,34 +1707,35 @@ const canonicalUrl = encodeURI(rawCanonicalUrl);
       });
     }
 
-    if (totalCount > 0) {
-  schemaGraph.push({
-    "@type": "ItemList",
-    "@id": `${canonicalUrl}#itemlist`,
-    "name": isNational 
-      ? "รายชื่อสาวรับงานและไซด์ไลน์ทั้งหมดทั่วไทย" 
-      : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
-    "numberOfItems": totalCount, // ✅ ดึงค่าออโต้จาก totalCount
-    "itemListElement": profilesList.map((p, idx) => {
-      const pSlug = p.slug || String(p.id);
-      const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
-      return {
-        "@type": "ListItem",
-        "position": idx + 1,
-        "item": {
-          "@type": "Person",
-          "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
-          "image": pImg,
-          "url": `https://firstmodelhub.com/sideline/${encodeURIComponent(pSlug)}`
-        }
-      };
-    })
-  });
-}
+    // ✅ 1. Schema ItemList ที่ดึงเฉพาะคนที่แสดงบนหน้าจอจริง ไม่ยัด 150 คนจนโดน Google Flag
+    const schemaVisibleList = isNational ? actualVisibleProfiles : profilesList;
+    if (schemaVisibleList.length > 0) {
+      schemaGraph.push({
+        "@type": "ItemList",
+        "@id": `${canonicalUrl}#itemlist`,
+        "name": isNational 
+          ? "รายชื่อสาวรับงานและไซด์ไลน์ทั้งหมดทั่วไทย" 
+          : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
+        "numberOfItems": schemaVisibleList.length,
+        "itemListElement": schemaVisibleList.map((p, idx) => {
+          const pSlug = p.slug || String(p.id);
+          const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
+          return {
+            "@type": "ListItem",
+            "position": idx + 1,
+            "item": {
+              "@type": "Person",
+              "name": (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "น้อง"),
+              "image": pImg,
+              "url": `https://firstmodelhub.com/sideline/${encodeURIComponent(pSlug)}`
+            }
+          };
+        })
+      });
+    }
 
-   
-    
     const ZONE_LOCAL_ENTITY_FAQS = {
+    
       // ==========================================
       // 1. จังหวัดเชียงใหม่ (ครบ 17 ย่านจริง)
       // ==========================================
@@ -2558,10 +2555,12 @@ if (!isNational && pills) {
     );
 
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
-    finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
+    // ✅ ป้องกันตัวอักษร $ ทำให้ JSON พังด้วย Callback () => ...
+    finalHtml = finalHtml.replace(
+      /<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, 
+      () => `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`
+    );
 
-    
-    
     let topModelCandidates = profilesList;
     if (zoneSlug) {
       const cleanZ = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
@@ -2571,8 +2570,20 @@ if (!isNational && pills) {
       }
     }
 
-    const liveTopModels = topModelCandidates.slice(0, 5).map(p => {
-      const cleanN = escapeHTML((p.name || "").replace(/^(น้อง|สาว)\s*/gi, "").trim());
+    const seenNamesToday = new Set();
+    const uniqueTopModels = [];
+    for (const p of topModelCandidates) {
+      const cleanN = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+      if (!cleanN || seenNamesToday.has(cleanN)) continue;
+      seenNamesToday.add(cleanN);
+      uniqueTopModels.push(p);
+      if (uniqueTopModels.length >= 5) break;
+    }
+
+    // ✅ ตัดคำนำหน้าครบ (น้อง/สาว/พี่) พร้อม Fallback สาวสวย กันชื่อว่าง
+    const liveTopModels = uniqueTopModels.map(p => {
+      const rawClean = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim();
+      const cleanN = escapeHTML(rawClean || "สาวสวย");
       const pSlug = encodeURIComponent(p.slug || p.id);
       return `<a href="/sideline/${pSlug}" style="display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.2); color: #4C1D95; font-size: 11.5px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-decoration: none;">✨ น้อง${cleanN}</a>`;
     }).join("");
@@ -2602,10 +2613,10 @@ if (!isNational && pills) {
       </div>
     `;
 
-    
-   finalHtml = finalHtml.replace(
+    // ✅ ใช้ Callback () => ... ป้องกันบั๊ก $ ในกล่องข้อความ
+    finalHtml = finalHtml.replace(
       /<div id="seo-drawer-wrapper"[\s\S]*?(?=<div\s+id=["']faq-wrapper-block["'])/i, 
-      `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.04);">
+      () => `<div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin-top: 24px; margin-bottom: 24px; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.04);">
           <div class="seo-content-inner">
               ${freshnessBox}
               ${linkedIntro}
@@ -2662,8 +2673,8 @@ if (!isNational && pills) {
       };
     });
 
-    // ✅ แก้ไข: ดึง clientProfilesData ที่ถูกบีบอัดแล้ว แทนที่จะดึง profilesList ดิบจากฐานข้อมูล
-    const initialClientProfiles = clientProfilesData;
+    
+    const initialClientProfiles = isNational ? clientProfilesData.slice(0, 24) : clientProfilesData;
     const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     

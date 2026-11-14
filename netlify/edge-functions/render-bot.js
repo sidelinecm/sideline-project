@@ -209,6 +209,28 @@ function generateSrcSet(imagePath) {
   return `${img400} 400w, ${img600} 600w`;
 }
 
+// นำฟังก์ชันนี้ไปวางไว้ส่วนกลางของไฟล์ render-bot.js
+function formatLineUrl(rawInput) {
+  if (!rawInput || typeof rawInput !== "string") {
+    return "https://line.me/ti/p/u8Bz9HsaY8";
+  }
+  const trimmed = rawInput.trim();
+  if (/vos730x|318afxwt|6Lj8m9G/i.test(trimmed)) {
+    return "https://line.me/ti/p/u8Bz9HsaY8";
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("@")) {
+    const handle = trimmed.replace(/^@+/, "").trim();
+    return handle ? `https://page.line.me/${handle}` : "https://line.me/ti/p/u8Bz9HsaY8";
+  }
+  const cleanId = trimmed.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+  if (cleanId.length > 0) {
+    return `https://line.me/ti/p/~${cleanId}`;
+  }
+  return "https://line.me/ti/p/u8Bz9HsaY8";
+}
 
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   let rawPersonalDesc = sanitizeThaiText(p.description || "")
@@ -488,29 +510,8 @@ try {
       </div>
     ` : "";
     
-   // ✅ แก้ไขเป็น:
-let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
-
-// 🟢 กรองบัญชี LINE ที่มีปัญหาให้ดีดกลับไปใช้ LINE กลางทันที
-if (/vos730x|318afxwt/i.test(rawLineInput)) {
-  rawLineInput = "https://line.me/ti/p/u8Bz9HsaY8";
-}
-
-let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
-
-    const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
-    if (matchUrl) {
-      lineId = matchUrl[0];
-    } else if (rawLineInput) {
-      const cleanHandle = rawLineInput.trim();
-      if (cleanHandle.startsWith("@")) {
-        const cleanOa = cleanHandle.replace(/^@+/, "").trim();
-        if (cleanOa) lineId = `https://page.line.me/${cleanOa}`;
-      } else {
-        const cleanPersonalId = cleanHandle.replace(/[^a-zA-Z0-9_\-\.]/g, "");
-        if (cleanPersonalId) lineId = `https://line.me/R/ti/p/~${cleanPersonalId}`;
-      }
-    }
+   let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
+    let lineId = formatLineUrl(rawLineInput);
 
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
@@ -530,7 +531,6 @@ let lineId = "https://line.me/ti/p/u8Bz9HsaY8";
     const rawH = parseInt(height, 10) || 160;
     const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
     
-    // เคารพข้อมูลจริงจาก Database ก่อน หากไม่มีหรือค่าหลุดโลก (เช่น <= 0) ค่อยประมาณการสมส่วน
     const rawW = (parsedDbWeight && parsedDbWeight >= 38 && parsedDbWeight <= 95)
       ? parsedDbWeight
       : Math.max(45, Math.min(52, rawH - 110));
