@@ -297,9 +297,12 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 ดักจับ Inline Data-URI ทันที ไม่ส่งไป Cloudinary
-  if (cleanPath.startsWith("data:")) return cleanPath;
+  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะ
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
+  if (cleanPath.startsWith("data:")) return cleanPath;
   let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
 
 
@@ -3421,3 +3424,13 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     setTimeout(runTicker, 4000);
   }
 })();
+
+
+document.addEventListener("error", function (e) {
+  if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === "img") {
+    const fallbackImg = "https://firstmodelhub.com/images/firstmodelhub.webp";
+    if (e.target.src !== fallbackImg) {
+      e.target.src = fallbackImg;
+    }
+  }
+}, true);
