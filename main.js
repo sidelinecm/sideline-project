@@ -620,13 +620,13 @@ if (isNation) {
           <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${statusLabel}</span>
           <span class="hot-rank-badge">${rankBadge}</span>
           <img src="${imgSrc}" 
-               alt="${escapeHTML(p.displayName)} ฟิวแฟน${escapeHTML(locationText)}" 
-               width="175" 
-               height="245" 
-               loading="${idx < 6 ? "eager" : "lazy"}" 
-               fetchpriority="${idx < 2 ? "high" : "auto"}"
-               decoding="async" 
-               onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
+     alt="${escapeHTML(p.displayName)} ฟิวแฟน${escapeHTML(locationText)}" 
+     width="175" 
+     height="245" 
+     loading="${idx < 6 ? "eager" : "lazy"}"
+     fetchpriority="${idx < 2 ? "high" : "auto"}"
+     decoding="async" 
+     onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์ ${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
