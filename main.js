@@ -303,7 +303,8 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+
 
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
@@ -362,7 +363,7 @@ function optimizeImg(imagePath, mode = "card") {
 
     const combinedPhotos = [mainImg, ...galleryArr].filter(s => s && (s.startsWith("http") || s.startsWith("/")));
 
-    // 🔒 ลบรูปซ้ำโดยเช็คจากชื่อไฟล์ภาพจริง (Image Signature) ป้องกัน Cloudinary URL เขียนต่างกันแต่วิ่งไปรูปเดียวกัน
+    
     const seenSignatures = new Set();
     const uniquePhotos = [];
 
@@ -410,7 +411,7 @@ function optimizeImg(imagePath, mode = "card") {
     if (pKey === "khonkaen") pKey = "khon-kaen";
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
     
-    // 🟢 แก้ไข: ใช้ parseRateToNumber ป้องกันบั๊กราคา 15.-
+ 
     const rawRate = raw.r || raw.rate || raw.price || raw.fee || raw.cost || 0;
     const numPrice = parseRateToNumber(rawRate);
     const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : (isEN ? "Inquire" : "สอบถาม");
@@ -421,10 +422,20 @@ function optimizeImg(imagePath, mode = "card") {
     const hips = raw.hip || raw.hips || "";
     const cup = (raw.cup_size || raw.cupSize || raw.cup || "").toString().toUpperCase().trim();
 
+    const rawProp = String(raw.st || raw.stats || raw.proportion || raw.proportions || "").trim();
+    const hasValidDbStats = rawProp && rawProp !== "-" && rawProp !== "0" && rawProp !== "null";
+
     if (bust && waist && hips) {
       statsStr = `${bust}${cup}-${waist}-${hips}`;
-  } else if (raw.st || raw.stats || raw.proportion || raw.proportions) {
-      statsStr = String(raw.st || raw.stats || raw.proportion || raw.proportions).trim();
+    } else if (hasValidDbStats) {
+      statsStr = rawProp;
+    } else {
+      // 🟢 ฉลาดขึ้น: ถ้าไม่มี หรือใน DB เป็น "-" ให้ดึงสัดส่วน 34-24-35 จากข้อความทันที
+      const fullBio = `${raw.description || ""} ${raw.slogan || ""} ${raw.quote || ""}`;
+      const foundMatch = fullBio.match(/(\d{2,3}[A-Za-z]?\s*[-–]\s*\d{2}\s*[-–]\s*\d{2})/);
+      if (foundMatch && foundMatch[1]) {
+        statsStr = foundMatch[1].replace(/\s+/g, "");
+      }
     }
 
     const rawAge = raw.a || raw.age || raw.profile_age;
@@ -436,8 +447,14 @@ function optimizeImg(imagePath, mode = "card") {
     const heightDisplay = cleanHeight ? `${cleanHeight} cm` : (isEN ? "N/A" : "ไม่ระบุ");
 
     const rawWeight = raw.weight || raw.profile_weight;
-    const cleanWeight = rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0" ? String(rawWeight).replace(/\D/g, "") : null;
-    const weightDisplay = cleanWeight ? `${cleanWeight} kg` : (isEN ? "N/A" : "ไม่ระบุ");
+    let cleanWeight = rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0" ? String(rawWeight).replace(/\D/g, "") : null;
+    
+    // 🟢 ถ้าไม่มีน้ำหนัก ให้คำนวณสัดส่วนสมส่วนจากส่วนสูงอัตโนมัติ (เช่น สูง 160 -> หนัก 50)
+    if (!cleanWeight && cleanHeight) {
+      const hNum = parseInt(cleanHeight, 10);
+      cleanWeight = String(Math.max(45, Math.min(52, hNum - 110)));
+    }
+    const weightDisplay = cleanWeight ? `${cleanWeight} kg` : (isEN ? "N/A" : "สมส่วน");
 
     const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
     const skinDisplay = rawSkin && String(rawSkin).trim() !== "-" ? String(rawSkin).trim() : (isEN ? "Fair" : "ไม่ระบุ");
@@ -450,7 +467,7 @@ function optimizeImg(imagePath, mode = "card") {
     const availabilityStatus = raw.availability || raw.status || (isEN ? "Available" : "รับงาน");
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
     
-   let rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
+    let rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
     // ถ้าเป็นลิงก์ของน้องข้าวฟ่างที่โดนแบน ให้สลับไปใช้ LINE กลาง
     if (/vos730x|318afxwt/i.test(rawLineVal)) {
       rawLineVal = "https://line.me/ti/p/u8Bz9HsaY8";
@@ -483,8 +500,8 @@ function optimizeImg(imagePath, mode = "card") {
       isVerified: raw.verified === true || raw.isVerified === true || raw.is_verified === true,
       hasVideo: raw.has_video === true || raw.hasVideo === true || raw.hasVideoClip === true,
       isfeatured: raw.isfeatured === true || raw.is_featured === true || raw.isFeatured === true,
-      lineId: rawLineVal,   // 🟢 ส่งค่าไลน์เดิมไป
-      line_id: rawLineVal,  // 🟢 เผื่อไว้ทั้ง 2 ชื่อกันระบบดึงผิดคีย์
+      lineId: rawLineVal,
+      line_id: rawLineVal,
       styleTags
     };
   }
@@ -536,31 +553,57 @@ if (currentProv && currentProv !== "national" && currentProv !== "all") {
   pool = pool.filter(p => (p.provinceKey || "").toLowerCase() === currentProv.toLowerCase());
 }
 
-let hotCandidate = pool.filter(p => {
-  const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
-  const descStr = (p.description || "").toLowerCase();
-  const sloganStr = (p.slogan || p.quote || "").toLowerCase();
-  const combined = `${tagsStr} ${descStr} ${sloganStr}`;
-  return combined.includes("ฟิวแฟน") || combined.includes("ฟิลแฟน") || combined.includes("gfe");
-});
+// 🟢 จัดกลุ่มตามจังหวัด และสลับดึงคนที่มี #ฟิวแฟน จังหวัดละ 2 คน
+let hotProfiles = [];
+const isNation = !currentProv || currentProv === "national" || currentProv === "all";
 
-// 2. ถ้าไม่ถึง 10 คน ให้เอาโปรไฟล์แนะนำอื่นมาเติม
-if (hotCandidate.length < 10) {
-  const others = appState.allProfiles.filter(p => !hotCandidate.some(h => String(h.id) === String(p.id)));
-  hotCandidate = [...hotCandidate, ...others];
+if (isNation) {
+  const fiwfanOnly = pool.filter(p => {
+    const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
+    const descStr = (p.description || "").toLowerCase();
+    const sloganStr = (p.slogan || p.quote || "").toLowerCase();
+    return `${tagsStr} ${descStr} ${sloganStr}`.includes("ฟิวแฟน") || tagsStr.includes("gfe");
+  });
+
+  const provGroup = new Map();
+  (fiwfanOnly.length >= 6 ? fiwfanOnly : pool).forEach(p => {
+    const k = (p.provinceKey || "other").toLowerCase();
+    if (!provGroup.has(k)) provGroup.set(k, []);
+    provGroup.get(k).push(p);
+  });
+
+  const seenNames = new Set();
+  const provKeys = Array.from(provGroup.keys());
+  let round = 0;
+
+  while (hotProfiles.length < 10 && round < 4) {
+    let added = 0;
+    for (const k of provKeys) {
+      const list = provGroup.get(k) || [];
+      if (list.length > round) {
+        const item = list[round];
+        const cleanN = (item.displayName || item.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+        if (!seenNames.has(cleanN)) {
+          seenNames.add(cleanN);
+          hotProfiles.push(item);
+          added++;
+          if (hotProfiles.length >= 10) break;
+        }
+      }
+    }
+    if (added === 0) break;
+    round++;
+  }
+} else {
+  // หากอยู่หน้ารายจังหวัด ให้ดึงคนในจังหวัดนั้นที่ติดฟิวแฟน
+  const provCandidates = pool.filter(p => {
+    const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
+    return tagsStr.includes("ฟิวแฟน") || (p.description || "").includes("ฟิวแฟน");
+  });
+  hotProfiles = (provCandidates.length >= 5 ? provCandidates : pool).slice(0, 10);
 }
 
-const seenHotNames = new Set();
-const hotProfiles = [];
-for (const p of hotCandidate) {
-  const cleanName = (p.displayName || p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-  if (seenHotNames.has(cleanName)) continue;
-  seenHotNames.add(cleanName);
-  hotProfiles.push(p);
-  if (hotProfiles.length >= 10) break;
-}
-
-    // 🟢 [เพิ่มบรรทัดนี้]: บันทึก ID ของน้องๆ ที่ติด Hot Swiper ไว้ เพื่อส่งไปตัดออกในฟีดหลักด้านล่าง
+    
     window.__hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
 
     vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
@@ -580,8 +623,8 @@ for (const p of hotCandidate) {
                alt="${escapeHTML(p.displayName)} ฟิวแฟน${escapeHTML(locationText)}" 
                width="175" 
                height="245" 
-               loading="${idx === 0 ? "eager" : "lazy"}" 
-               fetchpriority="${idx === 0 ? "high" : "auto"}" 
+               loading="${idx < 6 ? "eager" : "lazy"}" 
+               fetchpriority="${idx < 2 ? "high" : "auto"}"
                decoding="async" 
                onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';">
           <div class="vip-card-overlay"></div>
@@ -1849,16 +1892,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       const rate2Hrs = Math.round((rateNum * 1.8) / 100) * 100;
       const rateOvernight = Math.round((rateNum * 4.5) / 500) * 500;
       ratesGrid.innerHTML = `
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
-          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 8px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800;">1 ชม.</div>
           <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rateNum.toLocaleString()}.-</strong>
         </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
-          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชม.</div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 8px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800;">2 ชม. <span style="font-size: 9px; color:#8B5CF6;">(ประมาณการ)</span></div>
           <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rate2Hrs.toLocaleString()}.-</strong>
         </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
-          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน</div>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 8px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800;">ค้างคืน <span style="font-size: 9px; color:#8B5CF6;">(เริ่มต้น)</span></div>
           <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rateOvernight.toLocaleString()}.-</strong>
         </div>
       `;
@@ -1979,20 +2022,26 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     if (lineWrapper) {
       const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
       lineWrapper.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
-              <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
-              <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
-              <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+            <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
+                <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
+                <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
+                <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
+            </a>
+            <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+                <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+            </button>
+          </div>
+          <!-- ปุ่มติดต่อแอดมินช่วยเช็กคิวสำรอง -->
+          <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
+            <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #7C3AED; text-decoration: underline;">ให้แอดมินช่วยเช็กคิว (คลิกฟรี)</span>
           </a>
-          <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-              <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-          </button>
         </div>
       `;
     }
 
-    // 🟢 10. Thumbnails ใต้รูป
+    
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
     if (thumbStrip) {
       if (images.length > 1) {
@@ -2867,13 +2916,14 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
       } catch (_) {}
     };
 
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(() => runBgFetch(), { timeout: 4000 });
+        if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => runBgFetch(), { timeout: 2000 });
     } else {
       runBgFetch();
     }
-  }, 8000);
+  }, 2500);
 }
+
           
           return true;
         }
