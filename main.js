@@ -1067,7 +1067,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
             </div>
             <a href="/locations" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูทั้งหมด &rarr;</a>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
             <a href="/location/chiangmai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงใหม่</strong>
             </a>
@@ -1079,6 +1079,16 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
             </a>
             <a href="/location/udonthani" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">อุดรธานี</strong>
+            </a>
+            <a href="/location/chiangrai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงราย</strong>
+            </a>
+            <a href="/location/lampang" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ลำปาง</strong>
+            </a>
+            <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">กรุงเทพฯ</strong></div>
+              <span style="background:#FFE4E6; color:#9F1239; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:100px;">เปิดรับ</span>
             </a>
           </div>
         </section>
