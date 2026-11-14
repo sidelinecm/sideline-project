@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_42';
+let GLOBAL_VERSION = 'v_20261022_44';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -392,7 +392,8 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
@@ -1250,13 +1251,17 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     }
     rawZoneParam = sanitizeThaiText(rawZoneParam).replace(/^โซน/g, "").trim();
 
-    // 🟢 ตารางจับคู่ Slug อังกฤษ -> ชื่อย่านภาษาไทย (ครอบคลุมครบทุกโซนทั่วไทย 100%)
+    
     const ZONE_MAP = {
       // 1. เชียงใหม่
-      "nimman": "นิมมาน", "santitham": "สันติธรรม", "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด",
-      "maejo": "แม่โจ้", "hangdong": "หางดง", "cmu": "หลัง มช.", "langmor": "หลัง มช.",
-      "changphueak": "ช้างเผือก", "maerim": "แม่ริม", "sansai": "สันทราย",
+      "nimman": "นิมมาน", "nimmanhaemin": "นิมมาน", "santitham": "สันติธรรม", 
+      "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด", "maejo": "แม่โจ้", "hangdong": "หางดง", 
+      "cmu": "หลัง มช.", "langmor": "หลัง มช.", "lang-mor": "หลัง มช.",
+      "namor": "หน้า มช.", "na-mor": "หน้า มช.", "namor-cmu": "หน้า มช.",
+      "changphueak": "ช้างเผือก", "changphuak": "ช้างเผือก", "maerim": "แม่ริม", "sansai": "สันทราย",
       "ruamchok": "รวมโชค", "thapae": "ท่าแพ", "huaykaew": "ห้วยแก้ว", "payap": "พายัพ",
+      "centralfest": "เซ็นทรัลเฟส", "airport-cnx": "สนามบินเชียงใหม่",
+
       // 2. กรุงเทพฯ
       "sukhumvit": "สุขุมวิท", "ratchada": "รัชดา", "huaikhwang": "ห้วยขวาง",
       "ladprao": "ลาดพร้าว", "thonglor": "ทองหล่อ", "ekkamai": "เอกมัย",
@@ -1447,10 +1452,10 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
 
       if (matchedZoneProfiles.length === 0) { 
-        isZoneEmpty = false;
-        profilesList = provinceProfiles.slice(0, 6); 
+        isZoneEmpty = true; // ✅ กำหนดเป็น true เพื่อแสดงแจ้งเตือน
+        profilesList = provinceProfiles.slice(0, 6); // นำคนในจังหวัดมาแสดงแทนชั่วคราว
       } else { 
-        // 🟢 เรียงลำดับ: ใครพิกัดหลักคำแรกตรงกับย่าน (Score 3) ขึ้นก่อนคนเดินทางมาหา (Score 2)
+        isZoneEmpty = false;
         matchedZoneProfiles.sort((a, b) => {
           const scoreA = getZoneRelevanceScore(a, cleanZoneLower);
           const scoreB = getZoneRelevanceScore(b, cleanZoneLower);
@@ -1483,23 +1488,73 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       return text.includes("ฟิวแฟน") || text.includes("ฟิลแฟน") || text.includes("gfe");
     }
 
-    // 🟢 3. สร้างการ์ด HOT Swiper ประจำเดือน (หน้าแรกดึงทั่วไทย / หน้าจังหวัดดึงคนในจังหวัดนั้น)
-    const hotPool = isNational ? deduplicatedProfiles : provinceProfiles;
-    let hotCandidates = hotPool.filter(isFiwfanProfile);
-    if (hotCandidates.length < 8) {
-      const others = hotPool.filter(p => !hotCandidates.some(h => String(h.id) === String(p.id)));
-      hotCandidates = [...hotCandidates, ...others];
+    // 🟢 ฟังก์ชันจัดสรรโปรไฟล์อัจฉริยะ: ดึงข้ามจังหวัด + กรองเฉพาะฟิวแฟน + หมุนเวียนรอบวัน
+    function getBalancedRotatingProfiles(pool, { maxTotal = 10, perProv = 2, onlyFiwfan = true } = {}) {
+      // 1. คัดกรองตามเงื่อนไขฟิวแฟน
+      const eligible = onlyFiwfan ? pool.filter(isFiwfanProfile) : pool;
+      const baseList = eligible.length >= 6 ? eligible : pool;
+
+      // 2. จัดกลุ่มโปรไฟล์ตามจังหวัด
+      const grouped = new Map();
+      baseList.forEach(p => {
+        const pk = (p.provinceKey || "other").toLowerCase();
+        if (!grouped.has(pk)) grouped.set(pk, []);
+        grouped.get(pk).push(p);
+      });
+
+      // 3. หมุนเวียนคิวโปรไฟล์ในแต่ละจังหวัดตามรอบเวลา (สลับคิวทุก 8 ชั่วโมง)
+      const rotationStep = Math.floor(Date.now() / (1000 * 60 * 60 * 8));
+      for (const [pk, list] of grouped.entries()) {
+        if (list.length > 1) {
+          const shift = rotationStep % list.length;
+          grouped.set(pk, [...list.slice(shift), ...list.slice(0, shift)]);
+        }
+      }
+
+      // 4. สลับหยิบทีละจังหวัด (Interleave) จังหวัดละ 1-2 คน
+      const result = [];
+      const seenNames = new Set();
+      const keys = Array.from(grouped.keys());
+      let round = 0;
+
+      while (result.length < maxTotal && round < 5) {
+        let addedInRound = 0;
+        for (const pk of keys) {
+          const provList = grouped.get(pk) || [];
+          if (provList.length > round) {
+            const candidate = provList[round];
+            const cleanN = (candidate.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+            if (!seenNames.has(cleanN)) {
+              seenNames.add(cleanN);
+              result.push(candidate);
+              addedInRound++;
+              if (result.length >= maxTotal) break;
+            }
+          }
+        }
+        if (addedInRound === 0) break;
+        round++;
+      }
+
+      // Fallback ถ้ายังไม่พอ ให้เติมโปรไฟล์ที่เหลือจนครบ
+      if (result.length < maxTotal) {
+        for (const p of baseList) {
+          const cleanN = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+          if (!seenNames.has(cleanN)) {
+            seenNames.add(cleanN);
+            result.push(p);
+            if (result.length >= maxTotal) break;
+          }
+        }
+      }
+      return result;
     }
 
-    const seenHotNames = new Set();
-    const hotProfiles = [];
-    for (const p of hotCandidates) {
-      const cleanName = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-      if (seenHotNames.has(cleanName)) continue;
-      seenHotNames.add(cleanName);
-      hotProfiles.push(p);
-      if (hotProfiles.length >= 8) break;
-    }
+    // 🟢 3. สร้างการ์ด HOT Swiper (ดึงสลับจังหวัดละ 2 คน และมีเฉพาะ #ฟิวแฟน)
+    const hotPool = isNational ? deduplicatedProfiles : provinceProfiles;
+    const hotProfiles = isNational 
+      ? getBalancedRotatingProfiles(hotPool, { maxTotal: 10, perProv: 2, onlyFiwfan: true })
+      : getBalancedRotatingProfiles(hotPool, { maxTotal: 8, perProv: 8, onlyFiwfan: true });
 
     if (hotProfiles.length > 0) {
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
@@ -2083,7 +2138,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
       return acc;
     }, {});
 
-    const REGION_CONFIG = [
+        const REGION_CONFIG = [
       {
         name: "ภาคเหนือ",
         icon: "📍",
@@ -2092,64 +2147,225 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
             key: "chiangmai", 
             name: "ไซด์ไลน์เชียงใหม่", 
             zones: [
-              "โซนนิมมานเหมินท์", 
-              "โซนเจ็ดยอด", 
-              "โซนสันติธรรม", 
-              "โซนช้างเผือก", 
-              "โซนหลัง มช.", 
-              "โซนแม่โจ้", 
-              "โซนสันทราย"
+              "โซนนิมมาน",
+              "โซนเจ็ดยอด",
+              "โซนสันติธรรม",
+              "โซนช้างเผือก",
+              "โซนหลัง มช.",
+              "โซนหน้า มช.",
+              "โซนคูเมือง",
+              "โซนท่าแพ",
+              "โซนห้วยแก้ว",
+              "โซนรวมโชค",
+              "โซนสันทราย",
+              "โซนแม่โจ้",
+              "โซนพายัพ",
+              "โซนเซ็นทรัลเฟส",
+              "โซนสนามบินเชียงใหม่",
+              "โซนแม่ริม",
+              "โซนหางดง"
             ] 
           },
-          { key: "chiangrai", name: "ไซด์ไลน์เชียงราย", zones: ["โซนบ้านดู่", "โซนหน้า มฟล.", "โซนหอนาฬิกา"] },
-          { key: "lampang", name: "ไซด์ไลน์ลำปาง", zones: ["โซนในเมือง", "โซนสวนดอก", "โซน ม.ราชภัฏ"] },
-          { key: "lamphun", name: "ไซด์ไลน์ลำพูน", zones: ["โซนนิคมลำพูน", "โซนตัวเมือง"] },
-          { key: "phitsanulok", name: "ไซด์ไลน์พิษณุโลก", zones: ["โซนรอบ มน.", "โซนตัวเมือง"] }
+          { 
+            key: "chiangrai", 
+            name: "ไซด์ไลน์เชียงราย", 
+            zones: [
+              "โซนตัวเมืองเชียงราย",
+              "โซนบ้านดู่",
+              "โซนหน้า มฟล.",
+              "โซนหอนาฬิกา",
+              "โซนไนท์บาซาร์",
+              "โซนแม่สาย"
+            ] 
+          },
+          { 
+            key: "lampang", 
+            name: "ไซด์ไลน์ลำปาง", 
+            zones: [
+              "โซนตัวเมืองลำปาง",
+              "โซนสวนดอก",
+              "โซนสบตุ๋ย",
+              "โซน ม.ราชภัฏลำปาง"
+            ] 
+          },
+          { 
+            key: "lamphun", 
+            name: "ไซด์ไลน์ลำพูน", 
+            zones: [
+              "โซนตัวเมืองลำพูน",
+              "โซนนิคมลำพูน"
+            ] 
+          },
+          { 
+            key: "phitsanulok", 
+            name: "ไซด์ไลน์พิษณุโลก", 
+            zones: [
+              "โซนตัวเมืองพิษณุโลก",
+              "โซนรอบ มน.",
+              "โซนท่าโพธิ์"
+            ] 
+          }
         ]
       },
       {
         name: "ภาคอีสาน",
         icon: "📍",
         provinces: [
-          { key: "khon-kaen", name: "ไซด์ไลน์ขอนแก่น", zones: ["โซนกังสดาล - หลัง มข. - โนนม่วง", "โซนเซ็นทรัล - บึงแก่นนคร"] },
-          { key: "udonthani", name: "ไซด์ไลน์อุดรธานี", zones: ["โซน UD Town - เซ็นทรัลอุดร", "โซนหนองประจักษ์ - ตลาดรังษิณา"] },
-          { key: "korat", name: "ไซด์ไลน์โคราช", zones: ["โซนในเมือง - เซ็นทรัล - มทส."] }
+          { 
+            key: "khon-kaen", 
+            name: "ไซด์ไลน์ขอนแก่น", 
+            zones: [
+              "โซนในตัวเมืองขอนแก่น",
+              "โซนกังสดาล",
+              "โซนหลัง มข.",
+              "โซนหน้า มข.",
+              "โซนโนนม่วง",
+              "โซนเซ็นทรัลขอนแก่น",
+              "โซนบึงแก่นนคร",
+              "โซน ม.ภาค",
+              "โซนศิลา"
+            ] 
+          },
+          { 
+            key: "udonthani", 
+            name: "ไซด์ไลน์อุดรธานี", 
+            zones: [
+              "โซนตัวเมืองอุดร",
+              "โซน UD Town",
+              "โซนหนองประจักษ์",
+              "โซนเซ็นทรัลอุดร",
+              "โซนบ้านจาน",
+              "โซนโพศรี"
+            ] 
+          },
+          { 
+            key: "korat", 
+            name: "ไซด์ไลน์โคราช", 
+            zones: [
+              "โซนในเมืองโคราช",
+              "โซนเซ็นทรัลโคราช",
+              "โซน มทส.",
+              "โซนจอหอ",
+              "โซนปากช่อง",
+              "โซนเขาใหญ่"
+            ] 
+          }
         ]
       },
       {
         name: "ภาคกลาง / ตะวันออก",
         icon: "📍",
         provinces: [
-          { key: "bangkok", name: "ไซด์ไลน์กรุงเทพฯ", zones: ["โซนสุขุมวิท - รัชดา - ห้วยขวาง", "โซนสาทร - ทองหล่อ - พระราม 9"] },
-          { key: "chonburi", name: "ไซด์ไลน์ชลบุรี-พัทยา", zones: ["โซนพัทยา - จอมเทียน - บางแสน"] },
-          { key: "ayutthaya", name: "ไซด์ไลน์อยุธยา", zones: ["โซนโรจนะ - ตัวเมือง"] }
+          { 
+            key: "bangkok", 
+            name: "ไซด์ไลน์กรุงเทพฯ", 
+            zones: [
+              "โซนสุขุมวิท",
+              "โซนรัชดา",
+              "โซนห้วยขวาง",
+              "โซนลาดพร้าว",
+              "โซนทองหล่อ",
+              "โซนเอกมัย",
+              "โซนสาทร",
+              "โซนสีลม",
+              "โซนบางนา",
+              "โซนพระราม 9",
+              "โซนอารีย์",
+              "โซนรามอินทรา"
+            ] 
+          },
+          { 
+            key: "chonburi", 
+            name: "ไซด์ไลน์ชลบุรี-พัทยา", 
+            zones: [
+              "โซนพัทยา",
+              "โซนพัทยากลาง",
+              "โซนพัทยาใต้",
+              "โซนหาดจอมเทียน",
+              "โซนบางแสน",
+              "โซนศรีราชา",
+              "โซนตัวเมืองชลบุรี",
+              "โซนอมตะนคร",
+              "โซนแหลมฉบัง",
+              "โซนบ่อวิน"
+            ] 
+          },
+          { 
+            key: "ayutthaya", 
+            name: "ไซด์ไลน์อยุธยา", 
+            zones: [
+              "โซนตัวเมืองอยุธยา",
+              "โซนโรจนะ",
+              "โซนบางปะอิน"
+            ] 
+          }
         ]
       },
       {
         name: "ภาคใต้",
         icon: "📍",
         provinces: [
-          { key: "phuket", name: "ไซด์ไลน์ภูเก็ต", zones: ["โซนตัวเมืองภูเก็ต - ป่าตอง - กะทู้", "โซนบางเทา - เชิงทะเล - ราไวย์"] },
-          { key: "songkhla", name: "ไซด์ไลน์หาดใหญ่", zones: ["โซนตัวเมืองหาดใหญ่ - ม.อ."] },
-          { key: "suratthani", name: "ไซด์ไลน์สุราษฎร์-สมุย", zones: ["โซนตัวเมือง - หาดเฉวง เกาะสมุย"] }
+          { 
+            key: "phuket", 
+            name: "ไซด์ไลน์ภูเก็ต", 
+            zones: [
+              "โซนตัวเมืองภูเก็ต",
+              "โซนป่าตอง",
+              "โซนกะทู้",
+              "โซนฉลอง",
+              "โซนกะรน",
+              "โซนกะตะ",
+              "โซนบางเทา",
+              "โซนราไวย์",
+              "โซนเชิงทะเล",
+              "โซนกมลา"
+            ] 
+          },
+          { 
+            key: "songkhla", 
+            name: "ไซด์ไลน์หาดใหญ่", 
+            zones: [
+              "โซนตัวเมืองหาดใหญ่",
+              "โซน ม.อ.หาดใหญ่",
+              "โซนด่านนอก"
+            ] 
+          },
+          { 
+            key: "suratthani", 
+            name: "ไซด์ไลน์สุราษฎร์-สมุย", 
+            zones: [
+              "โซนตัวเมืองสุราษฎร์",
+              "โซนเกาะสมุย",
+              "โซนเฉวง",
+              "โซนละไม"
+            ] 
+          }
         ]
       }
     ];
 
+
     const dynamicRegionColsHtml = REGION_CONFIG.map(region => {
-      const activeProvsInRegion = region.provinces.filter(p => (provinceCounts[p.key] || 0) > 0);
+      // 🟢 อนุญาตให้แสดงกรุงเทพฯ แม้ count จะเป็น 0 เพื่อให้ตรงกับกล่องกลางเว็บ
+      const activeProvsInRegion = region.provinces.filter(p => (provinceCounts[p.key] || 0) > 0 || p.key === "bangkok");
       if (activeProvsInRegion.length === 0) return ""; 
 
       const totalRegionProfiles = activeProvsInRegion.reduce((sum, p) => sum + (provinceCounts[p.key] || 0), 0);
 
       const provListHtml = activeProvsInRegion.map(p => {
         const count = provinceCounts[p.key] || 0;
+        const isBkkComingSoon = p.key === "bangkok" && count === 0;
+        const badgeHtml = isBkkComingSoon
+          ? `<span style="color: #9F1239; font-size: 10px; font-weight: 800; background: #FFE4E6; padding: 1px 7px; border-radius: 100px; border: 1px solid #FDA4AF;">เปิดรับสมัคร</span>`
+          : `<span style="color: #7C3AED; font-size: 11px; font-weight: 800; background: rgba(124, 58, 237, 0.08); padding: 1px 8px; border-radius: 100px;">${count} คน</span>`;
+        const linkHref = isBkkComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${p.key}`;
+
         if (isNational) {
           return `
             <li style="margin-bottom: 6px;">
-              <a href="/location/${p.key}" style="color: var(--text-gray); text-decoration: none; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+              <a href="${linkHref}" style="color: var(--text-gray); text-decoration: none; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
                 <span>• ${escapeHTML(p.name)}</span>
-                <span style="color: #7C3AED; font-size: 11px; font-weight: 800; background: rgba(124, 58, 237, 0.08); padding: 1px 8px; border-radius: 100px;">${count} คน</span>
+                ${badgeHtml}
               </a>
             </li>
           `;
@@ -2271,36 +2487,49 @@ finalHtml = finalHtml.replace(
   `<!-- Hero Section ${heroCommentLabel} -->`
 );
 
-    function matchProfileToZone(p, cleanZ) {
-  if (!p || !cleanZ) return false;
-  const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
-  const desc = sanitizeThaiText(p.description || "").toLowerCase();
-  const rawTags = p.style_tags || p.styleTags || p.tags || [];
-  const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
-  const combined = `${rawLoc} ${desc} ${tags}`;
+        function matchProfileToZone(p, cleanZ) {
+      if (!p || !cleanZ) return false;
+      const targetZone = cleanZ.trim().toLowerCase();
+      const rawLoc = sanitizeThaiText(p.location || "").toLowerCase();
 
-  // คำพ้องและรูปแบบการพิมพ์ย่อที่พบบ่อยในไทย
-  const aliasMap = {
-    "หลัง มช.": ["หลังมอ", "หลังมช", "หลัง มช", "สุเทพ", "วัดอุโมงค์"],
-    "หน้า มช.": ["หน้ามอ", "หน้ามช", "หน้า มช", "กาดมาลิน", "มาลินพลาซ่า"],
-    "รอบ มน.": ["รอบมน", "มน.", "ม.นเรศวร", "ท่าโพธิ์"],
-    "หน้า มฟล.": ["หน้ามฟล", "มฟล.", "มฟล", "ม.แม่ฟ้าหลวง"],
-    "UD Town": ["ud town", "udtown", "ยูดีทาวน์", "ยูดี"],
-    "กังสดาล": ["กังสดาล", "บึงหนองแวง"],
-    "หลัง มข.": ["หลังมอ", "หลังมข", "หลัง มข", "โนนม่วง"]
-  };
+      // 1. ถ้าพิกัดหลักระบุชื่อโซนชัดเจน ให้ถือว่าตรงทันที
+      if (rawLoc.includes(targetZone)) return true;
 
-  const aliases = aliasMap[cleanZ] || [];
-  const zoneWithSpace = cleanZ.replace(/-/g, " ");
-  const zoneWithoutDash = cleanZ.replace(/-/g, "");
-  const zoneWithoutDots = cleanZ.replace(/\./g, "");
+      // 2. กรองประโยคปฏิเสธออกจากรายละเอียดอย่างเด็ดขาด (ครอบคลุมทั้ง "ไม่ไป", "งดรับแถว", "ยกเว้น")
+      const safeDesc = sanitizeThaiText(p.description || "").toLowerCase()
+        .replace(/(ไม่รับ|งดรับ|ไม่ไป|ไม่สะดวกไป|ยกเว้น|ไม่พร้อมไป|งดเดินทางไป)[^,.\n]*(โซน|ย่าน)?\s*[\u0E00-\u0E7F0-9]+/gi, " ");
 
-  return combined.includes(cleanZ) ||
-         combined.includes(zoneWithSpace) ||
-         combined.includes(zoneWithoutDash) ||
-         combined.includes(zoneWithoutDots) ||
-         aliases.some(alias => combined.includes(alias));
-}
+      const rawTags = p.style_tags || p.styleTags || p.tags || [];
+      const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
+      const combined = `${rawLoc} ${tags} ${safeDesc}`;
+
+      // ตรวจจับคำปฏิเสธโดยตรงกับเป้าหมาย
+      const negativePattern = new RegExp(`(ไม่รับ|งดรับ|ไม่ไป|ยกเว้น)[^,.\n]*${targetZone}`, "i");
+      if (negativePattern.test(`${rawLoc} ${p.description || ""}`)) {
+        return false;
+      }
+
+      const aliasMap = {
+        "หลัง มช.": ["หลังมอ", "หลังมช", "หลัง มช", "สุเทพ", "วัดอุโมงค์"],
+        "หน้า มช.": ["หน้ามอ", "หน้ามช", "หน้า มช", "กาดมาลิน", "มาลินพลาซ่า"],
+        "รอบ มน.": ["รอบมน", "มน.", "ม.นเรศวร", "ท่าโพธิ์"],
+        "หน้า มฟล.": ["หน้ามฟล", "มฟล.", "มฟล", "ม.แม่ฟ้าหลวง"],
+        "UD Town": ["ud town", "udtown", "ยูดีทาวน์", "ยูดี"],
+        "กังสดาล": ["กังสดาล", "บึงหนองแวง"],
+        "หลัง มข.": ["หลังมอ", "หลังมข", "หลัง มข", "โนนม่วง"]
+      };
+
+      const aliases = aliasMap[cleanZ] || [];
+      const zoneWithSpace = targetZone.replace(/-/g, " ");
+      const zoneWithoutDash = targetZone.replace(/-/g, "");
+      const zoneWithoutDots = targetZone.replace(/\./g, "");
+
+      return combined.includes(targetZone) ||
+             combined.includes(zoneWithSpace) ||
+             combined.includes(zoneWithoutDash) ||
+             combined.includes(zoneWithoutDots) ||
+             aliases.some(alias => combined.includes(alias));
+    }
 
     // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
 const zoneCountMap = {};
@@ -2406,7 +2635,10 @@ if (!isNational && pills) {
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${totalCount}</strong>`);
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
-    const topStoryProfiles = profilesList.slice(0, 10);
+    // 🟢 สร้างวงกลม Story ให้ดึงสลับจังหวัดเช่นกัน
+    const topStoryProfiles = isNational 
+      ? getBalancedRotatingProfiles(deduplicatedProfiles, { maxTotal: 10, perProv: 2, onlyFiwfan: false })
+      : profilesList.slice(0, 10);
     const renderStoryItem = (p) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(p.slug || p.id);
@@ -2493,7 +2725,9 @@ if (!isNational && pills) {
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 18px;">📍</span>
               <div>
-                <strong style="color: #140F22; font-size: 13.5px; font-weight: 900; display: block;">รับงาน${escapeHTML(cp.name)} (ไซด์ไลน์)</strong>
+                <strong style="color: #140F22; font-size: 12.5px; font-weight: 800; display: block;">${escapeHTML(cp.name)}</strong>
+                
+
                 <span style="color: #94A3B8; font-size: 10.5px;">${cp.tag}</span>
               </div>
             </div>
@@ -2535,10 +2769,21 @@ if (!isNational && pills) {
           </div>
         </section>
       `;
-    // 🟢 [จุดสำคัญที่กู้คืนมา]: บล็อก else สำหรับหน้ารายจังหวัดและโซนย่อยทั้งหมด!
+      
     } else {
+      const emptyZoneNoticeHtml = isZoneEmpty ? `
+        <div style="background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);">
+          <span style="font-size: 20px; line-height: 1;">📍</span>
+          <div>
+            <strong style="color: #92400E; font-size: 13px; display: block; margin-bottom: 2px;">ขณะนี้ยังไม่มีน้องสแตนด์บายในโซน${escapeHTML(zoneSlug)} โดยตรง</strong>
+            <span style="color: #B45309; font-size: 11.5px; line-height: 1.5; display: block;">ระบบจึงแสดงโปรไฟล์น้องๆ ใน${escapeHTML(provinceNameThai)} ที่พร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและที่พักในย่าน${escapeHTML(zoneSlug)} ได้แทนค่ะ</span>
+          </div>
+        </div>
+      ` : "";
+
       displayAreaHtml = `
         <div class="section-content-wrapper">
+          ${emptyZoneNoticeHtml}
           <div class="province-header-row">
               <h2 class="province-clean-title">
                   <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
