@@ -386,9 +386,12 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 ดักจับ Inline Data-URI ทันที ไม่ส่งไป Cloudinary
-  if (cleanPath.startsWith("data:")) return cleanPath;
+  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะ
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
+  if (cleanPath.startsWith("data:")) return cleanPath;
   let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {

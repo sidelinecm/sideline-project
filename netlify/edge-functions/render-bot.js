@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_41`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_42`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -170,11 +170,13 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 ดักจับ Inline Data-URI ทันที ไม่ส่งไป Cloudinary
-  if (cleanPath.startsWith("data:")) return cleanPath;
+  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะหรือไฟล์ที่สั้นเกินไป เด้งกลับรูปสำรองทันที
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
+    return DEFAULT_FALLBACK_IMG;
+  }
 
+  if (cleanPath.startsWith("data:")) return cleanPath;
   let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
- 
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
