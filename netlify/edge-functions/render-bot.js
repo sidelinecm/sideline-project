@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_44`;
+let GLOBAL_PROFILE_VERSION = `v_20261022_45`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -245,8 +245,14 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
     ? rawPersonalDesc 
     : "ยินดีที่ได้รู้จักค่ะ ทักมาพูดคุยสอบถามคิวหรือนัดเวลาล่วงหน้าได้เลยนะคะ เทคแคร์เป็นกันเอง ไม่ดุค่ะ";
 
+  
   const pId = Number(p.id) || 1;
-  const rawTags = (Array.isArray(p.styleTags) ? p.styleTags : (p.style_tags || [])).join(" ").toLowerCase();
+  const rawTagsList = Array.isArray(p.styleTags) 
+    ? p.styleTags 
+    : (Array.isArray(p.style_tags) 
+        ? p.style_tags 
+        : (typeof p.style_tags === "string" ? p.style_tags.split(",") : []));
+  const rawTags = rawTagsList.join(" ").toLowerCase();
 
   const introList = [
     `ข้อมูลสัดส่วนและพิกัดบริการของ${displayName} ได้รับการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และให้ความเป็นกันเอง สบายใจได้กับการนัดพบตัวจริงหน้างาน`,
