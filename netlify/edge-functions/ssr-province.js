@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_41';
+let GLOBAL_VERSION = 'v_20261022_42';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -2646,36 +2646,68 @@ if (!isNational && pills) {
       }
 
       const rawImgPath = p.imagePath || p.image_url || "";
-      const sanitizedImgPath = forceAdjucgga(rawImgPath);
-      const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(forceAdjucgga).filter(Boolean);
-
-      return {
-        id: p.id,
-        slug: p.slug || String(p.id),
-        name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-        imagePath: sanitizedImgPath,
-        galleryPaths: sanitizedGallery.slice(0, 3), // ตัดรูปส่วนเกินในก้อน JSON ของหน้าแรกออก
-        provinceKey: p.provinceKey || "chiangmai",
-        location: sanitizeThaiText(p.location || ""),
-        description: sanitizeThaiText(p.description || "").slice(0, 100), // ตัดข้อความยาวเหยียดออก เพื่อลดขนาด HTML เหลือไม่ถึง 80 KB
-        quote: sanitizeThaiText(p.slogan || p.quote || ""),
-        rate: extractCleanNumber(p.rate || p.price),
-        age: p.age || "",
-        height: p.height || "",
-        weight: p.weight || "",
-        stats: p.stats || "",
-        line_id: (p.line_id || p.line || p.lineId || "").trim(),
-        likes_count: p.likes_count || p.likes || 0,
-        availability: p.availability || "รับงาน",
-        isfeatured: Boolean(p.isfeatured),
-        verified: Boolean(p.verified),
-        styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : []
-      };
-    });
+    const sanitizedImgPath = forceAdjucgga(rawImgPath);
+    const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(forceAdjucgga).filter(Boolean);
 
     
-    const initialClientProfiles = isNational ? clientProfilesData.slice(0, 24) : clientProfilesData;
-    const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
+    const cleanModelSlug = (function(existingSlug, id) {
+      if (!existingSlug) return `model-${id}`;
+      const slugStr = String(existingSlug).trim().toLowerCase();
+      
+      
+      const isGarbageOrThai = /[\u0E00-\u0E7F]/.test(slugStr) || 
+                              /^(aekhth|ediyr|aikhejiyw|aetngom|aetngkwa|eoingeoy|emsa|hmiw)/.test(slugStr);
+      
+      if (isGarbageOrThai || !slugStr) {
+        return `model-${id}`; // เช่น model-16, model-142 อัตโนมัติ ปลอดภัย 100%
+      }
+      
+      return slugStr;
+    })(p.slug, p.id);
+
+    return {
+      id: p.id,
+      slug: cleanModelSlug, // 👈 ใช้ค่าออโต้ตรงนี้
+      name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
+      imagePath: sanitizedImgPath,
+      galleryPaths: sanitizedGallery.slice(0, 3),
+      provinceKey: p.provinceKey || "chiangmai",
+      location: sanitizeThaiText(p.location || ""),
+      description: sanitizeThaiText(p.description || ""),
+      quote: sanitizeThaiText(p.slogan || p.quote || ""),
+      rate: extractCleanNumber(p.rate || p.price),
+      age: p.age || "",
+      height: p.height || "",
+      weight: p.weight || "",
+      stats: p.stats || "",
+      line_id: (function(rawLine, fallbackAdminLine) {
+        if (!rawLine || typeof rawLine !== "string") return fallbackAdminLine;
+        const trimmed = rawLine.trim();
+        if (!trimmed || trimmed === "-" || trimmed.includes("null") || trimmed.includes("undefined")) {
+          return fallbackAdminLine;
+        }
+        if (/vos730x|318afxwt|6Lj8m9G/i.test(trimmed)) {
+          return fallbackAdminLine;
+        }
+        if (/^https?:\/\//i.test(trimmed)) {
+          return trimmed;
+        }
+        if (trimmed.startsWith("@")) {
+          return `https://page.line.me/${trimmed.replace(/^@+/, "")}`;
+        }
+        const cleanId = trimmed.replace(/[^a-zA-Z0-9_\-\.]/g, "");
+        return cleanId ? `https://line.me/ti/p/~${cleanId}` : fallbackAdminLine;
+      })(p.line_id || p.line || p.lineId, liveAdminLine),
+      likes_count: p.likes_count || p.likes || 0,
+      availability: p.availability || "รับงาน",
+      isfeatured: Boolean(p.isfeatured),
+      verified: Boolean(p.verified),
+      styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : []
+    };
+  });
+
+  const initialClientProfiles = isNational ? clientProfilesData.slice(0, 24) : clientProfilesData;
+  const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
@@ -2711,7 +2743,11 @@ const mapQuery = isNational
 const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
 const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-finalHtml = finalHtml.replace(/<iframe\s+id=["']google-map["'][^>]*src=["'][^"']*["']/i, `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}"`);
+// 🟢 ใส่ URL แผนที่ลงใน src โดยตรง + มี title สำหรับบอท + ปิดเครื่องหมาย > ให้สมบูรณ์
+finalHtml = finalHtml.replace(
+  /<iframe\s+id=["']google-map["'][^>]*>/i, 
+  `<iframe id="google-map" src="${mapEmbedUrl}" title="แผนที่พื้นที่ให้บริการ FirstModelHub" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;">`
+);
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
   // ✅ Preload รูปแรกของแถบ HOT Swiper ที่โชว์บนหน้าจอแรก

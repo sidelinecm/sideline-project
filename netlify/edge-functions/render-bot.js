@@ -524,9 +524,20 @@ try {
       : "160";
     const heightDisplay = `${height} ซม.`;
 
-    const stats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
-      ? String(profile.stats).trim() 
-      : "36-25-35";
+    // 🟢 ถ้าฟิลด์ stats ว่างเปล่า ให้ค้นหาสัดส่วนจริงจากข้อความแนะนำตัว (เช่น 38-26-35) ก่อนใช้ค่า Default
+    const stats = (function() {
+      const dbStats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
+        ? String(profile.stats).trim() 
+        : "";
+      if (dbStats) return dbStats;
+
+      const fullText = `${profile.description || ""} ${profile.slogan || ""} ${profile.quote || ""}`;
+      const match = fullText.match(/(\d{2,3}[A-Za-z]?\s*[-–]\s*\d{2}\s*[-–]\s*\d{2})/);
+      if (match && match[1]) {
+        return match[1].replace(/\s+/g, "");
+      }
+      return "36-25-35";
+    })();
 
     const rawH = parseInt(height, 10) || 160;
     const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
@@ -872,6 +883,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
       })();
     </script>
 </head>
+
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
