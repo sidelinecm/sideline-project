@@ -2022,21 +2022,15 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     if (lineWrapper) {
       const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
       lineWrapper.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
-                <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
-                <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
-                <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
-            </a>
-            <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-                <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-            </button>
-          </div>
-          <!-- ปุ่มติดต่อแอดมินช่วยเช็กคิวสำรอง -->
-          <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
-            <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #7C3AED; text-decoration: underline;">ให้แอดมินช่วยเช็กคิว (คลิกฟรี)</span>
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
+              <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
+              <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
+              <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
           </a>
+          <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+          </button>
         </div>
       `;
     }
