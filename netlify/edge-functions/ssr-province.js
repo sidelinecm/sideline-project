@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261022_44';
+let GLOBAL_VERSION = 'v_20261022_45';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -1184,8 +1184,8 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 ลบ "/profiles" ออกจาก BYPASS_ROUTES เพื่อให้เซิร์ฟเวอร์เรนเดอร์หน้านี้เอง:
-    const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations"];
+    // 🟢 เพิ่ม /sideline และ /profile เพื่อปล่อยให้ render-bot.js ทำงาน ไม่ให้ตัดเป็น 404
+    const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations", "/sideline", "/profile", "/app"];
     if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
       return await context.next(); 
     }
@@ -1579,29 +1579,31 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       }).join("");
     }
 
-    // 🟢 4. สำหรับหน้าแรก: คัดเลือกการ์ดโปรไฟล์แนะนำ (Featured) 8 คนเตรียมไว้ใส่กล่องแนะนำ
+    // 🟢 4. สำหรับหน้าแรก: กรองเอา ID คนที่อยู่ในแถบ HOT ออกไปก่อน จะได้ไม่ซ้ำกัน
+    const hotIds = new Set(hotProfiles.map(p => String(p.id)));
+
     if (isNational) {
-      const featuredProfiles = deduplicatedProfiles.filter(p => p.isfeatured || p.is_featured).slice(0, 8);
+      const featuredProfiles = deduplicatedProfiles
+        .filter(p => (p.isfeatured || p.is_featured) && !hotIds.has(String(p.id)))
+        .slice(0, 8);
       featuredCardsHtml = featuredProfiles.map((p, i) => {
         const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
         return renderCardHtml(p, false, pName);
       }).join("");
     }
 
+    const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
   
-  const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
-  
-  
-  const nationalFeedProfiles = isNational ? [...deduplicatedProfiles].sort((a, b) => {
-    const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
-    const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
-    return featB - featA;
-  }) : [];
+    // ฟีดหลักด้านล่างก็ต้องไม่ซ้ำกับแถบ HOT เช่นกัน
+    const nationalFeedProfiles = isNational ? deduplicatedProfiles.filter(p => !hotIds.has(String(p.id))).sort((a, b) => {
+      const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
+      const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
+      return featB - featA;
+    }) : [];
 
-  // ⚡ ตัดรอบแรกส่งแค่ 24 คนก่อน เพื่อลด DOM จาก 4,300 เหลือไม่เกิน 1,000 จุด (หน้าจอจะเลิกค้าง 3.7 วิ ทันที)
-const actualVisibleProfiles = isNational
-  ? nationalFeedProfiles.slice(0, 24)
-  : profilesList;
+    const actualVisibleProfiles = isNational
+      ? nationalFeedProfiles.slice(0, 24)
+      : profilesList;
   const totalCount = isNational ? liveTotalProfiles : actualVisibleProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
