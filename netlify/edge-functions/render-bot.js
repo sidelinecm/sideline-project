@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // 🟢 1. ระบบ Memory Cache พร้อมตัวจำกัดขนาด ป้องกัน Memory Leak บน Edge
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261022_45`;
+let GLOBAL_PROFILE_VERSION = `v_20261115_46`;
 
 const ONE_DAY_MS = 86400 * 1000; // คงค่าเดิม 1 วัน (24 ชั่วโมง)
 
@@ -103,9 +103,9 @@ function sanitizeThaiText(text) {
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
     .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
-    .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+   .replace(/(พร้อม|มี)?อาบน้ำด้วยกัน/gi, "")
     .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
-    .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
+    .replace(/[\d๑-๙]+\s*น้ำ(?!หนัก|มัน|หอม|ตก|ใส|ดื่ม|แข็ง|ตาล|พริก)(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
     .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)")
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
@@ -368,9 +368,10 @@ export default async (req, context) => {
         version: GLOBAL_PROFILE_VERSION
       }), {
         status: 200,
-        headers: { 
+       headers: { 
           "Content-Type": "application/json; charset=utf-8",
-          "Cache-Control": "no-store, no-cache, must-revalidate"
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Netlify-CDN-Cache-Control": "no-store"
         }
       });
     }
@@ -417,6 +418,13 @@ if (numericIdMatch && numericIdMatch[1]) {
       return context.next();
     }
 
+    // ✅ คุม Single Canonical URL ให้ตรงกับ HTML และ Schema 100% (ถ้าเข้าผิด Slug ให้ 301 Redirect)
+    const dbSlug = String(profile.slug || "").trim();
+    const trueCanonicalSlug = (!dbSlug || /[\u0E00-\u0E7F]/.test(dbSlug)) ? `model-${profile.id}` : dbSlug;
+    if (rawSlug.toLowerCase() !== trueCanonicalSlug.toLowerCase()) {
+      return Response.redirect(`${CONFIG.DOMAIN}/sideline/${encodeURIComponent(trueCanonicalSlug)}`, 301);
+    }
+
     let provinceKey = (profile.provinceKey || profile.province_slug || profile.province_key || "chiangmai").toString().trim().toLowerCase(); 
     if (provinceKey === "chiang-mai" || provinceKey === "chiang_mai") provinceKey = "chiangmai"; 
     if (provinceKey === "khonkaen" || provinceKey === "khon_kaen") provinceKey = "khon-kaen"; 
@@ -452,7 +460,12 @@ try {
     .not(provCol, 'in', `(${provVariants.join(',')})`)
     .limit(3);
 
-  relatedProfiles = [...(sameProvinceProfiles || []), ...(otherProfiles || [])].sort(() => Math.random() - 0.5).slice(0, 6);
+  relatedProfiles = [...(sameProvinceProfiles || []), ...(otherProfiles || [])]
+    .filter(rp => {
+      const img = String(rp.imagePath || rp.image_url || "").trim();
+      return img.length >= 15 && !img.includes("firstmodelhub.webp");
+    })
+    .slice(0, 6);
 } catch (err) {
   console.warn("Related profiles fetch error:", err);
 }
@@ -501,10 +514,17 @@ try {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // ดึงรูปภาพทั้งหมดในอัลบั้ม
+    // ดึงรูปภาพทั้งหมดในอัลบั้ม (ป้องกันการตัด , ภายใน URL Cloudinary ที่มี f_auto,q_auto)
     let rawGallery = profile.galleryPaths || profile.gallery_paths || profile.gallery || [];
     if (typeof rawGallery === "string") {
-      try { rawGallery = JSON.parse(rawGallery); } catch (_) { rawGallery = rawGallery.split(",").map(s => s.trim()); }
+      const trimmedGal = rawGallery.trim();
+      if (trimmedGal.startsWith("[")) {
+        try { rawGallery = JSON.parse(trimmedGal); } catch (_) { rawGallery = []; }
+      } else if (trimmedGal.startsWith("http") || trimmedGal.startsWith("/")) {
+        rawGallery = trimmedGal.split(/[\r\n]+|,\s*(?=https?:\/\/|\/)/).map(s => s.trim()).filter(Boolean);
+      } else {
+        rawGallery = [];
+      }
     }
     const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])].filter(Boolean);
     const uniqueGallery = [...new Set(allGalleryImages)];
@@ -635,12 +655,7 @@ const zoneHubUrl = hasDistinctZone
     const pageTitle = `${displayName} รับงาน${cleanProvince} (${primaryZone}) ไซด์ไลน์ฟิวแฟน ตัวจริงตรงปก จ่ายหน้างาน`;
     const metaDescription = `โปรไฟล์ ${displayName} รับงาน${cleanProvince} โซน${primaryZone} สัดส่วน ${stats} สไตล์ฟิวแฟน ตัวจริงตรงปก 100% นัดพบจ่ายหน้างาน ไร้มัดจำค่ะ [อัปเดตข้อมูลจริง ${actualDateText}]`;
 
-   // ถ้าเข้าผ่าน URL แบบ model-ID หรือ slug ใน DB มีภาษาไทย ให้ใช้ clean URL ปัจจุบันเป็น Canonical ทันที
-let canonicalSlug = String(profile.slug || profile.id);
-if (/[\u0E00-\u0E7F]/.test(canonicalSlug) || rawSlug.startsWith("model-")) {
-  canonicalSlug = rawSlug.startsWith("model-") ? rawSlug : `model-${profile.id}`;
-}
-const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSlug)}`;
+   const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(trueCanonicalSlug)}`;
     const realTimeText = getRealTimeAgo(profile.updated_at || profile.created_at);
     const currentAvail = (profile.availability || "").trim();
     
@@ -744,6 +759,7 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
             : ((profile.created_at && !isNaN(new Date(profile.created_at).getTime()))
                 ? new Date(profile.created_at).toISOString()
                 : new Date().toISOString()),
+          "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
           "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
           "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
@@ -761,14 +777,16 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
             "url": heroImageLarge
           },
           "url": canonicalUrl,
-          "height": {
+         "height": {
             "@type": "QuantitativeValue",
             "value": cleanHeightNum,
+            "unitCode": "CMT",
             "unitText": "cm"
           },
           "weight": {
             "@type": "QuantitativeValue",
             "value": cleanWeightNum,
+            "unitCode": "KGM",
             "unitText": "kg"
           },
           "homeLocation": {
@@ -855,8 +873,8 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
 
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@sidelinecm">
-    <meta name="twitter:creator" content="@sidelinecm">
+    <meta name="twitter:site" content="@Timedamdam">
+    <meta name="twitter:creator" content="@Timedamdam">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${ogImageSocial}">
@@ -885,15 +903,21 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
           });
         };
         
-        ['click','touchstart','keydown','scroll'].forEach(function(evt){
+        ['scroll', 'keydown'].forEach(function(evt){
           window.addEventListener(evt, loadGTM, { once: true, passive: true });
         });
-        setTimeout(loadGTM, 3000);
+        window.addEventListener('load', function() {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(function() { setTimeout(loadGTM, 1500); }, { timeout: 4000 });
+          } else {
+            setTimeout(loadGTM, 3500);
+          }
+        }, { once: true });
       })();
     </script>
 </head>
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
-    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 7rem 1rem;">
+    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8.5rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
@@ -1006,31 +1030,26 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
                     </p>
                 </section>
 
-                <!-- กล่องรีวิวและการันตีความตรงปก (Deterministic Review Snippet) -->
-                <section class="fmh-reviews-box" style="margin-top: 1.25rem; background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);">
+               <!-- กล่องมาตรฐานการตรวจสอบโปรไฟล์จริง (ปลอดภัยตาม Google Policy 2026) -->
+                <section class="fmh-verification-box" style="margin-top: 1.25rem; background: #FFFFFF; border: 1.5px solid rgba(5, 150, 105, 0.22); border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                    <strong style="color: #140F22; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-                      <span>⭐ รีวิวความประทับใจ</span>
-                      <span style="background: rgba(5,150,105,0.1); color: #059669; font-size: 10.5px; padding: 2px 8px; border-radius: 100px;">ตรงปก 100%</span>
+                    <strong style="color: #065F46; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                      <span>🛡️ สถานะการตรวจสอบโปรไฟล์</span>
                     </strong>
-                    <span style="color: #64748B; font-size: 11px;">ความพึงพอใจ 5/5</span>
+                    <span style="background: rgba(5,150,105,0.1); color: #059669; font-size: 10.5px; font-weight: 800; padding: 2px 9px; border-radius: 100px;">ยืนยันตัวตนแล้ว</span>
                   </div>
-                  <div style="background: #F8F6FC; border-radius: 12px; padding: 10px 12px; font-size: 12px; color: #334155; line-height: 1.6;">
-                    <p style="margin: 0 0 4px 0; font-style: italic;">
-                      "${(function(id) {
-                        const reviews = [
-                          "น้องน่ารักมากครับ ตรงปก พูดจาสุภาพ เทคแคร์เป็นกันเองสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ",
-                          "ตัวจริงน่ารักเหมือนในรูปเลยครับ ไม่เร่งเวลา คุยสนุก จ่ายหน้างานสบายใจ ปลอดภัยครับ",
-                          "นัดง่าย ตรงเวลา ให้เกียรติลูกค้า ยิ้มแย้มตลอดเวลา คลายเหงาได้ดีมากครับ แนะนำคนนี้เลย"
-                        ];
-                        return reviews[(Number(id) || 1) % reviews.length];
-                      })(profile.id)}"
-                    </p>
-                    <span style="font-size: 10.5px; color: #7C3AED; font-weight: 700;">— สมาชิก VIP ตรวจสอบแล้ว</span>
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 11.5px; color: #334155;">
+                    <div style="background: #F8FAFC; border-radius: 10px; padding: 8px 10px;">
+                      <span style="color: #64748B; display: block; font-size: 10px;">รูปแบบการชำระเงิน</span>
+                      <strong style="color: #059669;">จ่ายหน้างาน 100% (ไม่มีมัดจำ)</strong>
+                    </div>
+                    <div style="background: #F8FAFC; border-radius: 10px; padding: 8px 10px;">
+                      <span style="color: #64748B; display: block; font-size: 10px;">นโยบายความตรงปก</span>
+                      <strong style="color: #140F22;">ไม่ตรงปก ยกเลิกได้ฟรีทันที</strong>
+                    </div>
                   </div>
                 </section>
-
-                <!-- Bio Description: กล่องแนะนำตัว -->
+                
                 <div class="profile-bio-wrapper" style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
                     ${naturalDesc}
                 </div>
@@ -1058,8 +1077,8 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
        
     <script type="module" src="/main.js?v=${GLOBAL_PROFILE_VERSION}"></script>
 
-    <!-- แถบปุ่มติดต่อด้านล่าง: ปุ่มทักน้องหลัก + ปุ่มแอดมินสำรอง -->
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.98); backdrop-filter: blur(12px); padding: 8px 14px 10px 14px; border-top: 1px solid rgba(124, 58, 237, 0.15); display: flex; flex-direction: column; gap: 6px; z-index: 999; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.06);">
+    
+  <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #FFFFFF; padding: 8px 14px calc(10px + env(safe-area-inset-bottom)) 14px; border-top: 1px solid rgba(124, 58, 237, 0.15); display: flex; flex-direction: column; gap: 6px; z-index: 999; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.06);">
       <div style="display: flex; align-items: center; gap: 8px;">
         <a href="${lineId}" target="_blank" rel="noopener nofollow" class="fmh-btn-line-cta" style="flex: 1; padding: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; font-size: 13px; font-weight: 800; border-radius: 100px; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);" onclick="if(window.trackLineClick)window.trackLineClick('${profile.id}')">
           <i class="fab fa-line" style="font-size: 18px;"></i> 
@@ -1105,8 +1124,9 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+      "Cache-Control": isForceRefresh ? "no-store" : "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": isForceRefresh ? "no-store" : "public, s-maxage=86400, stale-while-revalidate=86400",
+      "Netlify-Vary": "query=refresh",
       "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
@@ -1116,11 +1136,17 @@ const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(canonicalSl
       "Referrer-Policy": "strict-origin-when-cross-origin"
     };
 
-    setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
+    if (!isForceRefresh) {
+      setSafeProfileCache(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
+    }
     return new Response(htmlResponse, { headers: responseHeaders });
 
   } catch (err) {
     console.error("Profile rendering error:", err);
     return context.next();
   }
+};
+
+export const config = {
+  cache: "manual"
 };
