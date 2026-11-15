@@ -482,7 +482,9 @@ try {
       } catch (_) {}
     }
 
-    const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
+    
+    const cleanRawName = (profile.name || "สาวสวย").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").trim().replace(/^(น้อง\s?)+/gi, "").trim() || "สาวสวย";
+    const displayName = `น้อง${cleanRawName}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `/location/${provinceKey}`;
 
@@ -491,12 +493,17 @@ try {
         <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
           ${relatedProfiles.map(rp => {
-            const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
-            const rpSlug = encodeURIComponent(rp.slug || rp.id);
-            const rpImg = optimizeImg(rp.imagePath || rp.image_url || "", 400);
+            const rpCleanName = (rp.name || "สาวสวย").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").trim().replace(/^(น้อง\s?)+/gi, "").trim() || "สาวสวย";
+            const rpName = `น้อง${escapeHTML(rpCleanName)}`;
+            const rpDbSlug = String(rp.slug || "").trim();
+            const rpCleanSlug = (!rpDbSlug || /[\u0E00-\u0E7F]/.test(rpDbSlug)) ? `model-${rp.id}` : rpDbSlug;
+            const rpSlug = encodeURIComponent(rpCleanSlug);
+            const rpImg = optimizeImg(rp.imagePath || rp.image_url || "", 300);
+            const rpProvKey = String(rp.provinceKey || "").toLowerCase().trim().replace(/_/g, "-");
+            const rpProvName = PROVINCE_NAME_MAP[rpProvKey] || provinceNameThai;
             return `
               <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(rpProvName)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
                 <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
               </a>
             `;
@@ -667,8 +674,8 @@ const zoneHubUrl = hasDistinctZone
   
     const statusDotColor = (currentAvail === "สอบถามคิว" || !isOnlineNow) ? "#F59E0B" : "#059669";
 
-    const cleanHeightNum = parseInt(String(height).replace(/\D/g, ""), 10) || 160;
-    const cleanWeightNum = parseInt(String(weight).replace(/\D/g, ""), 10) || 48;
+    const realHeightNum = parseInt(String(profile.height || "").replace(/\D/g, ""), 10);
+    const realWeightNum = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
     const activeBreadcrumbText = `ไซด์ไลน์${cleanProvince}`;
 
     const profileFaqs = [
@@ -763,7 +770,7 @@ const zoneHubUrl = hasDistinctZone
           "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
           "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
-    {
+        {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
           "name": stripHTML(displayName),
@@ -777,18 +784,22 @@ const zoneHubUrl = hasDistinctZone
             "url": heroImageLarge
           },
           "url": canonicalUrl,
-         "height": {
-            "@type": "QuantitativeValue",
-            "value": cleanHeightNum,
-            "unitCode": "CMT",
-            "unitText": "cm"
-          },
-          "weight": {
-            "@type": "QuantitativeValue",
-            "value": cleanWeightNum,
-            "unitCode": "KGM",
-            "unitText": "kg"
-          },
+          ...(realHeightNum > 100 ? {
+            "height": {
+              "@type": "QuantitativeValue",
+              "value": realHeightNum,
+              "unitCode": "CMT",
+              "unitText": "cm"
+            }
+          } : {}),
+          ...(realWeightNum >= 35 ? {
+            "weight": {
+              "@type": "QuantitativeValue",
+              "value": realWeightNum,
+              "unitCode": "KGM",
+              "unitText": "kg"
+            }
+          } : {}),
           "homeLocation": {
             "@type": "Place",
             "name": `โซน${primaryZone} ${cleanProvince}`,
@@ -903,15 +914,11 @@ const zoneHubUrl = hasDistinctZone
           });
         };
         
-        ['scroll', 'keydown'].forEach(function(evt){
+       ['pointerdown', 'scroll', 'keydown'].forEach(function(evt){
           window.addEventListener(evt, loadGTM, { once: true, passive: true });
         });
         window.addEventListener('load', function() {
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(function() { setTimeout(loadGTM, 1500); }, { timeout: 4000 });
-          } else {
-            setTimeout(loadGTM, 3500);
-          }
+          setTimeout(loadGTM, 5500);
         }, { once: true });
       })();
     </script>
