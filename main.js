@@ -115,30 +115,13 @@ async function getSupabaseClient() {
     national: { zones: ["เชียงใหม่", "ขอนแก่น", "ภูเก็ต", "อุดรธานี"] }
   };
 
-  const REVIEW_POOL = [
-    { name: "คุณชลสิทธิ์", text: "ตรงเวลามากครับ น้องน่ารัก อัธยาศัยดี พูดจาสุภาพ ดูแลสไตล์ฟิวแฟนแท้ๆ ประทับใจมากครับ" },
-    { name: "คุณเอก", text: "ตัวจริงสวยตรงปกเลยครับ คุยสนุก เป็นกันเองมาก ปลอดภัยนัดเจอจ่ายหน้างานสบายใจสุดๆ" },
-    { name: "พี่โจ", text: "จองง่าย ไม่ต้องโอนมัดจำล่วงหน้า ไปเจอน้องตัวจริงแล้วค่อยจ่าย สบายใจและปลอดภัย 100% ครับ" },
-    { name: "คุณกอล์ฟ", text: "น้องน่ารักสไตล์ผู้ดี มารยาทดีมาก เทคแคร์เอาใจใส่เป็นธรรมชาติ แนะนำคนนี้เลยครับ" },
-    { name: "พี่ยอด", text: "ตรงปกไม่จกตาครับ น้องสุภาพ เรียบร้อย ไม่มีเร่งเวลาเลย นั่งทานข้าวด้วยกันเพลินมาก" },
-    { name: "คุณต้น", text: "บริการประทับใจมากครับ ให้เกียรติลูกค้า น่ารัก ยิ้มเก่ง คลายเหงาได้ดีเยี่ยมเลยครับ" },
-    { name: "พี่บอล", text: "ฟิวแฟนของแท้เลยครับ น้องเทคแคร์ดีมาก ขี้อ้อน น่ารัก ตรงตามรูปในโปรไฟล์ทุกอย่าง" },
-    { name: "คุณอภิชาติ", text: "ระบบจองสะดวกมาก น้องตรงเวลา สะอาด มารยาทการดูแลดีเยี่ยม ไร้กังวลเรื่องมัดจำครับ" },
-    { name: "พี่เมฆ", text: "น่ารักและเป็นกันเองมากครับ น้องคุยสนุก ไม่มีเกร็งเลย เหมือนได้ไปเดทกับแฟนจริงๆ" },
-    { name: "คุณวิทย์", text: "ตัวจริงสวยกว่าในรูปอีกครับ ผิวพรรณดี สุภาพเรียบร้อย เอาใจใส่ทุกรายละเอียด แนะนำครับ" },
-    { name: "พี่นัท", text: "จ่ายเงินหน้างานตรงกับน้อง มั่นใจในความปลอดภัยได้เต็มร้อย บริการด้วยความจริงใจมากครับ" },
-    { name: "คุณบอย", text: "น้องตรงต่อเวลามาก น่ารัก สดใส พูดเพราะ ให้ความรู้สึกอบอุ่นและผ่อนคลายสุดๆ ครับ" },
-    { name: "คุณป้อง", text: "เทคแคร์ดีมากครับ สุภาพ อารมณ์ดีตลอดเวลา คุ้มค่าและประทับใจมากครับ" },
-    { name: "พี่ยุทธ", text: "โปรไฟล์ยืนยันตัวตนจริง ตัวจริงตรงปก 100% สบายใจเรื่องความปลอดภัย แนะนำต่อเลยครับ" },
-    { name: "คุณอาร์ม", text: "น่ารัก ขี้อ้อน คุยเก่งมากครับ ชวนคุยเพลิน ไม่มีช่วงเงียบเลย ประทับใจมากครับ" },
-    { name: "พี่ก้อง", text: "รักษาเวลาดีเยี่ยม สุภาพ สะอาด ให้เกียรติซึ่งกันและกัน มีโอกาสจะนัดหมายอีกแน่นอนครับ" },
-    { name: "คุณเต้", text: "นัดหมายปลอดภัย ไม่มีความเสี่ยงทางการเงิน น้องน่ารัก มารยาทดี สมราคาครับ" },
-    { name: "คุณเจ", text: "บริการด้วยความจริงใจ ฟีลแฟนอบอุ่น ดูแลเอาใจใส่เป็นธรรมชาติ ไม่ผิดหวังครับ" }
-  ];
+  
  
 
   const appState = {
     allProfiles: [],
+    profileById: new Map(),
+    profileBySlug: new Map(),
     provincesMap: new Map(),
     currentProfileSlug: null,
     isFetching: false,
@@ -242,12 +225,11 @@ async function getSupabaseClient() {
     .replace(/ฟรีแตกบนตัว!?/gi, "")
     .replace(/จู๋\s*ทำ\s*(\+\s*\d+)?(\.-)?/gi, "")
     .replace(/(69|➏➒|อมสด|ดูดสด|เอาร่องนม|จูบแลกลิ้น|แตกใน)/gi, "")
-    .replace(/(พร้อม|มี)?(อาบน้ำด้วยกัน|อาบน้ำ)/gi, "")
+   .replace(/(พร้อม|มี)?อาบน้ำด้วยกัน/gi, "")
     .replace(/(มีอารมร่วม|มีอารมณ์?ร่วม)/gi, "ดูแลเป็นกันเอง")
     
-    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (รองรับทั้งเลขอารบิกและเลขไทย + จัดระเบียบวงเล็บเวลา)
-    .replace(/[\d๑-๙]+\s*น้ำ(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
-    .replace(/\/\s*1\s*ชม\.?/gi, " (1 ชม.)") // ✅ แก้ให้รองรับทั้ง "/1ชม." และ "/ 1 ชม."
+    // 🟢 ดักจับคำว่า "น้ำ" ทุกรูปแบบ (เว้นคำว่า น้ำหนัก, น้ำมัน ฯลฯ)
+    .replace(/[\d๑-๙]+\s*น้ำ(?!หนัก|มัน|หอม|ตก|ใส|ดื่ม|แข็ง|ตาล|พริก)(\s*\/?\s*[\d๑-๙]+\s*ชม\.?)?/gi, "1 ชม.")
     
     // 4. จัดระเบียบคำซ้ำ
     .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/gi, "")
@@ -377,6 +359,7 @@ function optimizeImg(imagePath, mode = "card") {
 
     let images = uniquePhotos.map(urlStr => ({
       src: optimizeImg(urlStr, 300),
+      cardSrc: optimizeImg(urlStr, "card"),
       fullSrc: optimizeImg(urlStr, 600)
     }));
 
@@ -1327,9 +1310,9 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
         rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
-    const imgSrc = (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) 
-      ? p.images[0].src 
-      : optimizeImg(rawPath, 400);
+   const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
+      ? (p.images[0].cardSrc || p.images[0].src)
+      : optimizeImg(rawPath, "card");
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1380,8 +1363,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
       : `<span class="card-vibe-pill">${defaultTag}</span>`;
 
     const isFiwFan = rawTags.some(t => {
-      const cleanTag = String(t).replace(/^#/, "").trim().toLowerCase();
-      return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน");
+      const cleanTag = String(t).replace(/^#+/, "").trim().toLowerCase();
+      return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "ฟีลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน") || cleanTag.includes("ฟิลแฟน");
     });
 
     let rightBadgeHtml = "";
@@ -1419,7 +1402,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
        sizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px"
            style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;" 
            loading="${index < 4 ? "eager" : "lazy"}" 
-           fetchpriority="${index === 0 ? "high" : "auto"}" 
+           fetchpriority="auto"
            decoding="async" 
            onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
@@ -1437,9 +1420,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
           </div>
       </div>
       
-     <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}">
-       <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">${hiddenAnchorText}</span>
-     </a>
+ <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}"></a>
 
       <div class="profile-card-info-content">
           <div class="profile-card-tags-row">
@@ -1448,7 +1429,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
           
          <div class="profile-card-social-strip" style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
             <span class="social-badge-likes">
-              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               <span>${likesText}</span>
             </span>
           </div>
@@ -1760,15 +1741,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    // ⚡ 3. ย้ายการสั่งล็อก Body และรีเซ็ต Scroll ไปทำใน requestAnimationFrame ป้องกันอาการหน้าจอนิ่งค้าง (Layout Thrashing)
     requestAnimationFrame(() => {
       const scrollBodyEl = document.getElementById("lightboxScrollBody");
       if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
       document.body.classList.add("lightbox-open");
     });
-
-    
-    if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
     
     const isAvail = profile.isAvailable !== undefined
@@ -1980,9 +1957,14 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
 
         if (relatedMore) {
-          const zoneLinkUrl = primaryZone.includes("นิมมาน") 
-            ? "/location/chiangmai/nimman" 
-            : `/location/${profile.provinceKey || "chiangmai"}`;
+          const provSlug = profile.provinceKey || "chiangmai";
+          const miniZoneMap = {
+            "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham", "ช้างเผือก": "changphueak",
+            "หลัง มช.": "cmu", "ป่าตอง": "patong", "กังสดาล": "kangsadan", "หลัง มข.": "kku",
+            "บ้านดู่": "baandu", "UD Town": "udtown"
+          };
+          const zSlug = miniZoneMap[primaryZone] || "";
+          const zoneLinkUrl = zSlug ? `/location/${provSlug}/${zSlug}` : `/location/${provSlug}`;
           relatedMore.innerHTML = `
             <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
               ${isEn ? `View all models in ${primaryZone} →` : `ดูน้องๆ รับงานโซน${primaryZone} (${pProvText}) ทั้งหมด →`}
@@ -2024,7 +2006,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       } else if (rawLine.startsWith("@")) {
         lineUrl = `https://page.line.me/${rawLine.replace(/^@+/, "")}`;
       } else {
-        lineUrl = `https://line.me/R/ti/p/~${rawLine.replace(/[^a-zA-Z0-9_\-\.]/g, "")}`;
+        lineUrl = `https://line.me/ti/p/~${rawLine.replace(/[^a-zA-Z0-9_\-\.]/g, "")}`;
       }
     }
 
@@ -2069,12 +2051,17 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     }
 
-    // 🟢 11. อัปเดต Meta & Title ของหน้าเว็บให้ Google บอทและผู้ใช้เห็น
+    // 🟢 11. อัปเดต Title, Canonical และ og:url ให้ตรงกัน
     setTimeout(() => {
       const dynamicTitle = isEn
         ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
         : `น้อง${cleanName} สาวรับงาน${pProvText} ไซด์ไลน์${primaryZone} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ`;
       document.title = dynamicTitle;
+
+      const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
+      if (canonicalLink) canonicalLink.href = canonicalProfileUrl;
+      const ogUrlEl = document.querySelector('meta[property="og:url"]');
+      if (ogUrlEl) ogUrlEl.setAttribute("content", canonicalProfileUrl);
 
       if (typeof gtag === "function") {
         gtag("event", "page_view", {
@@ -2673,11 +2660,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     this.classList.add("active");
     appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    // 2. ⚡ ปลดล็อก INP: ปล่อยให้เบราว์เซอร์วาดสีปุ่มลงจอก่อนทันที แล้วค่อยเริ่มกรองการ์ดน้องๆ
     requestAnimationFrame(() => {
       setTimeout(() => {
         executeFilterAndRender(true);
-      }, 16);
+      }, 0);
     });
   });
 });
@@ -2750,7 +2736,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         const searchId = String(profileId || "");
         const searchSlug = String(profileSlug || "");
 
-        let targetProfile = appState.allProfiles.find(p => 
+        let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p => 
           String(p.id) === searchId || 
           (p.slug && String(p.slug) === searchSlug) ||
           (searchSlug && String(p.id) === searchSlug)
@@ -2762,12 +2748,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
 
         if (targetProfile) {
-          history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-          // 🟢 ใช้ requestAnimationFrame + setTimeout หน่วง 16ms เพื่อให้เบราว์เซอร์ตอบสนองนิ้วแตะ (Next Paint) ก่อนเริ่มวาด DOM หนักๆ
+          const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
           requestAnimationFrame(() => {
             setTimeout(() => {
+              history.pushState(null, "", nextUrl);
               window.openLightboxModal(targetProfile);
-            }, 16);
+            }, 0);
           });
         } else {
           window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
@@ -2897,6 +2883,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           const cleanProfiles = filterValidProfiles(window.profilesData);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
+          appState.profileById.clear();
+          appState.profileBySlug.clear();
+          appState.allProfiles.forEach(p => {
+            if (p.id != null) appState.profileById.set(String(p.id), p);
+            if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+          });
           populateInitialComponents();
           
 if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length) {
@@ -2905,17 +2897,24 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
       try {
         const bgClient = await getSupabaseClient();
         if (!bgClient) return;
-        const { data } = await bgClient.from("profiles")
+       const { data } = await bgClient.from("profiles")
           .select("*")
           .eq("active", true)
           .order("isfeatured", { ascending: false })
           .order("created_at", { ascending: false })
-          .range(window.profilesData.length, window.totalProfilesCount);
+          .range(0, Math.max(200, window.totalProfilesCount));
           
         if (data && data.length > 0) {
           const moreClean = filterValidProfiles(data);
           const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
-          appState.allProfiles = [...appState.allProfiles, ...moreProfiles];
+          const uniqueMore = moreProfiles.filter(p => !appState.profileById.has(String(p.id)));
+          if (uniqueMore.length > 0) {
+            uniqueMore.forEach(p => {
+              if (p.id != null) appState.profileById.set(String(p.id), p);
+              if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+            });
+            appState.allProfiles = [...appState.allProfiles, ...uniqueMore];
+          }
         }
       } catch (_) {}
     };
@@ -2947,11 +2946,18 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     await handleUrlRouting(true);
     hideGlobalLoader();
 
+    window.appState = appState;
+    window.__resetAllFilters = () => {
+      appState.activePillTag = "all";
+      window.currentZoneSlug = "";
+      executeFilterAndRender(true);
+    };
+
     // ดักจับการกดย้อนกลับ/ไปข้างหน้าของเบราว์เซอร์
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
-  } 
+  }
   
   
   function initAgencyStories() {
@@ -3369,6 +3375,7 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
         sheetEl.classList.remove("active");
         sheetEl.style.pointerEvents = "none";
         sheetEl.style.visibility = "hidden";
+        setTimeout(() => { sheetEl.style.transform = ""; }, 300);
         if (overlayEl) {
           overlayEl.classList.remove("active");
           overlayEl.style.pointerEvents = "none";
@@ -3376,7 +3383,7 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
         }
         document.body.style.overflow = "";
       } else {
-        sheetEl.style.transform = "translate(-50%, 0)";
+        sheetEl.style.transform = "";
       }
     }, { passive: true });
 
@@ -3408,7 +3415,9 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
         const allPill = document.querySelector('.filter-pill-tab[data-tag="all"]');
         if (allPill) allPill.classList.add("active");
 
-        if (typeof window.executeFilterAndRender === "function") {
+        if (typeof window.__resetAllFilters === "function") {
+          window.__resetAllFilters();
+        } else if (typeof window.executeFilterAndRender === "function") {
           window.executeFilterAndRender(true);
         }
       });
@@ -3422,62 +3431,6 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
   }
 })();
 
-// ==========================================================================
-// 🟢 SOCIAL PROOF LIVE TICKER (โมดูลแจ้งเตือนผู้ใช้งานแบบเรียลไทม์)
-// ==========================================================================
-(function initSocialProofTicker() {
-  "use strict";
-
-  function runTicker() {
-    const toastEl = document.getElementById("social-proof-toast");
-    const nameEl = document.getElementById("toast-model-name");
-    if (!toastEl || !nameEl) return;
-
-    const getLiveProfiles = () => {
-      if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
-        return window.profilesData;
-      }
-      if (window.appState && Array.isArray(window.appState.allProfiles) && window.appState.allProfiles.length > 0) {
-        return window.appState.allProfiles;
-      }
-      return [];
-    };
-
-    const profiles = getLiveProfiles();
-    if (profiles.length === 0) return;
-
-    // สลับข้อความแสดงผลทุกๆ 30 วินาที
-    setInterval(() => {
-      const liveList = getLiveProfiles();
-      if (liveList.length === 0) return;
-
-      const randomProfile = liveList[Math.floor(Math.random() * liveList.length)];
-      const rawName = randomProfile.name || randomProfile.displayName || "โมเดล";
-      const cleanName = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
-      const provName = randomProfile.provinceNameThai || (window.currentProvinceName !== "ทั่วไทย" ? window.currentProvinceName : "เชียงใหม่");
-
-      nameEl.textContent = `น้อง${cleanName} (${provName})`;
-
-      // สั่งแสดงกล่องแจ้งเตือนขึ้นมา
-      toastEl.style.transform = "translateY(0)";
-      toastEl.style.opacity = "1";
-
-      // ซ่อนกล่องลงไปหลังจากผ่านไป 5 วินาที
-      setTimeout(() => {
-        toastEl.style.transform = "translateY(120px)";
-        toastEl.style.opacity = "0";
-      }, 5000);
-
-    }, 30000);
-  }
-
-  // หน่วงเวลา 4 วินาทีหลังเว็บโหลดเสร็จ เพื่อให้ระบบหลักทำงานให้เสร็จก่อน 100%
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => setTimeout(runTicker, 4000));
-  } else {
-    setTimeout(runTicker, 4000);
-  }
-})();
 
 
 document.addEventListener("error", function (e) {
