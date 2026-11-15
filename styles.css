@@ -228,29 +228,25 @@ body, body.fmh-app-page {
 }
 
 /* ==========================================================================
-   FLOATING BOTTOM DOCK - SLEEK & COMPACT LUXURY PILL
+   FLOATING BOTTOM DOCK - SLEEK & COMPACT LUXURY PILL (OPTIMIZED)
    ========================================================================== */
 @media (max-width: 768px) {
   .floating-app-dock,
   nav.floating-app-dock {
-    height: 50px !important; /* ลดความสูงจาก 66px เหลือ 50px ให้ดูเพรียวบาง */
+    height: 50px !important;
     width: calc(100% - 36px) !important;
     max-width: 360px !important;
     bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
     padding: 0 6px 0 10px !important;
     border-radius: 100px !important;
-    background: rgba(255, 255, 255, 0.88) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     border: 1px solid rgba(124, 58, 237, 0.2) !important;
-    box-shadow: 
-      0 10px 28px -4px rgba(15, 10, 26, 0.16),
-      0 2px 6px rgba(124, 58, 237, 0.08),
-      inset 0 1px 1px #ffffff !important;
+    box-shadow: 0 10px 28px -4px rgba(15, 10, 26, 0.16), 0 2px 6px rgba(124, 58, 237, 0.08) !important;
     gap: 2px !important;
   }
 
-  /* ปรับช่องไอคอน 3 ปุ่มซ้ายให้กระชับ */
   .floating-app-dock .dock-item {
     gap: 1.5px !important;
     padding: 2px 0 !important;
@@ -272,13 +268,11 @@ body, body.fmh-app-page {
     line-height: 1.1 !important;
   }
 
-  /* เส้นคั่นแนวตั้งให้สั้นลงตามความสูงใหม่ */
   .floating-app-dock .dock-divider {
     height: 20px !important;
     margin: 0 2px !important;
   }
 
-  /* ปรับปุ่มเขียว "ติดต่อ" ด้านขวาให้เรียวสวย ไม่ใหญ่เทอะทะ */
   nav.floating-app-dock .dock-btn-line,
   nav.floating-app-dock a.dock-item.dock-item-line,
   nav.floating-app-dock a[href*="line.me"] {
@@ -307,47 +301,36 @@ body, body.fmh-app-page {
 }
 
 /* ==========================================================================
-   FIRSTMODELHUB - 120FPS BUTTER-SMOOTH SCROLL & GPU PERFORMANCE BOOST
+   FIRSTMODELHUB - FAST PAINT & ZERO MAIN-THREAD BLOAT
    ========================================================================== */
 
-/* 1. ปลดล็อกอาการกระตุก/จอดีดเวลาไถนิ้วเร็วๆ บนมือถือ */
-.profile-card-new-container,
-#profiles-display-area,
+/* การ์ดใบที่ 7 เป็นต้นไป + ส่วนท้ายเว็บ ให้เบราว์เซอร์รอวาดตอนเลื่อนถึงจริง */
+.profile-card-new-container:nth-child(n+7) {
+  content-visibility: auto !important;
+  contain-intrinsic-size: auto 260px !important;
+}
 #map-section,
 .concierge-luxury-section,
 .editorial-digest-section,
 footer.fmh-footer {
-  content-visibility: visible !important;
-  contain-intrinsic-size: auto !important;
+  content-visibility: auto !important;
+  contain-intrinsic-size: auto 420px !important;
 }
 
-/* 2. บังคับใช้ GPU Render การ์ดและแถบเลื่อนให้ลื่นไหลระดับ 120Hz */
-.profile-card-new,
-.vip-card-item,
-.city-hub-card {
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+/* ลดการสร้าง GPU Layer เกินจำเป็นและปิด Animation กิน CPU บนรูปภาพ */
+.profile-card-img {
+  animation: none !important;
+  background-image: none !important;
+  background-color: #ede9fe !important;
 }
-
-/* 3. ปรับแถบเลื่อนแนวนอน (Stories / HOT Swiper / Filter Pills) ให้ติดนิ้ว */
 .stories-scroll-container,
 .vip-swiper-wrapper,
 .filter-pills-scroll-row,
 #quick-filter-pills {
-  scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
-  will-change: scroll-position !important;
+  will-change: auto !important;
 }
-
-/* 4. เพิ่มความคมชัดของฟอนต์และรูปภาพบนจอ Retina */
 body {
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
-}
-.profile-card-img,
-.vip-card-item img {
-  image-rendering: -webkit-optimize-contrast !important;
-  will-change: auto !important;
 }
