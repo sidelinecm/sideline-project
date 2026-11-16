@@ -551,15 +551,17 @@ try {
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-    const age = cleanAge || "ไม่ระบุ"; // 👈 เพิ่มบรรทัดนี้กลับมา ป้องกัน ReferenceError
+    const age = cleanAge || "ไม่ระบุ";
     const ageDisplay = cleanAge ? `${cleanAge} ปี` : "20+ ปี";
-    
-    const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
-      ? String(profile.height).replace(/\D/g, "") 
-      : "160";
-    const heightDisplay = `${height} ซม.`;
 
-    // 🟢 ถ้าฟิลด์ stats ว่างเปล่า ให้ค้นหาสัดส่วนจริงจากข้อความแนะนำตัว (เช่น 38-26-35) ก่อนใช้ค่า Default
+    const rawHeightNum = profile.height ? parseInt(String(profile.height).replace(/\D/g, ""), 10) : 0;
+    const height = rawHeightNum > 0 ? String(rawHeightNum) : "160";
+    const heightDisplay = (rawHeightNum >= 140 && rawHeightNum <= 190) ? `${rawHeightNum} ซม.` : "ไม่ระบุ";
+
+    const rawWeightNum = profile.weight ? parseInt(String(profile.weight).replace(/\D/g, ""), 10) : 0;
+    const weight = rawWeightNum > 0 ? String(rawWeightNum) : "50";
+    const weightDisplay = (rawWeightNum >= 38 && rawWeightNum <= 95) ? `${rawWeightNum} กก.` : "สมส่วน";
+
     const stats = (function() {
       const dbStats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
         ? String(profile.stats).trim() 
@@ -571,18 +573,8 @@ try {
       if (match && match[1]) {
         return match[1].replace(/\s+/g, "");
       }
-      return "36-25-35";
+      return "สมส่วน (สอบถามน้อง)";
     })();
-
-    const rawH = parseInt(height, 10) || 160;
-    const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
-    
-    const rawW = (parsedDbWeight && parsedDbWeight >= 38 && parsedDbWeight <= 95)
-      ? parsedDbWeight
-      : Math.max(45, Math.min(52, rawH - 110));
-
-    const weight = String(rawW);
-    const weightDisplay = parsedDbWeight ? `${weight} กก.` : "สมส่วน";
   
     const cleanProvince = escapeHTML(provinceNameThai);
    // 🟢 ล้างทั้งตัวเคาะบรรทัด ช่องว่างตกค้าง และจุดปิดท้ายออกให้หมดก่อนนำไปใช้:
