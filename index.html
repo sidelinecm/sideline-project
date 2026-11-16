@@ -42,7 +42,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
  
-  <link rel="stylesheet" href="/styles.css?v=v_20261115_1">
+  <link rel="stylesheet" href="/styles.css?v=v_20261115_46">
 
   <script type="speculationrules">
   {
@@ -114,33 +114,15 @@
     })();
   </script>
  <style>
-    body.fmh-app-page {
-      padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-    .floating-app-dock {
-      padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
-    }
     .seo-h1-title, .h1-line-1, .h1-line-2 {
       content-visibility: visible !important;
     }
     .profile-card-new-container {
-      contain: layout style;
+      contain: layout style paint;
     }
-    .concierge-luxury-section {
+    .concierge-luxury-section, .editorial-digest-section, .fmh-footer, #map-section {
       content-visibility: auto;
-      contain-intrinsic-size: auto 1400px;
-    }
-    .editorial-digest-section {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 320px;
-    }
-    .fmh-footer {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 450px;
-    }
-    #map-section {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 350px;
+      contain-intrinsic-size: auto 420px;
     }
     #lightbox.active {
       backdrop-filter: none !important;
@@ -486,9 +468,8 @@
     <div class="sheet-header">
       <div style="display: flex; align-items: center; gap: 8px;">
         <i class="fas fa-sliders-h icon-purple" style="font-size: 14px;"></i>
-        <div style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</div>
+        <h3 style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</h3>
       </div>
-      
       <button type="button" id="close-search-drawer-btn" class="sheet-close-btn" aria-label="ปิดหน้าต่างตัวกรอง"><i class="fas fa-times"></i></button>
     </div>
     <div class="sheet-body-content">
@@ -585,8 +566,8 @@
             </div>
           </div>
         </div>
-      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
-          <div class="footer-heading" style="font-weight: 800; margin-bottom: 10px; color: #140F22;">เมนูหลัก</div>
+        <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
+          <h3 class="footer-heading">เมนูหลัก</h3>
           <ul class="footer-nav-links">
             <li><a href="/">หน้าแรก</a></li>
             <li><a href="/profiles">รวมโปรไฟล์</a></li>
@@ -644,7 +625,7 @@
        alt="รูปโปรไฟล์ตัวจริงตรงปก" 
        width="400" 
        height="560" 
-       loading="eager"
+       loading="lazy"
        decoding="async"
        style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
@@ -719,11 +700,11 @@
 </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261115_1"></script>
+  <script type="module" src="/main.js?v=v_20261115_46"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        const CURRENT_SW_VER = 'v_20261115_1';
+        const CURRENT_SW_VER = 'v_20261115_46';
         navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
           .then(function(reg) {
             reg.onupdatefound = function() {
