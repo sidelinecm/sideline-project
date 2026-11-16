@@ -494,100 +494,104 @@ function optimizeImg(imagePath, mode = "card") {
     };
   }
 
-  window.__populateProvinceSelectLazy = function() {
-    if (!domCache.provinceSelect || domCache.provinceSelect.dataset.populated === "true") return;
-    domCache.provinceSelect.dataset.populated = "true";
-    while (domCache.provinceSelect.options.length > 1) {
-      domCache.provinceSelect.remove(1);
+  function populateInitialComponents() {
+    if (domCache.provinceSelect) {
+      while (domCache.provinceSelect.options.length > 1) {
+        domCache.provinceSelect.remove(1);
+      }
+      const sortedProvinces = Array.from(appState.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
+      const fragment = document.createDocumentFragment();
+      sortedProvinces.forEach(([k, nameThai]) => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : nameThai;
+        fragment.appendChild(opt);
+      });
+      domCache.provinceSelect.appendChild(fragment);
     }
-    const sortedProvinces = Array.from(appState.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
-    const fragment = document.createDocumentFragment();
-    sortedProvinces.forEach(([k, nameThai]) => {
-      const opt = document.createElement("option");
-      opt.value = k;
-      opt.textContent = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : nameThai;
-      fragment.appendChild(opt);
-    });
-    domCache.provinceSelect.appendChild(fragment);
+    
+    initAgencyStories();
+    
 
     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
     const activeProvinceSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
-    if (activeProvinceSlug && activeProvinceSlug !== "national") {
+    if (domCache.provinceSelect && activeProvinceSlug && activeProvinceSlug !== "national") {
       domCache.provinceSelect.value = activeProvinceSlug;
     }
-  };
 
-  function populateInitialComponents() {
-    initAgencyStories();
-
-    const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
-    if (!hasExistingSSR) {
+    const hasExistingSSRProfiles = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
+    if (!hasExistingSSRProfiles) {
       executeFilterAndRender(false);
     }
 
     const vipSwiperEl = document.getElementById("vip-swiper-container");
-    if (!vipSwiperEl) return;
+if (!vipSwiperEl) return;
 
-    const existingVipCards = vipSwiperEl.querySelectorAll(".vip-card-item");
-    if (existingVipCards.length > 0) {
-      window.__hotProfileIds = new Set(Array.from(existingVipCards).map(el => String(el.dataset.profileId)));
-      return;
-    }
+// ✅ ถ้าบนหน้าจอมีน้องในแถบ HOT อยู่แล้ว ให้อ่าน ID ของน้องเก็บไว้ทันที จะได้ไม่นำมาแสดงซ้ำด้านล่าง
+const existingVipCards = vipSwiperEl.querySelectorAll(".vip-card-item");
+if (existingVipCards.length > 0) {
+  window.__hotProfileIds = new Set(Array.from(existingVipCards).map(el => String(el.dataset.profileId)));
+  return;
+}
 
-    const currentProv = window.currentProvinceSlug || "national";
-    let pool = appState.allProfiles;
-    if (currentProv && currentProv !== "national" && currentProv !== "all") {
-      pool = pool.filter(p => (p.provinceKey || "").toLowerCase() === currentProv.toLowerCase());
-    }
+// ✅ เช็คก่อนว่าอยู่หน้าจังหวัดอะไร ถ้าอยู่หน้าจังหวัดให้กรองเฉพาะน้องจังหวัดนั้นมาทำเป็น HOT
+const currentProv = window.currentProvinceSlug || "national";
+let pool = appState.allProfiles;
+if (currentProv && currentProv !== "national" && currentProv !== "all") {
+  pool = pool.filter(p => (p.provinceKey || "").toLowerCase() === currentProv.toLowerCase());
+}
 
-    let hotProfiles = [];
-    const isNation = !currentProv || currentProv === "national" || currentProv === "all";
+// 🟢 จัดกลุ่มตามจังหวัด และสลับดึงคนที่มี #ฟิวแฟน จังหวัดละ 2 คน
+let hotProfiles = [];
+const isNation = !currentProv || currentProv === "national" || currentProv === "all";
 
-    if (isNation) {
-      const fiwfanOnly = pool.filter(p => {
-        const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
-        const descStr = (p.description || "").toLowerCase();
-        const sloganStr = (p.slogan || p.quote || "").toLowerCase();
-        return `${tagsStr} ${descStr} ${sloganStr}`.includes("ฟิวแฟน") || tagsStr.includes("gfe");
-      });
+if (isNation) {
+  const fiwfanOnly = pool.filter(p => {
+    const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
+    const descStr = (p.description || "").toLowerCase();
+    const sloganStr = (p.slogan || p.quote || "").toLowerCase();
+    return `${tagsStr} ${descStr} ${sloganStr}`.includes("ฟิวแฟน") || tagsStr.includes("gfe");
+  });
 
-      const provGroup = new Map();
-      (fiwfanOnly.length >= 6 ? fiwfanOnly : pool).forEach(p => {
-        const k = (p.provinceKey || "other").toLowerCase();
-        if (!provGroup.has(k)) provGroup.set(k, []);
-        provGroup.get(k).push(p);
-      });
+  const provGroup = new Map();
+  (fiwfanOnly.length >= 6 ? fiwfanOnly : pool).forEach(p => {
+    const k = (p.provinceKey || "other").toLowerCase();
+    if (!provGroup.has(k)) provGroup.set(k, []);
+    provGroup.get(k).push(p);
+  });
 
-      const seenNames = new Set();
-      const provKeys = Array.from(provGroup.keys());
-      let round = 0;
+  const seenNames = new Set();
+  const provKeys = Array.from(provGroup.keys());
+  let round = 0;
 
-      while (hotProfiles.length < 10 && round < 4) {
-        let added = 0;
-        for (const k of provKeys) {
-          const list = provGroup.get(k) || [];
-          if (list.length > round) {
-            const item = list[round];
-            const cleanN = (item.displayName || item.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
-            if (!seenNames.has(cleanN)) {
-              seenNames.add(cleanN);
-              hotProfiles.push(item);
-              added++;
-              if (hotProfiles.length >= 10) break;
-            }
-          }
+  while (hotProfiles.length < 10 && round < 4) {
+    let added = 0;
+    for (const k of provKeys) {
+      const list = provGroup.get(k) || [];
+      if (list.length > round) {
+        const item = list[round];
+        const cleanN = (item.displayName || item.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+        if (!seenNames.has(cleanN)) {
+          seenNames.add(cleanN);
+          hotProfiles.push(item);
+          added++;
+          if (hotProfiles.length >= 10) break;
         }
-        if (added === 0) break;
-        round++;
       }
-    } else {
-      const provCandidates = pool.filter(p => {
-        const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
-        return tagsStr.includes("ฟิวแฟน") || (p.description || "").includes("ฟิวแฟน");
-      });
-      hotProfiles = (provCandidates.length >= 5 ? provCandidates : pool).slice(0, 10);
     }
+    if (added === 0) break;
+    round++;
+  }
+} else {
+  // หากอยู่หน้ารายจังหวัด ให้ดึงคนในจังหวัดนั้นที่ติดฟิวแฟน
+  const provCandidates = pool.filter(p => {
+    const tagsStr = (Array.isArray(p.styleTags) ? p.styleTags.join(" ") : (p.styleTags || "")).toLowerCase();
+    return tagsStr.includes("ฟิวแฟน") || (p.description || "").includes("ฟิวแฟน");
+  });
+  hotProfiles = (provCandidates.length >= 5 ? provCandidates : pool).slice(0, 10);
+}
 
+    
     window.__hotProfileIds = new Set(hotProfiles.map(p => String(p.id)));
 
     vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
@@ -620,7 +624,7 @@ function optimizeImg(imagePath, mode = "card") {
         </div>
       `;
     }).join("");
-  }
+    }
 
   function executeFilterAndRender(isUserTriggered = true) {
   try {
@@ -1915,95 +1919,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     }
 
-    const relatedTitle = document.getElementById("lightboxRelatedTitle");
-    if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
-
-    const relatedGrid = document.getElementById("lightboxRelatedGrid");
-    const relatedMore = document.getElementById("lightboxRelatedMoreLink");
-    if (relatedGrid) {
-      let allList = (appState && appState.allProfiles && appState.allProfiles.length > 0)
-        ? appState.allProfiles
-        : (window.profilesData || []);
-
-      const pKey = (profile.provinceKey || profile.province_slug || "chiangmai").toLowerCase();
-      let sameProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() === pKey);
-      let otherProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() !== pKey);
-
-      let candidates = [...sameProv.slice(0, 3), ...otherProv.slice(0, 3)];
-      if (candidates.length < 6) {
-        candidates = allList.filter(m => String(m.id) !== String(profile.id)).slice(0, 6);
-      }
-
-      if (candidates.length > 0) {
-        relatedGrid.innerHTML = candidates.map(rm => {
-          const rmName = rm.displayName || rm.name;
-          const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || fallbackImg);
-          const rmSlug = rm.slug || rm.id;
-          return `
-            <div class="lightbox-related-item" data-profile-slug="${rmSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); text-align: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-              <img src="${rmImg}" alt="${rmName}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
-              <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rmName}</div>
-            </div>
-          `;
-        }).join("");
-
-        relatedGrid.querySelectorAll(".lightbox-related-item").forEach(card => {
-          card.onclick = function(e) {
-            e.preventDefault();
-            const targetSlug = this.getAttribute("data-profile-slug");
-            const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
-            if (targetProfile) {
-              const normalized = (typeof normalizeProfile === "function" && !targetProfile.images)
-                ? normalizeProfile(targetProfile)
-                : targetProfile;
-              history.pushState(null, "", `/sideline/${encodeURIComponent(normalized.slug || normalized.id)}`);
-              window.openLightboxModal(normalized);
-            } else {
-              window.location.href = `/sideline/${encodeURIComponent(targetSlug)}`;
-            }
-          };
-        });
-      }
-
-      if (relatedMore) {
-        const provSlug = profile.provinceKey || "chiangmai";
-        const miniZoneMap = {
-          "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham", "ช้างเผือก": "changphueak",
-          "หลัง มช.": "cmu", "ป่าตอง": "patong", "กังสดาล": "kangsadan", "หลัง มข.": "kku",
-          "บ้านดู่": "baandu", "UD Town": "udtown"
-        };
-        const zSlug = miniZoneMap[primaryZone] || "";
-        const zoneLinkUrl = zSlug ? `/location/${provSlug}/${zSlug}` : `/location/${provSlug}`;
-        relatedMore.innerHTML = `
-          <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
-            ${isEn ? `View all models in ${primaryZone} →` : `ดูน้องๆ รับงานโซน${primaryZone} (${pProvText}) ทั้งหมด →`}
-          </a>
-        `;
-      }
-    }
-
-    const faqSection = document.getElementById("lightboxFaqSection");
-    const faqList = document.getElementById("lightboxFaqList");
-    if (faqSection && faqList) {
-      faqSection.style.display = "block";
-      const modelFaqs = [
-        { q: `นัดพบ${displayName} มีขั้นตอนการชำระเงินอย่างไร?`, a: `สามารถชำระเงินสดหรือโอนตรงให้น้องตอนเจอตัวจริงหน้างานได้เลยค่ะ ทางระบบไม่มีนโยบายโอนมัดจำล่วงหน้า เพื่อความสบายใจ 100% ค่ะ` },
-        { q: `หากน้องเดินทางมาถึงแล้วไม่ตรงปก ทำอย่างไรได้บ้าง?`, a: `หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูปโปรไฟล์ สามารถปฏิเสธและยกเลิกงานหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้นค่ะ` },
-        { q: `พิกัดโซน${primaryZone} มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`, a: `${displayName} สแตนด์บายอยู่ในโซน${primaryZone} (${pProvText}) มีทั้งห้องส่วนตัวและพร้อมเดินทางไปหาที่โรงแรมหรือคอนโดอย่างรวดเร็วค่ะ` }
-      ];
-      faqList.innerHTML = modelFaqs.map(f => `
-        <details style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; overflow: hidden; margin-bottom: 6px;">
-          <summary style="padding: 10px 12px; font-size: 12px; font-weight: 800; color: #140F22; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
-            <span>Q: ${f.q}</span>
-            <span style="color: #7C3AED; font-size: 10px; margin-left: 6px;">▼</span>
-          </summary>
-          <div style="padding: 0 12px 10px 12px; font-size: 11.5px; color: #475569; line-height: 1.55; border-top: 1px dashed rgba(124, 58, 237, 0.1); padding-top: 6px;">
-            ${f.a}
-          </div>
-        </details>
-      `).join("");
-    }
-
+    // ✅ เปิดแสดงหน้าต่างครั้งเดียวหลังใส่ข้อมูลเสร็จหมดแล้ว
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";
     lightboxEl.setAttribute("aria-hidden", "false");
@@ -2014,6 +1930,101 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       contentWrapperEl.style.opacity = "1";
     }
     document.body.classList.add("lightbox-open");
+    requestAnimationFrame(() => {
+      const scrollBodyEl = document.getElementById("lightboxScrollBody");
+      if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
+    });
+
+    setTimeout(() => {
+      const relatedTitle = document.getElementById("lightboxRelatedTitle");
+      if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
+
+      const relatedGrid = document.getElementById("lightboxRelatedGrid");
+      const relatedMore = document.getElementById("lightboxRelatedMoreLink");
+      if (relatedGrid) {
+        let allList = (appState && appState.allProfiles && appState.allProfiles.length > 0)
+          ? appState.allProfiles
+          : (window.profilesData || []);
+
+        const pKey = (profile.provinceKey || profile.province_slug || "chiangmai").toLowerCase();
+        let sameProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() === pKey);
+        let otherProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() !== pKey);
+
+        let candidates = [...sameProv.slice(0, 3), ...otherProv.slice(0, 3)];
+        if (candidates.length < 6) {
+          candidates = allList.filter(m => String(m.id) !== String(profile.id)).slice(0, 6);
+        }
+
+        if (candidates.length > 0) {
+          relatedGrid.innerHTML = candidates.map(rm => {
+            const rmName = rm.displayName || rm.name;
+            const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || fallbackImg);
+            const rmSlug = rm.slug || rm.id;
+            return `
+              <div class="lightbox-related-item" data-profile-slug="${rmSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); text-align: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                <img src="${rmImg}" alt="${rmName}" loading="lazy" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rmName}</div>
+              </div>
+            `;
+          }).join("");
+
+          relatedGrid.querySelectorAll(".lightbox-related-item").forEach(card => {
+            card.onclick = function(e) {
+              e.preventDefault();
+              const targetSlug = this.getAttribute("data-profile-slug");
+              const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
+              if (targetProfile) {
+                const normalized = (typeof normalizeProfile === "function" && !targetProfile.images)
+                  ? normalizeProfile(targetProfile)
+                  : targetProfile;
+                history.pushState(null, "", `/sideline/${encodeURIComponent(normalized.slug || normalized.id)}`);
+                window.openLightboxModal(normalized);
+              } else {
+                window.location.href = `/sideline/${encodeURIComponent(targetSlug)}`;
+              }
+            };
+          });
+        }
+
+        if (relatedMore) {
+          const provSlug = profile.provinceKey || "chiangmai";
+          const miniZoneMap = {
+            "นิมมาน": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham", "ช้างเผือก": "changphueak",
+            "หลัง มช.": "cmu", "ป่าตอง": "patong", "กังสดาล": "kangsadan", "หลัง มข.": "kku",
+            "บ้านดู่": "baandu", "UD Town": "udtown"
+          };
+          const zSlug = miniZoneMap[primaryZone] || "";
+          const zoneLinkUrl = zSlug ? `/location/${provSlug}/${zSlug}` : `/location/${provSlug}`;
+          relatedMore.innerHTML = `
+            <a href="${zoneLinkUrl}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
+              ${isEn ? `View all models in ${primaryZone} →` : `ดูน้องๆ รับงานโซน${primaryZone} (${pProvText}) ทั้งหมด →`}
+            </a>
+          `;
+        }
+      }
+
+      const faqSection = document.getElementById("lightboxFaqSection");
+      const faqList = document.getElementById("lightboxFaqList");
+      if (faqSection && faqList) {
+        faqSection.style.display = "block";
+        const modelFaqs = [
+          { q: `นัดพบ${displayName} มีขั้นตอนการชำระเงินอย่างไร?`, a: `สามารถชำระเงินสดหรือโอนตรงให้น้องตอนเจอตัวจริงหน้างานได้เลยค่ะ ทางระบบไม่มีนโยบายโอนมัดจำล่วงหน้า เพื่อความสบายใจ 100% ค่ะ` },
+          { q: `หากน้องเดินทางมาถึงแล้วไม่ตรงปก ทำอย่างไรได้บ้าง?`, a: `หากตรวจสอบแล้วตัวจริงไม่ตรงตามรูปโปรไฟล์ สามารถปฏิเสธและยกเลิกงานหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้นค่ะ` },
+          { q: `พิกัดโซน${primaryZone} มีห้องส่วนตัวหรือเดินทางนอกสถานที่ได้ไหม?`, a: `${displayName} สแตนด์บายอยู่ในโซน${primaryZone} (${pProvText}) มีทั้งห้องส่วนตัวและพร้อมเดินทางไปหาที่โรงแรมหรือคอนโดอย่างรวดเร็วค่ะ` }
+        ];
+        faqList.innerHTML = modelFaqs.map(f => `
+          <details style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; overflow: hidden; margin-bottom: 6px;">
+            <summary style="padding: 10px 12px; font-size: 12px; font-weight: 800; color: #140F22; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+              <span>Q: ${f.q}</span>
+              <span style="color: #7C3AED; font-size: 10px; margin-left: 6px;">▼</span>
+            </summary>
+            <div style="padding: 0 12px 10px 12px; font-size: 11.5px; color: #475569; line-height: 1.55; border-top: 1px dashed rgba(124, 58, 237, 0.1); padding-top: 6px;">
+              ${f.a}
+            </div>
+          </details>
+        `).join("");
+      }
+    }, 120);
 
     setTimeout(() => {
       const dynamicTitle = isEn
@@ -2494,13 +2505,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       openFilterDockBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof window.__populateProvinceSelectLazy === "function") {
-          window.__populateProvinceSelectLazy();
-        }
         toggleSearchDrawer(true);
-        if (window.__loadAllProfilesIfNeeded && !window.__allProfilesLoaded) {
-          window.__loadAllProfilesIfNeeded();
-        }
       };
     }
     
@@ -2715,17 +2720,21 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           if (rawP) targetProfile = normalizeProfile(rawP);
         }
 
-       if (targetProfile) {
+        if (targetProfile) {
           const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
-          history.pushState(null, "", nextUrl);
-          window.openLightboxModal(targetProfile);
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              history.pushState(null, "", nextUrl);
+              window.openLightboxModal(targetProfile);
+            }, 0);
+          });
         } else {
           window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
         }
         return;
       }
     }
-
+    
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");
       if (closeLightboxBtn || e.target === lightboxModal) {
@@ -2809,12 +2818,17 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           if (raw.id && seenIds.has(String(raw.id))) continue;
 
           
+          const pKey = (raw.pk || raw.provinceKey || raw.province_slug || "").toLowerCase();
+          const nameSig = `${cleanName}_${pKey}`;
+          if (seenNames.has(nameSig)) continue;
+
           let imgSig = "";
           const parts = rawImg.split("?")[0].split("/");
           imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
           if (imgSig && seenImgs.has(imgSig)) continue;
 
           if (raw.id) seenIds.add(String(raw.id));
+          seenNames.add(nameSig);
           if (imgSig) seenImgs.add(imgSig);
 
           validProfiles.push(raw);

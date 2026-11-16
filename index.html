@@ -31,7 +31,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub">
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนทั่วไทย ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ">
- <meta name="twitter:image" content="https://res.cloudinary.com/adjucgga/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/images/firstmodelhub.webp">
+  <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/webp" href="/images/firstmodelhub.webp">
@@ -100,26 +100,47 @@
         gtag('js', new Date());
         gtag('config', 'G-PG0QFDWTTG', {
           'send_page_view': true,
+          'link_attribution': false,
           'cookie_flags': 'SameSite=None;Secure'
         });
       };
       
-      window.addEventListener('scroll', loadGTM, { once: true, passive: true });
+     ['pointerdown', 'scroll', 'keydown'].forEach(function(evt){
+        window.addEventListener(evt, loadGTM, { once: true, passive: true });
+      });
       window.addEventListener('load', function() {
-        setTimeout(loadGTM, 3500);
+        setTimeout(loadGTM, 5500);
       }, { once: true });
     })();
   </script>
  <style>
+    body.fmh-app-page {
+      padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .floating-app-dock {
+      padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
+    }
     .seo-h1-title, .h1-line-1, .h1-line-2 {
       content-visibility: visible !important;
     }
     .profile-card-new-container {
-      contain: layout style paint;
+      contain: layout style;
     }
-    .concierge-luxury-section, .editorial-digest-section, .fmh-footer, #map-section {
+    .concierge-luxury-section {
       content-visibility: auto;
-      contain-intrinsic-size: auto 420px;
+      contain-intrinsic-size: auto 1400px;
+    }
+    .editorial-digest-section {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 320px;
+    }
+    .fmh-footer {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 450px;
+    }
+    #map-section {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 350px;
     }
     #lightbox.active {
       backdrop-filter: none !important;
@@ -419,7 +440,7 @@
         </div>
         
         <div id="faq-wrapper-block">
-          <h2 class="section-title-mini" style="color: var(--violet-main);">❓ คำถามที่พบบ่อย (FAQ)</h2>
+          <h3 class="section-title-mini" style="color: var(--violet-main);">❓ คำถามที่พบบ่อย (FAQ)</h3>
           <div id="faq-container-list" class="faq-list-wrapper"></div>
         </div>
 
@@ -465,8 +486,9 @@
     <div class="sheet-header">
       <div style="display: flex; align-items: center; gap: 8px;">
         <i class="fas fa-sliders-h icon-purple" style="font-size: 14px;"></i>
-        <h3 style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</h3>
+        <div style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</div>
       </div>
+      
       <button type="button" id="close-search-drawer-btn" class="sheet-close-btn" aria-label="ปิดหน้าต่างตัวกรอง"><i class="fas fa-times"></i></button>
     </div>
     <div class="sheet-body-content">
@@ -563,8 +585,8 @@
             </div>
           </div>
         </div>
-        <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
-          <h3 class="footer-heading">เมนูหลัก</h3>
+      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
+          <div class="footer-heading" style="font-weight: 800; margin-bottom: 10px; color: #140F22;">เมนูหลัก</div>
           <ul class="footer-nav-links">
             <li><a href="/">หน้าแรก</a></li>
             <li><a href="/profiles">รวมโปรไฟล์</a></li>
@@ -622,7 +644,7 @@
        alt="รูปโปรไฟล์ตัวจริงตรงปก" 
        width="400" 
        height="560" 
-       loading="lazy"
+       loading="eager"
        decoding="async"
        style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
