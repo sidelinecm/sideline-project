@@ -4,7 +4,7 @@
  */
 
 const swUrl = new URL(self.location);
-const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261115_46';
+const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261115_1';
 const CACHE_NAME = `firstmodelhub-cache-${CURRENT_VERSION}`;
 
 
