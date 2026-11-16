@@ -340,26 +340,32 @@ body {
    วางต่อท้ายล่างสุดของ styles.css โดยไม่ต้องแก้โค้ดเดิมด้านบน
    ========================================================================== */
 
-/* 1. กู้คืน Layout Containment ป้องกัน Forced Reflow 93ms และให้การ์ด 1-6 วาดทันที */
-#profiles-display-area {
+/* 1. บังคับแสดงการ์ดทุกใบ 100% ห้ามพับซ่อน ป้องกัน Googlebot เรนเดอร์จอว่าง */
+#profiles-display-area,
+.profile-grid,
+.profiles-grid-row,
+.profile-card-new-container,
+.profile-card-new {
   content-visibility: visible !important;
+  contain: none !important;
   contain-intrinsic-size: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: flex !important;
 }
 
 .profile-card-new-container {
-  will-change: auto !important;
-  transform: none !important;
-  contain: layout style paint !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 220px !important;
 }
 
-.profile-card-new-container:nth-child(-n+6) {
-  content-visibility: visible !important;
-  contain-intrinsic-size: none !important;
-}
-
-.profile-card-new-container:nth-child(n+7) {
-  content-visibility: auto !important;
-  contain-intrinsic-size: auto 260px !important;
+.profile-card-new {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 220px !important;
+  position: relative !important;
 }
 
 #search-bottom-sheet,
@@ -515,4 +521,30 @@ footer.fmh-footer .footer-directory-grid ul li a[href*="line.me"] {
 footer.fmh-footer [style*="color: #94A3B8"],
 .city-hub-card span[style*="color: #94A3B8"] {
   color: #475569 !important;
+}
+
+/* ==========================================================================
+   FIX GOOGLEBOT BLANK RENDER: ปลดบล็อก content-visibility ให้บอทเห็นการ์ดครบ 100%
+   ========================================================================== */
+
+/* ปลดล็อกคอนเทนเนอร์ใหญ่ ให้แสดงผลการ์ดตลอดเวลา ห้ามพับซ่อน */
+#profiles-display-area,
+.section-content-wrapper,
+.profile-grid,
+.profiles-grid-row {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ปลดล็อกการ์ดน้องทุกใบให้ Googlebot วาดภาพติด 100% */
+.profile-card-new-container,
+.profile-card-new {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
