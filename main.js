@@ -185,16 +185,10 @@ async function getSupabaseClient() {
       if (localStorage.getItem(storageKey)) return; 
       localStorage.setItem(storageKey, "true");
 
-      fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"
-        },
-        body: JSON.stringify({ profile_id_to_update: idNum }),
-        keepalive: true
-      }).catch(() => {});
-      
+      const client = await getSupabaseClient();
+      if (client) {
+        client.rpc("increment_likes", { profile_id_to_update: idNum }).catch(() => {});
+      }
     } catch (_) {}
   }, 50);
 };
@@ -291,18 +285,19 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+
+
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_auto,q_auto,w_120,h_120,c_thumb,g_face";
+    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
+    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    transform = "f_auto,q_auto,w_300,h_420,c_fill,g_auto";
+    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
+    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_auto,q_auto,w_1200,h_630,c_fill,g_face";
-  } else if (typeof mode === "number") {
-    const w = mode;
-    const h = Math.round(mode * 1.4);
-    transform = `f_auto,q_auto,w_${w},h_${h},c_fill,g_auto`;
+    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
+    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -1315,42 +1310,38 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
         rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
-    const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp"))
+   const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? (p.images[0].cardSrc || p.images[0].src)
       : optimizeImg(rawPath, "card");
-    const imgSrc200 = optimizeImg(rawPath, 200);
-    const imgSrc300 = optimizeImg(rawPath, 300);
-
+    
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
-    let rawName = String(p.displayName || p.name || "Model").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").trim();
+    let rawName = p.displayName || p.name || "Model";
     const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
-
+    
     const ageVal = p.safeAge || p.age;
     const ageDisplay = (ageVal && String(ageVal).trim() !== "-" && String(ageVal).trim() !== "0") ? `${String(ageVal).replace(/\D/g, "")} ปี` : "20+ ปี";
-
+    
     let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
     const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
     if (activeZone && rawLoc.includes(activeZone)) {
       locName = activeZone;
     } else {
-      const zoneTokens = rawLoc
-        .split(/[,/]|และ/)
-        .map(s => s.replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*/gi, "").trim())
-        .filter(s => s && !/^(ใกล้เคียง|พื้นที่ใกล้เคียง|รอบเมือง|ในเมือง)$/i.test(s));
-      locName = zoneTokens[0] || p.provinceNameThai || "เชียงใหม่";
+      locName = rawLoc
+        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+        .split(/[,/]|และใกล้/)[0]
+        .trim();
+      if (!locName) locName = rawLoc;
     }
 
-    const isOnline = p.isAvailable !== undefined
-      ? Boolean(p.isAvailable)
+    const isOnline = p.isAvailable !== undefined 
+      ? Boolean(p.isAvailable) 
       : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(p.availability || p.status || "").toLowerCase().includes(s));
-
+      
     const statusClass = isOnline ? "status-online" : "status-busy";
     const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
     const luxuryPrice = formatLuxuryRate(p.rate || p._price || p.price);
-    const rawSlugStr = String(p.slug || "").trim();
-    const cleanSlugStr = (!rawSlugStr || /[\u0E00-\u0E7F]/.test(rawSlugStr)) ? `model-${p.id}` : rawSlugStr;
-    const profileSlug = encodeURIComponent(cleanSlugStr);
+    const profileSlug = encodeURIComponent(p.slug || p.id);
 
     const rawTags = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
     const cleanTags = rawTags
@@ -1382,34 +1373,39 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     } else if (p.isVerified) {
       rightBadgeHtml = `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ตรงปก</span>`;
     } else {
-      rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(255, 255, 255, 0.92); color: #6D28D9;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
+      rightBadgeHtml = `<span class="badge-verified-top" style="background: rgba(124, 58, 237, 0.08); color: #7C3AED;"><span aria-hidden="true">✨</span> แนะนำ</span>`;
     }
 
+    // 🟢 ประกาศตัวแปรทั้ง 3 ตัวให้ครบถ้วน ป้องกัน ReferenceError 100%
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
     const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
+    const hiddenAnchorText = isEN 
+      ? `View profile of ${modelName} verified companion in ${p.location || 'Thailand'}`
+      : `ดูโปรไฟล์ ${escapeHTML(modelName)} รับงาน${escapeHTML(p.provinceNameThai || 'เชียงใหม่')} ไซด์ไลน์ตรงปก`;
+
+    // 🟢 ดึงยอดหัวใจจริง
     const rawLikes = p.likes_count || p.likes || 0;
     const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
     const article = document.createElement("article");
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
-    article.setAttribute("data-profile-slug", cleanSlugStr);
-    article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;";
+    article.setAttribute("data-profile-slug", p.slug || p.id);
+    article.style.cssText = "aspect-ratio: 3/4.2; display: flex; flex-direction: column;"; 
 
     article.innerHTML = `
-     <img src="${imgSrc300}"
-       srcset="${imgSrc200} 200w, ${imgSrc300} 300w, ${imgSrc} 420w"
-       alt="${escapeHTML(richAltText)}"
-       width="400"
-       height="560"
-       class="profile-card-img"
-       sizes="(max-width: 600px) 46vw, 240px"
-       style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;"
-       loading="${index < 4 ? "eager" : "lazy"}"
-       fetchpriority="auto"
-       decoding="async"
-       onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
-
+     <img src="${imgSrc}" 
+       alt="${escapeHTML(richAltText)}" 
+       width="400" 
+       height="560" 
+       class="profile-card-img" 
+       sizes="(max-width: 600px) 48vw, (max-width: 1024px) 33vw, 300px"
+           style="width: 100%; height: 100%; object-fit: cover; aspect-ratio: 400/560;" 
+           loading="${index < 4 ? "eager" : "lazy"}" 
+           fetchpriority="auto"
+           decoding="async" 
+           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
+           
       <div class="profile-card-gradient-overlay"></div>
 
       <div class="profile-card-badges-top">
@@ -1423,14 +1419,14 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
               ${rightBadgeHtml}
           </div>
       </div>
-
-      <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}"></a>
+      
+ <a href="/sideline/${profileSlug}" class="card-link" aria-label="${escapeHTML(viewProfileAria)}"></a>
 
       <div class="profile-card-info-content">
           <div class="profile-card-tags-row">
               ${vibeTagsHtml}
           </div>
-
+          
          <div class="profile-card-social-strip" style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
             <span class="social-badge-likes">
               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -1716,28 +1712,48 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (!lightboxEl) return;
 
+    // ⚡ 1. แสดงผลหน้าต่างทันทีใน 0 ms ไม่ขวาง Main Thread (ให้ค่า INP ผ่านเกณฑ์เขียวทันที)
+    lightboxEl.style.display = "flex";
+    lightboxEl.style.pointerEvents = "auto";
+    lightboxEl.setAttribute("aria-hidden", "false");
+    lightboxEl.classList.add("active");
+    lightboxEl.style.opacity = "1";
+
+    if (contentWrapperEl) {
+      contentWrapperEl.style.transform = "translateY(0) scale(1)";
+      contentWrapperEl.style.opacity = "1";
+    }
+
     if (typeof triggerHaptic === "function") triggerHaptic("medium");
 
-    const fallbackImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined")
-      ? DEFAULT_FALLBACK_IMG
+    // 🔒 2. ดึงข้อมูลพื้นฐาน
+    const fallbackImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined") 
+      ? DEFAULT_FALLBACK_IMG 
       : "https://firstmodelhub.com/images/firstmodelhub.webp";
 
     const isEn = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
-    const cleanName = (profile.name || profile.displayName || "สาวสวย").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/^(น้อง\s?)+/gi, "").trim() || "สาวสวย";
+    const cleanName = (profile.name || profile.displayName || "สาวสวย").replace(/^(น้อง\s?)+/gi, "").trim();
     const displayName = isEn ? cleanName : `น้อง${cleanName}`;
     const pProvinceThai = profile.provinceThai || profile.provinceNameThai || "เชียงใหม่";
-    const pProvText = pProvinceThai;
+    const pProvText = pProvinceThai; 
     const pLocation = profile.location || pProvinceThai;
     const primaryZone = pLocation.replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "").split(/[,/]|และใกล้/)[0].trim() || pProvText;
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
+    requestAnimationFrame(() => {
+      const scrollBodyEl = document.getElementById("lightboxScrollBody");
+      if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
+      document.body.classList.add("lightbox-open");
+    });
+
+    
     const isAvail = profile.isAvailable !== undefined
       ? Boolean(profile.isAvailable)
       : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(profile.availability || "").toLowerCase().includes(s));
-
-    const availStatus = isEn
-      ? (isAvail ? "Available Now" : "Inquire Schedule")
+    
+    const availStatus = isEn 
+      ? (isAvail ? "Available Now" : "Inquire Schedule") 
       : (profile.availability || (isAvail ? "พร้อมรับงาน" : "สอบถามคิว"));
     const statusColor = isAvail ? "#059669" : "#E11D48";
 
@@ -1759,6 +1775,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
+    
+
+
+// 🟢 3. จัดการรูปภาพหลัก + จุดไข่ปลา + ตัวนับรูป
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: fallbackImg, fullSrc: fallbackImg }];
@@ -1768,12 +1788,13 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
+      // รีเซ็ต Opacity ป้องกันรูปค้างจางตอนสลับคน
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
       heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
 
-      const optimizedModalSrc = images[0]?.src
-        ? images[0].src.replace("w_300,h_420", "w_480,h_672").replace("w_400,h_560", "w_480,h_672")
+      const optimizedModalSrc = images[0]?.src 
+        ? images[0].src.replace("w_300,h_420", "w_480,h_672").replace("w_400,h_560", "w_480,h_672") 
         : (images[0]?.fullSrc || fallbackImg);
 
       heroImg.onerror = function() {
@@ -1784,11 +1805,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       heroImg.alt = `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} โซน${primaryZone} ตรงปก 100% - FirstModelHub`;
     }
 
+    // สร้างเม็ดไข่ปลาและ Badge ตัวเลขนับรูป (1/N)
     const dotsContainer = document.getElementById("lightbox-dots-indicator");
     const counterBadge = document.getElementById("lightbox-photo-counter");
+
+    // 🔒 รีเซ็ตตัวแปรตำแหน่งรูปภาพให้เป็นรูปที่ 0 เสมอทุกครั้งที่เปิด Modal
+    currentActivePhotoIdx = 0;
+
     if (images.length > 1) {
       if (dotsContainer) {
-        dotsContainer.innerHTML = images.map((_, i) =>
+        dotsContainer.innerHTML = images.map((_, i) => 
           `<span class="gallery-dot ${i === 0 ? 'active' : ''}"></span>`
         ).join("");
         dotsContainer.style.display = "flex";
@@ -1798,10 +1824,18 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         counterBadge.style.display = "flex";
       }
     } else {
-      if (dotsContainer) { dotsContainer.innerHTML = ""; dotsContainer.style.display = "none"; }
-      if (counterBadge) { counterBadge.innerHTML = ""; counterBadge.style.display = "none"; }
+      // 🔒 เคลียร์ข้อความทิ้งให้สะอาด 100% ป้องกันตัวเลข 2/5 ค้างมาจากคนก่อนหน้า
+      if (dotsContainer) {
+        dotsContainer.innerHTML = "";
+        dotsContainer.style.display = "none";
+      }
+      if (counterBadge) {
+        counterBadge.innerHTML = "";
+        counterBadge.style.display = "none";
+      }
     }
 
+    // 🟢 4. สเปกย่อ 3 ช่อง และเรทราคา
     const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
     const safeStats = profile.safeStats || profile.stats || "ไม่ระบุ";
     const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "ไม่ระบุ");
@@ -1837,6 +1871,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
+    
     const parseFn = window.parseRateToNumber || ((r) => 1500);
     const rateNum = parseFn(profile._price || profile.rate || profile.price);
     const ratesGrid = document.getElementById("lightboxRatesGrid");
@@ -1859,6 +1894,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
+    // 🟢 6. กล่องแนะนำตัว (Persona Description) แสดงทันที 100%
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent && typeof generateModalPersonaBox === "function") {
@@ -1867,83 +1903,17 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       if (descContainer) descContainer.style.display = "block";
     }
 
-    const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
-    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
-    if (rawLine) {
-      if (rawLine.startsWith("http")) {
-        lineUrl = rawLine;
-      } else if (rawLine.startsWith("@")) {
-        lineUrl = `https://page.line.me/${rawLine.replace(/^@+/, "")}`;
-      } else {
-        lineUrl = `https://line.me/ti/p/~${rawLine.replace(/[^a-zA-Z0-9_\-\.]/g, "")}`;
-      }
-    }
-
-    const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
-    if (lineWrapper) {
-      const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
-      lineWrapper.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
-              <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
-              <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
-              <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
-          </a>
-          <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-              <i class="fas fa-share-alt" style="font-size: 16px;"></i>
-          </button>
-        </div>
-      `;
-    }
-
-    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
-    if (thumbStrip) {
-      if (images.length > 1) {
-        thumbStrip.style.cssText = "display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding: 2px 2px 6px 2px; -webkit-overflow-scrolling: touch;";
-        thumbStrip.innerHTML = images.map((img, i) => `
-          <div class="lightbox-thumb-item ${i === 0 ? "active" : ""}" data-thumb-idx="${i}" style="width: 58px; height: 76px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${i + 1}" width="58" height="76" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-          </div>
-        `).join("");
-
-        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
-          item.onclick = function(e) {
-            e.stopPropagation();
-            const idx = parseInt(this.getAttribute("data-thumb-idx"), 10);
-            if (typeof updateLightboxPhoto === "function") updateLightboxPhoto(idx);
-          };
-        });
-      } else {
-        thumbStrip.innerHTML = "";
-        thumbStrip.style.display = "none";
-      }
-    }
-
-    // ✅ เปิดแสดงหน้าต่างครั้งเดียวหลังใส่ข้อมูลเสร็จหมดแล้ว
-    lightboxEl.style.display = "flex";
-    lightboxEl.style.pointerEvents = "auto";
-    lightboxEl.setAttribute("aria-hidden", "false");
-    lightboxEl.classList.add("active");
-    lightboxEl.style.opacity = "1";
-    if (contentWrapperEl) {
-      contentWrapperEl.style.transform = "translateY(0) scale(1)";
-      contentWrapperEl.style.opacity = "1";
-    }
-    document.body.classList.add("lightbox-open");
-    requestAnimationFrame(() => {
-      const scrollBodyEl = document.getElementById("lightboxScrollBody");
-      if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
-    });
-
+    // 🟢 [จุดที่ 4.4] ย้ายการเรนเดอร์ส่วนท้าย (การ์ดแนะนำ 6 ใบ + คำถาม FAQ) ให้โหลดตามหลังหน้าต่างเปิด 120ms
     setTimeout(() => {
+      // 7. น้องๆ แนะนำเพิ่มเติม
       const relatedTitle = document.getElementById("lightboxRelatedTitle");
       if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
 
       const relatedGrid = document.getElementById("lightboxRelatedGrid");
       const relatedMore = document.getElementById("lightboxRelatedMoreLink");
       if (relatedGrid) {
-        let allList = (appState && appState.allProfiles && appState.allProfiles.length > 0)
-          ? appState.allProfiles
+        let allList = (appState && appState.allProfiles && appState.allProfiles.length > 0) 
+          ? appState.allProfiles 
           : (window.profilesData || []);
 
         const pKey = (profile.provinceKey || profile.province_slug || "chiangmai").toLowerCase();
@@ -1974,8 +1944,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
               const targetSlug = this.getAttribute("data-profile-slug");
               const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
               if (targetProfile) {
-                const normalized = (typeof normalizeProfile === "function" && !targetProfile.images)
-                  ? normalizeProfile(targetProfile)
+                const normalized = (typeof normalizeProfile === "function" && !targetProfile.images) 
+                  ? normalizeProfile(targetProfile) 
                   : targetProfile;
                 history.pushState(null, "", `/sideline/${encodeURIComponent(normalized.slug || normalized.id)}`);
                 window.openLightboxModal(normalized);
@@ -2003,6 +1973,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       }
 
+      // 8. คำถามที่พบบ่อย (FAQ Accordion)
       const faqSection = document.getElementById("lightboxFaqSection");
       const faqList = document.getElementById("lightboxFaqList");
       if (faqSection && faqList) {
@@ -2025,7 +1996,62 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         `).join("");
       }
     }, 120);
+    
+    // 🟢 9. ปุ่มทัก LINE จองคิว
+    const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
+    let lineUrl = "https://line.me/ti/p/u8Bz9HsaY8";
+    if (rawLine) {
+      if (rawLine.startsWith("http")) {
+        lineUrl = rawLine;
+      } else if (rawLine.startsWith("@")) {
+        lineUrl = `https://page.line.me/${rawLine.replace(/^@+/, "")}`;
+      } else {
+        lineUrl = `https://line.me/ti/p/~${rawLine.replace(/[^a-zA-Z0-9_\-\.]/g, "")}`;
+      }
+    }
 
+    const lineWrapper = document.getElementById("line-btn-sticky-wrapper");
+    if (lineWrapper) {
+      const lineBtnText = isEn ? `Book ${displayName}` : `ทัก LINE จองคิวน้อง${cleanName}`;
+      lineWrapper.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" onclick="window.trackLineClick('${profile.id}')" class="lightbox-line-cta" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; padding: 12px 14px;">
+              <i class="fab fa-line" style="font-size: 18px; flex-shrink: 0;"></i>
+              <span style="font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lineBtnText}</span>
+              <span style="font-size: 10.5px; background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 100px; font-weight: 700; flex-shrink: 0;">จ่ายหน้างาน</span>
+          </a>
+          <button type="button" onclick="window.shareProfile('${escapeHTML(displayName)}', '${canonicalProfileUrl}')" aria-label="แชร์โปรไฟล์" style="width: 48px; height: 48px; border-radius: 14px; background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.2); color: #7C3AED; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <i class="fas fa-share-alt" style="font-size: 16px;"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+    if (thumbStrip) {
+      if (images.length > 1) {
+        thumbStrip.style.cssText = "display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding: 2px 2px 6px 2px; -webkit-overflow-scrolling: touch;";
+        thumbStrip.innerHTML = images.map((img, i) => `
+          <div class="lightbox-thumb-item ${i === 0 ? "active" : ""}" data-thumb-idx="${i}" style="width: 58px; height: 76px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${i + 1}" width="58" height="76" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+          </div>
+        `).join("");
+
+        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
+          item.onclick = function(e) {
+            e.stopPropagation();
+            const idx = parseInt(this.getAttribute("data-thumb-idx"), 10);
+            if (typeof updateLightboxPhoto === "function") updateLightboxPhoto(idx);
+          };
+        });
+      } else {
+        thumbStrip.innerHTML = "";
+        thumbStrip.style.display = "none";
+      }
+    }
+
+    // 🟢 11. อัปเดต Title, Canonical และ og:url ให้ตรงกัน
     setTimeout(() => {
       const dynamicTitle = isEn
         ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
@@ -2046,6 +2072,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     }, 150);
   };
+
+ 
+    
 
   
  window.closeLightboxModal = function (updateHistory = true) {
@@ -2619,27 +2648,25 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
   document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-    pill.addEventListener("click", function (e) {
-      const targetHref = this.getAttribute("href");
-      if (this.tagName === "A" && targetHref) return;
+  pill.addEventListener("click", function (e) {
+    const targetHref = this.getAttribute("href");
+    if (this.tagName === "A" && targetHref) return;
 
-      e.preventDefault();
-      if (this.classList.contains("active")) return;
+    e.preventDefault();
+    if (this.classList.contains("active")) return;
 
-      document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-      this.classList.add("active");
-      appState.activePillTag = this.getAttribute("data-tag") || "all";
+    // 1. เปลี่ยนสีปุ่มทันทีใน 0 ms
+    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
+    appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-      requestAnimationFrame(() => {
-        setTimeout(async () => {
-          if (window.__loadAllProfilesIfNeeded && !window.__allProfilesLoaded) {
-            await window.__loadAllProfilesIfNeeded();
-          }
-          executeFilterAndRender(true);
-        }, 0);
-      });
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        executeFilterAndRender(true);
+      }, 0);
     });
   });
+});
   
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
@@ -2853,7 +2880,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
         }
 
-        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           const cleanProfiles = filterValidProfiles(window.profilesData);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           appState.profileById.clear();
@@ -2864,40 +2891,42 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
           populateInitialComponents();
           
-          if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length) {
-            window.__loadAllProfilesIfNeeded = async () => {
-              if (window.__allProfilesLoaded) return;
-              window.__allProfilesLoaded = true;
-              try {
-                const bgClient = await getSupabaseClient();
-                if (!bgClient) {
-                  window.__allProfilesLoaded = false;
-                  return;
-                }
-                const { data } = await bgClient.from("profiles")
-                  .select("*")
-                  .eq("active", true)
-                  .order("isfeatured", { ascending: false })
-                  .order("created_at", { ascending: false })
-                  .range(0, Math.max(200, window.totalProfilesCount));
-
-                if (data && data.length > 0) {
-                  const moreClean = filterValidProfiles(data);
-                  const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
-                  const uniqueMore = moreProfiles.filter(p => !appState.profileById.has(String(p.id)));
-                  if (uniqueMore.length > 0) {
-                    uniqueMore.forEach(p => {
-                      if (p.id != null) appState.profileById.set(String(p.id), p);
-                      if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
-                    });
-                    appState.allProfiles = [...appState.allProfiles, ...uniqueMore];
-                  }
-                }
-              } catch (_) {
-                window.__allProfilesLoaded = false;
-              }
-            };
+if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length) {
+  setTimeout(() => {
+    const runBgFetch = async () => {
+      try {
+        const bgClient = await getSupabaseClient();
+        if (!bgClient) return;
+       const { data } = await bgClient.from("profiles")
+          .select("*")
+          .eq("active", true)
+          .order("isfeatured", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(0, Math.max(200, window.totalProfilesCount));
+          
+        if (data && data.length > 0) {
+          const moreClean = filterValidProfiles(data);
+          const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
+          const uniqueMore = moreProfiles.filter(p => !appState.profileById.has(String(p.id)));
+          if (uniqueMore.length > 0) {
+            uniqueMore.forEach(p => {
+              if (p.id != null) appState.profileById.set(String(p.id), p);
+              if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+            });
+            appState.allProfiles = [...appState.allProfiles, ...uniqueMore];
           }
+        }
+      } catch (_) {}
+    };
+
+        if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => runBgFetch(), { timeout: 2000 });
+    } else {
+      runBgFetch();
+    }
+  }, 2500);
+}
+
           
           return true;
         }
@@ -2911,7 +2940,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         appState.isFetching = false;
         hideGlobalLoader();
       }
-      
     })();
 
     // จัดการ Routing ของ URL และซ่อนตัวโหลด
@@ -2936,11 +2964,13 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const trackEl = document.getElementById("agency-stories-track");
     if (!trackEl) return;
 
+    // 1. ถ้าใน HTML มีการเรนเดอร์มาแล้ว ให้หยุดทำงานทันที ป้องกันเรนเดอร์ซ้ำ
     if (trackEl.children.length > 0) return;
 
     const profiles = appState.allProfiles;
     if (!profiles || !Array.isArray(profiles) || profiles.length === 0) return;
 
+    // 2. คัดกรองเฉพาะโปรไฟล์ที่มีรูปภาพ และเลือกมา 10 คนแรกเพื่อประหยัดแบนด์วิดท์
     const validProfiles = profiles
       .filter(p => p && (p.imagePath || p.image_url || (p.images && p.images.length > 0)))
       .slice(0, 10);
@@ -2949,41 +2979,41 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
     const fallbackImg = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
+    // ฟังก์ชันสร้าง Story Item HTML แต่ละใบ
     const createStoryItemHtml = (p, idx, isAriaHidden = false) => {
       const rawName = p.displayName || p.name || "โมเดล";
-      const cleanName = rawName.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/^(น้อง\s?)+/gi, "").trim();
+      const cleanName = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
       const fullName = isEN ? cleanName : `น้อง${cleanName}`;
-
+      
       const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || fallbackImg;
-      const storyImg = typeof optimizeImg === "function" ? optimizeImg(rawImg, 120) : rawImg;
-
-      const rawSlugStr = String(p.slug || "").trim();
-      const cleanSlugStr = (!rawSlugStr || /[\u0E00-\u0E7F]/.test(rawSlugStr)) ? `model-${p.id}` : rawSlugStr;
-      const slug = encodeURIComponent(cleanSlugStr);
+      // 🟢 บีบอัดรูปวงกลม Story ให้เหลือ 120x120px โฟกัสใบหน้า (ขนาดไฟล์เหลือเพียง 3-5KB คมชัดระดับ Retina)
+      const storyImg = typeof optimizeImg === "function" ? optimizeImg(rawImg, 120, 120) : rawImg;
+      
+      const slug = encodeURIComponent(p.slug || p.id || cleanName);
       const profileId = p.id || "";
-
-      const isOnline = p.isAvailable !== undefined
-        ? Boolean(p.isAvailable)
+      
+      const isOnline = p.isAvailable !== undefined 
+        ? Boolean(p.isAvailable) 
         : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(p.availability || "").toLowerCase().includes(s));
-
+      
       const statusClass = isOnline ? "online" : "busy";
       const hiddenAttr = isAriaHidden ? 'aria-hidden="true" tabindex="-1" rel="nofollow"' : '';
 
       return `
-        <a href="/sideline/${slug}"
-           class="story-item-el interactive-card"
-           data-profile-id="${escapeHTML(String(profileId))}"
-           data-profile-slug="${slug}"
-           aria-label="${isAriaHidden ? '' : `ดูโปรไฟล์ ${escapeHTML(fullName)}`}"
+        <a href="/sideline/${slug}" 
+           class="story-item-el interactive-card" 
+           data-profile-id="${escapeHTML(String(profileId))}" 
+           data-profile-slug="${slug}" 
+           aria-label="${isAriaHidden ? '' : `ดูโปรไฟล์ ${escapeHTML(fullName)}`}" 
            ${hiddenAttr}>
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-            <img src="${storyImg}"
-                   alt="${escapeHTML(cleanName)}"
-                   loading="${idx < 4 ? "eager" : "lazy"}"
-                   decoding="async"
-                   width="52"
-                   height="52"
+            <img src="${storyImg}" 
+                   alt="${escapeHTML(cleanName)}" 
+                   loading="lazy" 
+                   decoding="async" 
+                   width="52" 
+                   height="52" 
                    onerror="this.onerror=null; this.src='${fallbackImg}';">
             </div>
             <span class="story-status-dot ${statusClass}" aria-hidden="true"></span>
@@ -2993,10 +3023,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     };
 
+  // 🟢 แก้ปัญหาข้อ 3: ลดการเรนเดอร์ DOM ซ้ำซ้อน ประหยัด RAM ให้มือถือ
     const primaryHtml = validProfiles.map((p, idx) => createStoryItemHtml(p, idx, false)).join("");
     trackEl.innerHTML = primaryHtml;
-  }
-  
+    }
+    
   // ==========================================================================
   // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (พร้อมกล่องแจ้งเตือนสถานะ สำเร็จ/ล้มเหลว)
   // ==========================================================================
@@ -3062,6 +3093,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     modal.style.transform = "translate(-50%, -50%) scale(1)";
   }
 
+  // ==========================================================================
+  // 🕵️‍♂️ STEALTH ADMIN CACHE PURGE (ระบบตัดขาดจากลิงก์ + ป๊อปอัป PIN แบบสมบูรณ์)
+  // ==========================================================================
   function initStealthAdminPurge() {
     const starElements = document.querySelectorAll(".luxe-star-crest, .brand-logo-text .star, .dancing-neon-star, .star");
     if (!starElements || starElements.length === 0) return;
@@ -3073,6 +3107,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const ADMIN_PIN = "8888";
 
     starElements.forEach(star => {
+      star.style.cursor = "pointer";
+      star.style.userSelect = "none";
+      star.style.webkitUserSelect = "none";
+      star.style.touchAction = "manipulation";
+
       const handleTap = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -3361,8 +3400,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         if (popover) popover.style.display = "none";
 
         const provSelect = document.getElementById("search-province");
-        const curProv = window.currentProvinceSlug;
-        if (provSelect) provSelect.value = (curProv && curProv !== "national") ? curProv : "";
+        if (provSelect) provSelect.value = "";
+
         const availSelect = document.getElementById("search-availability");
         if (availSelect) availSelect.value = "";
 
@@ -3383,7 +3422,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       });
     }
-  } // <-- ปิดฟังก์ชัน setupSheetGestures ตรงนี้พอครับ (ตัวที่เกินถูกตัดออกแล้ว)
+  }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", setupSheetGestures);

@@ -42,7 +42,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
  
-  <link rel="stylesheet" href="/styles.css?v=v_20261115_1">
+  <link rel="stylesheet" href="/styles.css?v=v_20261115_50">
 
   <script type="speculationrules">
   {
@@ -105,42 +105,28 @@
         });
       };
       
-     ['pointerdown', 'scroll', 'keydown'].forEach(function(evt){
+      ['scroll', 'keydown'].forEach(function(evt){
         window.addEventListener(evt, loadGTM, { once: true, passive: true });
       });
       window.addEventListener('load', function() {
-        setTimeout(loadGTM, 5500);
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(function() { setTimeout(loadGTM, 1500); }, { timeout: 4000 });
+        } else {
+          setTimeout(loadGTM, 3500);
+        }
       }, { once: true });
     })();
   </script>
  <style>
-    body.fmh-app-page {
-      padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-    .floating-app-dock {
-      padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
-    }
     .seo-h1-title, .h1-line-1, .h1-line-2 {
       content-visibility: visible !important;
     }
     .profile-card-new-container {
-      contain: layout style;
+      contain: layout style paint;
     }
-    .concierge-luxury-section {
+    .concierge-luxury-section, .editorial-digest-section, .fmh-footer, #map-section {
       content-visibility: auto;
-      contain-intrinsic-size: auto 1400px;
-    }
-    .editorial-digest-section {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 320px;
-    }
-    .fmh-footer {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 450px;
-    }
-    #map-section {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 350px;
+      contain-intrinsic-size: auto 420px;
     }
     #lightbox.active {
       backdrop-filter: none !important;
@@ -241,7 +227,7 @@
     </div>
     <div class="sidebar-links-wrapper">
       <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
-      <a href="/#featured-profiles"><i class="fas fa-user-check icon-green"></i> สาวๆที่แนะนำ</a>
+      <a href="/profiles"><i class="fas fa-user-check icon-green"></i> สาวๆที่แนะนำ</a>
       <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
       <a href="/profiles"><i class="fas fa-gem icon-pink"></i> โปรไฟล์สาวๆ ทั้งหมด</a>
       <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
@@ -486,9 +472,8 @@
     <div class="sheet-header">
       <div style="display: flex; align-items: center; gap: 8px;">
         <i class="fas fa-sliders-h icon-purple" style="font-size: 14px;"></i>
-        <div style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</div>
+        <h3 style="font-size: 15px; font-weight: 800; color: #140F22; margin: 0;">ตัวกรองการค้นหา</h3>
       </div>
-      
       <button type="button" id="close-search-drawer-btn" class="sheet-close-btn" aria-label="ปิดหน้าต่างตัวกรอง"><i class="fas fa-times"></i></button>
     </div>
     <div class="sheet-body-content">
@@ -585,8 +570,8 @@
             </div>
           </div>
         </div>
-      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
-          <div class="footer-heading" style="font-weight: 800; margin-bottom: 10px; color: #140F22;">เมนูหลัก</div>
+        <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
+          <h3 class="footer-heading">เมนูหลัก</h3>
           <ul class="footer-nav-links">
             <li><a href="/">หน้าแรก</a></li>
             <li><a href="/profiles">รวมโปรไฟล์</a></li>
@@ -616,7 +601,7 @@
     <div id="lightbox-content-wrapper-el">
       <div class="sheet-drag-pill-bar" id="lightbox-drag-bar" aria-hidden="true"></div>
       <div class="lightbox-top-brand" style="position: absolute !important; top: 12px !important; left: 12px !important; right: auto !important; width: fit-content !important; max-width: fit-content !important; z-index: 60 !important; background: transparent !important; padding: 0 !important; margin: 0 !important;">
-        <span class="brand-luxe-logo is-compact" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 5px 12px 5px 8px !important; border-radius: 100px !important; background: rgba(18, 12, 34, 0.88) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;">
+        <span class="brand-luxe-logo is-compact" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 5px 12px 5px 8px !important; border-radius: 100px !important; background: rgba(18, 12, 34, 0.65) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;">
           <span class="luxe-star-crest" aria-hidden="true" style="display: flex; align-items: center; filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none">
               <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
@@ -644,7 +629,7 @@
        alt="รูปโปรไฟล์ตัวจริงตรงปก" 
        width="400" 
        height="560" 
-       loading="eager"
+       loading="lazy"
        decoding="async"
        style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
@@ -719,11 +704,11 @@
 </div>
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="/main.js?v=v_20261115_1"></script>
+  <script type="module" src="/main.js?v=v_20261115_50"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        const CURRENT_SW_VER = 'v_20261115_1';
+        const CURRENT_SW_VER = 'v_20261115_50';
         navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
           .then(function(reg) {
             reg.onupdatefound = function() {
