@@ -38,7 +38,7 @@ const CONFIG = {
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
-  DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
+  DEFAULT_OG_IMAGE: "https://res.cloudinary.com/adjucgga/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/images/firstmodelhub.webp",
   DEFAULT_TELEPHONE: "+66926997044",
   SOCIAL_LINKS: [
     "https://line.me/ti/p/u8Bz9HsaY8",
@@ -391,7 +391,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+  let transform = "f_auto,q_auto:good,w_360,h_504,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     transform = "f_auto,q_auto,w_120,h_120,c_thumb,g_face";
@@ -418,7 +418,7 @@ function optimizeImg(imagePath, mode = "card") {
 
 function generateCardSrcSet(imagePath) {
   if (!imagePath || typeof imagePath !== "string" || imagePath.includes("firstmodelhub.webp") || imagePath.startsWith("data:")) return "";
-  return `${optimizeImg(imagePath, 200)} 200w, ${optimizeImg(imagePath, 300)} 300w, ${optimizeImg(imagePath, "card")} 420w`;
+  return `${optimizeImg(imagePath, 200)} 200w, ${optimizeImg(imagePath, 300)} 300w, ${optimizeImg(imagePath, "card")} 360w`;
 }
 
 function cleanProfileName(rawName) {
@@ -1005,7 +1005,7 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
   const zoneText = loc && loc !== provinceName ? ` โซน${loc}` : "";
   return `น้อง${cleanName}${zoneText} ${provinceName} - FirstModelHub`;
 }
-const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
+const renderCardHtml = (p, isEager = false, provinceName = "เชียงใหม่", currentZone = "", isPrimaryLCP = false) => {
   const cleanName = escapeHTML(cleanProfileName(p.name));
 
   let rawLoc = sanitizeThaiText(p.location || "");
@@ -1088,8 +1088,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
          width="400"
          height="560"
          class="profile-card-img"
-         loading="${isPriorityLCP ? "eager" : "lazy"}"
-         fetchpriority="${isPriorityLCP ? "high" : "auto"}"
+         loading="${isEager ? "eager" : "lazy"}"
+         fetchpriority="${isPrimaryLCP ? "high" : "auto"}"
          decoding="async"
          onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
 
@@ -1139,12 +1139,12 @@ const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
   return faqs.map(f => `
     <div class="faq-item-card" style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.16); border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-        <div style="font-size: 13px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">
+        <h3 style="font-size: 13px; font-weight: 800; color: #7C3AED; margin: 0 0 6px 0; line-height: 1.4;">
             Q: ${escapeHTML(sanitizeThaiText(f.q))}
-        </div>
-        <div style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.5;">
+        </h3>
+        <p style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.6; margin: 0;">
             ${escapeHTML(sanitizeThaiText(f.a))}
-        </div>
+        </p>
     </div>
   `).join("");
 };
@@ -1597,18 +1597,24 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       ? getBalancedRotatingProfiles(hotPool, { maxTotal: 10, perProv: 2, onlyFiwfan: true })
       : getBalancedRotatingProfiles(hotPool, { maxTotal: 8, perProv: 8, onlyFiwfan: true });
 
-    if (hotProfiles.length > 0) {
+   if (hotProfiles.length > 0) {
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
         const loc = escapeHTML(sanitizeThaiText(p.location) || currentProvName);
         const slug = encodeURIComponent(p.slug || p.id);
-        const img = optimizeImg(p.imagePath || p.image_url || "", 300);
+        const rawVipImg = p.imagePath || p.image_url || "";
+        const img200 = optimizeImg(rawVipImg, 200);
+        const img300 = optimizeImg(rawVipImg, 300);
+        const vipSrcSet = (img200 && img300 && !img300.includes("firstmodelhub.webp"))
+          ? `srcset="${img200} 200w, ${img300} 300w" sizes="175px"`
+          : "";
+        const altProvName = isNational ? (PROVINCE_SEO_DATA[p.provinceKey]?.name || currentProvName) : currentProvName;
         const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
         return `
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "low"}" decoding="${i === 0 ? "sync" : "async"}" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+            <img src="${img200}" ${vipSrcSet} alt="น้อง${cleanName} (${escapeHTML(altProvName)})" width="175" height="245" loading="${i < 2 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -2174,7 +2180,8 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     }
 
     const gridProfilesList = profilesList;
- const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, !isNational && i < 4, provinceNameThai, zoneSlug)).join("");
+ const hasVipHero = hotProfiles && hotProfiles.length > 0;
+ const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, !isNational && i < 4, provinceNameThai, zoneSlug, !hasVipHero && i === 0)).join("");
  const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
  const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
 
@@ -2409,7 +2416,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
         if (isNational || isBkkComingSoon) {
           return `
             <li style="margin-bottom: 6px;">
-              <a href="${linkHref}" ${isBkkComingSoon ? 'target="_blank" rel="noopener nofollow"' : ''} style="color: var(--text-gray); text-decoration: none; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+              <a href="${linkHref}" ${isBkkComingSoon ? 'class="footer-line-link" target="_blank" rel="noopener nofollow"' : ''} style="color: var(--text-gray); text-decoration: none; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
                 <span>• ${escapeHTML(p.name)}</span>
                 ${badgeHtml}
               </a>
@@ -2748,9 +2755,9 @@ if (!isNational && pills) {
 
     let displayAreaHtml = "";
     if (isNational) {
-      const feedCardsHtml = actualVisibleProfiles.map((p, i) => {
+      const feedCardsHtml = actualVisibleProfiles.map((p) => {
         const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
-        return renderCardHtml(p, i === 0, pName);
+        return renderCardHtml(p, false, pName, "", false);
       }).join("");
 
       const popularProvinces = [
@@ -3054,8 +3061,12 @@ if (!isNational && pills) {
       if (rawLcpImg) {
         const lcp300 = optimizeImg(rawLcpImg, 300);
         const lcp200 = optimizeImg(rawLcpImg, 200);
-        const preloadTag = `  <link rel="preload" as="image" href="${lcp300}" imagesrcset="${lcp200} 200w, ${lcp300} 300w" imagesizes="175px" fetchpriority="high">\n</head>`;
-        finalHtml = finalHtml.replace(/<\/head>/i, () => preloadTag);
+        const preloadTag = `<link rel="preconnect" href="https://res.cloudinary.com">\n  <link rel="preload" as="image" href="${lcp200}" imagesrcset="${lcp200} 200w, ${lcp300} 300w" imagesizes="175px" fetchpriority="high">`;
+        if (/<link\s+rel=["']preconnect["'][^>]*res\.cloudinary\.com[^>]*>/i.test(finalHtml)) {
+          finalHtml = finalHtml.replace(/<link\s+rel=["']preconnect["'][^>]*res\.cloudinary\.com[^>]*>/i, () => preloadTag);
+        } else {
+          finalHtml = finalHtml.replace(/<\/head>/i, () => `  ${preloadTag}\n</head>`);
+        }
       }
     }
 

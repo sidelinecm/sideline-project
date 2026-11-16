@@ -445,16 +445,15 @@ try {
   
   const { data: sameProvinceProfiles } = await supabase
     .from("profiles")
-    .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
+    .select("id, slug, name, imagePath, isfeatured, provinceKey")
     .eq("active", true)
     .neq("id", profile.id)
     .in(provCol, provVariants)
     .limit(3);
 
- 
   const { data: otherProfiles } = await supabase
     .from("profiles")
-    .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
+    .select("id, slug, name, imagePath, isfeatured, provinceKey")
     .eq("active", true)
     .neq("id", profile.id)
     .not(provCol, 'in', `(${provVariants.join(',')})`)
@@ -462,7 +461,7 @@ try {
 
   relatedProfiles = [...(sameProvinceProfiles || []), ...(otherProfiles || [])]
     .filter(rp => {
-      const img = String(rp.imagePath || rp.image_url || "").trim();
+      const img = String(rp.imagePath || "").trim();
       return img.length >= 15 && !img.includes("firstmodelhub.webp");
     })
     .slice(0, 6);
@@ -474,7 +473,7 @@ try {
       try {
         const { data: fallbackProfiles } = await supabase
           .from("profiles")
-          .select("id, slug, name, imagePath, image_url, isfeatured")
+          .select("id, slug, name, imagePath, isfeatured, provinceKey")
           .eq("active", true)
           .neq("id", profile.id)
           .limit(3);
@@ -899,33 +898,31 @@ const zoneHubUrl = hasDistinctZone
       window.gtag = gtag;
 
       (function() {
-        let gtmLoaded = false;
-        const loadGTM = function() {
-          if (gtmLoaded) return;
-          gtmLoaded = true;
-          var s = document.createElement('script');
-          s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
-          s.async = true;
-          document.head.appendChild(s);
-          gtag('js', new Date());
-          gtag('config', 'G-PG0QFDWTTG', {
-            'send_page_view': true,
-            'cookie_flags': 'SameSite=None;Secure'
-          });
-        };
-        
-       ['pointerdown', 'scroll', 'keydown'].forEach(function(evt){
-          window.addEventListener(evt, loadGTM, { once: true, passive: true });
+      let gtmLoaded = false;
+      const loadGTM = function() {
+        if (gtmLoaded) return;
+        gtmLoaded = true;
+        var s = document.createElement('script');
+        s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
+        s.async = true;
+        document.head.appendChild(s);
+        gtag('js', new Date());
+        gtag('config', 'G-PG0QFDWTTG', {
+          'send_page_view': true,
+          'cookie_flags': 'SameSite=None;Secure'
         });
-        window.addEventListener('load', function() {
-          setTimeout(loadGTM, 5500);
-        }, { once: true });
-      })();
+      };
+      
+      window.addEventListener('scroll', loadGTM, { once: true, passive: true });
+      window.addEventListener('load', function() {
+        setTimeout(loadGTM, 3500);
+      }, { once: true });
+    })();        
     </script>
 </head>
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8.5rem 1rem;">
-        <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+        <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
                 <span class="luxe-star-crest" aria-hidden="true">
@@ -1015,7 +1012,6 @@ const zoneHubUrl = hasDistinctZone
                     </div>
                 </div>
 
-                <!-- ✅ แก้ไขเครื่องหมาย < ให้เหลือตัวเดียวเรียบร้อยแล้ว -->
                 <section class="fmh-rates-box">
                     <h2 style="color: #7C3AED; text-align: center; font-weight: 900; font-size: 13.5px; margin: 0 0 10px 0;">💰 อัตราค่าบริการเพื่อนเที่ยว ${escapeHTML(displayName)} (${escapeHTML(cleanProvince)})</h2>
                     <div class="fmh-rates-grid">
@@ -1037,8 +1033,7 @@ const zoneHubUrl = hasDistinctZone
                     </p>
                 </section>
 
-               <!-- กล่องมาตรฐานการตรวจสอบโปรไฟล์จริง (ปลอดภัยตาม Google Policy 2026) -->
-                <section class="fmh-verification-box" style="margin-top: 1.25rem; background: #FFFFFF; border: 1.5px solid rgba(5, 150, 105, 0.22); border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.04);">
+               <section class="fmh-verification-box" style="margin-top: 1.25rem; background: #FFFFFF; border: 1.5px solid rgba(5, 150, 105, 0.22); border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                     <strong style="color: #065F46; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
                       <span>🛡️ สถานะการตรวจสอบโปรไฟล์</span>
@@ -1097,8 +1092,8 @@ const zoneHubUrl = hasDistinctZone
         </button>
       </div>
 
-      <!-- ปุ่มสำรองติดต่อแอดมินช่วยประสานงาน -->
-      <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
+      <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" class="fmh-backup-admin-link" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
+          
         <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #7C3AED; text-decoration: underline;">ติดต่อแอดมินช่วยเช็กคิวทันที (ฟรี)</span>
       </a>
     </div>
