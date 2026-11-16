@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261115_1';
+let GLOBAL_VERSION = 'v_20261115_46';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -2688,9 +2688,11 @@ if (!isNational && pills) {
 
       finalHtml = finalHtml.replace(/<ol[^>]*>[\s\S]*?<\/ol>/i, () => `<ol style="display: flex; align-items: center; gap: 6px; list-style: none; padding: 0; margin: 0; font-size: 11.5px;"><li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li><li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>${bcHtml}</ol>`);
 
-      finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>/i, "");
-      finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?<\/div>\s*<\/div>/i, "</div>");
+      finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
+      finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id="seo-drawer-wrapper")/i, "");
       finalHtml = finalHtml.replace(/<!--\s*Editorial Digest\s*-->\s*<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
+      finalHtml = finalHtml.replace(/<!--\s*Trust & Safety Reporting Center\s*-->[\s\S]*?<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
+      finalHtml = finalHtml.replace(/<!--\s*Safety Protocol & Maps\s*-->\s*<section id="verification-process"[\s\S]*?<\/section>/i, "");
     }
 
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${totalCount}</strong>`);
@@ -2819,11 +2821,11 @@ if (!isNational && pills) {
           <div class="profile-grid profiles-grid-row">
             ${feedCardsHtml}
           </div>
-       ${(function() {
+          ${(function() {
             if (!isNational || totalNationalPages <= 1) return "";
-            const basePagePath = cleanPath === "/profiles" ? "/profiles" : "";
-            const prevUrl = currentPage === 2 ? (basePagePath || "/") : `${basePagePath}?page=${currentPage - 1}`;
-            const nextUrl = `${basePagePath}?page=${currentPage + 1}`;
+            const basePagePath = cleanPath === "/profiles" ? "/profiles" : "/";
+            const prevUrl = currentPage === 2 ? basePagePath : `${basePagePath}?page=${currentPage - 1}`;
+            const nextUrl = `/profiles?page=${currentPage + 1}`;
             return `
               <nav aria-label="แบ่งหน้าโปรไฟล์" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 22px; flex-wrap: wrap;">
                 ${currentPage > 1 ? `<a href="${prevUrl}" style="padding: 8px 16px; border-radius: 100px; background: #FFFFFF; border: 1.5px solid #7C3AED; color: #7C3AED; font-size: 12px; font-weight: 800; text-decoration: none;">← หน้าก่อนหน้า</a>` : ""}
@@ -2846,19 +2848,19 @@ if (!isNational && pills) {
       ` : "";
 
       displayAreaHtml = `
-        <div class="section-content-wrapper" id="featured-profiles">
+        <div class="section-content-wrapper">
           ${emptyZoneNoticeHtml}
           <div class="province-header-row">
-        <h2 class="province-clean-title">
-            <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
-            <span class="province-prefix">น้องๆ ในจังหวัด</span>
-            <span class="province-name-highlight">${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""}</span>
-        </h2>
-        <span class="province-count-pill"><span class="pulse-dot-el"></span><span>${totalCount} โปรไฟล์</span></span>
-    </div>
-    <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
-  </div>
-`;
+              <h2 class="province-clean-title">
+                  <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
+                  <span class="province-prefix">น้องๆ ในจังหวัด</span>
+                  <span class="province-name-highlight">${escapeHTML(provinceNameThai)}${zoneSlug ? ` โซน${escapeHTML(zoneSlug)}` : ""}</span>
+              </h2>
+              <span class="province-count-pill"><span class="pulse-dot-el"></span><span>${totalCount} โปรไฟล์</span></span>
+          </div>
+          <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
+        </div>
+      `;
     }
 
     finalHtml = finalHtml.replace(
@@ -3009,7 +3011,6 @@ if (!isNational && pills) {
     });
 
     const visibleIdsSet = new Set([
-      ...topStoryProfiles.map(p => String(p.id)),
       ...hotProfiles.map(p => String(p.id)),
       ...Array.from(featuredIds),
       ...actualVisibleProfiles.map(p => String(p.id))
