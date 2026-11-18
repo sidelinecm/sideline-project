@@ -999,9 +999,11 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   if (currentZone && rawLoc.includes(currentZone)) {
     displayLoc = currentZone;
   }
-  let loc = escapeHTML(displayLoc || currentZone || provinceName);
+ let loc = escapeHTML(displayLoc || currentZone || provinceName);
   
-  const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+  
+  const safeSlug = (!p.slug || /[\u0E00-\u0E7F]/.test(String(p.slug).trim())) ? `model-${p.id}` : String(p.slug).trim();
+const profileUrl = `/sideline/${encodeURIComponent(safeSlug)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
   const ageStr = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${escapeHTML(p.age)} ปี` : "20+ ปี";
@@ -2770,7 +2772,7 @@ if (!isNational && pills) {
                 <strong style="color: #140F22; font-size: 12.5px; font-weight: 800; display: block;">${escapeHTML(cp.name)}</strong>
                 
 
-                <span style="color: #94A3B8; font-size: 10.5px;">${cp.tag}</span>
+               <span style="color: #64748B; font-size: 10.5px; font-weight: 600;">${cp.tag}</span>
               </div>
             </div>
             ${countBadge}
@@ -2933,12 +2935,7 @@ if (!isNational && pills) {
       finalHtml = finalHtml.replace(/<div class="footer-locations-block">[\s\S]*?<\/div>\s*(?=<div class="footer-bottom-bar">)/i, `<div class="footer-locations-block">${popularLocationsFooter}</div>`);
     }
 
-  const forceAdjucgga = (urlStr) => {
-      if (!urlStr || typeof urlStr !== "string") return "";
-      return urlStr.replace(/res\.cloudinary\.com\/dyynjlbuj\//gi, "res.cloudinary.com/adjucgga/");
-    };
-
-    const clientProfilesData = profilesList.map(p => {
+  const clientProfilesData = profilesList.map(p => {
       let rawGal = p.galleryPaths || p.gallery_paths || p.gallery || [];
       if (typeof rawGal === "string") {
         const t = rawGal.trim();
@@ -2955,26 +2952,26 @@ if (!isNational && pills) {
         try { rawTags = JSON.parse(rawTags); } catch (_) { rawTags = rawTags.split(",").map(s => s.trim()); }
       }
 
-      const rawImgPath = p.imagePath || p.image_url || "";
-    const sanitizedImgPath = forceAdjucgga(rawImgPath);
-    const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(forceAdjucgga).filter(Boolean);
+      const rawImgPath = (p.imagePath || p.image_url || "").trim();
+      // ✅ ไม่ดัดแปลง URL ข้ามบัญชี Cloudinary คงพาธเดิมไว้ 100% เพื่อไม่ให้รูป 404
+      const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(s => String(s || "").trim()).filter(Boolean);
 
-    // ✅ คง Slug เดิมให้ตรงกับ HTML <a href> และ Schema 100% (เปลี่ยนเป็น model-ID เฉพาะกรณีว่างหรือเป็นภาษาไทย)
-    const cleanModelSlug = (function(existingSlug, id) {
-      if (!existingSlug) return `model-${id}`;
-      const slugStr = String(existingSlug).trim();
-      if (/[\u0E00-\u0E7F]/.test(slugStr) || !slugStr) {
-        return `model-${id}`;
-      }
-      return slugStr;
-    })(p.slug, p.id);
+      // ✅ คุม Slug ให้ปลอดภัย
+      const cleanModelSlug = (function(existingSlug, id) {
+        if (!existingSlug) return `model-${id}`;
+        const slugStr = String(existingSlug).trim();
+        if (/[\u0E00-\u0E7F]/.test(slugStr) || !slugStr) {
+          return `model-${id}`;
+        }
+        return slugStr;
+      })(p.slug, p.id);
 
     return {
       id: p.id,
-      slug: cleanModelSlug, // 👈 ใช้ค่าออโต้ตรงนี้
+      slug: cleanModelSlug,
       name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
-      imagePath: sanitizedImgPath,
-      galleryPaths: sanitizedGallery.slice(0, 3),
+      imagePath: rawImgPath,
+      galleryPaths: sanitizedGallery, // ✅ ปลดล็อกเอา .slice(0, 3) ออก แสดงรูปครบทั้งหมดตามจริง
       provinceKey: p.provinceKey || "chiangmai",
       location: sanitizeThaiText(p.location || ""),
       description: sanitizeThaiText(p.description || ""),
