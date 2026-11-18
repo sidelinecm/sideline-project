@@ -91,6 +91,8 @@ function sanitizeThaiText(text) {
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ")
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/🚨/g, "")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน/g, "นิมมาน")
     .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน")
@@ -176,7 +178,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
 
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
@@ -486,9 +488,9 @@ try {
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `/location/${provinceKey}`;
 
-    const relatedCardsHtml = relatedProfiles.length > 0 ? `
+   const relatedCardsHtml = relatedProfiles.length > 0 ? `
       <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
-        <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h3>
+        <h2 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h2>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
           ${relatedProfiles.map(rp => {
             const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
@@ -539,21 +541,24 @@ try {
       </div>
     ` : "";
     
-   let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
+       let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     let lineId = formatLineUrl(rawLineInput);
 
+    // 1. อายุ (คงตัวแปร age ไว้ป้องกัน ReferenceError และแสดง "20+ ปี" เมื่อไม่ได้ระบุ)
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-    const age = cleanAge || "ไม่ระบุ"; // 👈 เพิ่มบรรทัดนี้กลับมา ป้องกัน ReferenceError
+    const age = cleanAge || "ไม่ระบุ";
     const ageDisplay = cleanAge ? `${cleanAge} ปี` : "20+ ปี";
-    
-    const height = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
-      ? String(profile.height).replace(/\D/g, "") 
-      : "160";
-    const heightDisplay = `${height} ซม.`;
 
-    // 🟢 ถ้าฟิลด์ stats ว่างเปล่า ให้ค้นหาสัดส่วนจริงจากข้อความแนะนำตัว (เช่น 38-26-35) ก่อนใช้ค่า Default
+    // 2. ส่วนสูง (แยกค่าแสดงผลบนเว็บกับค่าตัวเลขสำหรับ Schema ออกจากกัน ไม่เสก 160 ซม. ใส่หน้าเว็บ)
+    const cleanHeight = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
+      ? String(profile.height).replace(/\D/g, "") 
+      : null;
+    const height = cleanHeight || "160"; // เก็บค่าตัวเลขไว้ให้ Schema Person ด้านล่างใช้งานต่อได้ไม่พัง
+    const heightDisplay = cleanHeight ? `${cleanHeight} ซม.` : "สอบถามกับน้อง";
+
+    // 3. สัดส่วน (ดึงจาก DB -> ค้นหาในข้อความ Bio -> ถ้าไม่มีจริงๆ ให้แสดง "สมส่วน" แทนการยัด 36-25-35)
     const stats = (function() {
       const dbStats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
         ? String(profile.stats).trim() 
@@ -565,32 +570,34 @@ try {
       if (match && match[1]) {
         return match[1].replace(/\s+/g, "");
       }
-      return "36-25-35";
+      return "สมส่วน";
     })();
 
-    const rawH = parseInt(height, 10) || 160;
+    // 4. น้ำหนัก (ตรวจช่วงตัวเลขที่สมจริง 35-95 กก. ถ้าไม่ได้กรอกให้แสดง "สมส่วน")
+    const rawH = cleanHeight ? (parseInt(cleanHeight, 10) || 160) : 160;
     const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
+    const hasValidWeight = Boolean(parsedDbWeight && parsedDbWeight >= 35 && parsedDbWeight <= 95);
     
-    const rawW = (parsedDbWeight && parsedDbWeight >= 38 && parsedDbWeight <= 95)
+    const rawW = hasValidWeight
       ? parsedDbWeight
       : Math.max(45, Math.min(52, rawH - 110));
 
     const weight = String(rawW);
-    const weightDisplay = parsedDbWeight ? `${weight} กก.` : "สมส่วน";
-  
-    const cleanProvince = escapeHTML(provinceNameThai);
-   // 🟢 ล้างทั้งตัวเคาะบรรทัด ช่องว่างตกค้าง และจุดปิดท้ายออกให้หมดก่อนนำไปใช้:
-let rawLoc = sanitizeThaiText(profile.location || "");
-const extractedZone = rawLoc
-  .replace(/[\r\n\t]+/g, " ")  // แปลงตัวเคาะขึ้นบรรทัดใหม่ทั้งหมดให้เป็นช่องว่างเดียว
-  .replace(/\.+$/, "")          // ลบจุดที่อยู่ท้ายข้อความทิ้ง เช่น "มช." -> "มช"
-  .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-  .split(/[,/]|และใกล้/)[0]
-  .trim();
+    const weightDisplay = hasValidWeight ? `${weight} กก.` : "สมส่วน";
 
-    
+    // 5. พิกัดและโซน (รักษาจุดท้ายคำย่อสำคัญ เช่น มช., มข., มฟล., มน. ไม่ให้โดนตัดทิ้ง)
+    const cleanProvince = escapeHTML(provinceNameThai);
+    let rawLoc = sanitizeThaiText(profile.location || "");
+    const extractedZone = rawLoc
+      .replace(/[\r\n\t]+/g, " ")
+      .replace(/(?<!มช|มข|มฟล|มน|ม\.อ)\.+$/, "") // ลบจุดท้ายประโยค แต่เก็บจุดของชื่อย่อสถาบันไว้ครบ
+      .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+      .split(/[,/]|และใกล้/)[0]
+      .trim();
+
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
+
 
    
     // 🟢 วางทับแทนที่บล็อกเดิมใน render-bot.js ทั้งหมด:
@@ -689,7 +696,7 @@ const zoneHubUrl = hasDistinctZone
 
     const faqAccordionHtml = `
       <section class="profile-faq-section" style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
-        <h3 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">❓ คำถามพบบ่อยเกี่ยวกับ${escapeHTML(displayName)}</h3>
+        <h2 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">❓ คำถามพบบ่อยเกี่ยวกับ${escapeHTML(displayName)}</h2>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${profileFaqs.map((f) => `
             <details style="background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
@@ -917,8 +924,8 @@ const zoneHubUrl = hasDistinctZone
     </script>
 </head>
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
-    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8.5rem 1rem;">
-        <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+<div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8.5rem 1rem;">
+        <header id="page-header" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
                 <span class="luxe-star-crest" aria-hidden="true">
@@ -1050,16 +1057,19 @@ const zoneHubUrl = hasDistinctZone
                   </div>
                 </section>
                 
-                <div class="profile-bio-wrapper" style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
-                    ${naturalDesc}
-                </div>
+               <section class="profile-bio-wrapper" style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
+    <h2 style="font-size: 13.5px; font-weight: 900; color: #140F22; margin: 0 0 8px 0;">
+      ข้อมูลส่วนตัวและสไตล์การดูแลของ${escapeHTML(displayName)}
+    </h2>
+    ${naturalDesc}
+</section>
 
                 ${relatedCardsHtml}
 
                 ${faqAccordionHtml}
 
                 <section class="fmh-safety-protocol-card" style="margin-top: 1.5rem;">
-                    <h3 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h3>             
+                    <h2 style="font-size: 13.5px; font-weight: 900; margin: 0 0 8px 0; color: #140F22;">🛡️ แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัยสูงสุด</h2>             
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ เกณฑ์อายุผู้ใช้งาน:</strong> แพลตฟอร์ม FirstModelHub กำหนดให้ผู้ขอรับบริการและผู้ลงประกาศต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปอย่างเข้มงวด</p>
                     <p style="margin-bottom: 4px;"><strong style="color: #140F22;">✓ จ่ายหน้างาน 100%:</strong> เจอน้องตัวจริงก่อนจึงค่อยจ่าย ไม่มีมัดจำล่วงหน้าทุกกรณี</p>
                     <p style="margin: 0;"><strong style="color: #140F22;">✓ รักษาความลับ (Zero-Log):</strong> ข้อมูลการติดต่อปลอดภัยสูงสุด</p>
@@ -1067,7 +1077,7 @@ const zoneHubUrl = hasDistinctZone
             </article>
         </main>
         
-        <footer role="contentinfo" style="text-align: center; padding: 2rem 1rem; color: #64748B; font-size: 11.5px; line-height: 1.6;">
+        <footer style="text-align: center; padding: 2rem 1rem; color: #64748B; font-size: 11.5px; line-height: 1.6;">
           <p style="margin: 0 0 6px 0;">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ศูนย์รวมเพื่อนเที่ยวฟิวแฟน ปลอดภัย จ่ายหน้างาน 100%</p>
           <div style="font-size: 10px; color: #94A3B8; max-width: 580px; margin: 8px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px;">
             <strong>Content & Copyright Notice:</strong> FirstModelHub operates purely as an online directory and information service. All promotional listings, profiles, and associated images are provided and updated independently by individual third-party advertisers. We do not claim ownership, control, or responsibility for any user-generated content. For immediate copyright verification or removal requests, please officially reach out to us at: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.

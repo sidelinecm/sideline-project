@@ -320,6 +320,8 @@ function sanitizeThaiText(text) {
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ")
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/🚨/g, "")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน/g, "นิมมาน")
     .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน")
@@ -392,7 +394,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
 
   
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
@@ -1057,7 +1059,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 
  return `
     <div class="profile-card-new-container">
-      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
+      <div class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
       <img src="${cardImg}" 
          alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
          width="400"
@@ -1103,8 +1105,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
                 </span>
                 <span class="profile-card-price">${luxuryPrice}</span>
             </div>
-        </div>
-      </article>
+      </div>
+      </div>
     </div>
   `;
 };
@@ -1114,15 +1116,16 @@ const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
   return faqs.map(f => `
     <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
-        <div style="font-size: 13px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">
+        <h3 style="font-size: 13px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">
             Q: ${escapeHTML(sanitizeThaiText(f.q))}
-        </div>
-        <div style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.5;">
+        </h3>
+        <p style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.5; margin: 0;">
             ${escapeHTML(sanitizeThaiText(f.a))}
-        </div>
+        </p>
     </div>
   `).join("");
 };
+
 
 export default async (req, context) => {
   try {
@@ -1587,7 +1590,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
-              <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
+              <strong class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900; display: block;">น้อง${cleanName}</strong>
               <div class="vip-location">${loc}</div>
             </div>
           </div>
@@ -2702,12 +2705,14 @@ if (!isNational && pills) {
 
     
 
-   // 🟢 1. แสดง Hot Swiper ประจำเดือน (ทำงานทั้งหน้าแรก และ หน้าจังหวัด)
+   
+   
     if (hotSwiperCardsHtml) {
-      finalHtml = finalHtml.replace(
+   finalHtml = finalHtml.replace(
         /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, 
-        `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
+        `<div id="vip-swiper-container" class="vip-swiper-wrapper" role="region" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
       );
+      
       const hotTitle = isNational 
         ? "น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยมทั่วไทย" 
         : `น้องๆ ไซด์ไลน์ HOT 🔥 ประจำเดือน จ.${escapeHTML(provinceNameThai)}`;
@@ -3011,9 +3016,11 @@ if (!isNational && pills) {
     ...actualVisibleProfiles.map(p => String(p.id))
   ]);
   const initialClientProfiles = isNational
-    ? clientProfilesData.filter(p => visibleIdsSet.has(String(p.id)))
-    : clientProfilesData; clientProfilesData;
-  const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
+  ? clientProfilesData.filter(p => visibleIdsSet.has(String(p.id)))
+  : clientProfilesData;
+
+const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
+
 
     
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
