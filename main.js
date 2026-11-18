@@ -211,6 +211,8 @@ async function getSupabaseClient() {
     .replace(/(ฟิวแฟน\s*){2,}/gi, "ฟิวแฟน ")
    
     .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/🚨/g, "")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน/g, "นิมมาน")
     .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน") // แก้เสียงเพี้ยนเฉพาะตอนพูดถึงสถานที่
@@ -285,7 +287,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_420,h_588,c_fill,g_auto,e_sharpen:35";
+ let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
 
 
 
@@ -613,7 +615,7 @@ if (isNation) {
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์ ${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
-            <h3 class="vip-name" style="margin:0; font-size:14px; font-weight:900;">${escapeHTML(p.displayName)}</h3>
+            <strong class="vip-name" style="margin:0; font-size:14px; font-weight:900; display:block;">${escapeHTML(p.displayName)}</strong>
             <div class="vip-location">${escapeHTML(locationText)}</div>
           </div>
         </div>
@@ -1387,7 +1389,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     const rawLikes = p.likes_count || p.likes || 0;
     const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
-    const article = document.createElement("article");
+    const article = document.createElement("div");
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
@@ -2563,12 +2565,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         setTimeout(() => {
           const displayArea = document.getElementById("profiles-display-area");
           if (displayArea) {
-            const headerOffset = 70;
-            const elementPosition = displayArea.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: Math.max(0, offsetPosition), behavior: "smooth" });
+            displayArea.scrollIntoView({ behavior: "smooth", block: "start" });
           }
-        }, 150);
+        }, 100);
       };
     }
 
