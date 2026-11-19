@@ -803,7 +803,7 @@ if (activeProvince !== "all" && activeProvince !== "national") {
         const combined = `${tagStr} ${descStr} ${sloganStr} ${locStr}`;
 
         if (filterTag === "ตรงปก") return p.isVerified || combined.includes("ตรงปก");
-        if (filterTag === "เอ็นเตอร์เทน") return combined.includes("เอ็น") || combined.includes("en") || combined.includes("ชงเหล้า") || combined.includes("ปาร์ตี้");
+        if (filterTag === "เอ็นเตอร์เทน") return combined.includes("เอ็น") || /\ben\b/i.test(combined) || combined.includes("ชงเหล้า") || combined.includes("ปาร์ตี้");
         if (filterTag === "ค้างคืน") return combined.includes("ค้างคืน") || combined.includes("overnight") || combined.includes("เหมาคืน");
         if (filterTag === "ฟิวแฟน") return combined.includes("ฟิวแฟน") || combined.includes("gfe") || combined.includes("แฟน");
         
@@ -1113,9 +1113,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
     
-    // 🟢 1. ดึงตัวเลขจริงจาก SSR (115 คน) หรือ appState ไม่ให้ตัวเลขแกว่งหรือลดเหลือ 110
     const totalCount = isAllOrNational 
-      ? (window.totalProfilesCount || appState.allProfiles?.length || 115) 
+      ? (window.totalProfilesCount || appState.allProfiles?.length || 0) 
       : (typeof count === "number" ? count : (appState.filteredProfiles?.length || 0));
 
     // อัปเดตตัวเลขจำนวนโปรไฟล์สด
@@ -2115,40 +2114,33 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       let targetDesc = "";
 
       if (slug && slug !== "national" && slug !== "all") {
-        // 🟢 ถ้าเปิดดูหน้ารายย่านอยู่ ให้รักษา URL ย่านเดิมไว้ ไม่ดีดกลับไปหน้าจังหวัดหลัก
-        if (window.currentZoneSlug) {
-          targetUrl = `/location/${slug}/${window.currentZoneSlug}`;
-        } else {
-          targetUrl = `/location/${slug}`;
-        }
+        const zoneSlugKey = window.currentZoneKey || "";
+        targetUrl = zoneSlugKey ? `/location/${slug}/${encodeURIComponent(zoneSlugKey)}` : `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
         targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `รับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
-
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
-          : `🟢 นัดเจอจ่ายหน้างาน ไม่มีมัดจำ! รวมโปรไฟล์ไซด์ไลน์${provName} สาวรับงานฟิวแฟน ตัวจริงตรงปก 100% สแตนด์บายพร้อมดูแล ทักไลน์สอบถามคิวได้ตลอด 24 ชม.`;
+          : `รวมสาวรับงาน${provName} ไซด์ไลน์${provName} รูปจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`;
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
       } else {
-        // ✅ ตรวจสอบว่าถ้ามาจากหน้า /profiles ให้กลับไปที่ /profiles (ไม่ดีดไปหน้าแรก)
         const isFromProfiles = window.__isFromProfiles || (window.location.pathname.startsWith("/profiles"));
         targetUrl = isEN ? "/index-en" : (isFromProfiles ? "/profiles" : "/");
-        
-        targetTitle = isEN 
-          ? "Thailand Escorts & VIP Companions | FirstModelHub" 
-          : "ไซด์ไลน์ทั่วไทย รับงานทั่วไทย เด็กเอ็น ฟิวแฟนตรงปก จ่ายหน้างาน | FirstModelHub";
 
-        const liveCount = appState.allProfiles?.length || window.profilesData?.length || 0;
-        
+        targetTitle = isEN
+          ? "Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos (Pay on Arrival) | FirstModelHub"
+          : "รับงานไซด์ไลน์ ทั่วไทย รูปจริง100% ฟิวแฟนไม่มีมัดจำ | FirstModelHub";
+
+        const liveCount = window.totalProfilesCount || appState.allProfiles?.length || 0;
         const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
           ? appState.provincesMap.size
           : ((window.provincesData && window.provincesData.length > 0) ? window.provincesData.length : 1);
 
         targetDesc = isEN
-          ? "Premium VIP companions and escorts across Thailand. 100% real photos, pay on arrival."
-          : `🛡️ ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% รวม ${liveCount}+ โปรไฟล์ไซด์ไลน์ทั่วไทย สาวรับงาน เด็กเอ็น สไตล์ฟิวแฟน ตรงปก นัดเจอง่ายใน ${liveProvinces} จังหวัด พร้อมสแตนด์บาย ทักไลน์ได้ 24 ชม.`;
-     
+          ? "Premier verified travel companions and VIP dinner dates across Thailand. 100% real verified photos, pay on arrival."
+          : `ศูนย์รวม สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย (${liveCount} โปรไฟล์) ครอบคลุม ${liveProvinces} จังหวัด คัดรูปจริงตรงปก 100% จ่ายหน้างาน ไร้มัดจำ`;
+
         if (domCache.provinceSelect) domCache.provinceSelect.value = "";
       }
 
@@ -2158,7 +2150,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "" : targetUrl}`;
       if (canonicalLink) canonicalLink.href = fullCanonical;
 
-      // ✅ แก้ไข: อัปเดตแท็ก hreflang ให้ชี้ไปที่ URL ปัจจุบันเสมอ
       const hreflangTh = document.querySelector('link[rel="alternate"][hreflang="th"]');
       if (hreflangTh) hreflangTh.href = fullCanonical;
 
@@ -3089,8 +3080,6 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     let tapCount = 0;
     let resetTimer = null;
     let lastTapTime = 0;
-    const ADMIN_SECRET = "fmh_super_admin_2026";
-    const ADMIN_PIN = "8888";
 
     starElements.forEach(star => {
       star.style.cursor = "pointer";
@@ -3120,7 +3109,7 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
           tapCount = 0;
           clearTimeout(resetTimer);
           if (typeof triggerHaptic === "function") triggerHaptic("medium");
-          openAdminPinDialog(ADMIN_PIN, ADMIN_SECRET);
+          openAdminPinDialog();
         }
       };
 
@@ -3129,8 +3118,7 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     });
   }
 
-  // 🟢 หน้าต่าง Modal ใส่รหัส PIN สไตล์ Luxury Glassmorphic
-  function openAdminPinDialog(correctPin, secretKey) {
+  function openAdminPinDialog() {
     let modal = document.getElementById("admin-pin-dialog-modal");
     if (!modal) {
       modal = document.createElement("div");
@@ -3153,60 +3141,14 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
     }
 
     modal.innerHTML = `
-      <div style="
-        background: #140F22;
-        border: 1.5px solid rgba(124, 58, 237, 0.4);
-        border-radius: 26px;
-        padding: 26px 20px;
-        width: 100%;
-        max-width: 320px;
-        text-align: center;
-        box-shadow: 0 25px 70px rgba(0,0,0,0.8);
-        color: #FFFFFF;
-        font-family: 'Prompt', sans-serif;
-      ">
+      <div style="background: #140F22; border: 1.5px solid rgba(124, 58, 237, 0.4); border-radius: 26px; padding: 26px 20px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.8); color: #FFFFFF; font-family: 'Prompt', sans-serif;">
         <div style="font-size: 34px; margin-bottom: 6px;">🔑</div>
         <h3 style="font-size: 16px; font-weight: 900; margin: 0 0 4px 0; color: #FFFFFF;">ADMIN CONTROL HUB</h3>
         <p style="font-size: 11.5px; color: #94A3B8; margin: 0 0 16px 0;">ใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลก</p>
-        
-        <input type="password" id="admin-custom-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" style="
-          width: 100%;
-          height: 48px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1.5px solid rgba(124, 58, 237, 0.5);
-          border-radius: 14px;
-          color: #FFFFFF;
-          font-size: 26px;
-          text-align: center;
-          letter-spacing: 10px;
-          outline: none;
-          margin-bottom: 16px;
-          box-sizing: border-box;
-        ">
-        
+        <input type="password" id="admin-custom-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" style="width: 100%; height: 48px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.5); border-radius: 14px; color: #FFFFFF; font-size: 26px; text-align: center; letter-spacing: 10px; outline: none; margin-bottom: 16px; box-sizing: border-box;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" id="admin-pin-cancel-btn" style="
-            height: 44px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #CBD5E1;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-          ">ยกเลิก</button>
-          
-          <button type="button" id="admin-pin-submit-btn" style="
-            height: 44px;
-            background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%);
-            border: none;
-            color: #FFFFFF;
-            border-radius: 12px;
-            font-weight: 900;
-            font-size: 13px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
-          ">ยืนยัน</button>
+          <button type="button" id="admin-pin-cancel-btn" style="height: 44px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #CBD5E1; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;">ยกเลิก</button>
+          <button type="button" id="admin-pin-submit-btn" style="height: 44px; background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%); border: none; color: #FFFFFF; border-radius: 12px; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);">ยืนยัน</button>
         </div>
       </div>
     `;
@@ -3229,52 +3171,43 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
 
     const executePurge = async () => {
       const val = pinInput.value.trim();
-      if (val === correctPin) {
-        closeDialog();
+      if (!val) return;
+      closeDialog();
+      showAdminStatusModal("loading", "กำลังล้างแคชระบบ...", "กำลังตรวจสอบสิทธิ์และสั่งล้างแคช กรุณารอสักครู่...");
+
+      try {
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (!isLocal) {
+          const res = await fetch("/api/clear-cache", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pin: val }),
+            cache: "no-store"
+          });
+          if (!res.ok) {
+            showAdminStatusModal("error", "รหัสผ่านไม่ถูกต้อง!", "กรุณาตรวจสอบ PIN แล้วลองใหม่อีกครั้ง");
+            return;
+          }
+        }
+
+        if (window.sessionStorage) sessionStorage.clear();
+        if (window.localStorage) localStorage.clear();
+        if ("caches" in window) {
+          const cacheKeys = await caches.keys();
+          await Promise.all(cacheKeys.map(k => caches.delete(k)));
+        }
+
         showAdminStatusModal(
-          "loading", 
-          "กำลังล้างแคชระบบ...", 
-          "กำลังสั่งล้างแคชหน่วยความจำ กรุณารอสักครู่..."
+          "success",
+          "ล้างแคชสำเร็จ 100%!",
+          isLocal
+            ? "⚡ [โหมดทดสอบ Localhost] ล้างแคชในเครื่องสำเร็จเรียบร้อย!"
+            : "⚡ ล้าง Netlify CDN ทั่วโลกเรียบร้อย ทุกคนจะเห็นข้อมูลใหม่ทันที!"
         );
 
-        try {
-          if (window.sessionStorage) sessionStorage.clear();
-          if (window.localStorage) localStorage.clear();
-          if ("caches" in window) {
-            const cacheKeys = await caches.keys();
-            await Promise.all(cacheKeys.map(k => caches.delete(k)));
-          }
-
-          const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-          
-          if (!isLocal) {
-            await fetch(`/api/clear-cache?secret=${secretKey}`, {
-              method: "GET",
-              headers: { "x-purge-secret": secretKey },
-              cache: "no-store"
-            });
-          }
-
-          showAdminStatusModal(
-            "success", 
-            "ล้างแคชสำเร็จ 100%!", 
-            isLocal 
-              ? "⚡ [โหมดทดสอบ Localhost] ล้างแคชในเครื่องสำเร็จเรียบร้อย!" 
-              : "⚡ ล้าง Netlify CDN ทั่วโลกเรียบร้อย ทุกคนจะเห็นข้อมูลใหม่ทันที!"
-          );
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-
-        } catch (err) {
-          window.location.reload();
-        } 
-      } else {
-        pinInput.value = "";
-        pinInput.style.borderColor = "#FF1493";
-        if (typeof triggerHaptic === "function") triggerHaptic("medium");
-        pinInput.placeholder = "รหัสผิด!";
+        setTimeout(() => { window.location.reload(); }, 1000);
+      } catch (err) {
+        showAdminStatusModal("error", "เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
       }
     };
 
