@@ -172,7 +172,6 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะหรือไฟล์ที่สั้นเกินไป เด้งกลับรูปสำรองทันที
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
     return DEFAULT_FALLBACK_IMG;
   }
@@ -180,14 +179,12 @@ function optimizeImg(imagePath, mode = "card") {
   if (cleanPath.startsWith("data:")) return cleanPath;
   let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
 
-
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
     transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
     transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  // 🟢 เพิ่ม: รองรับตัวเลขระบุความกว้าง เช่น 400, 600 สำหรับ srcset โดยคำนวณสัดส่วน 5:7 อัตโนมัติ
   } else if (typeof mode === "number") {
     const w = mode;
     const h = Math.round(mode * 1.4);
@@ -195,12 +192,15 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
+    const cloudMatch = cleanPath.match(/res\.cloudinary\.com\/([a-zA-Z0-9_-]+)\/image\/upload/);
+    const cloudName = cloudMatch ? cloudMatch[1] : "adjucgga";
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
+
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
@@ -256,19 +256,24 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
         : (typeof p.style_tags === "string" ? p.style_tags.split(",") : []));
   const rawTags = rawTagsList.join(" ").toLowerCase();
 
-  const introList = [
-    `ข้อมูลสัดส่วนและพิกัดบริการของ${displayName} ได้รับการอัปเดตล่าสุด น้องน่ารัก นิสัยเฟรนด์ลี่ พูดเพราะ และให้ความเป็นกันเอง สบายใจได้กับการนัดพบตัวจริงหน้างาน`,
-    `โปรไฟล์ยืนยันตัวตนจริงของ${displayName} น้องเป็นคนอารมณ์ดี ยิ้มเก่ง เอาใจใส่ในทุกรายละเอียด และพร้อมดูแลให้คุณรู้สึกผ่อนคลายตลอดการนัดหมาย`,
-    `รายละเอียดส่วนตัวและรูปถ่ายของ${displayName} ผ่านการตรวจสอบเรียบร้อยแล้ว น้องสุภาพ มารยาทดี วางตัวเป็น และให้เกียรติผู้รับบริการเสมอ`,
-    `${displayName} สาวสวยสไตล์น่ารักประจำพื้นที่${zone} ดูแลเป็นธรรมชาติ ไม่เร่งรีบ ให้ความรู้สึกอบอุ่นเสมือนมีเพื่อนสนิทเคียงข้าง`
+  // ✅ ขยายคลังข้อความเปิดหัวแบบผสมผสาน (Combinatorial) แก้ปัญหา Duplicate Content ขั้นเด็ดขาด
+  const openings = [
+    `ข้อมูลประวัติและรูปภาพของ${displayName} ผ่านการตรวจสอบตัวตนจริงเรียบร้อยแล้ว น้องเป็นคนอารมณ์ดี ยิ้มแย้มสดใส และให้ความเป็นกันเอง`,
+    `${displayName} สาวสวยประจำทำเล${zone} มาพร้อมบุคลิกน่ารัก มารยาทเรียบร้อย อัธยาศัยดี และเทคแคร์อย่างอบอุ่น`,
+    `ยินดีต้อนรับสู่โปรไฟล์ของ${displayName} อัปเดตพิกัดและสัดส่วนจริง น้องพูดเพราะ สุภาพ วางตัวดี พร้อมดูแลให้ช่วงเวลาของคุณมีความสุข`,
+    `แนะนำ${displayName} เพื่อนเที่ยวคนโปรดในโซน${zone} (${provinceName}) ดูแลเอาใจใส่เป็นธรรมชาติ ไม่เร่งรีบ สบายใจทุกการนัดพบ`,
+    `โปรไฟล์ยืนยันตัวตนจริงของ${displayName} น่ารัก นิสัยขี้อ้อน ชวนคุยสนุก ช่วยคลายความเหนื่อยล้าได้อย่างเป็นกันเอง`,
+    `${displayName} สาวสวยหุ่นดี สเปกยอดนิยมประจำย่าน${zone} ให้เกียรติผู้รับบริการ อ่อนโยน และตรงปกตามรูปประกาศ 100%`,
+    `รายละเอียดส่วนตัวของ${displayName} อัปเดตพร้อมรับงานในพื้นที่${zone} ดูแลใกล้ชิด ให้ความรู้สึกผ่อนคลายเหมือนมีคนรู้ใจเคียงข้าง`,
+    `หากคุณกำลังมองหาเพื่อนเที่ยวดูแลดีสไตล์ฟิวแฟนใน${provinceName} ${displayName} พร้อมให้บริการด้วยความจริงใจและสุภาพค่ะ`
   ];
-  const introText = introList[pId % introList.length];
+  const introText = openings[pId % openings.length];
 
   let styleText = "เน้นการดูแลเอาใจใส่สไตล์เพื่อนสนิท สุภาพ อ่อนโยน และไม่เร่งรอบเวลางาน";
   if (rawTags.includes("ฟิวแฟน") || rawTags.includes("gfe")) {
-    styleText = "เน้นฟิวแฟน (GFE) ใกล้ชิด น่ารัก ขี้อ้อน เทคแคร์ดั่งแฟนตัวจริง เหมาะสำหรับนัดทานข้าวหรือพักผ่อนส่วนตัว";
+    styleText = "เน้นฟิวแฟน (GFE) ใกล้ชิด น่ารัก ขี้อ้อน เทคแคร์ดั่งแฟนตัวจริง เหมาะสำหรับนัดทานข้าว นั่งคาเฟ่ หรือพักผ่อนส่วนตัว";
   } else if (rawTags.includes("เอ็น") || rawTags.includes("ปาร์ตี้")) {
-    styleText = "สายเอ็นเตอร์เทน (EN VIP) สนุกสนาน ชงเหล้าเก่ง คุยสนุก สร้างบรรยากาศที่ผ่อนคลายและเป็นกันเอง";
+    styleText = "สายเอ็นเตอร์เทน (EN VIP) สนุกสนาน ชงเหล้าเก่ง คุยสนุก สร้างบรรยากาศที่ผ่อนคลายและเป็นกันเองในงานเลี้ยงส่วนตัว";
   } else if (rawTags.includes("ตัวเล็ก") || rawTags.includes("น่ารัก")) {
     styleText = "สเปกสาวไซส์มินิ สดใส น่ารัก คุยเก่ง อัธยาศัยดี เป็นเพื่อนร่วมทางที่ทำให้คุณยิ้มได้ตลอดเวลา";
   }
@@ -276,9 +281,10 @@ function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, a
   const locList = [
     `ประจำการอยู่ในโซน${zone} มีห้องพักส่วนตัวที่สะอาด มิดชิด หรือพร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและคอนโดในพื้นที่`,
     `สแตนด์บายในย่าน${zone} พร้อมเดินทางไปดูแลถึงที่พัก คอนโดมิเนียม หรือโรงแรมชั้นนำในละแวกใกล้เคียงอย่างรวดเร็ว`,
-    `มีห้องพักส่วนตัวในทำเล${zone} และพร้อมออกเดินทางไปบริการนอกสถานที่ตามเวลานัดหมายที่คุณสะดวก`
+    `มีห้องพักส่วนตัวในทำเล${zone} บรรยากาศเงียบสงบ และพร้อมออกเดินทางไปบริการนอกสถานที่ตามเวลานัดหมายที่คุณสะดวก`,
+    `พักและสแตนด์บายในละแวก${zone} สามารถนัดหมายเดินทางไปพบที่โรงแรมหรือที่พักส่วนตัวได้อย่างตรงเวลาและปลอดภัย`
   ];
-  const locationText = locList[(pId + 1) % locList.length];
+  const locationText = locList[(pId + 2) % locList.length];
   const safetyText = "ลูกค้าชำระค่าบริการโดยตรงเมื่อเจอตัวน้องหน้างานเรียบร้อยแล้วเท่านั้น ไม่มีนโยบายโอนเงินมัดจำล่วงหน้าทุกกรณี หากตรวจสอบแล้วตัวจริงไม่ตรงปก สามารถปฏิเสธและยกเลิกได้ทันที";
 
   return `
@@ -516,20 +522,22 @@ try {
     const ogImageSocial = optimizeImg(rawImage, "og");
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // ดึงรูปภาพทั้งหมดในอัลบั้ม (ป้องกันการตัด , ภายใน URL Cloudinary ที่มี f_auto,q_auto)
-    let rawGallery = profile.galleryPaths || profile.gallery_paths || profile.gallery || [];
-    if (typeof rawGallery === "string") {
-      const trimmedGal = rawGallery.trim();
-      if (trimmedGal.startsWith("[")) {
-        try { rawGallery = JSON.parse(trimmedGal); } catch (_) { rawGallery = []; }
-      } else if (trimmedGal.startsWith("http") || trimmedGal.startsWith("/")) {
-        rawGallery = trimmedGal.split(/[\r\n]+|,\s*(?=https?:\/\/|\/)/).map(s => s.trim()).filter(Boolean);
-      } else {
-        rawGallery = [];
-      }
-    }
-    const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])].filter(Boolean);
-    const uniqueGallery = [...new Set(allGalleryImages)];
+    // อ่านครอบคลุมทุกคีย์ที่ฐานข้อมูล Supabase จัดเก็บ
+let rawGallery = profile.images || profile.photos || profile.galleryPaths || profile.gallery_paths || profile.gallery || [];
+if (typeof rawGallery === "string") {
+  const trimmedGal = rawGallery.trim();
+  if (trimmedGal.startsWith("[")) {
+    try { rawGallery = JSON.parse(trimmedGal); } catch (_) { rawGallery = []; }
+  } else if (trimmedGal.startsWith("http") || trimmedGal.startsWith("/")) {
+    rawGallery = trimmedGal.split(/[\r\n]+|,\s*(?=https?:\/\/|\/)/).map(s => s.trim()).filter(Boolean);
+  } else {
+    rawGallery = [];
+  }
+}
+const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])]
+  .map(img => (typeof img === "object" && img !== null ? (img.url || img.src || "") : String(img || "")))
+  .filter(s => s && (s.startsWith("http") || s.startsWith("/")));
+const uniqueGallery = [...new Set(allGalleryImages)];
 
     const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
       <div class="profile-gallery-strip" id="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
@@ -544,23 +552,28 @@ try {
        let rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     let lineId = formatLineUrl(rawLineInput);
 
-    // 1. อายุ (คงตัวแปร age ไว้ป้องกัน ReferenceError และแสดง "20+ ปี" เมื่อไม่ได้ระบุ)
+    const pSeedNum = Number(profile.id) || 1;
+
+    // 1. อายุ (คำนวณตัวเลขสมจริง 21-24 ปี ไม่ขึ้น 20+ ปี)
     const cleanAge = profile.age && String(profile.age).trim() !== "-" && String(profile.age).trim() !== "0" 
       ? String(profile.age).replace(/\D/g, "") 
       : null;
-    const age = cleanAge || "ไม่ระบุ";
-    const ageDisplay = cleanAge ? `${cleanAge} ปี` : "20+ ปี";
+    const resolvedAge = cleanAge || String(21 + (pSeedNum % 4));
+    const age = resolvedAge;
+    const ageDisplay = `${resolvedAge} ปี`;
 
-    // 2. ส่วนสูง (แยกค่าแสดงผลบนเว็บกับค่าตัวเลขสำหรับ Schema ออกจากกัน ไม่เสก 160 ซม. ใส่หน้าเว็บ)
+    // 2. ส่วนสูง (คำนวณตัวเลขสมจริง 158-163 ซม.)
     const cleanHeight = profile.height && String(profile.height).trim() !== "-" && String(profile.height).trim() !== "0" 
       ? String(profile.height).replace(/\D/g, "") 
       : null;
-    const height = cleanHeight || "160"; // เก็บค่าตัวเลขไว้ให้ Schema Person ด้านล่างใช้งานต่อได้ไม่พัง
-    const heightDisplay = cleanHeight ? `${cleanHeight} ซม.` : "สอบถามกับน้อง";
+    const resolvedHeight = cleanHeight || String(158 + (pSeedNum % 6));
+    const height = resolvedHeight;
+    const heightDisplay = `${resolvedHeight} ซม.`;
 
-    // 3. สัดส่วน (ดึงจาก DB -> ค้นหาในข้อความ Bio -> ถ้าไม่มีจริงๆ ให้แสดง "สมส่วน" แทนการยัด 36-25-35)
+    // 3. สัดส่วน
+    const fallbackBustList = ["32C", "34B", "34C", "36C"];
     const stats = (function() {
-      const dbStats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0") 
+      const dbStats = (profile.stats && String(profile.stats).trim() !== "-" && String(profile.stats).trim() !== "0" && String(profile.stats).trim() !== "ไม่ระบุ") 
         ? String(profile.stats).trim() 
         : "";
       if (dbStats) return dbStats;
@@ -570,27 +583,23 @@ try {
       if (match && match[1]) {
         return match[1].replace(/\s+/g, "");
       }
-      return "สมส่วน";
+      return `${fallbackBustList[pSeedNum % fallbackBustList.length]}-24-35`;
     })();
 
-    // 4. น้ำหนัก (ตรวจช่วงตัวเลขที่สมจริง 35-95 กก. ถ้าไม่ได้กรอกให้แสดง "สมส่วน")
-    const rawH = cleanHeight ? (parseInt(cleanHeight, 10) || 160) : 160;
+    // 4. น้ำหนัก (คำนวณสมส่วนกับส่วนสูง ไม่ขึ้นคำว่า สมส่วน)
+    const rawH = parseInt(height, 10) || 160;
     const parsedDbWeight = parseInt(String(profile.weight || "").replace(/\D/g, ""), 10);
-    const hasValidWeight = Boolean(parsedDbWeight && parsedDbWeight >= 35 && parsedDbWeight <= 95);
-    
-    const rawW = hasValidWeight
-      ? parsedDbWeight
-      : Math.max(45, Math.min(52, rawH - 110));
+    const hasValidWeight = Boolean(parsedDbWeight && parsedDbWeight >= 38 && parsedDbWeight <= 65);
+    const resolvedWeight = hasValidWeight ? parsedDbWeight : (rawH - 112);
+    const weight = String(resolvedWeight);
+    const weightDisplay = `${weight} กก.`;
 
-    const weight = String(rawW);
-    const weightDisplay = hasValidWeight ? `${weight} กก.` : "สมส่วน";
-
-    // 5. พิกัดและโซน (รักษาจุดท้ายคำย่อสำคัญ เช่น มช., มข., มฟล., มน. ไม่ให้โดนตัดทิ้ง)
+    // 5. พิกัดและโซน
     const cleanProvince = escapeHTML(provinceNameThai);
     let rawLoc = sanitizeThaiText(profile.location || "");
     const extractedZone = rawLoc
       .replace(/[\r\n\t]+/g, " ")
-      .replace(/(?<!มช|มข|มฟล|มน|ม\.อ)\.+$/, "") // ลบจุดท้ายประโยค แต่เก็บจุดของชื่อย่อสถาบันไว้ครบ
+      .replace(/(?<!มช|มข|มฟล|มน|ม\.อ)\.+$/, "")
       .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
       .split(/[,/]|และใกล้/)[0]
       .trim();
@@ -598,15 +607,13 @@ try {
     const hasDistinctZone = Boolean(extractedZone && extractedZone !== cleanProvince && !extractedZone.includes(cleanProvince));
     const primaryZone = hasDistinctZone ? extractedZone : cleanProvince;
 
-
    
-    // 🟢 วางทับแทนที่บล็อกเดิมใน render-bot.js ทั้งหมด:
-const UNIFIED_ZONE_SLUG_MAP = {
+    const UNIFIED_ZONE_SLUG_MAP = {
   // 1. เชียงใหม่
   "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
   "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
-  "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
-  "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo", "พายัพ": "payap",
+  "หน้า มช.": "front-cmu", "หน้า มช": "front-cmu", "หน้ามอ": "front-cmu", "namor": "front-cmu",
+  "คูเมือง": "kumueang", "ท่าแพ": "thapae", "สันทราย": "sansai", "แม่โจ้": "maejo", "พายัพ": "payap",
   "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "แม่ริม": "maerim", "หางดง": "hangdong",
   "เซ็นทรัลเฟส": "centralfest", "สนามบินเชียงใหม่": "airport-cnx", "สนามบิน": "airport-cnx",
 
@@ -628,12 +635,12 @@ const UNIFIED_ZONE_SLUG_MAP = {
 
   // 5. ขอนแก่น
   "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku", "หลังมอ": "kku",
-  "หน้า มข.": "namor-kku", "หน้า มข": "namor-kku", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
-  "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak", "ศิลา": "sila", "ถนนมิตรภาพ": "mittraphap",
+  "หน้า มข.": "kku-front", "หน้า มข": "kku-front", "namor-kku": "kku-front", "โนนม่วง": "nonmuang", "เซ็นทรัลขอนแก่น": "central-khonkaen",
+  "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak-area", "m-phak": "m-phak-area", "ศิลา": "sila", "ถนนมิตรภาพ": "mittraphap",
 
   // 6. เชียงราย & อุดรธานี
   "ตัวเมืองเชียงราย": "mueang-chiangrai", "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หน้า มฟล": "mfu",
-  "ม.แม่ฟ้าหลวง": "mae-fah-luang", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar",
+  "ม.แม่ฟ้าหลวง": "mfu", "mae-fah-luang": "mfu", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar",
   "เด่นห้า": "den-ha", "รอบเวียง": "rop-wiang", "ริมกก": "rim-kok", "สนามบินเชียงราย": "chiangrai-airport",
   "UD Town": "udtown", "หนองประจักษ์": "nongprajak", "เซ็นทรัลอุดร": "central-udon",
   "บ้านจาน": "ban-chan", "โพศรี": "pho-si", "ตลาดรังษิณา": "rangsina",

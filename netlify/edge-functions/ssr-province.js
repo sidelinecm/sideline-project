@@ -216,13 +216,12 @@ PROVINCE_SEO_DATA["hatyai"] = PROVINCE_SEO_DATA["songkhla"];
 PROVINCE_SEO_DATA["surat-thani"] = PROVINCE_SEO_DATA["suratthani"];
 PROVINCE_SEO_DATA["samui"] = PROVINCE_SEO_DATA["suratthani"];
 
-// 🟢 รวม Master Slug ทุกโซนทั่วไทย (Single Source of Truth)
 const MASTER_ZONE_TO_SLUG = {
   // 1. เชียงใหม่
   "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
   "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
-  "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
-  "ท่าแพ": "thapae", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "สันทราย": "sansai",
+  "หน้า มช.": "front-cmu", "หน้า มช": "front-cmu", "หน้ามอ": "front-cmu", "namor": "front-cmu",
+  "คูเมือง": "kumueang", "ท่าแพ": "thapae", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "สันทราย": "sansai",
   "แม่โจ้": "maejo", "พายัพ": "payap", "เซ็นทรัลเฟส": "centralfest", "สนามบินเชียงใหม่": "airport-cnx",
   "แม่ริม": "maerim", "หางดง": "hangdong", "สันกำแพง": "sankamphaeng", "สารภี": "saraphi", "ดอยสะเก็ด": "doisaket",
 
@@ -243,12 +242,12 @@ const MASTER_ZONE_TO_SLUG = {
 
   // 5. ขอนแก่น
   "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku", "หลังมอ": "kku",
-  "หน้า มข.": "namor-kku", "หน้า มข": "namor-kku", "หน้ามอ": "namor-kku", "โนนม่วง": "nonmuang",
-  "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak", "ศิลา": "sila",
+  "หน้า มข.": "kku-front", "หน้า มข": "kku-front", "หน้ามอ": "kku-front", "namor-kku": "kku-front", "โนนม่วง": "nonmuang",
+  "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak-area", "m-phak": "m-phak-area", "ศิลา": "sila",
 
   // 6. เชียงราย
   "ตัวเมืองเชียงราย": "mueang-chiangrai", "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หน้า มฟล": "mfu",
-  "ม.แม่ฟ้าหลวง": "mae-fah-luang", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar", "แม่สาย": "maesai",
+  "ม.แม่ฟ้าหลวง": "mfu", "mae-fah-luang": "mfu", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar", "แม่สาย": "maesai",
 
   // 7. อุดรธานี
   "ตัวเมืองอุดร": "mueang-udon", "UD Town": "udtown", "หนองประจักษ์": "nongprajak",
@@ -388,7 +387,6 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะ
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
     return DEFAULT_FALLBACK_IMG;
   }
@@ -396,29 +394,31 @@ function optimizeImg(imagePath, mode = "card") {
   if (cleanPath.startsWith("data:")) return cleanPath;
   let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
 
-  
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
     transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
     transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
     transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+  } else if (typeof mode === "number") {
+    const w = mode;
+    const h = Math.round(mode * 1.4);
+    transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
   }
 
   if (cleanPath.includes("res.cloudinary.com")) {
+    const cloudMatch = cleanPath.match(/res\.cloudinary\.com\/([a-zA-Z0-9_-]+)\/image\/upload/);
+    const cloudName = cloudMatch ? cloudMatch[1] : "adjucgga";
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${fileMatch[1]}`;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${fileMatch[1]}`;
     }
     return cleanPath;
   }
+
   const formatted = cleanPath.replace(/^\/+/, "");
   return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
 }
-
 
 function getVariant(seedStr, variants) {
   if (!variants || variants.length === 0) return "";
@@ -1006,7 +1006,10 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 const profileUrl = `/sideline/${encodeURIComponent(safeSlug)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
-  const ageStr = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${escapeHTML(p.age)} ปี` : "20+ ปี";
+  const pSeed = Number(p.id) || 1;
+  const hasRealAge = p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0";
+  const ageVal = hasRealAge ? String(p.age).replace(/\D/g, "") : String(21 + (pSeed % 4));
+  const ageStr = `${escapeHTML(ageVal)} ปี`;
   const statusClass = isAvail ? "status-online" : "status-busy";
   const luxuryPrice = formatLuxuryRate(p.rate);
 
@@ -1272,12 +1275,12 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     rawZoneParam = sanitizeThaiText(rawZoneParam).replace(/^โซน/g, "").trim();
 
     
-    const ZONE_MAP = {
+const ZONE_MAP = {
       // 1. เชียงใหม่
       "nimman": "นิมมาน", "nimmanhaemin": "นิมมาน", "santitham": "สันติธรรม", 
       "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด", "maejo": "แม่โจ้", "hangdong": "หางดง", 
       "cmu": "หลัง มช.", "langmor": "หลัง มช.", "lang-mor": "หลัง มช.",
-      "namor": "หน้า มช.", "na-mor": "หน้า มช.", "namor-cmu": "หน้า มช.",
+      "front-cmu": "หน้า มช.", "namor": "หน้า มช.", "na-mor": "หน้า มช.", "namor-cmu": "หน้า มช.",
       "changphueak": "ช้างเผือก", "changphuak": "ช้างเผือก", "maerim": "แม่ริม", "sansai": "สันทราย",
       "ruamchok": "รวมโชค", "thapae": "ท่าแพ", "huaykaew": "ห้วยแก้ว", "payap": "พายัพ",
       "centralfest": "เซ็นทรัลเฟส", "airport-cnx": "สนามบินเชียงใหม่",
@@ -1286,32 +1289,48 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       "sukhumvit": "สุขุมวิท", "ratchada": "รัชดา", "huaikhwang": "ห้วยขวาง",
       "ladprao": "ลาดพร้าว", "thonglor": "ทองหล่อ", "ekkamai": "เอกมัย",
       "sathorn": "สาทร", "silom": "สีลม", "bangna": "บางนา", "rama9": "พระราม 9", "ari": "อารีย์",
+
       // 3. ชลบุรี / พัทยา
       "pattaya": "พัทยา", "jomtien": "หาดจอมเทียน", "bangsaen": "บางแสน",
       "sriracha": "ศรีราชา", "amata": "อมตะนคร", "bowin": "บ่อวิน",
+
       // 4. ภูเก็ต
       "patong": "ป่าตอง", "kathu": "กะทู้", "chalong": "ฉลอง", "karon": "กะรน", "kata": "กะตะ",
       "bangtao": "บางเทา", "rawai": "ราไวย์", "cherngtalay": "เชิงทะเล", "kamala": "กมลา",
+
       // 5. ขอนแก่น
-      "kku": "หลัง มข.", "kangsadan": "กังสดาล", "nonmuang": "โนนม่วง",
-      "central-khonkaen": "เซ็นทรัลขอนแก่น", "buengkaennakhon": "บึงแก่นนคร",
+      "kku": "หลัง มข.", "kangsadan": "กังสดาล", "kku-front": "หน้า มข.", "namor-kku": "หน้า มข.", "nonmuang": "โนนม่วง",
+      "central-khonkaen": "เซ็นทรัลขอนแก่น", "buengkaennakhon": "บึงแก่นนคร", "m-phak-area": "ม.ภาค", "m-phak": "ม.ภาค", "sila": "ศิลา",
+
       // 6. เชียงราย
-      "baandu": "บ้านดู่", "mfu": "หน้า มฟล.", "maesai": "แม่สาย", "clock-tower": "หอนาฬิกา",
-      // 7. ลำปาง
+      "baandu": "บ้านดู่", "mfu": "หน้า มฟล.", "mae-fah-luang": "หน้า มฟล.", "maesai": "แม่สาย", "clock-tower": "หอนาฬิกา",
+
+      // 7. ลำปาง & ลำพูน
       "suan-dok": "สวนดอก", "sob-tui": "สบตุ๋ย", "lpru": "ม.ราชภัฏลำปาง",
-      // 8. ลำพูน
       "nikom-lamphun": "นิคมลำพูน", "wiang-yong": "เวียงยอง",
-      // 9. พิษณุโลก
+
+      // 8. พิษณุโลก & อยุธยา
       "nu": "รอบ มน.", "tha-pho": "ท่าโพธิ์", "samo-khae": "สมอแข",
-      // 10. อุดรธานี
+      "rojana": "โรจนะ", "bang-pa-in": "บางปะอิน",
+
+      // 9. อุดรธานี
       "udtown": "UD Town", "nongprajak": "หนองประจักษ์", "central-udon": "เซ็นทรัลอุดร",
+
+      // 10. อื่นๆ
+      "sut": "มทส.", "khaoyai": "เขาใหญ่", "pakchong": "ปากช่อง", "joho": "จอหอ",
+      "hatyai": "ตัวเมืองหาดใหญ่", "psu": "ม.อ.หาดใหญ่", "dannok": "ด่านนอก",
+      "samui": "เกาะสมุย", "chaweng": "เฉวง", "lamai": "ละไม", "bophut": "บ่อผุด",
+      
       // 11. โคราช (นครราชสีมา)
       "sut": "มทส.", "khaoyai": "เขาใหญ่", "pakchong": "ปากช่อง", "joho": "จอหอ",
       // 12. สงขลา-หาดใหญ่
+      
       "hatyai": "ตัวเมืองหาดใหญ่", "psu": "ม.อ.หาดใหญ่", "dannok": "ด่านนอก",
       // 13. อยุธยา
+      
       "rojana": "โรจนะ", "bang-pa-in": "บางปะอิน",
       // 14. สุราษฎร์ธานี / เกาะสมุย
+      
       "samui": "เกาะสมุย", "chaweng": "เฉวง", "lamai": "ละไม", "bophut": "บ่อผุด"
     };
 
@@ -1398,29 +1417,22 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
     const seenNameKeys = new Set();
     const deduplicatedProfiles = [];
 
-    for (const p of rawProfiles) {
+   for (const p of rawProfiles) {
       if (!p) continue;
       const cleanName = (p.name || "").trim().toLowerCase().replace(/^(น้อง|สาว|พี่)\s?/gi, "");
       if (!cleanName || cleanName === "model" || cleanName === "สาวสวย" || cleanName === "-") continue;
 
-      // ✅ กรองรูปภาพอย่างเข้มงวด: ต้องไม่ใช่ค่าว่าง, ไม่ใช่โลโก้เว็บ, และมีความยาว URL ที่สมบูรณ์
       const rawImg = (p.imagePath || p.image_url || p.imageUrl || "").trim().toLowerCase();
       if (!rawImg || rawImg.includes("firstmodelhub.webp") || rawImg.length < 15) continue;
-
-      let imgSig = "";
-      const parts = rawImg.split("?")[0].split("/");
-      imgSig = parts[parts.length - 1].replace(/\.(webp|jpg|jpeg|png|avif)$/i, "");
 
       const realProvince = detectAccurateProvince(p);
       p.provinceKey = realProvince;
       p.province_slug = realProvince;
 
       const uniqueProfileId = String(p.id || "");
-      if (uniqueProfileId && seenNameKeys.has(uniqueProfileId)) continue;
-      if (imgSig && seenImageKeys.has(imgSig)) continue;
+      if (!uniqueProfileId || seenNameKeys.has(uniqueProfileId)) continue;
 
-      if (imgSig) seenImageKeys.add(imgSig);
-      if (uniqueProfileId) seenNameKeys.add(uniqueProfileId);
+      seenNameKeys.add(uniqueProfileId);
       deduplicatedProfiles.push(p);
     }
 
@@ -2828,19 +2840,40 @@ if (!isNational && pills) {
       `;
       
     } else {
-      const emptyZoneNoticeHtml = isZoneEmpty ? `
-        <div style="background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);">
-          <span style="font-size: 20px; line-height: 1;">📍</span>
-          <div>
-            <strong style="color: #92400E; font-size: 13px; display: block; margin-bottom: 2px;">ขณะนี้ยังไม่มีน้องสแตนด์บายในโซน${escapeHTML(zoneSlug)} โดยตรง</strong>
-            <span style="color: #B45309; font-size: 11.5px; line-height: 1.5; display: block;">ระบบจึงแสดงโปรไฟล์น้องๆ ใน${escapeHTML(provinceNameThai)} ที่พร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและที่พักในย่าน${escapeHTML(zoneSlug)} ได้แทนค่ะ</span>
+      let contentBlockHtml = "";
+      if (totalCount === 0 || provinceSlug === "bangkok") {
+        contentBlockHtml = `
+          <div style="background: #FFFFFF; border: 1.5px solid #7C3AED; border-radius: 20px; padding: 32px 20px; text-align: center; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06); margin-top: 10px;">
+            <div style="font-size: 40px; margin-bottom: 8px;">👑</div>
+            <h3 style="font-size: 18px; font-weight: 900; color: #140F22; margin: 0 0 6px 0;">เปิดรับสมัครสาวรับงาน & เพื่อนเที่ยวฟิวแฟน ${escapeHTML(provinceNameThai)}</h3>
+            <p style="font-size: 12.5px; color: #64748B; max-width: 480px; margin: 0 auto 16px auto; line-height: 1.6;">
+              สำหรับผู้รับบริการในพื้นที่ ${escapeHTML(provinceNameThai)} ที่ต้องการนัดหมายคิวงาน สามารถแอดไลน์แจ้งสเปกและทำเลที่ต้องการกับแอดมิน เพื่อประสานงานคิวงาน VIP ให้ได้ทันทีค่ะ (จ่ายหน้างาน ไม่มัดจำ)
+            </p>
+            <a href="${liveAdminLine}" target="_blank" rel="noopener nofollow" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; font-size: 13.5px; font-weight: 800; padding: 12px 28px; border-radius: 100px; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+              <i class="fab fa-line" style="font-size: 20px;"></i>
+              <span>ติดต่อแอดมินประสานงานคิว ${escapeHTML(provinceNameThai)}</span>
+            </a>
           </div>
-        </div>
-      ` : "";
+        `;
+      } else {
+        const emptyZoneNoticeHtml = isZoneEmpty ? `
+          <div style="background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);">
+            <span style="font-size: 20px; line-height: 1;">📍</span>
+            <div>
+              <strong style="color: #92400E; font-size: 13px; display: block; margin-bottom: 2px;">ขณะนี้ยังไม่มีน้องสแตนด์บายในโซน${escapeHTML(zoneSlug)} โดยตรง</strong>
+              <span style="color: #B45309; font-size: 11.5px; line-height: 1.5; display: block;">ระบบจึงแสดงโปรไฟล์น้องๆ ใน${escapeHTML(provinceNameThai)} ที่พร้อมเดินทางไปหา (Outcall) ถึงโรงแรมและที่พักในย่าน${escapeHTML(zoneSlug)} ได้แทนค่ะ</span>
+            </div>
+          </div>
+        ` : "";
+
+        contentBlockHtml = `
+          ${emptyZoneNoticeHtml}
+          <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
+        `;
+      }
 
       displayAreaHtml = `
         <div class="section-content-wrapper">
-          ${emptyZoneNoticeHtml}
           <div class="province-header-row">
               <h2 class="province-clean-title">
                   <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
@@ -2849,7 +2882,7 @@ if (!isNational && pills) {
               </h2>
               <span class="province-count-pill"><span class="pulse-dot-el"></span><span>${totalCount} โปรไฟล์</span></span>
           </div>
-          <div class="profile-grid profiles-grid-row">${allCardsHtml}</div>
+          ${contentBlockHtml}
         </div>
       `;
     }
