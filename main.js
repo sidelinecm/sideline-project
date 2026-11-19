@@ -301,13 +301,14 @@ function optimizeImg(imagePath, mode = "card") {
     transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
   }
 
-  // ดึง Cloud Name เดิมของรูปภาพนั้นๆ มาใช้งาน ป้องกันลิงก์ 404
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const cloudMatch = cleanPath.match(/res\.cloudinary\.com\/([a-zA-Z0-9_-]+)\/image\/upload/);
-    const cloudName = cloudMatch ? cloudMatch[1] : "adjucgga";
-    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
-    if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${fileMatch[1]}`;
+  if (cleanPath.includes("res.cloudinary.com/")) {
+    const parts = cleanPath.split("/image/upload/");
+    if (parts.length === 2) {
+      const restParts = parts[1].split("/");
+      while (restParts.length > 1 && (/[,:]/.test(restParts[0]) || /^(?:f|q|w|h|c|g|e|dpr|ar)_/i.test(restParts[0]))) {
+        restParts.shift();
+      }
+      return `${parts[0]}/image/upload/${transform}/${restParts.join("/")}`;
     }
     return cleanPath;
   }
@@ -344,7 +345,8 @@ function optimizeImg(imagePath, mode = "card") {
       .map(s => s.trim())
       .filter(s => s.startsWith("http") || s.startsWith("/"));
 
-    const combinedPhotos = [mainImg, ...galleryArr].filter(s => s && (s.startsWith("http") || s.startsWith("/")));
+    const combinedPhotos = [mainImg, ...galleryArr]
+      .filter(s => s && (s.startsWith("http") || s.startsWith("/")) && !s.includes("firstmodelhub.webp"));
 
     const seenSignatures = new Set();
     const uniquePhotos = [];
@@ -1512,7 +1514,87 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
 
   let currentActivePhotoIdx = 0;
   let currentActivePhotoList = [];
-function updateLightboxPhoto(idx) {
+
+  function syncLightboxGalleryUI() {
+    const fallbackImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined")
+      ? DEFAULT_FALLBACK_IMG
+      : "https://firstmodelhub.com/images/firstmodelhub.webp";
+    const displayName = window.__lightboxModelName || "Model";
+
+    const dotsContainer = document.getElementById("lightbox-dots-indicator");
+    const counterBadge = document.getElementById("lightbox-photo-counter");
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+
+    if (currentActivePhotoList.length > 1) {
+      if (dotsContainer) {
+        dotsContainer.innerHTML = currentActivePhotoList.map((_, i) =>
+          `<span class="gallery-dot ${i === currentActivePhotoIdx ? 'active' : ''}"></span>`
+        ).join("");
+        dotsContainer.style.display = "flex";
+      }
+      if (counterBadge) {
+        counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>${currentActivePhotoIdx + 1}/${currentActivePhotoList.length}</span>`;
+        counterBadge.style.display = "flex";
+      }
+      if (thumbStrip) {
+        thumbStrip.style.cssText = "display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding: 2px 2px 6px 2px; -webkit-overflow-scrolling: touch;";
+        thumbStrip.innerHTML = currentActivePhotoList.map((img, i) => `
+          <div class="lightbox-thumb-item ${i === currentActivePhotoIdx ? "active" : ""}" data-thumb-idx="${i}" style="width: 58px; height: 76px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === currentActivePhotoIdx ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <img src="${img.src || fallbackImg}" alt="${escapeHTML(displayName)} รูปที่ ${i + 1}" width="58" height="76" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+          </div>
+        `).join("");
+
+        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
+          item.onclick = function (e) {
+            e.stopPropagation();
+            const idx = parseInt(this.getAttribute("data-thumb-idx"), 10);
+            updateLightboxPhoto(idx);
+          };
+        });
+      }
+    } else {
+      if (dotsContainer) { dotsContainer.innerHTML = ""; dotsContainer.style.display = "none"; }
+      if (counterBadge) { counterBadge.innerHTML = ""; counterBadge.style.display = "none"; }
+      if (thumbStrip) { thumbStrip.innerHTML = ""; thumbStrip.style.display = "none"; }
+    }
+  }
+
+  function validateLightboxGallery(sessionId) {
+    const snapshot = [...currentActivePhotoList];
+    snapshot.forEach((photoObj) => {
+      const testUrl = photoObj.fullSrc || photoObj.src;
+      if (!testUrl || testUrl.includes("firstmodelhub.webp")) {
+        const pos = currentActivePhotoList.indexOf(photoObj);
+        if (pos !== -1 && currentActivePhotoList.length > 1) {
+          currentActivePhotoList.splice(pos, 1);
+          if (currentActivePhotoIdx >= currentActivePhotoList.length) {
+            currentActivePhotoIdx = currentActivePhotoList.length - 1;
+          }
+          syncLightboxGalleryUI();
+        }
+        return;
+      }
+      const probe = new Image();
+      probe.onerror = () => {
+        if (window.__lightboxSessionId !== sessionId) return;
+        const pos = currentActivePhotoList.indexOf(photoObj);
+        if (pos === -1 || currentActivePhotoList.length <= 1) return;
+
+        const wasViewingBroken = (pos === currentActivePhotoIdx);
+        currentActivePhotoList.splice(pos, 1);
+        if (pos < currentActivePhotoIdx) {
+          currentActivePhotoIdx = Math.max(0, currentActivePhotoIdx - 1);
+        } else if (currentActivePhotoIdx >= currentActivePhotoList.length) {
+          currentActivePhotoIdx = currentActivePhotoList.length - 1;
+        }
+        syncLightboxGalleryUI();
+        if (wasViewingBroken) updateLightboxPhoto(currentActivePhotoIdx);
+      };
+      probe.src = testUrl;
+    });
+  }
+
+  function updateLightboxPhoto(idx) {
     if (!currentActivePhotoList || currentActivePhotoList.length === 0) return;
 
     if (idx < 0) idx = currentActivePhotoList.length - 1;
@@ -1524,14 +1606,12 @@ function updateLightboxPhoto(idx) {
 
     if (typeof triggerHaptic === "function") triggerHaptic("light");
 
-    // ป้องกัน Error 100% ถ้า array ว่างหรือ object รูปไม่มีอยู่จริง
     const photoObj = currentActivePhotoList[idx] || {};
     const nextSrc = photoObj.fullSrc || photoObj.src || "https://firstmodelhub.com/images/firstmodelhub.webp";
 
-   heroImg.style.opacity = "0.3";
+    heroImg.style.opacity = "0.3";
     heroImg.style.transform = "scale(0.98)";
-    
-    // 🟢 โหลดรูปภาพใน Memory ให้เสร็จก่อน ป้องกันจอดำ
+
     const preloader = new Image();
     preloader.onload = () => {
       heroImg.src = nextSrc;
@@ -1539,12 +1619,19 @@ function updateLightboxPhoto(idx) {
       heroImg.style.transform = "scale(1)";
     };
     preloader.onerror = () => {
-      // ถ้ารูปเสีย/เน็ตหลุด ให้เด้งกลับไปรูป Fallback ทันที
+      // ถ้ารูปนี้ 404 และยังมีรูปอื่นเหลือ ให้ลบรูปนี้ออกแล้วข้ามไปรูปถัดไปแทน (ไม่แสดงโลโก้ FX!)
+      if (currentActivePhotoList.length > 1) {
+        const pos = currentActivePhotoList.indexOf(photoObj);
+        if (pos !== -1) currentActivePhotoList.splice(pos, 1);
+        const nextValidIdx = Math.min(idx, currentActivePhotoList.length - 1);
+        syncLightboxGalleryUI();
+        updateLightboxPhoto(nextValidIdx);
+        return;
+      }
       heroImg.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
     };
-    // เริ่มดาวน์โหลดรูป
     preloader.src = nextSrc;
 
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
@@ -1553,9 +1640,7 @@ function updateLightboxPhoto(idx) {
         const isActive = (i === idx);
         t.classList.toggle("active", isActive);
         t.style.borderColor = isActive ? "#7C3AED" : "transparent";
-        if (isActive) {
-          t.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-        }
+        if (isActive) t.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       });
     }
 
@@ -1566,9 +1651,11 @@ function updateLightboxPhoto(idx) {
       });
     }
 
-    const counterBadge = document.getElementById("lightbox-photo-counter"); if (counterBadge && currentActivePhotoList && currentActivePhotoList.length > 1) { counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>${idx + 1}/${currentActivePhotoList.length}</span>`; 
-    } 
-   } 
+    const counterBadge = document.getElementById("lightbox-photo-counter");
+    if (counterBadge && currentActivePhotoList.length > 1) {
+      counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>${idx + 1}/${currentActivePhotoList.length}</span>`;
+    }
+  }
     
     function initLightboxImageSwipe() {
     const heroContainer = document.querySelector(".lightbox-hero-container");
@@ -1647,7 +1734,7 @@ function updateLightboxPhoto(idx) {
   
 function generateModalPersonaBox(profile, displayName, provName, zoneName) {
   let rawPersonalDesc = sanitizeThaiText(profile.description || "")
-    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
+    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1/gi, "")
     .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
     .trim();
 
@@ -1776,61 +1863,40 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
 
 // 🟢 3. จัดการรูปภาพหลัก + จุดไข่ปลา + ตัวนับรูป
-    const images = Array.isArray(profile.images) && profile.images.length > 0
+    const rawImages = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: fallbackImg, fullSrc: fallbackImg }];
 
-    currentActivePhotoList = images;
+    const filteredImages = rawImages.filter(img => img && !(img.src || "").includes("firstmodelhub.webp"));
+    currentActivePhotoList = filteredImages.length > 0 ? filteredImages : rawImages;
     currentActivePhotoIdx = 0;
+
+    window.__lightboxModelName = displayName;
+    window.__lightboxSessionId = Date.now();
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
-      // รีเซ็ต Opacity ป้องกันรูปค้างจางตอนสลับคน
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
       heroImg.style.transition = "opacity 0.2s ease, transform 0.2s ease";
 
-      const optimizedModalSrc = images[0]?.src 
-        ? images[0].src.replace("w_300,h_420", "w_480,h_672").replace("w_400,h_560", "w_480,h_672") 
-        : (images[0]?.fullSrc || fallbackImg);
+      const firstPhoto = currentActivePhotoList[0] || {};
+      const optimizedModalSrc = firstPhoto.src
+        ? firstPhoto.src.replace("w_300,h_420", "w_480,h_672").replace("w_400,h_560", "w_480,h_672")
+        : (firstPhoto.fullSrc || fallbackImg);
 
       heroImg.onerror = function() {
         this.onerror = null;
-        this.src = images[0]?.src || fallbackImg;
+        if (currentActivePhotoList.length <= 1) {
+          this.src = firstPhoto.src || fallbackImg;
+        }
       };
       heroImg.src = optimizedModalSrc;
       heroImg.alt = `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} โซน${primaryZone} ตรงปก 100% - FirstModelHub`;
     }
 
-    // สร้างเม็ดไข่ปลาและ Badge ตัวเลขนับรูป (1/N)
-    const dotsContainer = document.getElementById("lightbox-dots-indicator");
-    const counterBadge = document.getElementById("lightbox-photo-counter");
-
-    // 🔒 รีเซ็ตตัวแปรตำแหน่งรูปภาพให้เป็นรูปที่ 0 เสมอทุกครั้งที่เปิด Modal
-    currentActivePhotoIdx = 0;
-
-    if (images.length > 1) {
-      if (dotsContainer) {
-        dotsContainer.innerHTML = images.map((_, i) => 
-          `<span class="gallery-dot ${i === 0 ? 'active' : ''}"></span>`
-        ).join("");
-        dotsContainer.style.display = "flex";
-      }
-      if (counterBadge) {
-        counterBadge.innerHTML = `<i class="fas fa-camera" style="font-size: 10px;"></i> <span>1/${images.length}</span>`;
-        counterBadge.style.display = "flex";
-      }
-    } else {
-      // 🔒 เคลียร์ข้อความทิ้งให้สะอาด 100% ป้องกันตัวเลข 2/5 ค้างมาจากคนก่อนหน้า
-      if (dotsContainer) {
-        dotsContainer.innerHTML = "";
-        dotsContainer.style.display = "none";
-      }
-      if (counterBadge) {
-        counterBadge.innerHTML = "";
-        counterBadge.style.display = "none";
-      }
-    }
+    syncLightboxGalleryUI();
+    validateLightboxGallery(window.__lightboxSessionId);
 
     // 🟢 4. สเปกย่อ 3 ช่อง และเรทราคา
     const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
@@ -2025,29 +2091,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     }
 
     
-    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
-    if (thumbStrip) {
-      if (images.length > 1) {
-        thumbStrip.style.cssText = "display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding: 2px 2px 6px 2px; -webkit-overflow-scrolling: touch;";
-        thumbStrip.innerHTML = images.map((img, i) => `
-          <div class="lightbox-thumb-item ${i === 0 ? "active" : ""}" data-thumb-idx="${i}" style="width: 58px; height: 76px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-            <img src="${img.src || fallbackImg}" alt="${displayName} รูปที่ ${i + 1}" width="58" height="76" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-          </div>
-        `).join("");
-
-        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
-          item.onclick = function(e) {
-            e.stopPropagation();
-            const idx = parseInt(this.getAttribute("data-thumb-idx"), 10);
-            if (typeof updateLightboxPhoto === "function") updateLightboxPhoto(idx);
-          };
-        });
-      } else {
-        thumbStrip.innerHTML = "";
-        thumbStrip.style.display = "none";
-      }
-    }
-
+    
     // 🟢 11. อัปเดต Title, Canonical และ og:url ให้ตรงกัน
     setTimeout(() => {
       const dynamicTitle = isEn
@@ -3354,9 +3398,16 @@ if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.to
 
 document.addEventListener("error", function (e) {
   if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === "img") {
+    const img = e.target;
+    if (img.id === "lightboxHeroImage") return;
+    const thumbSlot = img.closest(".thumb-slot, .lightbox-thumb-item");
+    if (thumbSlot) {
+      thumbSlot.remove();
+      return;
+    }
     const fallbackImg = "https://firstmodelhub.com/images/firstmodelhub.webp";
-    if (e.target.src !== fallbackImg) {
-      e.target.src = fallbackImg;
+    if (img.src !== fallbackImg) {
+      img.src = fallbackImg;
     }
   }
 }, true);
