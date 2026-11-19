@@ -341,7 +341,7 @@ export default async (req, context) => {
   }
 
   
-  if (url.pathname === "/api/purge-cache" || url.pathname === "/api/clear-cache") {
+  if (url.pathname === "/api/clear-profile-cache") {
     const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
     if (secret === CONFIG.PURGE_SECRET) {
       PROFILE_PAGE_CACHE.clear();
@@ -465,7 +465,7 @@ try {
     .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
     .eq("active", true)
     .neq("id", profile.id)
-    .not(provCol, 'in', `(${provVariants.join(',')})`)
+    .not(provCol, 'in', `(${provVariants.map(v => `"${v}"`).join(',')})`)
     .limit(3);
 
   relatedProfiles = [...(sameProvinceProfiles || []), ...(otherProfiles || [])]
