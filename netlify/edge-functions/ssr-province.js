@@ -3050,8 +3050,9 @@ if (!isNational && pills) {
       }
 
       const rawImgPath = (p.imagePath || p.image_url || "").trim();
-      // ✅ ไม่ดัดแปลง URL ข้ามบัญชี Cloudinary คงพาธเดิมไว้ 100% เพื่อไม่ให้รูป 404
-      const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(s => String(s || "").trim()).filter(Boolean);
+      const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : [])
+  .map(s => String(s || "").trim())
+  .filter(s => s && !s.includes("firstmodelhub.webp"));
 
       // ✅ คุม Slug ให้ปลอดภัย
       const cleanModelSlug = (function(existingSlug, id) {

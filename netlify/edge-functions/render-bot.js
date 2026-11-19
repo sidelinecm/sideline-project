@@ -239,7 +239,7 @@ function formatLineUrl(rawInput) {
 
 function generateDynamicPersonaDesc(p, displayName, provinceName, zone, stats, age, height, weight) {
   let rawPersonalDesc = sanitizeThaiText(p.description || "")
-    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1|มัดจำ/gi, "")
+    .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1/gi, "")
     .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
     .trim();
 
@@ -536,7 +536,7 @@ if (typeof rawGallery === "string") {
 }
 const allGalleryImages = [rawImage, ...(Array.isArray(rawGallery) ? rawGallery : [])]
   .map(img => (typeof img === "object" && img !== null ? (img.url || img.src || "") : String(img || "")))
-  .filter(s => s && (s.startsWith("http") || s.startsWith("/")));
+  .filter(s => s && (s.startsWith("http") || s.startsWith("/")) && !s.includes("firstmodelhub.webp"));
 const uniqueGallery = [...new Set(allGalleryImages)];
 
     const galleryThumbnailsHtml = uniqueGallery.length > 1 ? `
