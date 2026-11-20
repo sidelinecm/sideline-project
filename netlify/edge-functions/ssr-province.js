@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261115_54';
+let GLOBAL_VERSION = 'v_20261115_50';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -2459,8 +2459,8 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
         const count = provinceCounts[p.key] || 0;
         const isBkkComingSoon = p.key === "bangkok" && count === 0;
         const badgeHtml = isBkkComingSoon
-          ? `<span style="color: #9F1239; font-size: 10px; font-weight: 800; background: #FFE4E6; padding: 1px 7px; border-radius: 100px; border: 1px solid #FDA4AF;">เปิดรับสมัคร</span>`
-          : `<span style="color: #7C3AED; font-size: 11px; font-weight: 800; background: rgba(124, 58, 237, 0.08); padding: 1px 8px; border-radius: 100px;">${count} คน</span>`;
+  ? `<span style="background: #BE123C; color: #FFFFFF; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 100px;">เปิดรับสมัคร</span>`
+  : `<span style="color: #7C3AED; font-size: 11px; font-weight: 800; background: rgba(124, 58, 237, 0.08); padding: 1px 8px; border-radius: 100px;">${count} คน</span>`;
         const linkHref = isBkkComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${p.key}`;
 
         if (isNational || isBkkComingSoon) {
