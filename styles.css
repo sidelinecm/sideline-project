@@ -307,47 +307,61 @@ body, body.fmh-app-page {
 }
 
 /* ==========================================================================
-   FIRSTMODELHUB - 120FPS BUTTER-SMOOTH SCROLL & GPU PERFORMANCE BOOST
+   FIRSTMODELHUB - OPTIMIZED SCROLL, LCP-SAFE & LOW-MEMORY GPU LAYER
    ========================================================================== */
 
-/* 1. ปลดล็อกอาการกระตุก/จอดีดเวลาไถนิ้วเร็วๆ บนมือถือ */
+/* 1. การ์ดโปรไฟล์แสดงทันทีไม่กระตุก ส่วนท้ายเว็บ (แผนที่/Footer) เลื่อนการวาดไปทำทีหลัง */
 .profile-card-new-container,
-#profiles-display-area,
-#map-section,
-.concierge-luxury-section,
-.editorial-digest-section,
-footer.fmh-footer {
+#profiles-display-area {
   content-visibility: visible !important;
   contain-intrinsic-size: auto !important;
 }
 
-/* 2. บังคับใช้ GPU Render การ์ดและแถบเลื่อนให้ลื่นไหลระดับ 120Hz */
+#map-section,
+.concierge-luxury-section,
+.editorial-digest-section,
+footer.fmh-footer {
+  content-visibility: auto !important;
+  contain-intrinsic-size: auto 420px !important;
+}
+
+/* 2. ล็อกขอบการ์ดด้วย position: relative แทน transform: translate3d (แก้บั๊ก LCP หลุดขอบจอ & ลดกิน RAM) */
+.profile-card-new {
+  position: relative !important;
+}
+
 .profile-card-new,
 .vip-card-item,
 .city-hub-card {
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
-/* 3. ปรับแถบเลื่อนแนวนอน (Stories / HOT Swiper / Filter Pills) ให้ติดนิ้ว */
+.profile-card-new:active,
+.vip-card-item:active,
+.city-hub-card:active {
+  transform: scale(0.98) !important;
+}
+
+/* 3. แถบเลื่อนแนวนอนลื่นตามนิ้วโดยไม่จองเลเยอร์ GPU ทิ้งไว้ตลอดเวลา */
 .stories-scroll-container,
 .vip-swiper-wrapper,
 .filter-pills-scroll-row,
 #quick-filter-pills {
-  scroll-behavior: smooth !important;
+  scroll-behavior: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  will-change: scroll-position !important;
+  will-change: auto !important;
 }
 
-/* 4. เพิ่มความคมชัดของฟอนต์และรูปภาพบนจอ Retina */
+/* 4. คงความคมชัดของฟอนต์ และให้ GPU ย่อ-ขยายรูปคนได้เนียนตาที่สุด */
 body {
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
 }
 .profile-card-img,
 .vip-card-item img {
-  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: auto !important;
   will-change: auto !important;
 }
