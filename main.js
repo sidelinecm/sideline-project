@@ -281,7 +281,6 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  // 🟢 ป้องกันลิงก์ขยะหรือไฟล์ที่สั้นเกินไป
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
     return DEFAULT_FALLBACK_IMG;
   }
@@ -301,20 +300,17 @@ function optimizeImg(imagePath, mode = "card") {
     transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
   }
 
-  if (cleanPath.includes("res.cloudinary.com/")) {
-    const parts = cleanPath.split("/image/upload/");
-    if (parts.length === 2) {
-      const restParts = parts[1].split("/");
-      while (restParts.length > 1 && (/[,:]/.test(restParts[0]) || /^(?:f|q|w|h|c|g|e|dpr|ar)_/i.test(restParts[0]))) {
-        restParts.shift();
-      }
-      return `${parts[0]}/image/upload/${transform}/${restParts.join("/")}`;
-    }
-    return cleanPath;
+  // ✅ ดึงเฉพาะชื่อไฟล์หรือโฟลเดอร์ images ออกมา แล้วบังคับส่งผ่าน dduxw7k4 เสมอ
+  const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
+  if (match) {
+    let fileName = match[0];
+    if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
+    return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
   }
 
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${formatted}`;
+  const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
+  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
 
   function normalizeProfile(raw) {
@@ -1307,7 +1303,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
 
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-        rawPath = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
     const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? (p.images[0].cardSrc || p.images[0].src)
