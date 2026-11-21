@@ -94,7 +94,7 @@
   function = "render-bot"
   path = "/sideline/*"
 
-# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและโซนย่อย
+# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและโซนย่อย (ตัด /province/* ออก เพื่อไม่ให้สร้างหน้าซ้ำ)
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
@@ -102,14 +102,6 @@
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*/*"
-
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/province/*"
-
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/province/*/*"
 
 # 🟢 เรนเดอร์หน้าแรก และหน้าหลัก
 [[edge_functions]]
@@ -145,6 +137,13 @@
   to = "/ai-catalog.json"
   status = 200
 
+# 🟢 รวม /province/* ทั้งหมดมาที่ /location/* (แก้สร้างหน้าซ้ำ 2 ชุด)
+[[redirects]]
+  from = "/province/*"
+  to = "/location/:splat"
+  status = 301
+  force = true
+
 # 🟢 ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404 และรักษาอันดับ SEO สูงสุด
 [[redirects]]
   from = "/nimman"
@@ -167,6 +166,67 @@
 [[redirects]]
   from = "/niman.html"
   to = "/location/chiangmai/nimman"
+  status = 301
+  force = true
+
+# 🟢 รวม URL ชื่อจังหวัดเก่า/สะกดต่างกันเข้า URL มาตรฐาน
+[[redirects]]
+  from = "/location/khonkaen"
+  to = "/location/khon-kaen"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/khonkaen/*"
+  to = "/location/khon-kaen/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/chiang-mai"
+  to = "/location/chiangmai"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/chiang-mai/*"
+  to = "/location/chiangmai/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/chiang_mai"
+  to = "/location/chiangmai"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/chiang_mai/*"
+  to = "/location/chiangmai/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/phra-nakhon-si-ayutthaya"
+  to = "/location/ayutthaya"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/surat-thani"
+  to = "/location/suratthani"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/nakhon-ratchasima"
+  to = "/location/korat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/hat-yai"
+  to = "/location/songkhla"
   status = 301
   force = true
 
@@ -236,6 +296,13 @@
   status = 301
   force = true
 
+# 🟢 แก้บั๊ก URL ติดเครื่องหมายคำพูดจาก GSC
+[[redirects]]
+  from = "/profiles\""
+  to = "/profiles"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/profiles\"\""
   to = "/profiles"
@@ -248,13 +315,26 @@
   status = 301
   force = true
 
-# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en
 [[redirects]]
-  from = "/index-en.html"
-  to = "/index-en"
+  from = "/profiles%22%22"
+  to = "/profiles"
   status = 301
   force = true
 
+[[redirects]]
+  from = "/profiles%22%22%22"
+  to = "/profiles"
+  status = 301
+  force = true
+
+# 🟢 ส่งบทความเก่าที่ลบแล้วไปหน้ารวมบทความ (แก้ Soft 404 กลายเป็นหน้าแรก)
+[[redirects]]
+  from = "/blog/what-is-gfe-fiwfan-guide"
+  to = "/blog"
+  status = 301
+  force = true
+
+# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en (เอา 301 force จาก /index-en.html ออก เพื่อไม่ให้ขวาง getTemplateHtml; ส่วน /index-en.html -> /index-en จะดัก 301 ใน ssr-province.js)
 [[redirects]]
   from = "/en"
   to = "/index-en"
@@ -266,18 +346,8 @@
   to = "/index-en.html"
   status = 200
 
-# 🟢 Fallback Routes สำหรับ Client-Side Routing
-[[redirects]]
-  from = "/sideline/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/location/*"
-  to = "/index.html"
-  status = 200
-
+# 🟢 Fallback 404 จริง (ปิดการเสิร์ฟหน้าแรก 200 OK ซ้ำซ้อนบน URL ที่ไม่มีอยู่จริง)
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/404.html"
+  status = 404
