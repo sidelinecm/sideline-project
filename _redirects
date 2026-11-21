@@ -18,6 +18,9 @@
 /พิกัดและพื้นที่บริการไซด์ไลน์เชียงใหม่                               /location/chiangmai           301!
 /sideline/พิกัดและพื้นที่บริการไซด์ไลน์เชียงใหม่                      /location/chiangmai           301!
 
+/contact              https://line.me/ti/p/u8Bz9HsaY8  301!
+/terms-of-service     /about                           301!
+/images/blog/safety-guide.webp  /images/firstmodelhub.webp  302!
 # ========================================================
 # 2. รายชื่อโปรไฟล์น้องๆ (Thai URL / URL เก่า -> Model ID)
 # ========================================================
@@ -234,8 +237,8 @@
 /sideline/ของขวัญ-ในเมือง                                              /sideline/model-26    301!
 
 # 50. น้องบีบี (ID: 54)
-/sideline/%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%B5-%E0%B9%83%E0%B8%99%E0%B8%A1%E0%B8%B7%E0%B8%AD    /sideline/model-27    301!
-/sideline/บีบี-ในเมือง                                                /sideline/model-54    301!
+/sideline/%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%B5-%E0%B9%83%E0%B8%99%E0%B8%A1%E0%B8%B7%E0%B8%AD    /sideline/model-54    301!
+/sideline/บีบี-ในเมือง                                                /sideline/model-54    301!                               
 
 # 51. น้องหวาน (ID: 80)
 /sideline/%E0%B8%AB%E0%B8%A7%E0%B8%B2%E0%B8%99-%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%A1%E0%B8%B7%E0%B8%AD    /sideline/model-80    301!
