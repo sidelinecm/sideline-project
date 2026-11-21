@@ -35,7 +35,7 @@ const CONFIG = {
     return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dduxw7k4/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
@@ -413,7 +413,7 @@ function optimizeImg(imagePath, mode = "card") {
 
   if (cleanPath.includes("res.cloudinary.com")) {
     const cloudMatch = cleanPath.match(/res\.cloudinary\.com\/([a-zA-Z0-9_-]+)\/image\/upload/);
-    const cloudName = cloudMatch ? cloudMatch[1] : "adjucgga";
+    const cloudName = cloudMatch ? cloudMatch[1] : "dduxw7k4";
     const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
     if (fileMatch && fileMatch[1]) {
       return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${fileMatch[1]}`;
@@ -422,7 +422,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${formatted}`;
 }
 
 function getVariant(seedStr, variants) {
@@ -1032,7 +1032,7 @@ const profileUrl = `/sideline/${encodeURIComponent(safeSlug)}`;
       }
     }
     const validFromGallery = Array.isArray(gallery) ? gallery.find(g => g && !g.includes("firstmodelhub.webp")) : null;
-    rawImg = validFromGallery || "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+    rawImg = validFromGallery || "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
   }
 
   const cardImg = optimizeImg(rawImg, "card");
@@ -2765,7 +2765,7 @@ if (!isNational && pills) {
       const sSlug = encodeURIComponent(p.slug || p.id);
       let rawImg = p.imagePath || p.image_url || "";
       if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
-        rawImg = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawImg = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
       }
       const sImg = optimizeImg(rawImg, "thumb");
 
