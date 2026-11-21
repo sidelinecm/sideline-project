@@ -314,7 +314,7 @@ function optimizeImg(imagePath, mode = "card") {
   }
 
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/adjucgga/image/upload/${transform}/${formatted}`;
+  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${formatted}`;
 }
 
   function normalizeProfile(raw) {
@@ -1307,7 +1307,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
 
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-        rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawPath = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
     }
     const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? (p.images[0].cardSrc || p.images[0].src)
@@ -2905,49 +2905,83 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
             if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
           });
           populateInitialComponents();
-          
-// ✅ โหลดข้อมูลพื้นหลังครอบคลุมหน้าแรก ทั่วไทย และหน้า /profiles โดยไม่ขัดจังหวะ Main Thread
-const isNationalPath = window.location.pathname === "/" || 
-                       window.location.pathname === "/profiles" || 
-                       window.location.pathname === "/index-en";
 
-if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length && isNationalPath) {
-  const idleCallback = window.requestIdleCallback || ((cb) => setTimeout(cb, 3000));
-  idleCallback(async () => {
-    try {
-      const bgClient = await getSupabaseClient();
-      if (!bgClient) return;
-      
-      // ดึงให้ครอบคลุมโปรไฟล์ทั้งหมด (รองรับสูงสุด 200 คน)
-      const { data } = await bgClient.from("profiles")
-        .select("*")
-        .eq("active", true)
-        .order("isfeatured", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(200);
-        
-      if (data && data.length > 0) {
-        const moreClean = filterValidProfiles(data);
-        const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
-        let hasNewProfiles = false;
-
-        moreProfiles.forEach(p => {
-          if (p.id != null && !appState.profileById.has(String(p.id))) {
-            appState.profileById.set(String(p.id), p);
-            if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
-            appState.allProfiles.push(p);
-            hasNewProfiles = true;
+          // 🚀 1. ฟังก์ชันช่วยสั่งให้บัญชีใหม่ (dduxw7k4) กวาดดูดรูปทั้งหมดมาเก็บไว้ในคลัง
+          function syncProfilesImagesToNewCloud(profilesList) {
+            if (!profilesList || !Array.isArray(profilesList)) return;
+            profilesList.forEach(p => {
+              // ดึงรูปหน้าปกหลัก
+              if (p.images && p.images[0]) {
+                const img = new Image();
+                img.src = p.images[0].fullSrc || p.images[0].src;
+              }
+              // ดึงรูปทั้งหมดในอัลบั้ม (Gallery)
+              const gallery = p.galleryPaths || p.gallery_paths || [];
+              if (Array.isArray(gallery)) {
+                gallery.forEach(g => {
+                  const gUrl = typeof g === 'string' ? g : (g.src || g.url || g.imagePath);
+                  if (gUrl && typeof gUrl === 'string') {
+                    const galImg = new Image();
+                    galImg.src = optimizeImg(gUrl, 600);
+                  }
+                });
+              }
+            });
           }
-        });
 
-        // ถ้าผู้ใช้กำลังพิมพ์ค้นหาอยู่ในช่อง Search ให้อัปเดตผลลัพธ์ทันทีเพื่อให้น้องที่เพิ่งโหลดมาแสดงขึ้นมา
-        if (hasNewProfiles && domCache.searchInput && domCache.searchInput.value.trim() !== "") {
-          executeFilterAndRender(false);
-        }
-      }
-    } catch (_) {}
-  }, { timeout: 4000 });
-}
+          // 🚀 สั่งดูดรูปภาพรอบแรกทันที (ในเวลาที่เครื่องว่าง)
+          const idleSync = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
+          idleSync(() => {
+            syncProfilesImagesToNewCloud(appState.allProfiles);
+            console.log("⚡ [Cloudinary] กำลังกวาดดูดรูปภาพรอบแรกเข้าบัญชีใหม่ (dduxw7k4)...");
+          });
+
+          // ✅ โหลดข้อมูลพื้นหลังครอบคลุมหน้าแรก ทั่วไทย และหน้า /profiles โดยไม่ขัดจังหวะ Main Thread
+          const isNationalPath = window.location.pathname === "/" || 
+                                 window.location.pathname === "/profiles" || 
+                                 window.location.pathname === "/index-en";
+
+          if (window.totalProfilesCount && Array.isArray(window.profilesData) && window.totalProfilesCount > window.profilesData.length && isNationalPath) {
+            const idleCallback = window.requestIdleCallback || ((cb) => setTimeout(cb, 3000));
+            idleCallback(async () => {
+              try {
+                const bgClient = await getSupabaseClient();
+                if (!bgClient) return;
+                
+                // ดึงให้ครอบคลุมโปรไฟล์ทั้งหมด (รองรับสูงสุด 200 คน)
+                const { data } = await bgClient.from("profiles")
+                  .select("*")
+                  .eq("active", true)
+                  .order("isfeatured", { ascending: false })
+                  .order("created_at", { ascending: false })
+                  .limit(200);
+                  
+                if (data && data.length > 0) {
+                  const moreClean = filterValidProfiles(data);
+                  const moreProfiles = moreClean.map(normalizeProfile).filter(Boolean);
+                  let hasNewProfiles = false;
+
+                  moreProfiles.forEach(p => {
+                    if (p.id != null && !appState.profileById.has(String(p.id))) {
+                      appState.profileById.set(String(p.id), p);
+                      if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+                      appState.allProfiles.push(p);
+                      hasNewProfiles = true;
+                    }
+                  });
+
+                  // 🚀 สั่งให้บัญชีใหม่กวาดดูดรูปของน้องๆ อีก 200 คนที่เพิ่งโหลดมาเพิ่มทันที
+                  syncProfilesImagesToNewCloud(moreProfiles);
+                  console.log("⚡ [Cloudinary] กวาดดูดรูปภาพทั้งหมดครบ 200 คนเรียบร้อยแล้ว!");
+
+                  // ถ้าผู้ใช้กำลังพิมพ์ค้นหาอยู่ในช่อง Search ให้อัปเดตผลลัพธ์ทันทีเพื่อให้น้องที่เพิ่งโหลดมาแสดงขึ้นมา
+                  if (hasNewProfiles && domCache.searchInput && domCache.searchInput.value.trim() !== "") {
+                    executeFilterAndRender(false);
+                  }
+                }
+              } catch (_) {}
+            }, { timeout: 4000 });
+          }
 
           return true;
         }
