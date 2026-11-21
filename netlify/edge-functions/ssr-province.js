@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261115_50';
+let GLOBAL_VERSION = 'v_20261115_54';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -304,7 +304,12 @@ function getRealTimeAgo(dateInput) {
   return `อัปเดตเมื่อ ${new Date(updatedTime).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
 }
 
-function formatActualDateText(dateInput) { const d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date(); const thaiMonthsShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]; return `${d.getDate()} ${thaiMonthsShort[d.getMonth()]} ${d.getFullYear()}`; 
+function formatActualDateText(dateInput) { 
+  let d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date(); 
+  const now = new Date();
+  if (d.getTime() > now.getTime()) d = now;
+  const thaiMonthsShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]; 
+  return `${d.getDate()} ${thaiMonthsShort[d.getMonth()]} ${d.getFullYear()}`; 
 }
 
 function sanitizeThaiText(text) {
@@ -3080,14 +3085,15 @@ if (!isNational && pills) {
       weight: p.weight || "",
       stats: p.stats || "",
       line_id: (function(rawLine, fallbackAdminLine) {
-        if (!rawLine || typeof rawLine !== "string") return fallbackAdminLine;
-        const trimmed = rawLine.trim();
-        if (!trimmed || trimmed === "-" || trimmed.includes("null") || trimmed.includes("undefined")) {
-          return fallbackAdminLine;
-        }
-        if (/vos730x|318afxwt|6Lj8m9G/i.test(trimmed)) {
-          return fallbackAdminLine;
-        }
+  if (!rawLine || typeof rawLine !== "string") return fallbackAdminLine;
+  const trimmed = rawLine.trim();
+  if (!trimmed || trimmed === "-" || trimmed.includes("null") || trimmed.includes("undefined")) {
+    return fallbackAdminLine;
+  }
+  // 🟢 ดักจับ ZRDtq11 และ store.line.me
+  if (/ZRDtq11|vos730x|318afxwt|6Lj8m9G|store\.line\.me/i.test(trimmed)) {
+    return fallbackAdminLine;
+  }
         if (/^https?:\/\//i.test(trimmed)) {
           return trimmed;
         }

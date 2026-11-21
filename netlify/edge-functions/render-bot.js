@@ -367,7 +367,12 @@ function getRealTimeAgo(dateInput) {
 }
 
 function getProfileActualDate(dateInput) {
-  const d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date();
+  let d = (dateInput && !isNaN(new Date(dateInput).getTime())) ? new Date(dateInput) : new Date();
+  const now = new Date();
+  // 🟢 ถ้าวันที่ใน Database บันทึกเวลาล่วงหน้าเกินปัจจุบัน ให้ใช้วันเวลาปัจจุบันแทนทันที
+  if (d.getTime() > now.getTime()) {
+    d = now;
+  }
   const thaiMonthsShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
   return `${d.getDate()} ${thaiMonthsShort[d.getMonth()]} ${d.getFullYear()}`;
 }
@@ -506,7 +511,8 @@ function formatLineUrl(rawInput, fallbackAdminLine = "https://line.me/ti/p/u8Bz9
     return fallbackAdminLine;
   }
   const trimmed = rawInput.trim();
-  if (/vos730x|318afxwt|6Lj8m9G/i.test(trimmed)) {
+  // 🟢 ดักจับลิงก์ที่เคยขึ้น 400 Bad Request หรือเป็นบัญชีที่ถูกระงับ
+  if (/ZRDtq11|vos730x|318afxwt|6Lj8m9G|store\.line\.me/i.test(trimmed)) {
     return fallbackAdminLine;
   }
   if (/^https?:\/\//i.test(trimmed)) {
@@ -1083,6 +1089,14 @@ export default async (req, context) => {
             "url": heroImageLarge
           },
           "url": canonicalUrl,
+          "priceRange": `${rateNumber} THB`,
+          "offers": {
+            "@type": "Offer",
+            "price": rateNumber,
+            "priceCurrency": "THB",
+            "availability": isOnlineNow ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
+            "url": canonicalUrl
+          },
           "height": {
             "@type": "QuantitativeValue",
             "value": cleanHeightNum,
@@ -1154,7 +1168,7 @@ export default async (req, context) => {
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     ${heroSrcSet
-      ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px" fetchpriority="high">`
+      ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 480px) 100vw, 400px" fetchpriority="high">`
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
@@ -1264,7 +1278,7 @@ export default async (req, context) => {
             <article class="interactive-card fmh-bento-card">
                <section class="hero-section" style="padding: 0; margin-bottom: 1rem;">
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15);">
-                      <img id="main-profile-img" src="${heroImageSmall}" ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""} class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone} ตรงปก 100% - FirstModelHub" loading="eager" fetchpriority="high" decoding="async" width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
+                     <img id="main-profile-img" src="${heroImageSmall}" ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 480px) 100vw, 400px"` : ""} class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${primaryZone} ตรงปก 100% - FirstModelHub" loading="eager" fetchpriority="high" decoding="async" width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     ${galleryThumbnailsHtml}
                 </section>
