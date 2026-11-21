@@ -35,7 +35,7 @@ const CONFIG = {
     return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dduxw7k4/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
@@ -411,18 +411,17 @@ function optimizeImg(imagePath, mode = "card") {
     transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
   }
 
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const cloudMatch = cleanPath.match(/res\.cloudinary\.com\/([a-zA-Z0-9_-]+)\/image\/upload/);
-    const cloudName = cloudMatch ? cloudMatch[1] : "dduxw7k4";
-    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
-    if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${fileMatch[1]}`;
-    }
-    return cleanPath;
+  // ✅ ดึงเฉพาะชื่อไฟล์หรือโฟลเดอร์ images ออกมา แล้วบังคับส่งผ่าน dduxw7k4 เสมอ
+  const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
+  if (match) {
+    let fileName = match[0];
+    if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
+    return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
   }
 
   const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${formatted}`;
+  const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
+  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
 
 function getVariant(seedStr, variants) {
@@ -1032,7 +1031,7 @@ const profileUrl = `/sideline/${encodeURIComponent(safeSlug)}`;
       }
     }
     const validFromGallery = Array.isArray(gallery) ? gallery.find(g => g && !g.includes("firstmodelhub.webp")) : null;
-    rawImg = validFromGallery || "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+    rawImg = validFromGallery || "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
   }
 
   const cardImg = optimizeImg(rawImg, "card");
@@ -2765,7 +2764,7 @@ if (!isNational && pills) {
       const sSlug = encodeURIComponent(p.slug || p.id);
       let rawImg = p.imagePath || p.image_url || "";
       if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
-        rawImg = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+        rawImg = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
       }
       const sImg = optimizeImg(rawImg, "thumb");
 
