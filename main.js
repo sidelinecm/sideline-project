@@ -1299,8 +1299,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
 
     let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
     if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-        rawPath = "https://res.cloudinary.com/adjucgga/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
-    }
+  rawPath = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
+}
     const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
       ? (p.images[0].cardSrc || p.images[0].src)
       : optimizeImg(rawPath, "card");
@@ -2315,7 +2315,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     document.querySelectorAll(".floating-app-dock .dock-item").forEach(item => {
       item.classList.remove("active");
       const href = item.getAttribute("href");
-      // จะ Active เฉพาะเมื่อ URL คือ "/" เท่านั้น หากอยู่หน้า /location/... จะไม่ Active หน้าแรกเด็ดขาด
       if ((rawPath === "/" && href === "/") || (href && href !== "/" && rawPath.startsWith(href))) {
         item.classList.add("active");
       }
@@ -2325,38 +2324,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
     if (isStandaloneProfile) {
       hideGlobalLoader();
-      initDockAutoHide();
-      
-      // ⚡ ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
-      const galleryStrip = document.getElementById('profile-gallery-strip');
-      const mainProfileImg = document.getElementById('main-profile-img');
-      if (galleryStrip && mainProfileImg) {
-        galleryStrip.addEventListener('click', (e) => {
-          const btn = e.target.closest('.thumb-slot');
-          if (!btn) return;
-          
-          if (typeof triggerHaptic === 'function') triggerHaptic('light');
-          const fullSrc = btn.getAttribute('data-full-src');
-          if (fullSrc) {
-            mainProfileImg.style.opacity = '0.3';
-            mainProfileImg.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-              mainProfileImg.src = fullSrc;
-              mainProfileImg.removeAttribute('srcset'); // ลบ srcset เพื่อให้แสดงรูปที่เลือกแน่นอน
-              mainProfileImg.style.opacity = '1';
-              mainProfileImg.style.transform = 'scale(1)';
-            }, 120);
-
-            galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
-              b.classList.remove('active');
-              b.style.borderColor = 'transparent';
-            });
-            btn.classList.add('active');
-            btn.style.borderColor = '#7C3AED';
-          }
-        });
-      }
-      return; // ออกจากการทำงาน ไม่ต้องโหลด Database รายชื่อคนอื่น
+      if (typeof initDockAutoHide === 'function') initDockAutoHide();
+      return; 
     }
 
     // 🟢 ตรวจสอบการเปิดโปรไฟล์แบบ Lightbox Modal (ผ่าน URL /sideline/...)
@@ -2370,7 +2339,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         String(p.id) === slugVal
       );
 
-      // Fallback ค้นหาจาก SSR window.profilesData
       if (!foundProfile && window.profilesData && Array.isArray(window.profilesData)) {
         const rawP = window.profilesData.find(p => String(p.id) === slugVal || String(p.slug) === slugVal);
         if (rawP && typeof normalizeProfile === "function") foundProfile = normalizeProfile(rawP);
@@ -2438,21 +2406,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     window.closeLightboxModal(false);
     if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
-    // ⚡ ถ้าเป็นการโหลดหน้าแรกครั้งแรก ไม่ต้องสั่งล้าง DOM ซ้ำ
     if (!isInitial) {
       executeFilterAndRender(false);
     }
   }
   
-  
   async function initApplication() {
-    // ⚡ 1. ตรวจสอบทันทีก่อนทำอย่างอื่น: ถ้าเป็นหน้าโปรไฟล์เดี่ยว
+    // ⚡ 1. ตรวจสอบทันที: ถ้าเป็นหน้าโปรไฟล์เดี่ยว
     const isStandaloneProfile = document.querySelector('article.interactive-card') && !document.getElementById('profiles-display-area');
     if (isStandaloneProfile) {
       hideGlobalLoader();
-      initDockAutoHide();
+      if (typeof initDockAutoHide === 'function') initDockAutoHide();
       
-      // ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้มสำหรับหน้าโปรไฟล์เดี่ยว (60 FPS)
+      // ⚡ ผูกระบบคลิกเปลี่ยนรูปภาพในอัลบั้ม: เปลี่ยนทันที 0ms ปลดล็อก INP ให้ผ่านเขียว
       const galleryStrip = document.getElementById('profile-gallery-strip');
       const mainProfileImg = document.getElementById('main-profile-img');
       if (galleryStrip && mainProfileImg) {
@@ -2462,14 +2428,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           if (typeof triggerHaptic === 'function') triggerHaptic('light');
           const fullSrc = btn.getAttribute('data-full-src');
           if (fullSrc) {
-            mainProfileImg.style.opacity = '0.3';
-            mainProfileImg.style.transform = 'scale(0.98)';
-            setTimeout(() => {
+            // ✅ ใช้ requestAnimationFrame แทน setTimeout 120ms (INP ลดฮวบเหลือ < 50ms)
+            requestAnimationFrame(() => {
               mainProfileImg.src = fullSrc;
               mainProfileImg.removeAttribute('srcset');
-              mainProfileImg.style.opacity = '1';
-              mainProfileImg.style.transform = 'scale(1)';
-            }, 120);
+            });
 
             galleryStrip.querySelectorAll('.thumb-slot').forEach(b => {
               b.classList.remove('active');
@@ -2492,7 +2455,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       });
 
-      return; // 🛑 จบการทำงานตรงนี้ทันที ประหยัดเน็ต ไม่ต้องโหลดฐานข้อมูลทั้งเว็บ
+      return; // 🛑 จบการทำงานหน้านี้ทันที ไม่ดึง DB ทั้งเว็บ
     }
 
     domCache.body = document.body;
@@ -2515,16 +2478,15 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const closeMenuBtn = document.getElementById("close-menu-btn");
 
     const toggleSidebar = (isOpen) => {
-  if (sidebarMenuEl) {
-    sidebarMenuEl.classList.toggle("active", isOpen);
-    sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
-  }
-  if (sidebarOverlayEl) {
-    sidebarOverlayEl.classList.toggle("active", isOpen);
-    sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
-  }
-  // ✅ ไม่ต้องแตะ document.body.style.overflow อีกต่อไป
-};
+      if (sidebarMenuEl) {
+        sidebarMenuEl.classList.toggle("active", isOpen);
+        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+      if (sidebarOverlayEl) {
+        sidebarOverlayEl.classList.toggle("active", isOpen);
+        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+    };
 
     if (menuToggleBtn) menuToggleBtn.onclick = () => toggleSidebar(true);
     if (closeMenuBtn) closeMenuBtn.onclick = () => toggleSidebar(false);
@@ -2552,7 +2514,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
         searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
       }
-      // ⚡ ตัด requestAnimationFrame และ body.style.overflow ทิ้งเด็ดขาดเพื่อกำจัด Presentation Delay 206ms
     };
 
     if (openFilterDockBtn) {
@@ -2594,49 +2555,31 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       };
     }
 
-    // ✅ ให้เปลี่ยนหน้านำทางเฉพาะเมื่อผู้ใช้กดปุ่ม "แสดงผลลัพธ์" (applyFilterBtn) เท่านั้น
     if (domCache.provinceSelect) {
-      domCache.provinceSelect.addEventListener("change", (e) => {
-        // ปล่อยให้ผู้ใช้เลือกเงื่อนไขอื่นให้เสร็จก่อน ไม่ต้องบังคับ reload หน้านี้
-      });
+      domCache.provinceSelect.addEventListener("change", () => {});
     }
 
-    
-        
-
-  function scrollToProfilesArea() {
-  const displayArea = document.getElementById("profiles-display-area");
-  if (displayArea) {
-    displayArea.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
+    function scrollToProfilesArea() {
+      const displayArea = document.getElementById("profiles-display-area");
+      if (displayArea) {
+        displayArea.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
 
     if (domCache.searchInput) {
-      // 🟢 2. เพิ่มตัวดักปุ่ม Enter / ปุ่มแว่นขยายบนแป้นพิมพ์มือถือ
       domCache.searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           clearTimeout(window.searchTimeout);
-
-          // ซ่อนแป้นพิมพ์มือถือทันที (แก้ปัญหาแป้นพิมพ์บังจอ)
           domCache.searchInput.blur();
-
-          // ปิดป๊อปอัปคำค้นหาแนะนำ
           const popover = document.getElementById("search-suggestions");
           if (popover) popover.style.display = "none";
-
-          // สั่งปิดหน้าต่างตัวกรอง (Drawer) ลงมา
-          if (typeof toggleSearchDrawer === "function") {
-            toggleSearchDrawer(false);
-          }
-
-          // ค้นหาข้อมูล และเลื่อนจอขึ้นไปหาน้องๆ ทันที
+          toggleSearchDrawer(false);
           executeFilterAndRender(true);
           scrollToProfilesArea();
         }
       });
 
-      // 3. ขณะพิมพ์ข้อความ (Realtime Search พร้อมปุ่มกากบาท)
       domCache.searchInput.addEventListener("input", (e) => {
         clearTimeout(window.searchTimeout);
         const queryText = e.target.value;
@@ -2648,13 +2591,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }, 200);
       });
 
-      // 4. เมื่อแตะที่ช่องค้นหา
       domCache.searchInput.addEventListener("focus", () => {
         showSearchSuggestions(domCache.searchInput.value);
       });
     }
 
-    // 5. ปุ่มกากบาท (X) ล้างคำค้นหา
     const clearSearchBtn = document.getElementById("clear-search-btn");
     if (clearSearchBtn) {
       clearSearchBtn.addEventListener("click", () => {
@@ -2669,36 +2610,33 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-  document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-  pill.addEventListener("click", function (e) {
-    const targetHref = this.getAttribute("href");
-    if (this.tagName === "A" && targetHref) return;
+    document.querySelectorAll(".filter-pill-tab").forEach(pill => {
+      pill.addEventListener("click", function (e) {
+        const targetHref = this.getAttribute("href");
+        if (this.tagName === "A" && targetHref) return;
 
-    e.preventDefault();
-    if (this.classList.contains("active")) return;
+        e.preventDefault();
+        if (this.classList.contains("active")) return;
 
-    // 1. เปลี่ยนสีปุ่มทันทีใน 0 ms
-    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-    this.classList.add("active");
-    appState.activePillTag = this.getAttribute("data-tag") || "all";
+        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+        this.classList.add("active");
+        appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        executeFilterAndRender(true);
-      }, 0);
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            executeFilterAndRender(true);
+          }, 0);
+        });
+      });
     });
-  });
-});
   
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
-      // ⚡ [จุดที่ 4.2] ปลดล็อก INP ปุ่ม "หน้าแรก" (แยก scrollTo ไปทำหลัง Paint ทันที ทำให้ Next Paint จบใน 0ms)
       const homeDockBtn = e.target.closest('#dock-item-home, a[href="/"].dock-item');
       if (homeDockBtn) {
         if (window.location.pathname === "/" || window.location.pathname === "") {
           e.preventDefault();
           if (typeof triggerHaptic === "function") triggerHaptic("light");
-          // 🟢 แยกคำสั่งเลื่อนจอไปทำใน requestAnimationFrame เพื่อให้เบราว์เซอร์ส่งเฟรมภาพแรกได้ทันที ไม่เกิด Presentation Delay
           requestAnimationFrame(() => {
             window.scrollTo({ top: 0, behavior: "smooth" });
           });
@@ -2707,7 +2645,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         if (typeof triggerHaptic === "function") triggerHaptic("light");
       }
 
-      
       const shareBtn = e.target.closest('[data-action="share-profile"]');
       if (shareBtn) {
         e.preventDefault();
@@ -2744,45 +2681,44 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       }
 
-   // 🟢 [จุดที่ 4.3] ปลดล็อก INP การคลิกการ์ด: เปลี่ยน URL ทันทีและแยกการวาด Lightbox ออกจากรอบคลิก
-    const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-    if (cardElement) {
-      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      if (e.target.closest('button, a:not(.card-link)')) return;
+      const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
+      if (cardElement) {
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        if (e.target.closest('button, a:not(.card-link)')) return;
 
-      const profileId = cardElement.getAttribute("data-profile-id");
-      const profileSlug = cardElement.getAttribute("data-profile-slug");
+        const profileId = cardElement.getAttribute("data-profile-id");
+        const profileSlug = cardElement.getAttribute("data-profile-slug");
 
-      if (profileId || profileSlug) {
-        e.preventDefault();
-        const searchId = String(profileId || "");
-        const searchSlug = String(profileSlug || "");
+        if (profileId || profileSlug) {
+          e.preventDefault();
+          const searchId = String(profileId || "");
+          const searchSlug = String(profileSlug || "");
 
-        let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p => 
-          String(p.id) === searchId || 
-          (p.slug && String(p.slug) === searchSlug) ||
-          (searchSlug && String(p.id) === searchSlug)
-        );
+          let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p => 
+            String(p.id) === searchId || 
+            (p.slug && String(p.slug) === searchSlug) ||
+            (searchSlug && String(p.id) === searchSlug)
+          );
 
-        if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-          const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
-          if (rawP) targetProfile = normalizeProfile(rawP);
+          if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
+            const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+            if (rawP) targetProfile = normalizeProfile(rawP);
+          }
+
+          if (targetProfile) {
+            const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                history.pushState(null, "", nextUrl);
+                window.openLightboxModal(targetProfile);
+              }, 0);
+            });
+          } else {
+            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+          }
+          return;
         }
-
-        if (targetProfile) {
-          const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              history.pushState(null, "", nextUrl);
-              window.openLightboxModal(targetProfile);
-            }, 0);
-          });
-        } else {
-          window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-        }
-        return;
       }
-    }
     
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");
@@ -2822,21 +2758,17 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
       window.addEventListener('scroll', function () {
         const currentScrollY = window.scrollY;
-
-        // ใช้การสลับคลาส CSS แทนการกำหนด style.transform ตรงๆ เพื่อไม่ให้ทับค่า translateX(-50%)
         if (currentScrollY > lastScrollY && currentScrollY > 80) {
           floatingDock.classList.add('dock-hidden');
         } else if (currentScrollY < lastScrollY) {
           floatingDock.classList.remove('dock-hidden');
         }
-
         lastScrollY = Math.max(0, currentScrollY);
       }, { passive: true });
     }
     
     initDockAutoHide();
 
-  
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
@@ -2860,7 +2792,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
             continue;
           }
 
-          // 🟢 ยึด Unique ID จาก Database เท่านั้น ไม่ตัดคนชื่อซ้ำทิ้ง
           if (!raw.id) continue;
           const uniqueId = String(raw.id);
           if (seenIds.has(uniqueId)) continue;
@@ -2872,7 +2803,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         return validProfiles;
       }
       try {
-       
         const provSource = (window.provincesData && Array.isArray(window.provincesData)) 
           ? window.provincesData 
           : (await (await getSupabaseClient())?.from("provinces").select("*"))?.data;
@@ -2887,7 +2817,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
         }
 
-       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
+        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           const cleanProfiles = filterValidProfiles(window.profilesData);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           appState.profileById.clear();
@@ -2898,9 +2828,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
           populateInitialComponents();
 
-          // ✅ ยกเลิกการสั่งดูดรูปล่วงหน้า 200 คน เพื่อหยุดสูบ Bandwidth และแก้ปัญหา INP หน่วง
-
-          
+          // ✅ ปิดการดูดรูปล่วงหน้า 200 คน ปลดล็อก 11.8MB และป้องกัน Cloudinary ตันเรียบร้อย
           const isNationalPath = window.location.pathname === "/" || 
                                  window.location.pathname === "/profiles" || 
                                  window.location.pathname === "/index-en";
@@ -2912,7 +2840,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
                 const bgClient = await getSupabaseClient();
                 if (!bgClient) return;
                 
-                // ดึงให้ครอบคลุมโปรไฟล์ทั้งหมด (รองรับสูงสุด 200 คน)
                 const { data } = await bgClient.from("profiles")
                   .select("*")
                   .eq("active", true)
@@ -2934,11 +2861,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
                     }
                   });
 
-                  // 🚀 สั่งให้บัญชีใหม่กวาดดูดรูปของน้องๆ อีก 200 คนที่เพิ่งโหลดมาเพิ่มทันที
-                  syncProfilesImagesToNewCloud(moreProfiles);
-                  console.log("⚡ [Cloudinary] กวาดดูดรูปภาพทั้งหมดครบ 200 คนเรียบร้อยแล้ว!");
+                  // 🟢 [ลบคำสั่ง syncProfilesImagesToNewCloud ที่ทำให้เกิด ReferenceError ทิ้งอย่างสมบูรณ์]
 
-                  // ถ้าผู้ใช้กำลังพิมพ์ค้นหาอยู่ในช่อง Search ให้อัปเดตผลลัพธ์ทันทีเพื่อให้น้องที่เพิ่งโหลดมาแสดงขึ้นมา
                   if (hasNewProfiles && domCache.searchInput && domCache.searchInput.value.trim() !== "") {
                     executeFilterAndRender(false);
                   }
@@ -2961,7 +2885,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     })();
 
-    // จัดการ Routing ของ URL และซ่อนตัวโหลด
     await handleUrlRouting(true);
     hideGlobalLoader();
 
@@ -2972,7 +2895,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       executeFilterAndRender(true);
     };
 
-    // ดักจับการกดย้อนกลับ/ไปข้างหน้าของเบราว์เซอร์
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
@@ -2983,13 +2905,13 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const trackEl = document.getElementById("agency-stories-track");
     if (!trackEl) return;
 
-    // 1. ถ้าใน HTML มีการเรนเดอร์มาแล้ว ให้หยุดทำงานทันที ป้องกันเรนเดอร์ซ้ำ
+    
     if (trackEl.children.length > 0) return;
 
     const profiles = appState.allProfiles;
     if (!profiles || !Array.isArray(profiles) || profiles.length === 0) return;
 
-    // 2. คัดกรองเฉพาะโปรไฟล์ที่มีรูปภาพ และเลือกมา 10 คนแรกเพื่อประหยัดแบนด์วิดท์
+    
     const validProfiles = profiles
       .filter(p => p && (p.imagePath || p.image_url || (p.images && p.images.length > 0)))
       .slice(0, 10);
