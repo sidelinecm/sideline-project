@@ -281,34 +281,30 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
-    return DEFAULT_FALLBACK_IMG;
-  }
-
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
+  
+  // ✅ เปลี่ยนจาก f_auto เป็น f_webp และล็อกขนาดมาตรฐาน
+  let transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 300 || mode === "swiper") {
-    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+    transform = "f_webp,q_auto:good,w_120,h_120,c_thumb,g_face";
+  } else if (mode === 300 || mode === "swiper" || mode === "card") {
+    transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  } else if (typeof mode === "number") {
-    const w = mode;
-    const h = Math.round(mode * 1.4);
-    transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
+    transform = "f_webp,q_auto:good,w_1200,h_630,c_fill,g_auto";
+  } else if (mode === 600 || mode === "full" || typeof mode === "number") {
+    transform = "f_webp,q_auto:good,w_600,h_840,c_limit";
   }
 
-  // ✅ ดึงเฉพาะชื่อไฟล์หรือโฟลเดอร์ images ออกมา แล้วบังคับส่งผ่าน dduxw7k4 เสมอ
   const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
   if (match) {
-    let fileName = match[0];
+    let fileName = match[0].replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
     if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
     return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
   }
 
-  const formatted = cleanPath.replace(/^\/+/, "");
+  const formatted = cleanPath.replace(/^\/+/, "").replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
   const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
@@ -2902,37 +2898,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           });
           populateInitialComponents();
 
-          // 🚀 1. ฟังก์ชันช่วยสั่งให้บัญชีใหม่ (dduxw7k4) กวาดดูดรูปทั้งหมดมาเก็บไว้ในคลัง
-          function syncProfilesImagesToNewCloud(profilesList) {
-            if (!profilesList || !Array.isArray(profilesList)) return;
-            profilesList.forEach(p => {
-              // ดึงรูปหน้าปกหลัก
-              if (p.images && p.images[0]) {
-                const img = new Image();
-                img.src = p.images[0].fullSrc || p.images[0].src;
-              }
-              // ดึงรูปทั้งหมดในอัลบั้ม (Gallery)
-              const gallery = p.galleryPaths || p.gallery_paths || [];
-              if (Array.isArray(gallery)) {
-                gallery.forEach(g => {
-                  const gUrl = typeof g === 'string' ? g : (g.src || g.url || g.imagePath);
-                  if (gUrl && typeof gUrl === 'string') {
-                    const galImg = new Image();
-                    galImg.src = optimizeImg(gUrl, 600);
-                  }
-                });
-              }
-            });
-          }
+          // ✅ ยกเลิกการสั่งดูดรูปล่วงหน้า 200 คน เพื่อหยุดสูบ Bandwidth และแก้ปัญหา INP หน่วง
 
-          // 🚀 สั่งดูดรูปภาพรอบแรกทันที (ในเวลาที่เครื่องว่าง)
-          const idleSync = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
-          idleSync(() => {
-            syncProfilesImagesToNewCloud(appState.allProfiles);
-            console.log("⚡ [Cloudinary] กำลังกวาดดูดรูปภาพรอบแรกเข้าบัญชีใหม่ (dduxw7k4)...");
-          });
-
-          // ✅ โหลดข้อมูลพื้นหลังครอบคลุมหน้าแรก ทั่วไทย และหน้า /profiles โดยไม่ขัดจังหวะ Main Thread
+          
           const isNationalPath = window.location.pathname === "/" || 
                                  window.location.pathname === "/profiles" || 
                                  window.location.pathname === "/index-en";
