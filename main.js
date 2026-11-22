@@ -1074,9 +1074,9 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
             <a href="/location/lampang" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ลำปาง</strong>
             </a>
-            <a href="https://line.me/ti/p/u8Bz9HsaY8" target="_blank" rel="noopener nofollow" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+            <a href="/location/bangkok" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; justify-content:space-between; gap:6px;">
               <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">กรุงเทพฯ</strong></div>
-              <span style="background:#FFE4E6; color:#9F1239; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:100px;">เปิดรับ</span>
+              <span style="background:rgba(124,58,237,0.1); color:#7C3AED; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:100px;">เปิดรับ</span>
             </a>
           </div>
         </section>
