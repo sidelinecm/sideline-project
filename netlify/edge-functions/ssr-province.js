@@ -392,34 +392,30 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
-    return DEFAULT_FALLBACK_IMG;
-  }
-
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
+  
+  // ✅ เปลี่ยนจาก f_auto เป็น f_webp และล็อกขนาดมาตรฐาน
+  let transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
 
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 300 || mode === "swiper") {
-    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+    transform = "f_webp,q_auto:good,w_120,h_120,c_thumb,g_face";
+  } else if (mode === 300 || mode === "swiper" || mode === "card") {
+    transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  } else if (typeof mode === "number") {
-    const w = mode;
-    const h = Math.round(mode * 1.4);
-    transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
+    transform = "f_webp,q_auto:good,w_1200,h_630,c_fill,g_auto";
+  } else if (mode === 600 || mode === "full" || typeof mode === "number") {
+    transform = "f_webp,q_auto:good,w_600,h_840,c_limit";
   }
 
-  // ✅ ดึงเฉพาะชื่อไฟล์หรือโฟลเดอร์ images ออกมา แล้วบังคับส่งผ่าน dduxw7k4 เสมอ
   const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
   if (match) {
-    let fileName = match[0];
+    let fileName = match[0].replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
     if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
     return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
   }
 
-  const formatted = cleanPath.replace(/^\/+/, "");
+  const formatted = cleanPath.replace(/^\/+/, "").replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
   const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
@@ -1752,12 +1748,12 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     } else if (zoneSlug) {
       metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
       ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
-                   <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไร้มัดจำ</span>`;
+                   <span class="h1-line-2">แหล่งรวมน้องๆสาวๆ รับงานเพื่อนเที่ยวฟิวแฟน ไซด์ไลน์ รูปจริง100% จ่ายหน้างาน ไร้มัดจำ</span>`;
       dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
     } else {
       metaTitle = `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
       ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน</span>`;
+                   <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน</span>`;
       dynamicSubheadline = `ศูนย์รวมสาวรับงานและไซด์ไลน์ จ.${escapeHTML(provinceNameThai)}`;
     }
 
@@ -3163,18 +3159,17 @@ finalHtml = finalHtml.replace(
 );
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  // ✅ Preload รูปแรกของแถบ HOT Swiper ที่โชว์บนหน้าจอแรก
-const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : null;
+  // ✅ บังคับให้รูป LCP ตัวแรกสุด โหลดด้วยความสำคัญสูงสุด (high) เสมอทุกหน้า
+    const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : null;
 
-if (lcpTargetProfile) {
-  const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  if (rawLcpImg) {
-    const lcpExactUrl = optimizeImg(rawLcpImg, 300);
-    const imgPriority = isNational ? "low" : "high";
-    const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="${imgPriority}">\n</head>`;
-    finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
-  }
-}
+    if (lcpTargetProfile) {
+      const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
+      if (rawLcpImg) {
+        const lcpExactUrl = optimizeImg(rawLcpImg, 300); // จะแปลงเป็น f_webp อัตโนมัติจากที่เราแก้optimizeImgไป
+        const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
+        finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+      }
+    }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
