@@ -2827,24 +2827,22 @@ if (!isNational && pills) {
       { key: "udonthani", name: "อุดรธานี", tag: "ภาคอีสาน" },
       { key: "chiangrai", name: "เชียงราย", tag: "ภาคเหนือ" },
       { key: "lampang", name: "ลำปาง", tag: "ภาคเหนือ" },
-      { key: "bangkok", name: "กรุงเทพฯ", tag: "เร็วๆ นี้" }
+      { key: "bangkok", name: "กรุงเทพฯ", tag: "ภาคกลาง" }
     ];
 
     const cityHubCardsHtml = popularProvinces.map(cp => {
       const count = provinceCounts[cp.key] || 0;
-      const isComingSoon = cp.key === "bangkok" && count === 0;
-      const linkHref = isComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${cp.key}`;
-      const countBadge = isComingSoon
-        ? `<span style="background: #FFE4E6; color: #9F1239; font-size: 10.5px; font-weight: 900; padding: 3px 9px; border-radius: 100px; border: 1px solid #FDA4AF;">เปิดรับสมัคร</span>`
-        : `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>`;
+      const countBadge = count > 0
+        ? `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>`
+        : `<span style="background: rgba(124, 58, 237, 0.08); color: #7C3AED; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">เปิดรับ</span>`;
 
       return `
-        <a href="${linkHref}" class="city-hub-card interactive-card" style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
+        <a href="/location/${cp.key}" class="city-hub-card interactive-card" style="background: #FFFFFF !important; border: 1.5px solid rgba(124, 58, 237, 0.15) !important; border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 18px;">📍</span>
             <div>
-              <strong style="color: #140F22; font-size: 12.5px; font-weight: 800; display: block;">${escapeHTML(cp.name)}</strong>
-              <span style="color: #64748B; font-size: 10.5px; font-weight: 600;">${cp.tag}</span>
+              <strong style="color: #140F22 !important; font-size: 12.5px; font-weight: 800; display: block;">${escapeHTML(cp.name)}</strong>
+              <span style="color: #64748B !important; font-size: 10.5px; font-weight: 600;">${cp.tag}</span>
             </div>
           </div>
           ${countBadge}
