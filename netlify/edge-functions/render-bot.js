@@ -464,30 +464,34 @@ function optimizeImg(imagePath, mode = "card") {
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
 
-  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
-  if (cleanPath.startsWith("data:")) return cleanPath;
-  
-  // ✅ เปลี่ยนจาก f_auto เป็น f_webp และล็อกขนาดมาตรฐาน
-  let transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
-
-  if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_webp,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 300 || mode === "swiper" || mode === "card") {
-    transform = "f_webp,q_auto:good,w_360,h_504,c_fill,g_auto";
-  } else if (mode === "og") {
-    transform = "f_webp,q_auto:good,w_1200,h_630,c_fill,g_auto";
-  } else if (mode === 600 || mode === "full" || typeof mode === "number") {
-    transform = "f_webp,q_auto:good,w_600,h_840,c_limit";
+  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
+    return DEFAULT_FALLBACK_IMG;
   }
 
+  if (cleanPath.startsWith("data:")) return cleanPath;
+  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto,e_sharpen:35";
+
+  if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
+    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
+  } else if (mode === 300 || mode === "swiper") {
+    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+  } else if (mode === "og") {
+    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+  } else if (typeof mode === "number") {
+    const w = mode;
+    const h = Math.round(mode * 1.4);
+    transform = `f_auto,q_auto:good,w_${w},h_${h},c_fill,g_auto`;
+  }
+
+  // ✅ ดึงเฉพาะชื่อไฟล์หรือโฟลเดอร์ images ออกมา แล้วบังคับส่งผ่าน dduxw7k4 เสมอ
   const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
   if (match) {
-    let fileName = match[0].replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
+    let fileName = match[0];
     if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
     return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
   }
 
-  const formatted = cleanPath.replace(/^\/+/, "").replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
+  const formatted = cleanPath.replace(/^\/+/, "");
   const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
@@ -1325,14 +1329,14 @@ export default async (req, context) => {
                         <div class="time-label">1 ชม.</div>
                         <strong class="price-val">${rateNumber.toLocaleString()}.-</strong>
                       </div>
-                     <div class="fmh-rate-col">
-  <div class="time-label">2 ชม. <span style="font-size:9.5px; font-weight:800; color:#6D28D9;">(ประมาณการ)</span></div>
-  <strong class="price-val">${(Math.round((rateNumber * 1.8) / 100) * 100).toLocaleString()}.-</strong>
-</div>
-<div class="fmh-rate-col">
-  <div class="time-label">ค้างคืน <span style="font-size:9.5px; font-weight:800; color:#6D28D9;">(เริ่มต้น)</span></div>
-  <strong class="price-val">${(Math.round((rateNumber * 4.5) / 500) * 500).toLocaleString()}.-</strong>
-</div>
+                      <div class="fmh-rate-col">
+                        <div class="time-label">2 ชม. <span style="font-size:9.5px; font-weight:700; color:#8B5CF6;">(ประมาณการ)</span></div>
+                        <strong class="price-val">${(Math.round((rateNumber * 1.8) / 100) * 100).toLocaleString()}.-</strong>
+                      </div>
+                      <div class="fmh-rate-col">
+                        <div class="time-label">ค้างคืน <span style="font-size:9.5px; font-weight:700; color:#8B5CF6;">(เริ่มต้น)</span></div>
+                        <strong class="price-val">${(Math.round((rateNumber * 4.5) / 500) * 500).toLocaleString()}.-</strong>
+                      </div>
                     </div>
                     <p style="font-size: 11px; color: #64748B; text-align: center; margin: 8px 0 0 0; line-height: 1.4;">
                       * หมายเหตุ: เรท 2 ชม. และค้างคืนเป็นราคาประมาณการเริ่มต้น กรุณาตกลงเวลากับน้องก่อนเริ่มงานค่ะ
@@ -1400,9 +1404,9 @@ export default async (req, context) => {
         </button>
       </div>
 
-     <a href="${liveAdminLine}" target="_blank" rel="noopener nofollow" style="text-align: center; color: #334155; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
-  <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #6D28D9; text-decoration: underline; font-weight: 800;">ติดต่อแอดมินช่วยเช็กคิวทันที (ฟรี)</span>
-</a>
+      <a href="${liveAdminLine}" target="_blank" rel="noopener nofollow" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
+        <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #7C3AED; text-decoration: underline;">ติดต่อแอดมินช่วยเช็กคิวทันที (ฟรี)</span>
+      </a>
     </div>
 
     <script>

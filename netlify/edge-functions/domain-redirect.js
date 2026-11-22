@@ -10,7 +10,11 @@ export default async function handler(request, context) {
     "st.firstmodelhub.com"
   ];
 
-  if (oldDomains.includes(host)) {
+  // ตรวจสอบว่าเป็นโดเมนเก่า หรือเป็น HTTP ธรรมดาที่ไม่ได้เข้ารหัส
+  const isOldDomain = oldDomains.includes(host);
+  const isHttp = url.protocol === "http:";
+
+  if (isOldDomain || isHttp) {
     url.hostname = "firstmodelhub.com";
     url.protocol = "https:";
     return Response.redirect(url.toString(), 301);
