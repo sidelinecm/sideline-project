@@ -792,8 +792,8 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
       intro: `FirstModelHub แหล่งรวมโปรไฟล์สาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นทั่วประเทศ คัดสรรตัวจริงตรงปก 100% สไตล์เพื่อนเที่ยวฟิวแฟน (GFE) น่ารัก อัธยาศัยดี พูดเพราะ เอาใจเก่ง ไม่เร่งรีบ ให้ความรู้สึกอบอุ่นผ่อนคลายเหมือนไปเดตกับแฟนตัวจริง ปลอดภัยสูงสุดด้วยระบบนัดพบเจอตัวจริงก่อน แล้วค่อยชำระค่าบริการหน้างาน ไร้ความเสี่ยง ไม่ต้องโอนมัดจำล่วงหน้าทุกกรณีค่ะ`,
       convenience: `ครอบคลุมโรงแรม คอนโด และที่พักชั้นนำทุกภูมิภาคทั่วประเทศ${zoneText} น้องๆ สแตนด์บายพร้อมเดินทางไปหา (Outcall) ถึงที่พักอย่างรวดเร็ว มิดชิด และรักษาความเป็นส่วนตัวสูงสุด`
     },
-    chiangmai: {
-      headline: customZone ? customZone.headline : (zoneSlug ? `สาวรับงานเชียงใหม่ โซน${zoneSlug} • ไซด์ไลน์${zoneSlug} ตัวจริงตรงปก 100%` : `สาวรับงานเชียงใหม่ • ไซด์ไลน์เชียงใหม่ เพื่อนเที่ยวฟิวแฟนตรงปก จ่ายหน้างาน`),
+   chiangmai: {
+  headline: customZone ? customZone.headline : (zoneSlug ? `ไซด์ไลน์${zoneSlug} • สาวรับงาน${zoneSlug} (${provinceNameThai}) ตัวจริงตรงปก 100%` : `ไซด์ไลน์เชียงใหม่ • สาวรับงานเชียงใหม่ เพื่อนเที่ยวฟิวแฟนตรงปก จ่ายหน้างาน 100%`),
       intro: customZone ? customZone.intro : (zoneSlug ? `รวมน้องๆ สาวรับงานเชียงใหม่ และสาวไซด์ไลน์โซน${zoneSlug} วัยใสน่ารัก นักศึกษาและสาวสวยหุ่นดี พักและสแตนด์บายอยู่ในพื้นที่${zoneSlug} สไตล์เพื่อนเที่ยวฟิวแฟน (GFE) นัดเจอตัวจริงเช็คความตรงปกหน้างานก่อนค่อยจ่ายเงิน ไร้มัดจำค่ะ` : `ศูนย์รวมสาวรับงานเชียงใหม่ และน้องๆ ไซด์ไลน์เชียงใหม่ สเปกน่ารัก วัยใส นักศึกษา มช. และสาวสวยหุ่นดี คัดสรรเฉพาะโปรไฟล์ตัวจริงตรงปก 100% สไตล์เพื่อนเที่ยวฟิวแฟน (GFE) เอาใจใส่ อ่อนโยน สุภาพ ไม่เร่งงาน มั่นใจปลอดภัยด้วยมาตรฐานจ่ายหน้างาน นัดเจอน้องตัวจริงเช็คความถูกต้องเรียบร้อยก่อนค่อยชำระเงิน หมดกังวลเรื่องการโดนหลอกโอนมัดจำล่วงหน้า 100% ค่ะ`),
       convenience: customZone ? customZone.convenience : `พร้อมเดินทางไปหา (Outcall) ถึงโรงแรม คอนโด และที่พักส่วนตัวทั่ว${provinceName} ตลอดจนย่านยอดนิยม${zoneText} น้องๆ พักในพื้นที่ เดินทางรวดเร็วภายใน 15-30 นาที นัดหมายสะดวก เป็นส่วนตัวสูงสุด`
     },
@@ -1746,17 +1746,16 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
       ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span> <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
       dynamicSubheadline = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
     } else if (zoneSlug) {
-      metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน | FirstModelHub`;
-      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
-                   <span class="h1-line-2">แหล่งรวมน้องๆสาวๆ รับงานเพื่อนเที่ยวฟิวแฟน ไซด์ไลน์ รูปจริง100% จ่ายหน้างาน ไร้มัดจำ</span>`;
-      dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
-    } else {
-      metaTitle = `รับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
-      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-                   <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน</span>`;
-      dynamicSubheadline = `ศูนย์รวมสาวรับงานและไซด์ไลน์ จ.${escapeHTML(provinceNameThai)}`;
-    }
-
+  metaTitle = `ไซด์ไลน์${zoneSlug} รับงาน${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+  ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(zoneSlug)} &amp; รับงาน${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
+               <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+  dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
+} else {
+  metaTitle = `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} ฟิวแฟน ตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+  ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} &amp; น้องรับงาน<span class="t-chunk">${escapeHTML(provinceNameThai)}</span></span>
+               <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+  dynamicSubheadline = `ศูนย์รวมสาวไซด์ไลน์และน้องรับงาน จ.${escapeHTML(provinceNameThai)}`;
+}
     
 
     const dynamicMetaZones = (seoData.zones || [])
@@ -1780,12 +1779,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     ];
  
     if (!isNational) {
-      breadcrumbItems.push({
-        "@type": "ListItem",
-        "position": 2,
-        "name": provinceNameThai, // 🟢 ใช้ชื่อจังหวัดตรงๆ (ไม่ต้องมีคำว่าไซด์ไลน์ปะปน)
-        "item": `${primaryDomain}/location/${provinceSlug}`
-      });
+      breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceNameThai}`, "item": `${primaryDomain}/location/${provinceSlug}` });
       if (zoneSlug) {
         breadcrumbItems.push({
           "@type": "ListItem",
@@ -1807,17 +1801,23 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
       "dateModified": latestActualIso,
       "isPartOf": { "@id": `${primaryDomain}/#website` },
       "about": isNational
-        ? { "@type": "Country", "name": isEnglishHome ? "Thailand" : "ประเทศไทย", "identifier": "TH" }
-        : {
-            "@type": "Place",
-            "name": zoneSlug ? `โซน${zoneSlug} จังหวัด${provinceNameThai}` : `จังหวัด${provinceNameThai}`,
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": zoneSlug || provinceNameThai,
-              "addressRegion": provinceNameThai,
-              "addressCountry": "TH"
-            }
-          }
+  ? { "@type": "Country", "name": isEnglishHome ? "Thailand" : "ประเทศไทย", "identifier": "TH" }
+  : {
+      "@type": "Place",
+      "name": zoneSlug ? `โซน${zoneSlug} จังหวัด${provinceNameThai}` : `จังหวัด${provinceNameThai}`,
+      ...(provinceSlug === "chiangmai" ? {
+        "sameAs": [
+          "https://th.wikipedia.org/wiki/จังหวัดเชียงใหม่",
+          "https://www.wikidata.org/wiki/Q211756"
+        ]
+      } : {}),
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": zoneSlug || provinceNameThai,
+        "addressRegion": provinceNameThai,
+        "addressCountry": "TH"
+      }
+    }
     };
     
     if (totalCount > 0) {
