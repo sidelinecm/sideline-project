@@ -2719,17 +2719,17 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
             if (rawP) targetProfile = normalizeProfile(rawP);
           }
 
-          // ❌ เดิมมี: requestAnimationFrame(() => { setTimeout(() => { ... }, 0) });
-// ✅ เปลี่ยนเป็น: สั่งเปิดตรงๆ ไม่ต้องครอบ Timer ซ้อน Timer
-if (targetProfile) {
-  const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
-  history.pushState(null, "", nextUrl);
-  window.openLightboxModal(targetProfile);
-} else {
-  window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-}
-return;
-    
+          if (targetProfile) {
+            const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
+            history.pushState(null, "", nextUrl);
+            window.openLightboxModal(targetProfile);
+          } else {
+            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+          }
+          return;
+        } // ✅ ปิด if (profileId || profileSlug)
+      } // ✅ ปิด if (cardElement)
+
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");
       if (closeLightboxBtn || e.target === lightboxModal) {
