@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261115_55';
+let GLOBAL_VERSION = 'v_20261115_60';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -3113,29 +3113,27 @@ if (!isNational && pills) {
   ? clientProfilesData.filter(p => visibleIdsSet.has(String(p.id)))
   : clientProfilesData;
 
-const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
+  const serializedProfilesJson = JSON.stringify(clientProfilesData).replace(/</g, "\\u003c");
 
-    
-    const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
-      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
-      nameThai: p.nameThai || p.name
-    }));
+  const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
+    key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
+    nameThai: p.nameThai || p.name
+  }));
 
-    
-const ssrDataScript = `
-  <script id="ssr-profiles-data">
-    window.profilesData = ${serializedProfilesJson};
-    window.totalProfilesCount = ${totalCount};
-    window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
-    window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
-    window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
-    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
-    window.currentZoneKey = ${JSON.stringify(safeZoneSlugPart || "")};
-  </script>
-`;
+  const ssrDataScript = `
+    <script id="ssr-profiles-data">
+      window.profilesData = ${serializedProfilesJson};
+      window.totalProfilesCount = ${totalCount};
+      window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
+      window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
+      window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
+      window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
+      window.currentZoneKey = ${JSON.stringify(safeZoneSlugPart || "")};
+    </script>
+  `;
 
-finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
+  finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
