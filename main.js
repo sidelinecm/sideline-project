@@ -2166,7 +2166,21 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         targetUrl = zoneSlugKey ? `/location/${slug}/${encodeURIComponent(zoneSlugKey)}` : `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        targetTitle = isEN ? `${provName} Escorts & Companions | FirstModelHub` : `รับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟน รูปตรงปก จ่ายหน้างาน | FirstModelHub`;
+        // ✅ เพิ่มตัวแปรชื่อโซนภาษาไทย (เช่น นิมมาน, เจ็ดยอด)
+        const currentZoneName = window.currentZoneSlug || "";
+
+        if (currentZoneName) {
+          // ถ้าปิด Modal ในหน้าโซนย่อย ให้คืนค่า Title ของโซนย่อยนั้น
+          targetTitle = isEN
+            ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
+            : `ไซด์ไลน์${currentZoneName} รับงาน${currentZoneName} (${provName}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+        } else {
+          // ถ้าปิด Modal ในหน้าจังหวัดปกติ ให้คืนค่า Title จังหวัดตามเดิม
+          targetTitle = isEN 
+            ? `${provName} Escorts & Companions | FirstModelHub` 
+            : `ไซด์ไลน์${provName} รับงาน${provName} ฟิวแฟน ตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+        }
+
         targetDesc = isEN
           ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
           : `รวมสาวรับงาน${provName} ไซด์ไลน์${provName} รูปจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`;
