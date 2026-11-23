@@ -36,7 +36,7 @@
 
 <link rel="icon" href="/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/webp" sizes="32x32" href="/images/favicon-32x32.webp">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="32x96" href="/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="92x92" href="/images/favicon-92x92.png">
 <link rel="icon" type="image/png" sizes="180x180" href="/images/favicon-180x180.png">
 
@@ -91,63 +91,53 @@
   }
   </script>
 
-  <!-- Google Analytics / GTM (สูตร Smart Idle ไม่แย่ง CPU ตอนแตะจอ) -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ window.dataLayer.push(arguments); }
-    window.gtag = gtag;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+  window.gtag = gtag;
 
-    (function() {
-      let gtmLoaded = false;
-      const loadGTM = function() {
-        if (gtmLoaded) return;
-        gtmLoaded = true;
+  (function() {
+    let gtmLoaded = false;
+    const loadGTM = function() {
+      if (gtmLoaded) return;
+      gtmLoaded = true;
 
-        ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(function(evt){
-          window.removeEventListener(evt, triggerGTM, { passive: true });
-        });
-
-        setTimeout(function() {
-          var s = document.createElement('script');
-          s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
-          s.async = true;
-          document.head.appendChild(s);
-          gtag('js', new Date());
-          gtag('config', 'G-PG0QFDWTTG', {
-            'send_page_view': true,
-            'link_attribution': false,
-            'cookie_flags': 'SameSite=None;Secure'
-          });
-        }, 120);
-      };
-
-      function triggerGTM() {
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(loadGTM, { timeout: 1200 });
-        } else {
-          setTimeout(loadGTM, 250);
-        }
-      }
-
-      ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(function(evt){
-        window.addEventListener(evt, triggerGTM, { once: true, passive: true });
+      ['scroll', 'keydown'].forEach(function(evt){
+        window.removeEventListener(evt, triggerGTM, { passive: true });
       });
 
-      // สำรองกรณีผู้ใช้ไม่แตะจอ ให้โหลดที่ 4 วินาที
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          if (!gtmLoaded) {
-            if ('requestIdleCallback' in window) {
-              requestIdleCallback(loadGTM);
-            } else {
-              loadGTM();
-            }
-          }
-        }, 4000);
-      }, { once: true });
-    })();
-  </script>
+      var s = document.createElement('script');
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
+      s.async = true;
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', 'G-PG0QFDWTTG', {
+        'send_page_view': true,
+        'cookie_flags': 'SameSite=None;Secure'
+      });
+    };
 
+    function triggerGTM() {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 1500 });
+      } else {
+        setTimeout(loadGTM, 300);
+      }
+    }
+
+    // 🟢 เอา pointerdown และ touchstart ออก (เพื่อไม่ให้แย่ง CPU ตอนผู้ใช้กดปุ่ม)
+    ['scroll', 'keydown'].forEach(function(evt){
+      window.addEventListener(evt, triggerGTM, { once: true, passive: true });
+    });
+
+    // สำรองกรณีผู้ใช้ไม่ได้แตะหรือเลื่อนจอ ให้โหลดอัตโนมัติที่ 3.5 วินาที
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (!gtmLoaded) triggerGTM();
+      }, 3500);
+    }, { once: true });
+  })();
+</script>
   <style>
     @font-face {
       font-family: 'Prompt';

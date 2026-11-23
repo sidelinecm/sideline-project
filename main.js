@@ -1827,11 +1827,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const profileSlug = encodeURIComponent(profile.slug || profile.id);
     const canonicalProfileUrl = `https://firstmodelhub.com/sideline/${profileSlug}`;
 
-    requestAnimationFrame(() => {
-      const scrollBodyEl = document.getElementById("lightboxScrollBody");
-      if (scrollBodyEl) scrollBodyEl.scrollTop = 0;
-      document.body.classList.add("lightbox-open");
-    });
+    // ✅ โค้ดแก้ไขใหม่:
+    document.body.classList.add("lightbox-open");
+    const scrollBodyEl = document.getElementById("lightboxScrollBody");
+    if (scrollBodyEl && scrollBodyEl.scrollTop !== 0) {
+      scrollBodyEl.scrollTop = 0;
+    }
 
     
     const isAvail = profile.isAvailable !== undefined
@@ -1968,10 +1969,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       if (descContainer) descContainer.style.display = "block";
     }
 
-    // 🟢 [จุดที่ 4.4] ย้ายการเรนเดอร์ส่วนท้าย (การ์ดแนะนำ 6 ใบ + คำถาม FAQ) ให้โหลดตามหลังหน้าต่างเปิด 120ms
+    // ✅ แก้ไขตัวเลขจาก 120 เป็น 350ms:
     setTimeout(() => {
       // 7. น้องๆ แนะนำเพิ่มเติม
       const relatedTitle = document.getElementById("lightboxRelatedTitle");
+    
       if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
 
       const relatedGrid = document.getElementById("lightboxRelatedGrid");
@@ -2060,7 +2062,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           </details>
         `).join("");
       }
-    }, 120);
+    }, 350);
     
     // 🟢 9. ปุ่มทัก LINE จองคิว
     const rawLine = String(profile.line_id || profile.lineId || profile.line || "").trim();
@@ -2620,25 +2622,27 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       });
     }
 
-    document.querySelectorAll(".filter-pill-tab").forEach(pill => {
-      pill.addEventListener("click", function (e) {
-        const targetHref = this.getAttribute("href");
-        if (this.tagName === "A" && targetHref) return;
+    // ✅ อัปเดต UI ปุ่มก่อน แล้ว Yield คิวให้เบราว์เซอร์ Paint ทันที (INP เขียวแน่นอน)
+document.querySelectorAll(".filter-pill-tab").forEach(pill => {
+  pill.addEventListener("click", async function (e) {
+    const targetHref = this.getAttribute("href");
+    if (this.tagName === "A" && targetHref) return; // ถ้าเป็นลิงก์ URL ปล่อยให้เบราว์เซอร์ทำงานตามปกติ
 
-        e.preventDefault();
-        if (this.classList.contains("active")) return;
+    e.preventDefault();
+    if (this.classList.contains("active")) return;
 
-        document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
-        this.classList.add("active");
-        appState.activePillTag = this.getAttribute("data-tag") || "all";
+    // 1. สลับคลาส active ทันที
+    document.querySelectorAll(".filter-pill-tab").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
+    appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            executeFilterAndRender(true);
-          }, 0);
-        });
-      });
-    });
+    // 2. ปล่อยให้เบราว์เซอร์ Paint การเปลี่ยนสีปุ่มลงหน้าจอก่อนทันที (INP บันทึกตรงนี้: < 30ms)
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // 3. เริ่มกรองและเปลี่ยนการ์ดโปรไฟล์
+    executeFilterAndRender(true);
+  });
+});
   
     // 🟢 Global Click Delegation
     document.body.addEventListener("click", (e) => {
@@ -2715,20 +2719,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
             if (rawP) targetProfile = normalizeProfile(rawP);
           }
 
-          if (targetProfile) {
-            const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
-            requestAnimationFrame(() => {
-              setTimeout(() => {
-                history.pushState(null, "", nextUrl);
-                window.openLightboxModal(targetProfile);
-              }, 0);
-            });
-          } else {
-            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-          }
-          return;
-        }
-      }
+          // ❌ เดิมมี: requestAnimationFrame(() => { setTimeout(() => { ... }, 0) });
+// ✅ เปลี่ยนเป็น: สั่งเปิดตรงๆ ไม่ต้องครอบ Timer ซ้อน Timer
+if (targetProfile) {
+  const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
+  history.pushState(null, "", nextUrl);
+  window.openLightboxModal(targetProfile);
+} else {
+  window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+}
+return;
     
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");

@@ -310,12 +310,6 @@ body, body.fmh-app-page {
    FIRSTMODELHUB - OPTIMIZED SCROLL, LCP-SAFE & LOW-MEMORY GPU LAYER
    ========================================================================== */
 
-/* 1. การ์ดโปรไฟล์แสดงทันทีไม่กระตุก ส่วนท้ายเว็บ (แผนที่/Footer) เลื่อนการวาดไปทำทีหลัง */
-.profile-card-new-container,
-#profiles-display-area {
-  content-visibility: visible !important;
-  contain-intrinsic-size: auto !important;
-}
 
 #map-section,
 .concierge-luxury-section,
@@ -364,4 +358,10 @@ body {
 .vip-card-item img {
   image-rendering: auto !important;
   will-change: auto !important;
+}
+/* 1. การ์ดโปรไฟล์แสดงทันทีไม่กระตุก ส่วนท้ายเว็บ (แผนที่/Footer) เลื่อนการวาดไปทำทีหลัง */
+.profile-card-new-container,
+#profiles-display-area {
+  content-visibility: visible !important;
+  contain-intrinsic-size: auto !important;
 }
