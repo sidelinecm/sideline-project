@@ -1,5 +1,5 @@
 # ==============================================================================
-# Netlify configuration for First Model Hub
+# Netlify configuration for First Model Hub (Production-Ready)
 # ==============================================================================
 [build]
   publish = "."
@@ -73,28 +73,22 @@
 # ==============================================================================
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
-
-# 🛡️ ลำดับที่ 1: ดักจับโดเมนเก่าแล้วดีด 301
 [[edge_functions]]
   function = "domain-redirect"
   path = "/*"
 
-# 🟢 แผนผังเว็บไซต์
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 🟢 ฟังก์ชันล้างแคชระดับ Edge สำหรับแอดมิน
 [[edge_functions]]
   function = "ssr-province"
   path = "/api/*"
 
-# 🟢 ฟังก์ชันเรนเดอร์หน้ารายบุคคล
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# 🟢 ฟังก์ชันเรนเดอร์หน้ารายจังหวัดและโซนย่อย (ตัด /province/* ออก เพื่อไม่ให้สร้างหน้าซ้ำ)
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
@@ -103,7 +97,6 @@
   function = "ssr-province"
   path = "/location/*/*"
 
-# 🟢 เรนเดอร์หน้าแรก และหน้าหลัก
 [[edge_functions]]
   function = "ssr-province"
   path = "/"
@@ -112,21 +105,19 @@
   function = "ssr-province"
   path = "/index.html"
 
-# 🟢 เรนเดอร์หน้ารวมน้องๆ ทั้งหมด
 [[edge_functions]]
   function = "ssr-province"
   path = "/profiles"
 
-# 🟢 เรนเดอร์หน้าภาษาอังกฤษ
 [[edge_functions]]
   function = "ssr-province"
   path = "/index-en"
 
 # ==============================================================================
-# 3. REDIRECTS & CLEAN URLS
+# 3. REDIRECTS (TOP-DOWN PRECEDENCE)
 # ==============================================================================
 
-# 🟢 เชื่อมต่อคำขอ AI Agent ทุกเส้นทางตรงเข้า ai-catalog.json
+# 🟢 กฎที่ 1: เชื่อมต่อ AI Agent ตรงเข้า ai-catalog.json
 [[redirects]]
   from = "/.well-known/ai-catalog.json"
   to = "/ai-catalog.json"
@@ -137,14 +128,14 @@
   to = "/ai-catalog.json"
   status = 200
 
-# 🟢 รวม /province/* ทั้งหมดมาที่ /location/* (แก้สร้างหน้าซ้ำ 2 ชุด)
+# 🟢 กฎที่ 2: รวม /province/* ทั้งหมดมาที่ /location/*
 [[redirects]]
   from = "/province/*"
   to = "/location/:splat"
   status = 301
   force = true
 
-# 🟢 ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404 และรักษาอันดับ SEO สูงสุด
+# 🟢 กฎที่ 3: ย้ายหน้านิมมานเดิมไปยังโซนใหม่ ป้องกันหน้า 404
 [[redirects]]
   from = "/nimman"
   to = "/location/chiangmai/nimman"
@@ -169,7 +160,7 @@
   status = 301
   force = true
 
-# 🟢 รวม URL ชื่อจังหวัดเก่า/สะกดต่างกันเข้า URL มาตรฐาน
+# 🟢 กฎที่ 4: รวม URL ชื่อจังหวัดเก่า/สะกดต่างกันเข้า URL มาตรฐาน
 [[redirects]]
   from = "/location/khonkaen"
   to = "/location/khon-kaen"
@@ -230,130 +221,7 @@
   status = 301
   force = true
 
-# 🟢 กรอง Query String จังหวัด
-[[redirects]]
-  query = { province = ":p" }
-  from = "/"
-  to = "/location/:p"
-  status = 301
-  force = true
-
-[[redirects]]
-  query = { province = ":p" }
-  from = "/location/*"
-  to = "/location/:p"
-  status = 301
-  force = true
-
-[[redirects]]
-  query = { province = ":p" }
-  from = "/profiles"
-  to = "/location/:p"
-  status = 301
-  force = true
-
-[[redirects]]
-  query = { province = ":p" }
-  from = "/profiles.html"
-  to = "/location/:p"
-  status = 301
-  force = true
-
-# 🟢 บังคับตัดนามสกุล .html ทิ้งทั้งหมด (Canonical Clean URLs)
-[[redirects]]
-  from = "/profiles.html"
-  to = "/profiles"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/about.html"
-  to = "/about"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/faq.html"
-  to = "/faq"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/locations.html"
-  to = "/locations"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/blog.html"
-  to = "/blog"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/privacy-policy.html"
-  to = "/privacy-policy"
-  status = 301
-  force = true
-
-# 🟢 แก้บั๊ก URL ติดเครื่องหมายคำพูดจาก GSC
-[[redirects]]
-  from = "/profiles\""
-  to = "/profiles"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/profiles\"\""
-  to = "/profiles"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/profiles\"\"\""
-  to = "/profiles"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/profiles%22%22"
-  to = "/profiles"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/profiles%22%22%22"
-  to = "/profiles"
-  status = 301
-  force = true
-
-# 🟢 ส่งบทความเก่าที่ลบแล้วไปหน้ารวมบทความ (แก้ Soft 404 กลายเป็นหน้าแรก)
-[[redirects]]
-  from = "/blog/what-is-gfe-fiwfan-guide"
-  to = "/blog"
-  status = 301
-  force = true
-
-# 🟢 รวม URL ภาษาอังกฤษเข้า /index-en (เอา 301 force จาก /index-en.html ออก เพื่อไม่ให้ขวาง getTemplateHtml; ส่วน /index-en.html -> /index-en จะดัก 301 ใน ssr-province.js)
-[[redirects]]
-  from = "/en"
-  to = "/index-en"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/index-en"
-  to = "/index-en.html"
-  status = 200
-
-# 🟢 Fallback 404 จริง (ปิดการเสิร์ฟหน้าแรก 200 OK ซ้ำซ้อนบน URL ที่ไม่มีอยู่จริง)
-[[redirects]]
-  from = "/*"
-  to = "/404.html"
-  status = 404
-# ==============================================================================
-# รวมโซนย่อย เชียงใหม่ (แก้ Cannibalization)
-# ==============================================================================
+# 🟢 กฎที่ 5: รวมโซนย่อย เชียงใหม่ (แก้ Cannibalization)
 [[redirects]]
   from = "/location/chiangmai/แม่โจ้"
   to = "/location/chiangmai/maejo"
@@ -391,6 +259,12 @@
   force = true
 
 [[redirects]]
+  from = "/location/chiangmai/หลัง%20มช."
+  to = "/location/chiangmai/cmu"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/location/chiangmai/หลัง-มช."
   to = "/location/chiangmai/cmu"
   status = 301
@@ -408,9 +282,7 @@
   status = 301
   force = true
 
-# ==============================================================================
-# รวมโซนย่อย เชียงราย (แก้ Cannibalization)
-# ==============================================================================
+# 🟢 กฎที่ 6: รวมโซนย่อย เชียงราย
 [[redirects]]
   from = "/location/chiangrai/บ้านดู่"
   to = "/location/chiangrai/baandu"
@@ -441,11 +313,15 @@
   status = 301
   force = true
 
-# ==============================================================================
-# รวมโซนย่อย ขอนแก่น (แก้ Cannibalization)
-# ==============================================================================
+# 🟢 กฎที่ 7: รวมโซนย่อย ขอนแก่น
 [[redirects]]
   from = "/location/khon-kaen/หลัง มข."
+  to = "/location/khon-kaen/kku"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/khon-kaen/หลัง%20มข."
   to = "/location/khon-kaen/kku"
   status = 301
   force = true
@@ -458,6 +334,12 @@
 
 [[redirects]]
   from = "/location/khon-kaen/หน้า มข."
+  to = "/location/khon-kaen/kku"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/khon-kaen/หน้า%20มข."
   to = "/location/khon-kaen/kku"
   status = 301
   force = true
@@ -492,11 +374,15 @@
   status = 301
   force = true
 
-# ==============================================================================
-# รวมโซนย่อย อุดรธานี & ลำปาง
-# ==============================================================================
+# 🟢 กฎที่ 8: รวมโซนย่อย อุดรธานี & ลำปาง
 [[redirects]]
   from = "/location/udonthani/UD Town"
+  to = "/location/udonthani/udtown"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/location/udonthani/UD%20Town"
   to = "/location/udonthani/udtown"
   status = 301
   force = true
@@ -530,3 +416,125 @@
   to = "/location/lampang/sob-tui"
   status = 301
   force = true
+
+# 🟢 กฎที่ 9: กรอง Query String จังหวัดครอบคลุมทุก URL
+[[redirects]]
+  query = { province = ":p" }
+  from = "/"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+[[redirects]]
+  query = { province = ":p" }
+  from = "/location/*"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+[[redirects]]
+  query = { province = ":p" }
+  from = "/profiles"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+[[redirects]]
+  query = { province = ":p" }
+  from = "/profiles.html"
+  to = "/location/:p"
+  status = 301
+  force = true
+
+# 🟢 กฎที่ 10: บังคับตัดนามสกุล .html ทิ้งทั้งหมด (Canonical Clean URLs)
+[[redirects]]
+  from = "/profiles.html"
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/about.html"
+  to = "/about"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/faq.html"
+  to = "/faq"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations.html"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/blog.html"
+  to = "/blog"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy-policy.html"
+  to = "/privacy-policy"
+  status = 301
+  force = true
+
+# 🟢 กฎที่ 11: แก้บั๊ก URL ติดเครื่องหมายคำพูดจาก Google Search Console
+[[redirects]]
+  from = "/profiles\""
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/profiles\"\""
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/profiles\"\"\""
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/profiles%22%22"
+  to = "/profiles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/profiles%22%22%22"
+  to = "/profiles"
+  status = 301
+  force = true
+
+# 🟢 กฎที่ 12: ส่งบทความเก่าที่ลบแล้วไปหน้ารวมบทความ
+[[redirects]]
+  from = "/blog/what-is-gfe-fiwfan-guide"
+  to = "/blog"
+  status = 301
+  force = true
+
+# 🟢 กฎที่ 13: รวม URL ภาษาอังกฤษเข้า /index-en
+[[redirects]]
+  from = "/en"
+  to = "/index-en"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/index-en"
+  to = "/index-en.html"
+  status = 200
+
+# 🟢 กฎสุดท้าย (ต้องอยู่ล่างสุดเสมอ): Fallback 404 จริงเมื่อไม่มีหน้าตรงกับเงื่อนไขใดๆ เลย
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
