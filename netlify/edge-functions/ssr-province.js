@@ -1737,6 +1737,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     let ssrH1Html = "";
     let dynamicSubheadline = "";
 
+    
     if (isEnglishHome) {
       metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
       ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
@@ -1745,19 +1746,23 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
       metaTitle = `รับงานไซด์ไลน์ ทั่วไทย รูปจริง100% ฟิวแฟนไม่มีมัดจำ | FirstModelHub`; 
       ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ เด็กเอ็น <span class="t-chunk">ทั่วไทย</span></span> <span class="h1-line-2">เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
       dynamicSubheadline = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
-    } else if (zoneSlug) {
-  metaTitle = `ไซด์ไลน์${zoneSlug} รับงาน${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
-  ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(zoneSlug)} &amp; รับงาน${escapeHTML(zoneSlug)} <span class="t-chunk">(${escapeHTML(provinceNameThai)})</span></span>
-               <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ</span>`;
-  dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
-} else {
-  metaTitle = `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} ฟิวแฟน ตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
-  ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} &amp; น้องรับงาน<span class="t-chunk">${escapeHTML(provinceNameThai)}</span></span>
-               <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปก จ่ายหน้างาน ไม่มีมัดจำ</span>`;
-  dynamicSubheadline = `ศูนย์รวมสาวไซด์ไลน์และน้องรับงาน จ.${escapeHTML(provinceNameThai)}`;
-}
-    
 
+    // 🟢 หน้าโซนย่อย -> [สลับเอา "รับงาน" ขึ้นก่อน]
+    } else if (zoneSlug) {
+      metaTitle = `รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${provinceNameThai}) ฟิวแฟน รูปจริงตรงปก ไม่มีมัดจำ | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} &amp; ไซด์ไลน์${escapeHTML(zoneSlug)} <span class="t-chunk">(เมือง${escapeHTML(provinceNameThai)})</span></span>
+                   <span class="h1-line-2">สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+      dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} จ.${escapeHTML(provinceNameThai)}`;
+
+    
+    } else {
+      metaTitle = `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} ฟิวแฟน รูปจริง ไม่มีมัดจำ | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} &amp; รับงาน${escapeHTML(provinceNameThai)}</span>
+                   <span class="h1-line-2">สาวไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริง จ่ายหน้างาน ไม่มีมัดจำ📌</span>`;
+      dynamicSubheadline = `ศูนย์รวมสาวไซด์ไลน์และสาวรับงาน จ.${escapeHTML(provinceNameThai)}`;
+    }
+
+    
     const dynamicMetaZones = (seoData.zones || [])
       .filter(z => z && z !== "ทั้งหมด")
       .slice(0, 4)
@@ -1767,13 +1772,15 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     const metaDescription = isEnglishHome
       ? `Premium verified escorts and sidelines across Thailand (${totalCount} profiles). 100% real photos, pay directly on arrival, zero advance deposit.`
       : (zoneSlug
-          ? `ค้นหาโปรไฟล์ สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${totalCount} โปรไฟล์) คัดรูปจริง 100% ตรงปก สแตนด์บายพร้อมดูแล นัดเจอง่าย จ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี [อัปเดต ${realFreshnessDate}]`
+          
+          ? `ค้นหาน้องๆสาวๆ รับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} ในตัวเมือง(${provinceNameThai}) (${totalCount} โปรไฟล์) คัดรูปจริง 100% ตรงปก สแตนด์บายพร้อมดูแล นัดเจอง่าย จ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี [อัปเดต ${realFreshnessDate}]`
           : (isNational
               ? `ศูนย์รวม สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย (${totalCount} โปรไฟล์) คัดรูปจริงตรงปก 100% นัดเจอง่าย จ่ายเงินหน้างานตรงกับน้อง ปลอดภัย ไร้มัดจำ [อัปเดต ${realFreshnessDate}]`
-              : `รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมย่าน${dynamicMetaZones || provinceNameThai} นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
+              
+              : `รวมน้องๆสาวๆ ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมในตัวเมือง ย่าน${dynamicMetaZones || provinceNameThai} นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
 
     const cleanMetaDesc = stripHTML(metaDescription);
-    // 1. จัดการ Breadcrumb List ให้สะอาดและเป็นมิตรกับ Googlebot
+    
     const breadcrumbItems = [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${primaryDomain}/` }
     ];
