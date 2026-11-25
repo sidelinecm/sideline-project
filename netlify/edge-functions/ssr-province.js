@@ -1353,6 +1353,13 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       supabase.from("site_settings").select("key, value")
     ]);
 
+    if (profilesRes?.error) {
+      console.error("Supabase profiles query error:", profilesRes.error);
+      return await context.next();
+    }
+
+    const settingsMap = new Map((settingsRes?.data || []).map(s => [s.key, s.value]));
+
     const settingsMap = new Map((settingsRes?.data || []).map(s => [s.key, s.value]));
     const liveAdminLine = settingsMap.get("admin_line_url") || "https://line.me/ti/p/u8Bz9HsaY8";
 

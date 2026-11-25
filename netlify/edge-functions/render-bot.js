@@ -34,7 +34,7 @@ const CONFIG = {
   },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
-  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/adjucgga/image/upload/",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dduxw7k4/image/upload/",
   DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 
@@ -497,11 +497,12 @@ function optimizeImg(imagePath, mode = "card") {
 }
 
 function generateSrcSet(imagePath) {
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.includes("res.cloudinary.com")) {
+  if (!imagePath || typeof imagePath !== "string" || imagePath.includes("firstmodelhub.webp") || imagePath.startsWith("data:")) {
     return "";
   }
   const img400 = optimizeImg(imagePath, 400);
   const img600 = optimizeImg(imagePath, 600);
+  if (!img400.includes("res.cloudinary.com")) return "";
   return `${img400} 400w, ${img600} 600w`;
 }
 
