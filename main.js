@@ -741,7 +741,7 @@ vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
       "sut": "มทส.", "suranaree": "มทส.", "joho": "จอหอ", "pakchong": "ปากช่อง", "khaoyai": "เขาใหญ่",
 
       // --- 13. สงขลา-หาดใหญ่ ---
-      "mueang-hatyai": "ตัวเมืองหาดใหญ่", "hat-yai": "ตัวเมืองหาดใหญ่", "kho-hong": "คอหงส์",
+      "hatyai": "ตัวเมืองหาดใหญ่", "mueang-hatyai": "ตัวเมืองหาดใหญ่", "hat-yai": "ตัวเมืองหาดใหญ่", "kho-hong": "คอหงส์",
       "psu": "ม.อ.หาดใหญ่", "lee-gardens": "ลีการ์เดนส์", "dannok": "ด่านนอก", "mueang-songkhla": "ตัวเมืองสงขลา",
 
       // --- 14. สุราษฎร์ธานี / เกาะสมุย ---
@@ -1885,10 +1885,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     if (heroImg) {
       heroImg.style.opacity = "1";
       heroImg.style.transform = "scale(1)";
-      const firstPhoto = currentActivePhotoList[0] || {};
-      const optimizedModalSrc = firstPhoto.src
-        ? firstPhoto.src.replace("w_300,h_420", "w_400,h_560").replace("w_360,h_504", "w_400,h_560")
-        : (firstPhoto.fullSrc || fallbackImg);
+     const firstPhoto = currentActivePhotoList[0] || {};
+      const optimizedModalSrc = firstPhoto.fullSrc || firstPhoto.cardSrc || firstPhoto.src || fallbackImg;
 
       heroImg.onerror = function() {
         this.onerror = null;
@@ -2162,9 +2160,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       let targetTitle = "";
       let targetDesc = "";
 
+      const savedReturnPath = window.__returnUrlBeforeModal || "";
       if (slug && slug !== "national" && slug !== "all") {
-        const zoneSlugKey = window.currentZoneKey || "";
-        targetUrl = zoneSlugKey ? `/location/${slug}/${encodeURIComponent(zoneSlugKey)}` : `/location/${slug}`;
+        const zoneSlugKey = window.currentZoneKey || (savedReturnPath.match(/^\/location\/[^/]+\/([^/?#]+)/i)?.[1] || "");
+        targetUrl = zoneSlugKey ? `/location/${slug}/${zoneSlugKey}` : `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
         // ✅ เพิ่มตัวแปรชื่อโซนภาษาไทย (เช่น นิมมาน, เจ็ดยอด)
@@ -2188,7 +2187,7 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
       } else {
-        const isFromProfiles = window.__isFromProfiles || (window.location.pathname.startsWith("/profiles"));
+        const isFromProfiles = window.__isFromProfiles || savedReturnPath.startsWith("/profiles") || window.location.pathname.startsWith("/profiles");
         targetUrl = isEN ? "/index-en" : (isFromProfiles ? "/profiles" : "/");
 
         targetTitle = isEN
@@ -2326,10 +2325,24 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
   }
   window.hideGlobalLoader = hideGlobalLoader;
 
-  // 🟢 ลบฟังก์ชันซ้ำซ้อนออก แล้วเรียกใช้ฟังก์ชัน initDockAutoHide() หลักที่สร้างไว้ด้านบนทันที
-    if (typeof initDockAutoHide === "function") {
-      initDockAutoHide();
-    }
+function initDockAutoHide() {
+    const floatingDock = document.querySelector(".floating-app-dock");
+    if (!floatingDock || floatingDock.dataset.scrollBound === "true") return;
+    floatingDock.dataset.scrollBound = "true";
+
+    let lastScrollY = window.scrollY;
+    window.addEventListener("scroll", function () {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        floatingDock.classList.add("dock-hidden");
+      } else if (currentScrollY < lastScrollY) {
+        floatingDock.classList.remove("dock-hidden");
+      }
+      lastScrollY = Math.max(0, currentScrollY);
+    }, { passive: true });
+  }
+  
+  if (typeof initDockAutoHide === 'function') initDockAutoHide();
 
   // ==============================================================================
   // 🧭 URL ROUTING & NAVIGATION HANDLER
@@ -2658,98 +2671,100 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
   });
 });
   
-    // 🟢 Global Click Delegation
-    document.body.addEventListener("click", (e) => {
-      const homeDockBtn = e.target.closest('#dock-item-home, a[href="/"].dock-item');
-      if (homeDockBtn) {
-        if (window.location.pathname === "/" || window.location.pathname === "") {
-          e.preventDefault();
-          if (typeof triggerHaptic === "function") triggerHaptic("light");
-          requestAnimationFrame(() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          });
+    // 🟢 Global Click Delegation (จัดลำดับเช็กปุ่มเฉพาะเจาะจงก่อนการ์ด + รองรับ .story-item-el)
+    if (!window.__fmhBodyClickBound) {
+      window.__fmhBodyClickBound = true;
+      document.body.addEventListener("click", (e) => {
+        const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
+        const lightboxModal = document.getElementById("lightbox");
+        if (closeLightboxBtn || e.target === lightboxModal) {
+          window.closeLightboxModal(true);
           return;
         }
-        if (typeof triggerHaptic === "function") triggerHaptic("light");
-      }
 
-      const shareBtn = e.target.closest('[data-action="share-profile"]');
-      if (shareBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
-        const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
-        window.shareProfile(name, url);
-        return;
-      }
+        const homeDockBtn = e.target.closest('#dock-item-home, a[href="/"].dock-item');
+        if (homeDockBtn) {
+          if (window.location.pathname === "/" || window.location.pathname === "") {
+            e.preventDefault();
+            if (typeof triggerHaptic === "function") triggerHaptic("light");
+            requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+            return;
+          }
+          if (typeof triggerHaptic === "function") triggerHaptic("light");
+        }
 
-      const searchInputEl = document.getElementById("search-keyword");
-      const suggestionsEl = document.getElementById("search-suggestions");
-      if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
-        suggestionsEl.style.display = "none";
-      }
-
-      const suggestionTarget = e.target.closest('[data-action="suggestion"]');
-      if (suggestionTarget) {
-        const slug = suggestionTarget.dataset.slug;
-        const isProfile = suggestionTarget.dataset.isProfile === "true";
-        if (isProfile) {
-          if (suggestionsEl) suggestionsEl.style.display = "none";
-          toggleSearchDrawer(false);
-          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
-          handleUrlRouting();
+        const shareBtn = e.target.closest('[data-action="share-profile"]');
+        if (shareBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const name = shareBtn.getAttribute("data-profile-name") || "FirstModelHub";
+          const url = shareBtn.getAttribute("data-profile-url") || window.location.href;
+          window.shareProfile(name, url);
           return;
-        } else {
-          if (domCache.searchInput) {
+        }
+
+        const searchInputEl = document.getElementById("search-keyword");
+        const suggestionsEl = document.getElementById("search-suggestions");
+        if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
+          suggestionsEl.style.display = "none";
+        }
+
+        const suggestionTarget = e.target.closest('[data-action="suggestion"]');
+        if (suggestionTarget) {
+          const slug = suggestionTarget.dataset.slug;
+          const isProfile = suggestionTarget.dataset.isProfile === "true";
+          if (isProfile) {
+            if (suggestionsEl) suggestionsEl.style.display = "none";
+            toggleSearchDrawer(false);
+            history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
+            handleUrlRouting();
+            return;
+          } else if (domCache.searchInput) {
             domCache.searchInput.value = slug;
             if (suggestionsEl) suggestionsEl.style.display = "none";
             executeFilterAndRender(true);
+            return;
           }
-          return;
         }
-      }
 
-      const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-      if (cardElement) {
-        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
-        if (e.target.closest('button, a:not(.card-link)')) return;
+        const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .story-item-el, .interactive-card");
+        if (cardElement) {
+          if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+          if (e.target.closest("button, a:not(.card-link):not(.story-item-el)")) return;
 
-        const profileId = cardElement.getAttribute("data-profile-id");
-        const profileSlug = cardElement.getAttribute("data-profile-slug");
+          const profileId = cardElement.getAttribute("data-profile-id");
+          const profileSlug = cardElement.getAttribute("data-profile-slug");
 
-        if (profileId || profileSlug) {
-          e.preventDefault();
-          const searchId = String(profileId || "");
-          const searchSlug = String(profileSlug || "");
+          if (profileId || profileSlug) {
+            e.preventDefault();
+            const searchId = String(profileId || "");
+            const searchSlug = String(profileSlug || "");
 
-          let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p => 
-            String(p.id) === searchId || 
-            (p.slug && String(p.slug) === searchSlug) ||
-            (searchSlug && String(p.id) === searchSlug)
-          );
+            let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p =>
+              String(p.id) === searchId ||
+              (p.slug && String(p.slug) === searchSlug) ||
+              (searchSlug && String(p.id) === searchSlug)
+            );
 
-          if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
-            const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
-            if (rawP) targetProfile = normalizeProfile(rawP);
+            if (!targetProfile && Array.isArray(window.profilesData)) {
+              const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+              if (rawP) targetProfile = normalizeProfile(rawP);
+            }
+
+            if (targetProfile) {
+              window.__returnUrlBeforeModal = window.location.pathname + window.location.search;
+              window.__isFromProfiles = window.location.pathname.startsWith("/profiles");
+              const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
+              history.pushState(null, "", nextUrl);
+              window.openLightboxModal(targetProfile);
+            } else {
+              window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
+            }
+            return;
           }
-
-          if (targetProfile) {
-            const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
-            history.pushState(null, "", nextUrl);
-            window.openLightboxModal(targetProfile);
-          } else {
-            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
-          }
-          return;
-        } // ✅ ปิด if (profileId || profileSlug)
-      } // ✅ ปิด if (cardElement)
-
-      const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
-      const lightboxModal = document.getElementById("lightbox");
-      if (closeLightboxBtn || e.target === lightboxModal) {
-        window.closeLightboxModal(true);
-      }
-    });
+        }
+      });
+    }
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
@@ -2774,22 +2789,6 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       });
     });
 
-    function initDockAutoHide() {
-      const floatingDock = document.querySelector('.floating-app-dock');
-      if (!floatingDock) return;
-
-      let lastScrollY = window.scrollY;
-
-      window.addEventListener('scroll', function () {
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 80) {
-          floatingDock.classList.add('dock-hidden');
-        } else if (currentScrollY < lastScrollY) {
-          floatingDock.classList.remove('dock-hidden');
-        }
-        lastScrollY = Math.max(0, currentScrollY);
-      }, { passive: true });
-    }
     
     initDockAutoHide();
 
@@ -2841,8 +2840,23 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
           });
         }
 
-        if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
-          const cleanProfiles = filterValidProfiles(window.profilesData);
+        let rawList = Array.isArray(window.profilesData) ? window.profilesData : null;
+
+        if (!rawList || rawList.length === 0) {
+          const sb = await getSupabaseClient();
+          if (sb) {
+            const { data, error } = await sb
+              .from("profiles")
+              .select("*")
+              .eq("active", true)
+              .order("isfeatured", { ascending: false })
+              .order("created_at", { ascending: false });
+            if (!error && Array.isArray(data)) rawList = data;
+          }
+        }
+
+        if (rawList && rawList.length > 0) {
+          const cleanProfiles = filterValidProfiles(rawList);
           appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
           appState.profileById.clear();
           appState.profileBySlug.clear();
@@ -2852,11 +2866,31 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
           });
           populateInitialComponents();
 
-          // -------------------------------------------------------------------------
-          // ✅ ข้อมูลโปรไฟล์ทั้งหมดถูกจัดส่งผ่าน SSR (window.profilesData) ครบถ้วน 100% แล้ว
-          // ปิดการดึงข้อมูล 200 คนในพื้นหลัง เพื่อป้องกัน Main-Thread ค้างตอนวินาทีที่ 3
-          // ผลลัพธ์: ปลดล็อก CPU ให้ว่าง 100% ค่า INP จะลดจาก 543ms เหลือ < 80ms ทันที
-          // -------------------------------------------------------------------------
+          // โหลดโปรไฟล์ที่เหลือช่วง Idle เพื่อให้ค้นหา/กดแท็บหน้าแรกเจอครบทุกคน ไม่ติดแค่ 24 คนแรก
+          if (window.totalProfilesCount && appState.allProfiles.length < window.totalProfilesCount) {
+            const hydrateRemaining = async () => {
+              const sb = await getSupabaseClient();
+              if (!sb) return;
+              const { data } = await sb
+                .from("profiles")
+                .select("*")
+                .eq("active", true)
+                .order("isfeatured", { ascending: false })
+                .order("created_at", { ascending: false });
+              if (Array.isArray(data) && data.length > appState.allProfiles.length) {
+                const allNormalized = filterValidProfiles(data).map(normalizeProfile).filter(Boolean);
+                appState.allProfiles = allNormalized;
+                appState.profileById.clear();
+                appState.profileBySlug.clear();
+                allNormalized.forEach(p => {
+                  if (p.id != null) appState.profileById.set(String(p.id), p);
+                  if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+                });
+              }
+            };
+            if ("requestIdleCallback" in window) requestIdleCallback(hydrateRemaining, { timeout: 4000 });
+            else setTimeout(hydrateRemaining, 2500);
+          }
 
           return true;
         }
@@ -3304,17 +3338,12 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
 
 
 document.addEventListener("error", function (e) {
-  if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === "img") {
-    const img = e.target;
-    if (img.id === "lightboxHeroImage") return;
-    const thumbSlot = img.closest(".thumb-slot, .lightbox-thumb-item");
-    if (thumbSlot) {
-      thumbSlot.remove();
-      return;
-    }
-    const fallbackImg = "https://firstmodelhub.com/images/firstmodelhub.webp";
-    if (img.src !== fallbackImg) {
-      img.src = fallbackImg;
-    }
-  }
+  const img = e.target;
+  if (!img || !img.tagName || img.tagName.toLowerCase() !== "img") return;
+  if (img.id === "lightboxHeroImage") return;
+  if (img.dataset.fallbackApplied === "true") return;
+
+  img.dataset.fallbackApplied = "true";
+  if (img.hasAttribute("srcset")) img.removeAttribute("srcset");
+  img.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
 }, true);
