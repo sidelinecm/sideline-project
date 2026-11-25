@@ -1584,24 +1584,25 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     let metaTitle = "";
     let ssrH1Html = "";
     let dynamicSubheadline = "";
+    
+    // ✅ กำหนดค่าให้ zoneLocationParen ใช้ชื่อจังหวัดปัจจุบัน
+    const zoneLocationParen = provinceNameThai;
 
     if (isEnglishHome) {
       metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
       ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
       dynamicSubheadline = "Verified companions across Thailand";
     } else if (isNational) { 
-  metaTitle = `รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ`; 
-  ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ <span class="t-chunk">ทั่วไทย</span></span>
-               <span class="h1-line-2">เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
-  dynamicSubheadline = "สาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
+      metaTitle = `รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ`; 
+      ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ <span class="t-chunk">ทั่วไทย</span></span>
+                   <span class="h1-line-2">เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
+      dynamicSubheadline = "สาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
 
     } else if (zoneSlug) {
-  metaTitle = `รับงาน${zoneSlug} สาวไซด์ไลน์ ${zoneLocationParen} รูปจริงตรงปก ไม่มีมัดจำ | FirstModelHub`;
-  ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} สาวไซด์ไลน์ <span class="t-chunk">${escapeHTML(zoneLocationParen)}</span></span>
-               <span class="h1-line-2">รูปจริงตรงปก ไม่มีมัดจำ</span>`;
-  dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} ${escapeHTML(zoneLocationParen)}`;
-
-    
+      metaTitle = `รับงาน${zoneSlug} สาวไซด์ไลน์ ${zoneLocationParen} รูปจริงตรงปก ไม่มีมัดจำ | FirstModelHub`;
+      ssrH1Html = `<span class="h1-line-1">รับงาน${escapeHTML(zoneSlug)} สาวไซด์ไลน์ <span class="t-chunk">${escapeHTML(zoneLocationParen)}</span></span>
+                   <span class="h1-line-2">รูปจริงตรงปก ไม่มีมัดจำ</span>`;
+      dynamicSubheadline = `สแตนด์บายพร้อมดูแล โซน${escapeHTML(zoneSlug)} ${escapeHTML(zoneLocationParen)}`;
     } else {
   metaTitle = `ไซด์ไลน์${provinceNameThai} รับงาน${provinceNameThai} ฟิวแฟน รูปจริง ไม่มีมัดจำ | FirstModelHub`;
   ssrH1Html = `<span class="h1-line-1">ไซด์ไลน์${escapeHTML(provinceNameThai)} รับงาน${escapeHTML(provinceNameThai)}</span>
