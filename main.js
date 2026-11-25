@@ -2171,10 +2171,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         const currentZoneName = window.currentZoneSlug || "";
 
         if (currentZoneName) {
-          // ถ้าปิด Modal ในหน้าโซนย่อย ให้คืนค่า Title ของโซนย่อยนั้น
-          targetTitle = isEN
-            ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
-            : `ไซด์ไลน์${currentZoneName} รับงาน${currentZoneName} (${provName}) ฟิวแฟน รูปจริงตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+  const zoneLoc = window.currentZoneLocationParen || `(${provName})`;
+  targetTitle = isEN
+    ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
+    : `รับงาน${currentZoneName} สาวไซด์ไลน์ ${zoneLoc} รูปจริงตรงปก ไม่มีมัดจำ | FirstModelHub`;
         } else {
           // ถ้าปิด Modal ในหน้าจังหวัดปกติ ให้คืนค่า Title จังหวัดตามเดิม
           targetTitle = isEN 
@@ -2192,9 +2192,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         targetUrl = isEN ? "/index-en" : (isFromProfiles ? "/profiles" : "/");
 
         targetTitle = isEN
-          ? "Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos (Pay on Arrival) | FirstModelHub"
-          : "รับงานไซด์ไลน์ ทั่วไทย รูปจริง100% ฟิวแฟนไม่มีมัดจำ | FirstModelHub";
-
+  ? "Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos (Pay on Arrival) | FirstModelHub"
+  : "รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ";
         const liveCount = window.totalProfilesCount || appState.allProfiles?.length || 0;
         const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
           ? appState.provincesMap.size
