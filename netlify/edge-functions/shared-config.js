@@ -131,7 +131,6 @@ export function safeOptimizeImg(imagePath, mode = "card") {
     transform = `f_auto,q_auto:good,w_${mode},h_${Math.round(mode * 1.4)},c_fill,g_auto`;
   }
 
-  // ✅ แยก Cloudinary Path แบบ Segment-by-Segment แม่นยำ 100% (ไม่กิน v1790... และไม่ทำ folder หาย)
   const cldMarker = "/image/upload/";
   if (cleanPath.includes("res.cloudinary.com") && cleanPath.includes(cldMarker)) {
     const markerIdx = cleanPath.indexOf(cldMarker);
@@ -147,7 +146,6 @@ export function safeOptimizeImg(imagePath, mode = "card") {
 
       if (verIdx !== -1) {
         tailParts = parts.slice(verIdx + 1);
-        
       } else {
         const isTransformSeg = (seg) =>
           seg.includes(",") ||
@@ -171,3 +169,5 @@ export function safeOptimizeImg(imagePath, mode = "card") {
   const finalPath = formatted.startsWith("images/") ? formatted : `images/${formatted}`;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
+
+// ✅ Dummy Handler ป้องกัน Netlify Auto-discovery Error export default async (req, context) => { return context?.next ? context.next() : new Response(null, { status: 404 }); };
