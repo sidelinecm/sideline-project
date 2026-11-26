@@ -1,8 +1,15 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
+import {
+  normalizeProvKey,
+  MASTER_ZONES,
+  resolveZone,
+  getCanonicalProfileSlug,
+  safeOptimizeImg
+} from "./shared-config.js";
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261115_69';
+let GLOBAL_VERSION = 'v_20261126_01';
 let TEMPLATE_HTML_CACHE = null;
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -32,7 +39,7 @@ const CONFIG = {
     return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
   },
   get PURGE_SECRET() {
-    return Deno.env.get("PURGE_SECRET") || "fmh_super_admin_2026";
+    return Deno.env.get("PURGE_SECRET") || "";
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dduxw7k4/image/upload/",
@@ -216,12 +223,11 @@ PROVINCE_SEO_DATA["hatyai"] = PROVINCE_SEO_DATA["songkhla"];
 PROVINCE_SEO_DATA["surat-thani"] = PROVINCE_SEO_DATA["suratthani"];
 PROVINCE_SEO_DATA["samui"] = PROVINCE_SEO_DATA["suratthani"];
 
-// 🟢 รวม Master Slug ทุกโซนทั่วไทย (Single Source of Truth)
 const MASTER_ZONE_TO_SLUG = {
   // 1. เชียงใหม่
   "นิมมาน": "nimman", "นิมมานเหมินท์": "nimman", "เจ็ดยอด": "jedyod", "สันติธรรม": "santitham",
   "ช้างเผือก": "changphueak", "หลัง มช.": "cmu", "หลัง มช": "cmu", "หลังมอ": "cmu",
-  "หน้า มช.": "namor", "หน้า มช": "namor", "หน้ามอ": "namor", "คูเมือง": "kumueang",
+  "หน้า มช.": "front-cmu", "หน้า มช": "front-cmu", "หน้ามอ": "front-cmu", "คูเมือง": "kumueang",
   "ท่าแพ": "thapae", "ห้วยแก้ว": "huaykaew", "รวมโชค": "ruamchok", "สันทราย": "sansai",
   "แม่โจ้": "maejo", "พายัพ": "payap", "เซ็นทรัลเฟส": "centralfest", "สนามบินเชียงใหม่": "airport-cnx",
   "แม่ริม": "maerim", "หางดง": "hangdong", "สันกำแพง": "sankamphaeng", "สารภี": "saraphi", "ดอยสะเก็ด": "doisaket",
@@ -242,46 +248,59 @@ const MASTER_ZONE_TO_SLUG = {
   "เชิงทะเล": "cherngtalay", "กมลา": "kamala", "สนามบินภูเก็ต": "phuket-airport",
 
   // 5. ขอนแก่น
-  "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku", "หลังมอ": "kku",
-  "หน้า มข.": "namor-kku", "หน้า มข": "namor-kku", "หน้ามอ": "namor-kku", "โนนม่วง": "nonmuang",
-  "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon", "ม.ภาค": "m-phak", "ศิลา": "sila",
+  "ในตัวเมืองขอนแก่น": "mueang-khonkaen", "กังสดาล": "kangsadan", "หลัง มข.": "kku", "หลัง มข": "kku",
+  "หน้า มข.": "kku-front", "หน้า มข": "kku-front", "โนนม่วง": "nonmuang",
+  "เซ็นทรัลขอนแก่น": "central-khonkaen", "บึงแก่นนคร": "buengkaennakhon",
+  "ม.ภาค": "m-phak-area", "ถนนมิตรภาพ": "mittraphap", "ศิลา": "sila",
 
   // 6. เชียงราย
   "ตัวเมืองเชียงราย": "mueang-chiangrai", "บ้านดู่": "baandu", "หน้า มฟล.": "mfu", "หน้า มฟล": "mfu",
-  "ม.แม่ฟ้าหลวง": "mae-fah-luang", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar", "แม่สาย": "maesai",
+  "ม.แม่ฟ้าหลวง": "mfu", "หอนาฬิกา": "clock-tower", "ไนท์บาซาร์": "night-bazaar",
+  "เด่นห้า": "den-ha", "รอบเวียง": "rop-wiang", "ริมกก": "rim-kok",
+  "สนามบินเชียงราย": "chiangrai-airport", "แม่สาย": "maesai",
 
   // 7. อุดรธานี
-  "ตัวเมืองอุดร": "mueang-udon", "UD Town": "udtown", "หนองประจักษ์": "nongprajak",
+  "ตัวเมืองอุดร": "mueang-udon", "ud town": "udtown", "หนองประจักษ์": "nongprajak",
   "เซ็นทรัลอุดร": "central-udon", "บ้านจาน": "ban-chan", "โพศรี": "pho-si",
+  "ทุ่งศรีเมือง": "thung-si-mueang", "หนองสิม": "nong-sim", "ตลาดรังษิณา": "rangsina", "สี่แยกไฮเทค": "high-tech",
 
   // 8. ลำปาง & ลำพูน
-  "ตัวเมืองลำปาง": "mueang-lampang", "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui", "ม.ราชภัฏลำปาง": "lpru",
-  "ตัวเมืองลำพูน": "mueang-lamphun", "นิคมลำพูน": "nikom-lamphun",
+  "ตัวเมืองลำปาง": "mueang-lampang", "สวนดอก": "suan-dok", "สบตุ๋ย": "sob-tui",
+  "ม.ราชภัฏลำปาง": "lpru", "เซ็นทรัลลำปาง": "central-lampang", "อัศวิน": "atsavin",
+  "กาดกองต้า": "kad-kong-ta", "เกาะคา": "ko-kha",
+  "ตัวเมืองลำพูน": "mueang-lamphun", "นิคมลำพูน": "nikom-lamphun", "เวียงยอง": "wiang-yong",
+  "ป่าซาง": "pa-sang", "เหมืองง่า": "mueang-nga", "บ้านกลาง": "ban-klang",
 
   // 9. พิษณุโลก & อยุธยา
   "ตัวเมืองพิษณุโลก": "mueang-phitsanulok", "รอบ มน.": "nu", "รอบ มน": "nu", "ท่าโพธิ์": "tha-pho",
+  "สมอแข": "samo-khae", "ท็อปแลนด์": "topland", "เซ็นทรัลพิษณุโลก": "central-phitsanulok",
   "โรจนะ": "rojana", "ตัวเมืองอยุธยา": "mueang-ayutthaya", "บางปะอิน": "bang-pa-in",
+  "ประตูชัย": "pratu-chai", "เสนา": "sena",
 
   // 10. โคราช, หาดใหญ่, สุราษฎร์-สมุย
-  "ในเมืองโคราช": "mueang-korat", "เซ็นทรัลโคราช": "central-korat", "เขาใหญ่": "khaoyai", "ปากช่อง": "pakchong",
-  "มทส.": "sut", "มทส": "sut", "จอหอ": "joho",
-  "ตัวเมืองหาดใหญ่": "hatyai", "ม.อ.หาดใหญ่": "psu", "ม.อ.": "psu", "ด่านนอก": "dannok",
-  "ตัวเมืองสุราษฎร์": "mueang-surat", "เกาะสมุย": "samui", "เฉวง": "chaweng", "ละไม": "lamai"
+  "ในเมืองโคราช": "mueang-korat", "เซ็นทรัลโคราช": "central-korat", "เดอะมอลล์โคราช": "themall-korat",
+  "เขาใหญ่": "khaoyai", "ปากช่อง": "pakchong", "มทส.": "sut", "มทส": "sut", "จอหอ": "joho",
+  "ตัวเมืองหาดใหญ่": "hatyai", "คอหงส์": "kho-hong", "ม.อ.หาดใหญ่": "psu", "ม.อ.": "psu",
+  "ลีการ์เดนส์": "lee-gardens", "ด่านนอก": "dannok", "ตัวเมืองสงขลา": "mueang-songkhla",
+  "ตัวเมืองสุราษฎร์": "mueang-surat", "เกาะสมุย": "samui", "เฉวง": "chaweng",
+  "ละไม": "lamai", "บ่อผุด": "bophut", "เกาะพะงัน": "phangan"
 };
 
-// 🟢 ฟังก์ชันแปลงชื่อโซนเป็น Slug อย่างปลอดภัย ป้องกัน ReferenceError เว็บล่ม 100%
-function getSafeZoneSlug(zoneName) {
+function getSafeZoneSlug(zoneName, provinceKey = "") {
   if (!zoneName || typeof zoneName !== "string") return "";
-  const raw = zoneName.trim().replace(/^โซน/g, "").trim();
-  const noDot = raw.replace(/\./g, "");
-  const noSpace = raw.replace(/\s+/g, "");
-  const noDotSpace = raw.replace(/[\.\s]/g, "");
-
-  return MASTER_ZONE_TO_SLUG[raw] ||
-         MASTER_ZONE_TO_SLUG[noDot] ||
-         MASTER_ZONE_TO_SLUG[noSpace] ||
-         MASTER_ZONE_TO_SLUG[noDotSpace] ||
-         encodeURIComponent(raw.replace(/\s+/g, "-"));
+  const raw = zoneName.trim().replace(/^โซน/g, "").replace(/\.+$/, "").trim();
+  if (provinceKey) {
+    const { zone } = resolveZone(provinceKey, raw);
+    if (zone) return zone.slug;
+    const list = MASTER_ZONES[normalizeProvKey(provinceKey)] || [];
+    const found = list.find(z =>
+      z.thai.replace(/\.+$/, "").toLowerCase() === raw.toLowerCase() ||
+      z.match.some(m => m.replace(/\.+$/, "").toLowerCase() === raw.toLowerCase())
+    );
+    if (found) return found.slug;
+    return "";
+  }
+  return MASTER_ZONE_TO_SLUG[raw] || MASTER_ZONE_TO_SLUG[raw.replace(/\./g, "")] || "";
 }
 
 function getRealTimeAgo(dateInput) {
@@ -382,38 +401,7 @@ function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟ�
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
 function optimizeImg(imagePath, mode = "card") {
-  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
-  if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
-  const cleanPath = imagePath.trim();
-
-  // 🟢 [เพิ่มใหม่] ป้องกันลิงก์ขยะ
-  if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) {
-    return DEFAULT_FALLBACK_IMG;
-  }
-
-  if (cleanPath.startsWith("data:")) return cleanPath;
-  let transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
-  
-  if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    // วงกลมสตอรี่: g_face เจาะจงเฉพาะใบหน้าตรงกลาง
-    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
-  } else if (mode === 300 || mode === "swiper") {
-    // แถบสไลด์ HOT Swiper: สัดส่วน 5:7 เป๊ะ (300x420) + g_auto
-    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
-  } else if (mode === "og") {
-    // แชร์เฟซบุ๊ก / LINE แนวนอน: AI โฟกัสหน้า หัวไม่ขาด
-    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
-  }
-
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const fileMatch = cleanPath.match(/(?:v\d+\/)?(images\/[^\s\?]+|[^\/]+\.(?:png|jpg|jpeg|webp|avif))$/i);
-    if (fileMatch && fileMatch[1]) {
-      return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileMatch[1]}`;
-    }
-    return cleanPath;
-  }
-  const formatted = cleanPath.replace(/^\/+/, "");
-  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${formatted}`;
+  return safeOptimizeImg(imagePath, mode);
 }
 
 
@@ -441,11 +429,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   };
 
   const isNation = provinceSlug === "national" || provinceName === "ทั่วไทย";
-  const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket", "bangkok", "chonburi"];
+  const ACTIVE_PROVINCE_SLUGS = ["chiangmai", "khon-kaen", "chiangrai", "udonthani", "lampang", "phuket"];
 
- const chipStyle = `display: inline-flex; align-items: center; gap: 6px; background: #FFFFFF !important; border: 1.5px solid #A855F7 !important; color: #3B0764 !important; font-size: 11.5px; font-weight: 800; padding: 6px 14px; border-radius: 100px; text-decoration: none; box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12); transition: all 0.2s;`;
+  const chipStyle = `display: inline-flex; align-items: center; gap: 6px; background: #FFFFFF !important; border: 1.5px solid #A855F7 !important; color: #3B0764 !important; font-size: 11.5px; font-weight: 800; padding: 6px 14px; border-radius: 100px; text-decoration: none; box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12); transition: all 0.2s;`;
 
- const zoneLinks = cleanZones.slice(0, 10).map(z => {
+  const zoneLinks = cleanZones.slice(0, 10).map(z => {
       const cleanZ = sanitizeThaiText(z);
       if (!cleanZ) return "";
       
@@ -454,11 +442,11 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
         if (targetSlug && ACTIVE_PROVINCE_SLUGS.includes(targetSlug)) {
           return `<a href="/location/${targetSlug}" class="kw-zone" style="${chipStyle}" title="สาวรับงาน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
         }
-        return `<span class="kw-zone" style="${chipStyle}">📍 ${escapeHTML(cleanZ)}</span>`;
+        return "";
       }
       
-      // ✅ ดึงจาก MASTER_ZONE_TO_SLUG โดยตรง
-      const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
+      const slugPart = getSafeZoneSlug(cleanZ, provinceSlug);
+      if (!slugPart) return "";
       return `<a href="/location/${provinceSlug}/${slugPart}" class="kw-zone" style="${chipStyle}" title="สาวรับงานโซน${escapeHTML(cleanZ)}">📍 ${escapeHTML(cleanZ)}</a>`;
     }).filter(Boolean);
 
@@ -690,9 +678,9 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
     },
 
     // ==================== 6. เชียงราย ====================
-    "บ้านดู่": {
+   "บ้านดู่": {
       headline: "สาวรับงานบ้านดู่ เชียงราย • ไซด์ไลน์บ้านดู่ ใกล้ มรภ.เชียงราย & สนามบิน สเปกวัยใสน่ารัก",
-      intro: "รวมสาวรับงานตำบลบ้านดู่และไซด์ไลน์บ้านดู่ เชียงราย ย่านมหาวิทยาลัยราชภัฏเชียงใหม่ แหล่งรวมสาวสวยวัยใส สดใส เป็นกันเอง คุยเก่ง ฟิวแฟนอบอุ่น นัดเจอน้องตัวจริงก่อนค่อยจ่ายเงินหน้างาน สบายใจได้ 100% ค่ะ",
+      intro: "รวมสาวรับงานตำบลบ้านดู่และไซด์ไลน์บ้านดู่ เชียงราย ย่านมหาวิทยาลัยราชภัฏเชียงราย แหล่งรวมสาวสวยวัยใส สดใส เป็นกันเอง คุยเก่ง ฟิวแฟนอบอุ่น นัดเจอน้องตัวจริงก่อนค่อยจ่ายเงินหน้างาน สบายใจได้ 100% ค่ะ",
       convenience: "ใกล้ท่าอากาศยานแม่ฟ้าหลวงเชียงราย ตลาดบ้านดู่ และน้ำพุร้อนโป่งพระบาท มีโรงแรมและรีสอร์ตมิดชิดมากมาย น้องๆ เดินทางถึงที่พักไวใน 15 นาที"
     },
     "หน้า มฟล.": {
@@ -991,14 +979,14 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     .trim();
   let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
   
-  // 🟢 แก้ไข: ถ้าเปิดหน้าโซนย่อยอยู่ (currentZone มีค่า) และน้องคนนั้นมีชื่อโซนนี้อยู่ในประวัติ ให้แสดงชื่อโซนปัจจุบันเป็นหลัก
-  let displayLoc = firstPart.split(/\s+/)[0].trim();
+  let displayLoc = firstPart.trim();
   if (currentZone && rawLoc.includes(currentZone)) {
     displayLoc = currentZone;
   }
   let loc = escapeHTML(displayLoc || currentZone || provinceName);
   
-  const profileUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+  const canonicalProfileSlug = getCanonicalProfileSlug(p);
+  const profileUrl = `/sideline/${encodeURIComponent(canonicalProfileSlug)}`;
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
   const ageStr = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${escapeHTML(p.age)} ปี` : "20+ ปี";
@@ -1049,7 +1037,7 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
 
  return `
     <div class="profile-card-new-container">
-      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
+ <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(canonicalProfileSlug)}">
       <img src="${cardImg}" 
          alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
          width="400"
@@ -1140,20 +1128,55 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 3. เคลียร์แคชระบบ (Admin Secret Purge)
+    // 🟢 3. เคลียร์แคชระบบ (รองรับ PURGE_SECRET และ ADMIN_PIN จาก Env Var เท่านั้น)
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
-      const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
-      if (secret === CONFIG.PURGE_SECRET) {
+      let bodyPin = "";
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          bodyPin = String(body?.pin || body?.secret || "").trim();
+        } catch (_) {}
+      }
+      const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret") || bodyPin;
+      const adminPin = Deno.env.get("ADMIN_PIN") || "";
+
+      if (secret && ((CONFIG.PURGE_SECRET && secret === CONFIG.PURGE_SECRET) || (adminPin && secret === adminPin))) {
         PAGE_CACHE.clear();
         TEMPLATE_HTML_CACHE = null;
         GLOBAL_VERSION = `v_${Date.now()}`;
 
-        return new Response(JSON.stringify({ success: true, version: GLOBAL_VERSION }), {
+        let cdnPurged = false;
+        const netlifyToken = Deno.env.get("NETLIFY_AUTH_TOKEN");
+        const netlifySiteId = Deno.env.get("NETLIFY_SITE_ID");
+        if (netlifyToken && netlifySiteId) {
+          try {
+            const purgeRes = await fetch("https://api.netlify.com/api/v1/purge_cache", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${netlifyToken}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ site_id: netlifySiteId })
+            });
+            cdnPurged = purgeRes.ok;
+          } catch (e) {
+            console.warn("Netlify CDN Purge failed:", e);
+          }
+        }
+
+        return new Response(JSON.stringify({ success: true, cdnPurged, version: GLOBAL_VERSION }), {
           status: 200,
-          headers: { "Content-Type": "application/json; charset=utf-8" }
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+            "Netlify-CDN-Cache-Control": "no-store"
+          }
         });
       }
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+      });
     }
 
     // 🟢 4. ข้ามไฟล์ Static และ SSR Bypass
@@ -1167,49 +1190,89 @@ export default async (req, context) => {
       decodedPath = decodeURIComponent(cleanPath);
     } catch (_) {}
 
-    // ✅ แก้เคสพิมพ์ URL ย่อ หรือเข้าผ่าน .html ให้เข้าหน้านิมมานมาตรฐาน
-    if (decodedPath === "/nimman" || decodedPath === "/nimman.html") {
-      return Response.redirect(`${primaryDomain}/location/chiangmai/nimman`, 301);
+    // ✅ 5.0 ดัก URL เก่าที่มีปัญหา (ต้องอยู่ก่อนข้อ 5.1–5.4 เสมอ!)
+    const LEGACY_EXACT_REDIRECTS = {
+      "/nimman": "/location/chiangmai/nimman",
+      "/nimman.html": "/location/chiangmai/nimman",
+      "/location/chiangmai-service": "/location/chiangmai",
+      "/location/phra-nakhon-si-ayutthaya/เชียงใหม่": "/location/chiangmai",
+      "/location/phra-nakhon-si-ayutthaya/ลำปาง": "/location/lampang",
+      "/พิกัดและพื้นที่บริการไซด์ไลน์เชียงใหม่": "/location/chiangmai"
+    };
+    if (LEGACY_EXACT_REDIRECTS[decodedPath]) {
+      return Response.redirect(`${primaryDomain}${LEGACY_EXACT_REDIRECTS[decodedPath]}`, 301);
     }
 
-    // ✅ 5. ดักจับ URL ภาษาไทยใน Path แล้ว 301 Redirect ไป Slug อังกฤษมาตรฐานทั่วไทย
-    const pathParts = decodedPath.split("/").filter(Boolean);
-    if (pathParts[0] === "location" && pathParts[1] && pathParts[2]) {
-      const currentProv = pathParts[1];
-      const currentZoneRaw = pathParts[2].replace(/^โซน/g, "").trim();
-      const matchedEngSlug = MASTER_ZONE_TO_SLUG[currentZoneRaw] || MASTER_ZONE_TO_SLUG[currentZoneRaw.replace(/\./g, "")];
-      if (matchedEngSlug && matchedEngSlug !== currentZoneRaw) {
-        return Response.redirect(`${primaryDomain}/location/${currentProv}/${matchedEngSlug}`, 301);
+    // ✅ 5. ดักจับ Query String ?province=, ?zone=, เส้นทาง /province/, และ Slug เก่า ตั้งแต่บน Edge
+    const segments = decodedPath.split("/").filter(Boolean);
+
+    // 5.1 ถ้ามี ?province= (เช่น /?province=chiangmai หรือ /profiles?province=chiangrai) -> 301 ไป /location/จังหวัด
+    const qProvince = url.searchParams.get("province")?.trim();
+    if (qProvince) {
+      const normProv = normalizeProvKey(qProvince);
+      const targetPath = (normProv && normProv !== "all" && normProv !== "national")
+        ? `/location/${encodeURIComponent(normProv)}`
+        : "/";
+      return Response.redirect(`${primaryDomain}${targetPath}`, 301);
+    }
+
+    // 5.2 ถ้าเข้าผ่านเส้นทางเก่า /province/... -> 301 ไป /location/...
+    if (segments[0] === "province" && segments[1]) {
+      const normProv = normalizeProvKey(segments[1]);
+      if (segments[2]) {
+        const { zone } = resolveZone(normProv, segments[2].replace(/^โซน/g, "").trim());
+        const targetPath = zone ? `/location/${normProv}/${zone.slug}` : `/location/${normProv}`;
+        return Response.redirect(`${primaryDomain}${targetPath}`, 301);
+      }
+      return Response.redirect(`${primaryDomain}/location/${normProv}`, 301);
+    }
+
+    // 5.3 ถ้ามี ?zone= (เช่น /location/chiangmai?zone=นิมมาน หรือ ?zone=ทั้งหมด) -> 301 ไป Clean URL
+    const rawZoneQuery = url.searchParams.get("zone")?.trim();
+    if (rawZoneQuery && segments[0] === "location" && segments[1]) {
+      const normProv = normalizeProvKey(segments[1]);
+      const cleanZ = rawZoneQuery.replace(/^โซน/g, "").trim();
+      if (!cleanZ || cleanZ === "ทั้งหมด") {
+        return Response.redirect(`${primaryDomain}/location/${normProv}`, 301);
+      }
+      const { zone } = resolveZone(normProv, cleanZ);
+      const targetPath = zone ? `/location/${normProv}/${zone.slug}` : `/location/${normProv}`;
+      return Response.redirect(`${primaryDomain}${targetPath}`, 301);
+    }
+
+    // 5.4 ถ้าเข้า URL /location/จังหวัด/โซน ที่เป็นภาษาไทย, Legacy Slug (namor/m-phak/mae-fah-luang) หรือจังหวัดสะกดผิด -> 301
+    if (segments[0] === "location" && segments[1]) {
+      const rawProv = segments[1];
+      const normProv = normalizeProvKey(rawProv);
+      if (segments[2]) {
+        const cleanZoneRaw = segments[2].replace(/^โซน/g, "").trim();
+        const { zone, isLegacy } = resolveZone(normProv, cleanZoneRaw);
+        if (zone && (isLegacy || normProv !== rawProv)) {
+          return Response.redirect(`${primaryDomain}/location/${normProv}/${zone.slug}`, 301);
+        }
+        if (!zone) {
+          return Response.redirect(`${primaryDomain}/location/${normProv}`, 301);
+        }
+      } else if (normProv !== rawProv) {
+        return Response.redirect(`${primaryDomain}/location/${normProv}`, 301);
       }
     }
 
-    // 🟢 ลบ "/profiles" ออกจาก BYPASS_ROUTES เพื่อให้เซิร์ฟเวอร์เรนเดอร์หน้านี้เอง:
+    // 🟢 6. เส้นทาง Static
     const BYPASS_ROUTES = ["/about", "/faq", "/blog", "/privacy-policy", "/locations"];
-    if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) { 
-      return await context.next(); 
+    if (BYPASS_ROUTES.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+      return await context.next();
     }
 
-    // ✅ 7. ดักจับ Query String ?zone= แล้ว 301 Redirect ตรงไป Slug อังกฤษทันที (ไม่มี Redirect Chain)
-    const rawZoneQuery = url.searchParams.get("zone")?.trim();
-    const segments = url.pathname.split("/").filter(Boolean);
-
-    if (rawZoneQuery && rawZoneQuery !== "ทั้งหมด" && !cleanPath.includes("/sideline/") && segments[0] === "location" && segments[1]) {
-      const currentProv = segments[1];
-      let cleanZoneName = rawZoneQuery;
-      try {
-        cleanZoneName = decodeURIComponent(cleanZoneName).trim();
-      } catch (_) {}
-      
-      const rawZ = cleanZoneName.replace(/^โซน/g, "").trim();
-      // ดึงตรงจาก MASTER_ZONE_TO_SLUG ถ้าไม่มีค่อยแทนที่ space ด้วยขีด
-      const safeZone = MASTER_ZONE_TO_SLUG[rawZ] || MASTER_ZONE_TO_SLUG[rawZ.replace(/\./g, "")] || rawZ.replace(/\s+/g, "-");
-      const targetRedirectUrl = `${primaryDomain}/location/${currentProv}/${safeZone}`;
-      return Response.redirect(targetRedirectUrl, 301);
-    }
-
-    // 🟢 8. เช็ค Cache Memory รายวัน
-    const isForceRefresh = url.searchParams.get("refresh") === CONFIG.PURGE_SECRET || url.searchParams.has("purge");
-    const cacheKey = `${req.method}:${url.pathname.toLowerCase()}${url.search ? url.search.toLowerCase() : ""}`;
+    // 🟢 8. เช็ค Cache Memory รายวัน (ไม่ให้ใครสุ่ม ?purge=1 ทะลุแคช และไม่เก็บ ?fbclid= ลง Cache Key)
+    const isForceRefresh = Boolean(
+      CONFIG.PURGE_SECRET && (
+        url.searchParams.get("refresh") === CONFIG.PURGE_SECRET ||
+        url.searchParams.get("secret") === CONFIG.PURGE_SECRET
+      )
+    );
+    const pageQuery = cleanPath === "/profiles" ? (url.searchParams.get("page") || "1") : "";
+    const cacheKey = `${req.method}:${decodedPath}${pageQuery ? `?page=${pageQuery}` : ""}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
     const isExpiredOneDay = cachedPage && (Date.now() - (cachedPage.cachedAt || 0) > ONE_DAY_MS);
     if (!isForceRefresh && cachedPage && !isExpiredOneDay && cachedPage.version === GLOBAL_VERSION) {
@@ -1220,77 +1283,20 @@ export default async (req, context) => {
     }
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    
-   const isEnglishHome = cleanPath === "/index-en";
-let isNational = cleanPath === "/" || cleanPath === "" || isEnglishHome || cleanPath === "/profiles";
 
-let provinceSlug = isNational 
-  ? "national" 
-  : (segments[0] === "location" && segments[1] ? segments[1] : (segments[1] || "chiangmai")).toLowerCase().trim();
+    const isEnglishHome = cleanPath === "/index-en";
+    const isProfilesDirectory = cleanPath === "/profiles";
+    let isNational = cleanPath === "/" || cleanPath === "" || isEnglishHome || isProfilesDirectory;
 
-if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
-if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = "khon-kaen";
+    let provinceSlug = isNational
+      ? "national"
+      : normalizeProvKey(segments[0] === "location" && segments[1] ? segments[1] : (segments[1] || "chiangmai"));
 
-    // 🟢 แก้ไขจุดที่ 4: ถอดรหัสโซนย่อยอย่างปลอดภัย (ป้องกัน Double Encoding)
-    let rawZoneParam = "";
-    if (!isNational && segments.length >= 3) {
-      try {
-        rawZoneParam = decodeURIComponent(segments[2]).trim();
-        if (rawZoneParam.includes("%")) rawZoneParam = decodeURIComponent(rawZoneParam).trim();
-      } catch (_) {
-        rawZoneParam = String(segments[2]).trim();
-      }
-    } else if (url.searchParams.has("zone")) {
-      try {
-        rawZoneParam = decodeURIComponent(url.searchParams.get("zone") || "").trim();
-        if (rawZoneParam.includes("%")) rawZoneParam = decodeURIComponent(rawZoneParam).trim();
-      } catch (_) {
-        rawZoneParam = String(url.searchParams.get("zone") || "").trim();
-      }
-    }
-    rawZoneParam = sanitizeThaiText(rawZoneParam).replace(/^โซน/g, "").trim();
-
-    // 🟢 ตารางจับคู่ Slug อังกฤษ -> ชื่อย่านภาษาไทย (ครอบคลุมครบทุกโซนทั่วไทย 100%)
-    const ZONE_MAP = {
-      // 1. เชียงใหม่
-      "nimman": "นิมมาน", "santitham": "สันติธรรม", "jedyod": "เจ็ดยอด", "jed-yod": "เจ็ดยอด",
-      "maejo": "แม่โจ้", "hangdong": "หางดง", "cmu": "หลัง มช.", "langmor": "หลัง มช.",
-      "changphueak": "ช้างเผือก", "maerim": "แม่ริม", "sansai": "สันทราย",
-      "ruamchok": "รวมโชค", "thapae": "ท่าแพ", "huaykaew": "ห้วยแก้ว", "payap": "พายัพ",
-      // 2. กรุงเทพฯ
-      "sukhumvit": "สุขุมวิท", "ratchada": "รัชดา", "huaikhwang": "ห้วยขวาง",
-      "ladprao": "ลาดพร้าว", "thonglor": "ทองหล่อ", "ekkamai": "เอกมัย",
-      "sathorn": "สาทร", "silom": "สีลม", "bangna": "บางนา", "rama9": "พระราม 9", "ari": "อารีย์",
-      // 3. ชลบุรี / พัทยา
-      "pattaya": "พัทยา", "jomtien": "หาดจอมเทียน", "bangsaen": "บางแสน",
-      "sriracha": "ศรีราชา", "amata": "อมตะนคร", "bowin": "บ่อวิน",
-      // 4. ภูเก็ต
-      "patong": "ป่าตอง", "kathu": "กะทู้", "chalong": "ฉลอง", "karon": "กะรน", "kata": "กะตะ",
-      "bangtao": "บางเทา", "rawai": "ราไวย์", "cherngtalay": "เชิงทะเล", "kamala": "กมลา",
-      // 5. ขอนแก่น
-      "kku": "หลัง มข.", "kangsadan": "กังสดาล", "nonmuang": "โนนม่วง",
-      "central-khonkaen": "เซ็นทรัลขอนแก่น", "buengkaennakhon": "บึงแก่นนคร",
-      // 6. เชียงราย
-      "baandu": "บ้านดู่", "mfu": "หน้า มฟล.", "maesai": "แม่สาย", "clock-tower": "หอนาฬิกา",
-      // 7. ลำปาง
-      "suan-dok": "สวนดอก", "sob-tui": "สบตุ๋ย", "lpru": "ม.ราชภัฏลำปาง",
-      // 8. ลำพูน
-      "nikom-lamphun": "นิคมลำพูน", "wiang-yong": "เวียงยอง",
-      // 9. พิษณุโลก
-      "nu": "รอบ มน.", "tha-pho": "ท่าโพธิ์", "samo-khae": "สมอแข",
-      // 10. อุดรธานี
-      "udtown": "UD Town", "nongprajak": "หนองประจักษ์", "central-udon": "เซ็นทรัลอุดร",
-      // 11. โคราช (นครราชสีมา)
-      "sut": "มทส.", "khaoyai": "เขาใหญ่", "pakchong": "ปากช่อง", "joho": "จอหอ",
-      // 12. สงขลา-หาดใหญ่
-      "hatyai": "ตัวเมืองหาดใหญ่", "psu": "ม.อ.หาดใหญ่", "dannok": "ด่านนอก",
-      // 13. อยุธยา
-      "rojana": "โรจนะ", "bang-pa-in": "บางปะอิน",
-      // 14. สุราษฎร์ธานี / เกาะสมุย
-      "samui": "เกาะสมุย", "chaweng": "เฉวง", "lamai": "ละไม", "bophut": "บ่อผุด"
-    };
-
-    const activeZoneName = ZONE_MAP[rawZoneParam.toLowerCase()] || rawZoneParam;
+    // ✅ ใช้ resolveZone จาก shared-config.js (จบปัญหา ZONE_MAP ทับกันเอง!)
+    const rawZoneParam = (!isNational && segments.length >= 3) ? segments[2].trim() : "";
+    const resolvedZoneInfo = (!isNational && rawZoneParam) ? resolveZone(provinceSlug, rawZoneParam) : { zone: null };
+   const activeZoneObj = resolvedZoneInfo.zone;
+    const activeZoneName = activeZoneObj ? activeZoneObj.thai : "";
 
     const cleanProvinceSlug = provinceSlug.replace(/[-_]/g, "");
     const provinceKeyVariants = [provinceSlug, cleanProvinceSlug];
@@ -1358,7 +1364,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       return await context.next();
     }
 
-    const settingsMap = new Map((settingsRes?.data || []).map(s => [s.key, s.value]));
+    
 
     const settingsMap = new Map((settingsRes?.data || []).map(s => [s.key, s.value]));
     const liveAdminLine = settingsMap.get("admin_line_url") || "https://line.me/ti/p/u8Bz9HsaY8";
@@ -1402,8 +1408,12 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       if (uniqueProfileId && seenNameKeys.has(uniqueProfileId)) continue;
       if (imgSig && seenImageKeys.has(imgSig)) continue;
 
+      // 🟢 ถ้าอยู่หน้าแรก (ทั่วไทย) หากชื่อน้องซ้ำกับคนที่มีอยู่แล้ว ให้ข้ามทันที
+      if (isNational && cleanName && seenNameKeys.has(cleanName)) continue;
+
       if (imgSig) seenImageKeys.add(imgSig);
       if (uniqueProfileId) seenNameKeys.add(uniqueProfileId);
+      if (cleanName) seenNameKeys.add(cleanName);
       deduplicatedProfiles.push(p);
     }
 
@@ -1438,37 +1448,34 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
 
       // ระดับ 1: มีแค่ในคำบรรยายหรือแท็ก
       const desc = sanitizeThaiText(p.description || "").toLowerCase();
-      const tags = (Array.isArray(p.style_tags) ? p.style_tags.join(" ") : String(p.style_tags || "")).toLowerCase();
+     const rawTags = p.styleTags || p.style_tags;
+      const tags = (Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "")).toLowerCase();
       if (desc.includes(targetZone) || tags.includes(targetZone)) return 1;
 
       return 0;
     }
 
-    // กรองต่อตามโซนย่อย (สำหรับรายการโปรไฟล์ด้านล่าง)
     let profilesList = provinceProfiles;
     const zoneSlug = activeZoneName || null;
-    let isZoneEmpty = false;
 
-    if (!isNational && provinceSlug !== "national" && zoneSlug) {
-      const cleanZoneLower = zoneSlug.toLowerCase().replace(/^(โซน|ย่าน)/, "").trim();
-      const matchedZoneProfiles = profilesList.filter(p => matchProfileToZone(p, cleanZoneLower));
+    if (!isNational && provinceSlug !== "national" && activeZoneObj) {
+      const matchedZoneProfiles = provinceProfiles.filter(p => {
+        const rawTags = p.styleTags || p.style_tags; const tagsStr = Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "");
+        const combined = `${sanitizeThaiText(p.location || "")} ${sanitizeThaiText(p.description || "")} ${tagsStr}`.toLowerCase();
+        return activeZoneObj.match.some(m => combined.includes(m.toLowerCase()));
+      });
 
-      if (matchedZoneProfiles.length === 0) { 
-        isZoneEmpty = false;
-        profilesList = provinceProfiles.slice(0, 6); 
-      } else { 
-        // 🟢 เรียงลำดับ: ใครพิกัดหลักคำแรกตรงกับย่าน (Score 3) ขึ้นก่อนคนเดินทางมาหา (Score 2)
-        matchedZoneProfiles.sort((a, b) => {
-          const scoreA = getZoneRelevanceScore(a, cleanZoneLower);
-          const scoreB = getZoneRelevanceScore(b, cleanZoneLower);
-          if (scoreA !== scoreB) return scoreB - scoreA;
+      const cleanZoneLower = activeZoneObj.thai.toLowerCase();
+      matchedZoneProfiles.sort((a, b) => {
+        const scoreA = getZoneRelevanceScore(a, cleanZoneLower);
+        const scoreB = getZoneRelevanceScore(b, cleanZoneLower);
+        if (scoreA !== scoreB) return scoreB - scoreA;
 
-          const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
-          const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
-          return featB - featA;
-        });
-        profilesList = matchedZoneProfiles; 
-      }
+        const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
+        const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
+        return featB - featA;
+      });
+      profilesList = matchedZoneProfiles;
     }
     
     let hotSwiperCardsHtml = "";
@@ -1512,7 +1519,7 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
         const loc = escapeHTML(sanitizeThaiText(p.location) || currentProvName);
-        const slug = encodeURIComponent(p.slug || p.id);
+        const slug = encodeURIComponent(getCanonicalProfileSlug(p));
         const img = optimizeImg(p.imagePath || p.image_url || "", 300);
         const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
         return `
@@ -1531,29 +1538,33 @@ if (provinceSlug === "khonkaen" || provinceSlug === "khon_kaen") provinceSlug = 
       }).join("");
     }
 
-    // 🟢 4. สำหรับหน้าแรก: คัดเลือกการ์ดโปรไฟล์แนะนำ (Featured) 8 คนเตรียมไว้ใส่กล่องแนะนำ
-    if (isNational) {
+   // 🟢 4. หน้าแรกแสดงโปรไฟล์แนะนำ 8 คน และกรองไม่ให้ซ้ำใน Feed ด้านล่าง + /profiles แบ่งหน้าละ 32 คน
+    const featuredIdSet = new Set();
+    if (isNational && !isProfilesDirectory) {
       const featuredProfiles = deduplicatedProfiles.filter(p => p.isfeatured || p.is_featured).slice(0, 8);
-      featuredCardsHtml = featuredProfiles.map((p, i) => {
+      featuredProfiles.forEach(fp => featuredIdSet.add(String(fp.id)));
+      featuredCardsHtml = featuredProfiles.map((p) => {
         const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
         return renderCardHtml(p, false, pName);
       }).join("");
     }
 
-  
-  const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
-  
-  
-  const nationalFeedProfiles = isNational ? [...deduplicatedProfiles].sort((a, b) => {
-    const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
-    const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
-    return featB - featA;
-  }) : [];
+    const liveTotalProfiles = isNational ? deduplicatedProfiles.length : provinceProfiles.length;
 
-  // ⚡ ตัดรอบแรกส่งแค่ 24 คนก่อน เพื่อลด DOM จาก 4,300 เหลือไม่เกิน 1,000 จุด (หน้าจอจะเลิกค้าง 3.7 วิ ทันที)
-const actualVisibleProfiles = isNational
-  ? nationalFeedProfiles.slice(0, 24)
-  : profilesList;
+    const nationalFeedProfiles = isNational ? [...deduplicatedProfiles].sort((a, b) => {
+      const featA = (a.isfeatured || a.is_featured) ? 1 : 0;
+      const featB = (b.isfeatured || b.is_featured) ? 1 : 0;
+      return featB - featA;
+    }) : [];
+
+    const pageNumForProfiles = isProfilesDirectory ? Math.max(1, parseInt(url.searchParams.get("page") || "1", 10)) : 1;
+    const dirPerPage = 32;
+    const dirTotalPages = Math.max(1, Math.ceil(nationalFeedProfiles.length / dirPerPage));
+    const feedWithoutFeatured = nationalFeedProfiles.filter(p => !featuredIdSet.has(String(p.id)));
+
+    const actualVisibleProfiles = isProfilesDirectory
+      ? nationalFeedProfiles.slice((pageNumForProfiles - 1) * dirPerPage, pageNumForProfiles * dirPerPage)
+      : (isNational ? feedWithoutFeatured.slice(0, 24) : profilesList);
   const totalCount = isNational ? liveTotalProfiles : actualVisibleProfiles.length;
     const activeProvincesCount = new Set(deduplicatedProfiles.map(p => p.provinceKey).filter(Boolean)).size || 1;
     const provinceNameThai = isNational ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
@@ -1563,19 +1574,20 @@ const actualVisibleProfiles = isNational
     
     
 
-const safeZoneSlugPart = zoneSlug ? getSafeZoneSlug(zoneSlug) : "";
+const safeZoneSlugPart = activeZoneObj ? activeZoneObj.slug : "";
+const profilesCanonical = pageNumForProfiles > 1
+  ? `${primaryDomain}/profiles?page=${pageNumForProfiles}`
+  : `${primaryDomain}/profiles`;
 
 const rawCanonicalUrl = isEnglishHome
   ? `${primaryDomain}/index-en`
-  : (cleanPath === "/profiles" 
-      ? `${primaryDomain}/profiles` 
-      : (isNational 
-          ? `${primaryDomain}/` 
-          : (zoneSlug 
-              ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}` 
-              : `${primaryDomain}/location/${provinceSlug}`))); 
-
-const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
+  : (isProfilesDirectory
+      ? profilesCanonical
+      : (isNational
+          ? `${primaryDomain}/`
+          : (safeZoneSlugPart
+              ? `${primaryDomain}/location/${provinceSlug}/${safeZoneSlugPart}`
+              : `${primaryDomain}/location/${provinceSlug}`)));
 
     
     const latestUpdateMillis = profilesList.reduce((latest, p) => {
@@ -1596,9 +1608,15 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     const zoneLocationParen = provinceNameThai;
 
     if (isEnglishHome) {
-      metaTitle = `Thailand Escorts & Sidelines • 100% Real Photos | ${CONFIG.BRAND_NAME}`;
-      ssrH1Html = `<span class="h1-line-1">Verified Escorts &amp; Companions <span class="t-chunk">Thailand</span></span>`;
+      metaTitle = `Thailand Travel Companions & VIP Dates • Real Photos | ${CONFIG.BRAND_NAME}`;
+      ssrH1Html = `<span class="h1-line-1">Verified Companions <span class="t-chunk">Thailand</span></span>`;
       dynamicSubheadline = "Verified companions across Thailand";
+    } else if (isProfilesDirectory) {
+      const pageSuffix = pageNumForProfiles > 1 ? ` (หน้า ${pageNumForProfiles})` : "";
+      metaTitle = `รวมโปรไฟล์สาวรับงาน ไซด์ไลน์ VIP อัปเดตล่าสุด${pageSuffix} | ${CONFIG.BRAND_NAME}`;
+      ssrH1Html = `<span class="h1-line-1">รวมโปรไฟล์สาวรับงาน <span class="t-chunk">ไซด์ไลน์ทั้งหมด${pageSuffix}</span></span>
+                   <span class="h1-line-2">คัดรูปจริงตรงปก ${liveTotalProfiles} โปรไฟล์ จ่ายหน้างาน ไม่มีมัดจำ</span>`;
+      dynamicSubheadline = `สารบัญโปรไฟล์ทั้งหมด ${liveTotalProfiles} คนทั่วไทย`;
     } else if (isNational) { 
       metaTitle = `รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ`; 
       ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ <span class="t-chunk">ทั่วไทย</span></span>
@@ -1629,7 +1647,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
           ? `ค้นหาโปรไฟล์ สาวรับงาน${zoneSlug} ไซด์ไลน์${zoneSlug} (${totalCount} โปรไฟล์) คัดรูปจริง 100% ตรงปก สแตนด์บายพร้อมดูแล นัดเจอง่าย จ่ายหน้างาน ไม่มีการโอนมัดจำล่วงหน้าทุกกรณี [อัปเดต ${realFreshnessDate}]`
           : (isNational
               ? `ศูนย์รวม สาวรับงาน ไซด์ไลน์ เด็กเอ็น ทั่วไทย (${totalCount} โปรไฟล์) คัดรูปจริงตรงปก 100% นัดเจอง่าย จ่ายเงินหน้างานตรงกับน้อง ปลอดภัย ไร้มัดจำ [อัปเดต ${realFreshnessDate}]`
-              : `รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมย่านนิมมาน เจ็ดยอด สันติธรรม หลังมช. นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
+              : `รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} (${totalCount} โปรไฟล์ล่าสุด) รูปจริงตรงปก 100% ครอบคลุมย่าน${dynamicMetaZones || "ใจกลางเมือง"} นัดเจอจ่ายหน้างาน ไม่มีมัดจำ [อัปเดต ${realFreshnessDate}]`));
 
     const cleanMetaDesc = stripHTML(metaDescription);
     
@@ -1738,7 +1756,7 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
           : `รายชื่อสาวรับงานและไซด์ไลน์ ${provinceNameThai}${zoneSlug ? ` โซน${zoneSlug}` : ""}`,
         "numberOfItems": schemaVisibleList.length,
         "itemListElement": schemaVisibleList.map((p, idx) => {
-          const pSlug = p.slug || String(p.id);
+          const pSlug = getCanonicalProfileSlug(p);
           const pImg = optimizeImg(p.imagePath || p.image_url || "", "card");
           return {
             "@type": "ListItem",
@@ -2185,7 +2203,8 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
         if (p.key === "ayutthaya" && cleanZ === "ตัวเมือง") lookupKey = "ตัวเมืองอยุธยา";
         if (p.key === "songkhla" && cleanZ === "ม.อ.") lookupKey = "ม.อ.หาดใหญ่";
 
-        const slugPart = getSafeZoneSlug(lookupKey);
+        const slugPart = getSafeZoneSlug(lookupKey, p.key);
+        if (!slugPart) return "";
         const zoneHref = `/location/${p.key}/${slugPart}`;
 
         return `
@@ -2224,7 +2243,13 @@ const canonicalUrl = encodeURI(decodeURI(rawCanonicalUrl));
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
- const robotsDirectives = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+ const minRequired = activeZoneObj ? 2 : 1;
+    const shouldIndex = isProfilesDirectory
+      ? actualVisibleProfiles.length > 0
+      : (profilesList.length >= minRequired);
+    const robotsDirectives = shouldIndex
+      ? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      : "noindex, follow";
   
     
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
@@ -2302,7 +2327,7 @@ finalHtml = finalHtml.replace(
     "หน้า มช.": ["หน้ามอ", "หน้ามช", "หน้า มช", "กาดมาลิน", "มาลินพลาซ่า"],
     "รอบ มน.": ["รอบมน", "มน.", "ม.นเรศวร", "ท่าโพธิ์"],
     "หน้า มฟล.": ["หน้ามฟล", "มฟล.", "มฟล", "ม.แม่ฟ้าหลวง"],
-    "UD Town": ["ud town", "udtown", "ยูดีทาวน์", "ยูดี"],
+    "ud town": ["ud town", "udtown", "ยูดีทาวน์", "ยูดี"],
     "กังสดาล": ["กังสดาล", "บึงหนองแวง"],
     "หลัง มข.": ["หลังมอ", "หลังมข", "หลัง มข", "โนนม่วง"]
   };
@@ -2319,66 +2344,77 @@ finalHtml = finalHtml.replace(
          aliases.some(alias => combined.includes(alias));
 }
 
-    // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซน
-const zoneCountMap = {};
-const baseProvProfiles = deduplicatedProfiles.filter(p => {
-  const pKey = (p.provinceKey || "").toLowerCase();
-  return provinceKeyVariants.includes(pKey);
-});
+    // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซนจาก MASTER_ZONES (ตรงกับ shared-config.js และ sitemap.js 100%)
+    const baseProvProfiles = deduplicatedProfiles.filter(p => {
+      const pKey = (p.provinceKey || "").toLowerCase();
+      return provinceKeyVariants.includes(pKey);
+    });
 
-// ✅ แก้ไข: ดึง Array โซนจาก seoData.zones ที่ประกาศไว้ใน PROVINCE_SEO_DATA
-const zonesToScan = (seoData && Array.isArray(seoData.zones)) ? seoData.zones : [];
+    const provMasterZones = MASTER_ZONES[provinceSlug] || [];
+    const activeZonesForPills = [];
 
-zonesToScan.forEach(rawZ => {
-  const cleanZ = sanitizeThaiText(rawZ).replace(/^(โซน|ย่าน)/, "").trim().toLowerCase();
-  if (!cleanZ || cleanZ === "ทั้งหมด") return;
-  
-  const count = baseProvProfiles.filter(p => matchProfileToZone(p, cleanZ)).length;
-  if (count > 0) {
-    zoneCountMap[rawZ] = count;
-  }
-});
+    provMasterZones.forEach(zObj => {
+      const count = baseProvProfiles.filter(p => {
+        const rawTags = p.styleTags || p.style_tags; const tagsStr = Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "");
+        const combined = `${sanitizeThaiText(p.location || "")} ${sanitizeThaiText(p.description || "")} ${tagsStr}`.toLowerCase();
+        return zObj.match.some(m => combined.includes(m.toLowerCase()));
+      }).length;
+      if (count > 0) {
+        activeZonesForPills.push({ ...zObj, count });
+      }
+    });
 
-    
+    // 🟢 สร้างปุ่มลิงก์โซน (หน้าจังหวัด) หรือปุ่มจังหวัดอัตโนมัติ (หน้าแรก)
+    let pills = `
+      <a href="/location/${provinceSlug}" class="filter-pill-tab ${!activeZoneObj ? 'active' : ''}" data-tag="all">
+        <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
+        <span class="badge-count">${baseProvProfiles.length}</span>
+      </a>
+    `;
 
-    // 🟢 สร้างปุ่มลิงก์โซนภาษาไทย ทรงแคปซูลหรูหรา สไตล์แอปมือถือ (Clean Code + SEO)
-const activeZoneKeys = Object.keys(zoneCountMap);
-const isAllActive = !zoneSlug;
+    pills += activeZonesForPills.map(z => {
+      const isActiveZone = activeZoneObj && activeZoneObj.slug === z.slug;
+      return `
+        <a href="/location/${provinceSlug}/${z.slug}" class="filter-pill-tab ${isActiveZone ? 'active' : ''}" title="สาวรับงานและไซด์ไลน์โซน${escapeHTML(z.thai)}">
+          <span>📍 ไซด์ไลน์${escapeHTML(z.thai)}</span>
+          <span class="badge-count">${z.count}</span>
+        </a>
+      `;
+    }).join("");
 
-// ✅ เติม data-tag="all"
-let pills = `
-  <a href="/location/${provinceSlug}" class="filter-pill-tab ${isAllActive ? 'active' : ''}" data-tag="all">
-    <span>✨ ทั้งหมดใน${escapeHTML(provinceNameThai)}</span>
-    <span class="badge-count">${baseProvProfiles.length}</span>
-  </a>
-`;
+    if (!isNational && pills) {
+      finalHtml = finalHtml.replace(
+        /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
+        `<div class="filter-pills-scroll-row" id="quick-filter-pills">${pills}</div>`
+      );
+    } else if (isNational && !isProfilesDirectory) {
+      const ALL_PROVINCE_PILLS = [
+        { key: "chiangmai", label: "เชียงใหม่", title: "ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน" },
+        { key: "chiangrai", label: "เชียงราย", title: "ไซด์ไลน์เชียงราย รับงานเชียงราย ฟิวแฟน" },
+        { key: "lampang", label: "ลำปาง", title: "ไซด์ไลน์ลำปาง รับงานลำปาง ฟิวแฟน" },
+        { key: "lamphun", label: "ลำพูน", title: "ไซด์ไลน์ลำพูน รับงานลำพูน ฟิวแฟน" },
+        { key: "phitsanulok", label: "พิษณุโลก", title: "ไซด์ไลน์พิษณุโลก รับงานพิษณุโลก ฟิวแฟน" },
+        { key: "bangkok", label: "กรุงเทพฯ", title: "ไซด์ไลน์กรุงเทพฯ รับงานกรุงเทพฯ ฟิวแฟน" },
+        { key: "chonburi", label: "พัทยา-ชลบุรี", title: "ไซด์ไลน์พัทยา ไซด์ไลน์ชลบุรี รับงานพัทยา" },
+        { key: "ayutthaya", label: "อยุธยา", title: "ไซด์ไลน์อยุธยา รับงานอยุธยา ฟิวแฟน" },
+        { key: "khon-kaen", label: "ขอนแก่น", title: "ไซด์ไลน์ขอนแก่น รับงานขอนแก่น ฟิวแฟน" },
+        { key: "udonthani", label: "อุดรธานี", title: "ไซด์ไลน์อุดรธานี รับงานอุดรธานี ฟิวแฟน" },
+        { key: "korat", label: "โคราช", title: "ไซด์ไลน์โคราช รับงานโคราช นครราชสีมา" },
+        { key: "phuket", label: "ภูเก็ต", title: "ไซด์ไลน์ภูเก็ต รับงานภูเก็ต ฟิวแฟน" },
+        { key: "songkhla", label: "หาดใหญ่", title: "ไซด์ไลน์หาดใหญ่ รับงานหาดใหญ่ สงขลา" },
+        { key: "suratthani", label: "สุราษฎร์-สมุย", title: "ไซด์ไลน์สุราษฎร์ธานี ไซด์ไลน์สมุย รับงานสมุย" }
+      ];
 
-pills += activeZoneKeys.map(z => {
-  const cleanZ = escapeHTML(String(z).trim());
-  const count = zoneCountMap[z];
-  const cleanSlugZone = cleanZ.replace(/\s+/g, "-");
-  
-  // ✅ ดึงจาก MASTER_ZONE_TO_SLUG ตัวเดียว ครอบคลุมทุกจังหวัดทั่วไทย
-const slugPart = MASTER_ZONE_TO_SLUG[cleanZ] || MASTER_ZONE_TO_SLUG[cleanZ.replace(/\./g, "")] || cleanZ.replace(/\s+/g, "-");
-const href = `/location/${provinceSlug}/${slugPart}`;
-  
-  const isActiveZone = zoneSlug && (zoneSlug === cleanZ || zoneSlug.includes(cleanZ));
+      const liveProvLinks = ALL_PROVINCE_PILLS
+        .filter(item => (provinceCounts[item.key] || 0) > 0)
+        .map(item => `<a href="/location/${item.key}" class="filter-pill-tab" style="text-decoration: none;" title="${item.title}">📍 ${item.label}</a>`)
+        .join("\n      ");
 
-  return `
-    <a href="${href}" class="filter-pill-tab ${isActiveZone ? 'active' : ''}" title="สาวรับงานและไซด์ไลน์โซน${cleanZ}">
-      <span>📍 ไซด์ไลน์${cleanZ}</span>
-      <span class="badge-count">${count}</span>
-    </a>
-  `;
-}).join("");
-
-if (!isNational && pills) {
-  // นำไปแทนที่ใน HTML
-  finalHtml = finalHtml.replace(
-    /<div class="filter-pills-scroll-row" id="quick-filter-pills">[\s\S]*?<\/div>/i,
-    `<div class="filter-pills-scroll-row" id="quick-filter-pills">${pills}</div>`
-  );
-}
+      finalHtml = finalHtml.replace(
+        /(<button class="filter-pill-tab active"[^>]*>[\s\S]*?<\/button>)[\s\S]*?(<button class="filter-pill-tab"[^>]*data-tag="ฟิวแฟน")/i,
+        `$1\n      ${liveProvLinks}\n      $2`
+      );
+    }
     
    const trustBoxHtml = `
       <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
@@ -2414,7 +2450,9 @@ if (!isNational && pills) {
       finalHtml = finalHtml.replace(/<ol[^>]*>[\s\S]*?<\/ol>/i, `<ol style="display: flex; align-items: center; gap: 6px; list-style: none; padding: 0; margin: 0; font-size: 11.5px;"><li><a href="/" style="color: #64748B; text-decoration: none;">หน้าแรก</a></li><li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>${bcHtml}</ol>`);
 
       finalHtml = finalHtml.replace(/<div class="bento-header-center">[\s\S]*?HOW IT WORKS[\s\S]*?<div class="steps-compact-grid">[\s\S]*?<\/div>\s*(?=<div class="trust-protocol-bento")/i, "");
-      finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?(?=<!--\s*SEO Information Section)/i, "");
+      
+      finalHtml = finalHtml.replace(/<!--\s*Lifestyle & Vibes Bento\s*-->[\s\S]*?<div class="vibes-bento-wrapper"[\s\S]*?(?=<div id=["']seo-drawer-wrapper["'])/i, "");
+      
       finalHtml = finalHtml.replace(/<!--\s*Editorial Digest\s*-->\s*<section class="editorial-digest-section"[\s\S]*?<\/section>/i, "");
       finalHtml = finalHtml.replace(/<!--\s*Trust & Safety Reporting Center\s*-->[\s\S]*?<div class="live-concierge-bar"[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/i, "</div></section>");
       finalHtml = finalHtml.replace(/<!--\s*Safety Protocol & Maps\s*-->\s*<section id="verification-process"[\s\S]*?<\/section>/i, "");
@@ -2426,7 +2464,7 @@ if (!isNational && pills) {
     const topStoryProfiles = profilesList.slice(0, 10);
     const renderStoryItem = (p) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
-      const sSlug = encodeURIComponent(p.slug || p.id);
+      const sSlug = encodeURIComponent(getCanonicalProfileSlug(p));
       let rawImg = p.imagePath || p.image_url || "";
       if (!rawImg || rawImg.includes("firstmodelhub.webp")) {
         rawImg = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
@@ -2494,33 +2532,45 @@ if (!isNational && pills) {
         { key: "udonthani", name: "อุดรธานี", tag: "ภาคอีสาน" },
         { key: "chiangrai", name: "เชียงราย", tag: "ภาคเหนือ" },
         { key: "lampang", name: "ลำปาง", tag: "ภาคเหนือ" },
-        { key: "bangkok", name: "กรุงเทพฯ", tag: "เร็วๆ นี้" }
+        { key: "bangkok", name: "กรุงเทพฯ", tag: "ภาคกลาง" }
       ];
 
-      const cityHubCardsHtml = popularProvinces.map(cp => {
-        const count = provinceCounts[cp.key] || 0;
-        const isComingSoon = cp.key === "bangkok" && count === 0;
-        const linkHref = isComingSoon ? "https://line.me/ti/p/u8Bz9HsaY8" : `/location/${cp.key}`;
-        const countBadge = isComingSoon 
-  ? `<span style="background: #FFE4E6; color: #9F1239; font-size: 10.5px; font-weight: 900; padding: 3px 9px; border-radius: 100px; border: 1px solid #FDA4AF;">เปิดรับสมัคร</span>`
-          : `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>`;
-
-        return `
-          <a href="${linkHref}" class="city-hub-card interactive-card" style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 18px;">📍</span>
-              <div>
-                <strong style="color: #140F22; font-size: 13.5px; font-weight: 900; display: block;">รับงาน${escapeHTML(cp.name)} (ไซด์ไลน์)</strong>
-                <span style="color: #94A3B8; font-size: 10.5px;">${cp.tag}</span>
+      const cityHubCardsHtml = popularProvinces
+        .filter(cp => (provinceCounts[cp.key] || 0) > 0)
+        .map(cp => {
+          const count = provinceCounts[cp.key] || 0;
+          return `
+            <a href="/location/${cp.key}" class="city-hub-card interactive-card" style="background: #FFFFFF !important; border: 1.5px solid rgba(124, 58, 237, 0.15) !important; border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">📍</span>
+                <div>
+                  <strong style="color: #140F22 !important; font-size: 12.5px; font-weight: 800; display: block;">${escapeHTML(cp.name)}</strong>
+                  <span style="color: #64748B !important; font-size: 10.5px; font-weight: 600;">${cp.tag}</span>
+                </div>
               </div>
-            </div>
-            ${countBadge}
-          </a>
-        `;
-      }).join("");
+              <span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${count} คน</span>
+            </a>
+          `;
+        }).join("");
+
+      const paginationHtml = isProfilesDirectory
+        ? `<div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 22px;">
+            ${Array.from({ length: dirTotalPages }, (_, idx) => {
+              const pNum = idx + 1;
+              const pHref = pNum === 1 ? "/profiles" : `/profiles?page=${pNum}`;
+              const isCurr = pNum === pageNumForProfiles;
+              return `<a href="${pHref}" style="display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 38px; padding: 0 12px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; ${isCurr ? "background: #7C3AED; color: #FFFFFF;" : "background: #FFFFFF; color: #140F22; border: 1.5px solid rgba(124,58,237,0.2);"}">${pNum}</a>`;
+            }).join("")}
+          </div>`
+        : `<div style="text-align: center; margin-top: 20px;">
+            <a href="/profiles" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%); color: #FFFFFF; font-size: 13px; font-weight: 800; padding: 11px 24px; border-radius: 100px; text-decoration: none; box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);">
+              <span>ดูโปรไฟล์สาวๆ ทั้งหมด (${totalCount} คน)</span>
+              <span>&rarr;</span>
+            </a>
+          </div>`;
 
       displayAreaHtml = `
-        <!-- ส่วนที่ 1: หมวดหมู่จังหวัดยอดนิยม -->
+        ${!isProfilesDirectory ? `
         <section class="national-city-hubs-section" style="margin-top: 20px; margin-bottom: 26px;">
           <div class="featured-header-clean-row" style="margin-bottom: 12px;">
             <div class="featured-title-flex">
@@ -2532,15 +2582,14 @@ if (!isNational && pills) {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;">
             ${cityHubCardsHtml}
           </div>
-        </section>
+        </section>` : ""}
 
-        <!-- ส่วนที่ 2: แสดงโปรไฟล์ครบทุกคนตามจริง ไม่ตัดทิ้ง -->
         <section class="section-content-wrapper" style="margin-top: 10px;">
           <div class="province-header-row">
             <h2 class="province-clean-title">
               <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
               <span class="province-prefix">สาวรับงาน &amp; ไซด์ไลน์</span>
-              <span class="province-name-highlight">สไตล์ฟิวแฟน ยอดนิยมทั่วไทย</span>
+              <span class="province-name-highlight">${isProfilesDirectory ? `ทั้งหมด (หน้า ${pageNumForProfiles}/${dirTotalPages})` : "สไตล์ฟิวแฟน ยอดนิยมทั่วไทย"}</span>
             </h2>
             <span class="province-count-pill">
               <span class="pulse-dot-el"></span>
@@ -2550,9 +2599,9 @@ if (!isNational && pills) {
           <div class="profile-grid profiles-grid-row">
             ${feedCardsHtml}
           </div>
+          ${paginationHtml}
         </section>
       `;
-    // 🟢 [จุดสำคัญที่กู้คืนมา]: บล็อก else สำหรับหน้ารายจังหวัดและโซนย่อยทั้งหมด!
     } else {
       displayAreaHtml = `
         <div class="section-content-wrapper">
@@ -2569,9 +2618,9 @@ if (!isNational && pills) {
       `;
     }
 
-   finalHtml = finalHtml.replace(
-      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, 
-      `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์สาวรับงานและไซด์ไลน์${provinceNameThai}">${displayAreaHtml}</div>`
+    finalHtml = finalHtml.replace(
+      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
+      () => `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์สาวรับงานและไซด์ไลน์${provinceNameThai}">${displayAreaHtml}</div>`
     );
 
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
@@ -2604,7 +2653,7 @@ if (!isNational && pills) {
     const liveTopModels = uniqueTopModels.map(p => {
       const rawClean = (p.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim();
       const cleanN = escapeHTML(rawClean || "สาวสวย");
-      const pSlug = encodeURIComponent(p.slug || p.id);
+      const pSlug = encodeURIComponent(getCanonicalProfileSlug(p));
       return `<a href="/sideline/${pSlug}" style="display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1px solid rgba(124, 58, 237, 0.2); color: #4C1D95; font-size: 11.5px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-decoration: none;">✨ น้อง${cleanN}</a>`;
     }).join("");
 
@@ -2652,7 +2701,7 @@ if (!isNational && pills) {
 
   const forceAdjucgga = (urlStr) => {
       if (!urlStr || typeof urlStr !== "string") return "";
-      return urlStr.replace(/res\.cloudinary\.com\/dyynjlbuj\//gi, "res.cloudinary.com/dduxw7k4/");
+      return urlStr.replace(/res\.cloudinary\.com\/(?:adjucgga|dyynjlbuj|drffioary)\//gi, "res.cloudinary.com/dduxw7k4/");
     };
 
     const clientProfilesData = profilesList.map(p => {
@@ -2784,18 +2833,24 @@ if (lcpTargetProfile) {
 }
 
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
-    finalHtml = finalHtml.replace(/\/styles\.css\?v=[^"'\s>]+/g, `/styles.css?v=${GLOBAL_VERSION}`);
-    finalHtml = finalHtml.replace(/\/main\.js\?v=[^"'\s>]+/g, `/main.js?v=${GLOBAL_VERSION}`);
+    finalHtml = finalHtml.replace(/(href=["'])\/?styles\.css\?v=[^"'\s>]+/g, `$1/styles.css?v=${GLOBAL_VERSION}`);
+finalHtml = finalHtml.replace(/(src=["'])\/?main\.js\?v=[^"'\s>]+/g, `$1/main.js?v=${GLOBAL_VERSION}`);
 
-    if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) { finalHtml = finalHtml.replace(/<head>/i, '<head>\n <meta charset="utf-8">'); } const responseHeaders = { "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+    if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) {
+      finalHtml = finalHtml.replace(/<head>/i, '<head>\n  <meta charset="utf-8">');
+    }
+    const responseHeaders = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": isForceRefresh ? "no-store" : "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": isForceRefresh ? "no-store" : "public, s-maxage=86400, stale-while-revalidate=86400",
       "ETag": `"${GLOBAL_VERSION}"`,
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
     };
 
-    setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
-   return new Response(finalHtml, { headers: responseHeaders });
+    if (!isForceRefresh) {
+      setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
+    }
+    return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);

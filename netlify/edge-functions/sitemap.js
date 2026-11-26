@@ -1,4 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
+import {
+  MASTER_ZONES,
+  normalizeProvKey,
+  getCanonicalProfileSlug,
+  safeOptimizeImg
+} from "./shared-config.js";
 
 const CONFIG = {
   get SUPABASE_URL() {
@@ -37,102 +43,9 @@ const getProfileMainImage = (p) => {
   return img.trim();
 };
 
-// ✅ ใช้บัญชี dduxw7k4 + f_webp ตรงกับหน้าเว็บจริง 100%
-const optimizeImgForXml = (path) => {
-  if (!path || typeof path !== "string" || !path.trim()) return null;
-  const cleanPath = path.trim();
-  const transform = "f_webp,q_auto:good,w_600,h_840,c_fill,g_auto";
-  const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
-  if (match) {
-    let fileName = match[0].replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
-    if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
-    return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
-  }
-  return cleanPath;
-};
-
-const normalizeProvKey = (raw) => {
-  let k = String(raw || "").trim().toLowerCase();
-  if (k === "chiang_mai" || k === "chiang-mai") return "chiangmai";
-  if (k === "khonkaen" || k === "khon_kaen") return "khon-kaen";
-  if (k === "phra-nakhon-si-ayutthaya") return "ayutthaya";
-  if (k === "nakhon-ratchasima" || k === "nakhonratchasima") return "korat";
-  if (k === "hat-yai" || k === "hatyai") return "songkhla";
-  if (k === "samui" || k === "surat-thani") return "suratthani";
-  return k;
-};
-
-// ✅ โซนตรงกับ ssr-province.js 100% (ไม่มี namor / namor-kku / m-phak ที่ขัดกันแล้ว)
-const TARGET_SUB_ZONES = [
-  // 1. เชียงใหม่
-  { province: "chiangmai", zone: "nimman", matchWords: ["นิมมาน", "nimman", "นิมมานเหมินท์"] },
-  { province: "chiangmai", zone: "jedyod", matchWords: ["เจ็ดยอด"] },
-  { province: "chiangmai", zone: "santitham", matchWords: ["สันติธรรม"] },
-  { province: "chiangmai", zone: "changphueak", matchWords: ["ช้างเผือก"] },
-  { province: "chiangmai", zone: "maejo", matchWords: ["แม่โจ้"] },
-  { province: "chiangmai", zone: "cmu", matchWords: ["หลัง มช", "หลังมอ", "หลัง มช."] },
-  { province: "chiangmai", zone: "front-cmu", matchWords: ["หน้า มช", "หน้ามอ", "หน้า มช."] },
-  { province: "chiangmai", zone: "sansai", matchWords: ["สันทราย"] },
-  { province: "chiangmai", zone: "hangdong", matchWords: ["หางดง"] },
-  { province: "chiangmai", zone: "maerim", matchWords: ["แม่ริม"] },
-  { province: "chiangmai", zone: "kumueang", matchWords: ["คูเมือง", "ในเมืองเชียงใหม่", "ตัวเมืองเชียงใหม่"] },
-  { province: "chiangmai", zone: "thapae", matchWords: ["ท่าแพ"] },
-  { province: "chiangmai", zone: "huaykaew", matchWords: ["ห้วยแก้ว"] },
-  { province: "chiangmai", zone: "ruamchok", matchWords: ["รวมโชค"] },
-  { province: "chiangmai", zone: "payap", matchWords: ["พายัพ"] },
-  { province: "chiangmai", zone: "centralfest", matchWords: ["เซ็นทรัลเฟส", "เซ็นทรัลเฟสติวัล"] },
-  { province: "chiangmai", zone: "airport-cnx", matchWords: ["สนามบิน"] },
-
-  // 2. ภูเก็ต
-  { province: "phuket", zone: "patong", matchWords: ["ป่าตอง"] },
-  { province: "phuket", zone: "mueang-phuket", matchWords: ["ตัวเมืองภูเก็ต", "เมืองภูเก็ต", "ในเมือง"] },
-  { province: "phuket", zone: "kathu", matchWords: ["กะทู้"] },
-  { province: "phuket", zone: "chalong", matchWords: ["ฉลอง"] },
-  { province: "phuket", zone: "karon", matchWords: ["กะรน"] },
-  { province: "phuket", zone: "kata", matchWords: ["กะตะ"] },
-  { province: "phuket", zone: "bangtao", matchWords: ["บางเทา"] },
-  { province: "phuket", zone: "rawai", matchWords: ["ราไวย์"] },
-  { province: "phuket", zone: "cherngtalay", matchWords: ["เชิงทะเล"] },
-  { province: "phuket", zone: "kamala", matchWords: ["กมลา"] },
-
-  // 3. ขอนแก่น
-  { province: "khon-kaen", zone: "kangsadan", matchWords: ["กังสดาล"] },
-  { province: "khon-kaen", zone: "kku", matchWords: ["หลัง มข", "หลัง มข."] },
-  { province: "khon-kaen", zone: "kku-front", matchWords: ["หน้า มข", "หน้า มข."] },
-  { province: "khon-kaen", zone: "nonmuang", matchWords: ["โนนม่วง"] },
-  { province: "khon-kaen", zone: "central-khonkaen", matchWords: ["เซ็นทรัลขอนแก่น"] },
-  { province: "khon-kaen", zone: "buengkaennakhon", matchWords: ["บึงแก่นนคร"] },
-  { province: "khon-kaen", zone: "mueang-khonkaen", matchWords: ["ในตัวเมือง", "ในเมือง"] },
-  { province: "khon-kaen", zone: "m-phak-area", matchWords: ["ม.ภาค"] },
-
-  // 4. เชียงราย
-  { province: "chiangrai", zone: "baandu", matchWords: ["บ้านดู่"] },
-  { province: "chiangrai", zone: "mfu", matchWords: ["หน้า มฟล", "มฟล", "แม่ฟ้าหลวง"] },
-  { province: "chiangrai", zone: "mueang-chiangrai", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "chiangrai", zone: "clock-tower", matchWords: ["หอนาฬิกา"] },
-  { province: "chiangrai", zone: "rim-kok", matchWords: ["ริมกก"] },
-  { province: "chiangrai", zone: "maesai", matchWords: ["แม่สาย"] },
-
-  // 5. อุดรธานี
-  { province: "udonthani", zone: "udtown", matchWords: ["ud town", "ยูดีทาวน์", "udtown"] },
-  { province: "udonthani", zone: "nongprajak", matchWords: ["หนองประจักษ์"] },
-  { province: "udonthani", zone: "central-udon", matchWords: ["เซ็นทรัลอุดร"] },
-  { province: "udonthani", zone: "mueang-udon", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "udonthani", zone: "ban-chan", matchWords: ["บ้านจาน", "บ้านจั่น"] },
-  { province: "udonthani", zone: "rangsina", matchWords: ["รังษิณา"] },
-
-  // 6. ลำปาง
-  { province: "lampang", zone: "mueang-lampang", matchWords: ["ตัวเมือง", "ในเมือง"] },
-  { province: "lampang", zone: "suan-dok", matchWords: ["สวนดอก"] },
-  { province: "lampang", zone: "lpru", matchWords: ["ราชภัฏลำปาง"] },
-  { province: "lampang", zone: "sob-tui", matchWords: ["สบตุ๋ย"] },
-  { province: "lampang", zone: "atsavin", matchWords: ["อัศวิน"] },
-  { province: "lampang", zone: "ko-kha", matchWords: ["เกาะคา"] }
-];
-
 export default async () => {
   const domain = CONFIG.PRIMARY_DOMAIN;
-  const fallbackDate = "2026-11-22T00:00:00.000Z";
+  const fallbackDate = "2026-11-25T00:00:00.000Z";
 
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -175,10 +88,14 @@ export default async () => {
       xml += `  <url>\n    <loc>${escapeXml(domain + p.path)}</loc>\n    <lastmod>${p.lastmod}</lastmod>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
     });
 
-    // ✅ เฉพาะจังหวัดที่มีโปรไฟล์จริง >= 1 คนใน Supabase
+    // เฉพาะจังหวัดที่มีโปรไฟล์จริง >= 1 คน
+    const seenProvKeys = new Set();
     provinces.forEach(prov => {
       if (!prov?.key) return;
       const cleanKey = normalizeProvKey(prov.key);
+      if (seenProvKeys.has(cleanKey)) return;
+      seenProvKeys.add(cleanKey);
+
       const provProfiles = profiles.filter(m => normalizeProvKey(m.provinceKey || m.province_slug || m.province_key || "chiangmai") === cleanKey);
       if (provProfiles.length === 0) return;
 
@@ -190,36 +107,37 @@ export default async () => {
       xml += `  <url>\n    <loc>${escapeXml(buildSafeUrl(domain, `/location/${cleanKey}`))}</loc>\n    <lastmod>${provDate}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
     });
 
-    // ✅ เฉพาะโซนที่มีโปรไฟล์จริง >= 1 คน
-    TARGET_SUB_ZONES.forEach(sz => {
-      const zoneProfiles = profiles.filter(p => {
-        const pKey = normalizeProvKey(p.provinceKey || p.province_key || p.province_slug || "chiangmai");
-        const pLoc = (p.location || "").toLowerCase();
-        return pKey === sz.province && sz.matchWords.some(w => pLoc.includes(w.toLowerCase()));
+    // ดึงโซนจาก MASTER_ZONES เดียวกับ ssr-province.js และใส่เฉพาะโซนที่มี >= 2 โปรไฟล์ (ไม่เอาหน้า noindex เข้า Sitemap)
+    Object.entries(MASTER_ZONES).forEach(([provSlug, zones]) => {
+      zones.forEach(z => {
+        const zoneProfiles = profiles.filter(p => {
+          const pKey = normalizeProvKey(p.provinceKey || p.province_key || p.province_slug || "chiangmai");
+          const rawTags = p.styleTags || p.style_tags; const tagsStr = Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "");
+          const combined = `${p.location || ""} ${p.description || ""} ${tagsStr}`.toLowerCase();
+          return pKey === provSlug && z.match.some(w => combined.includes(w.toLowerCase()));
+        });
+        if (zoneProfiles.length < 2) return;
+
+        const zoneDate = zoneProfiles.reduce((max, m) => {
+          const d = safeGetIsoDate(m.updated_at || m.created_at, fallbackDate);
+          return d > max ? d : max;
+        }, "2026-11-01T00:00:00.000Z");
+
+        xml += `  <url>\n    <loc>${escapeXml(buildSafeUrl(domain, `/location/${provSlug}/${z.slug}`))}</loc>\n    <lastmod>${zoneDate}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
       });
-      if (zoneProfiles.length === 0) return;
-
-      const zoneDate = zoneProfiles.reduce((max, m) => {
-        const d = safeGetIsoDate(m.updated_at || m.created_at, fallbackDate);
-        return d > max ? d : max;
-      }, "2026-11-01T00:00:00.000Z");
-
-      xml += `  <url>\n    <loc>${escapeXml(buildSafeUrl(domain, `/location/${sz.province}/${sz.zone}`))}</loc>\n    <lastmod>${zoneDate}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
     });
 
-    // โปรไฟล์รายคน
+    // โปรไฟล์รายคน (ใช้ Canonical Slug เดียวกับ render-bot.js และ ssr-province.js)
     profiles.forEach(p => {
-      let rawSlug = String(p.slug || p.id).trim();
-      if (/[\u0E00-\u0E7F]/.test(rawSlug)) rawSlug = `model-${p.id}`;
-
-      const safeProfileUrl = buildSafeUrl(domain, `/sideline/${rawSlug}`);
+      const canonicalSlug = getCanonicalProfileSlug(p);
+      const safeProfileUrl = buildSafeUrl(domain, `/sideline/${canonicalSlug}`);
       const modDate = safeGetIsoDate(p.updated_at || p.created_at, fallbackDate);
 
       let imageXml = "";
       const imgPath = getProfileMainImage(p);
       if (imgPath) {
-        const imgUrl = optimizeImgForXml(imgPath);
-        if (imgUrl) {
+        const imgUrl = safeOptimizeImg(imgPath, 600);
+        if (imgUrl && !imgUrl.includes("firstmodelhub.webp")) {
           const cleanName = (p.name ? String(p.name) : "สาวสวย").replace(/^(น้อง\s?)+/gi, "").replace(/🚨/g, "").trim();
           imageXml = `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>น้อง${escapeXml(cleanName)}</image:title>\n    </image:image>`;
         }
