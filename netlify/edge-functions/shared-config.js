@@ -1,12 +1,42 @@
 // netlify/edge-functions/shared-config.js
 
-export const BRAND_CONFIG = {
+export const CONFIG = {
+  get SUPABASE_URL() {
+    try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; }
+    catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
+  },
+  get SUPABASE_KEY() {
+    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
+    catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
+  },
+  get PURGE_SECRET() {
+    try { return Deno.env.get("PURGE_SECRET") || ""; }
+    catch { return ""; }
+  },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/dduxw7k4/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
-  DEFAULT_LINE_URL: "https://line.me/ti/p/u8Bz9HsaY8",
-  DEFAULT_TELEPHONE: "+66926997044"
+  DEFAULT_TELEPHONE: "+66926997044",
+  SOCIAL_LINKS: [
+    "https://line.me/ti/p/u8Bz9HsaY8",
+    "https://x.com/Timedamdam",
+    "https://bsky.app/profile/sidelinechiangmai.bsky.social",
+    "https://linktr.ee/kissmodel"
+  ]
+};
+
+// คง BRAND_CONFIG ไว้เพื่อให้โค้ดเดิมที่ import อยู่ยังทำงานได้ 100%
+export const BRAND_CONFIG = {
+  PRIMARY_DOMAIN: CONFIG.PRIMARY_DOMAIN,
+  BRAND_NAME: CONFIG.BRAND_NAME,
+  BRAND_LEGAL_NAME: CONFIG.BRAND_LEGAL_NAME,
+  DEFAULT_OG_IMAGE: CONFIG.DEFAULT_OG_IMAGE,
+  DEFAULT_LINE_URL: CONFIG.SOCIAL_LINKS[0],
+  DEFAULT_TELEPHONE: CONFIG.DEFAULT_TELEPHONE,
+  CLOUDINARY_BASE_URL: CONFIG.CLOUDINARY_BASE_URL,
+  SOCIAL_LINKS: CONFIG.SOCIAL_LINKS
 };
 
 export function normalizeProvKey(raw) {
@@ -77,7 +107,7 @@ export const MASTER_ZONES = {
     { slug: "nongprajak", thai: "หนองประจักษ์", match: ["หนองประจักษ์"] },
     { slug: "central-udon", thai: "เซ็นทรัลอุดร", match: ["เซ็นทรัลอุดร", "เซ็นทรัล"] },
     { slug: "mueang-udon", thai: "ตัวเมืองอุดร", match: ["ตัวเมือง", "ในเมือง", "ในตัวเมือง"] },
-    { slug: "ban-chan", thai: "บ้านจาน", match: ["บ้านจาน", "บ้านจั่น"] },
+    { slug: "ban-chan", thai: "บ้านจั่น", match: ["บ้านจาน", "บ้านจั่น"] },
     { slug: "pho-si", thai: "โพศรี", match: ["โพศรี"] },
     { slug: "rangsina", thai: "ตลาดรังษิณา", match: ["รังษิณา"] }
   ],
@@ -114,7 +144,7 @@ export function getCanonicalProfileSlug(p) {
 }
 
 export function safeOptimizeImg(imagePath, mode = "card") {
-  const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
+  const DEFAULT_FALLBACK_IMG = CONFIG.DEFAULT_OG_IMAGE;
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
   const cleanPath = imagePath.trim();
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
@@ -134,12 +164,8 @@ export function safeOptimizeImg(imagePath, mode = "card") {
   const cldMarker = "/image/upload/";
   if (cleanPath.includes("res.cloudinary.com") && cleanPath.includes(cldMarker)) {
     const markerIdx = cleanPath.indexOf(cldMarker);
-    const prefix = cleanPath.slice(0, markerIdx);
     const rest = cleanPath.slice(markerIdx + cldMarker.length);
-    const cloudMatch = prefix.match(/^https?:\/\/res\.cloudinary\.com\/([^\/]+)/i);
-
-    if (cloudMatch && rest) {
-      const cloudName = "dduxw7k4";
+    if (rest) {
       const parts = rest.split("/");
       const verIdx = parts.findIndex((seg) => /^v\d+$/.test(seg));
       let tailParts = [];
@@ -159,17 +185,15 @@ export function safeOptimizeImg(imagePath, mode = "card") {
       }
 
       if (tailParts.length > 0) {
-        return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${tailParts.join("/")}`;
+        return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${tailParts.join("/")}`;
       }
     }
   }
 
-if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
+  if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   const finalPath = formatted.startsWith("images/") ? formatted : `images/${formatted}`;
-  return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
+  return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${finalPath}`;
 }
 
-// ✅ บรรทัดนี้บรรทัดเดียวจบ ห้ามมี export default ซ้ำอีก
 export default async (req, context) => context.next();
-
