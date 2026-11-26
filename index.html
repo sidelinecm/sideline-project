@@ -49,7 +49,7 @@
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
  
-  <link rel="stylesheet" href="styles.css?v=v_20261126_01">
+  <link rel="stylesheet" href="styles.css?v=v_20261126_02">
 
   <script type="speculationrules">
   {
@@ -103,9 +103,7 @@
       if (gtmLoaded) return;
       gtmLoaded = true;
 
-      ['scroll', 'keydown'].forEach(function(evt){
-        window.removeEventListener(evt, triggerGTM, { passive: true });
-      });
+      window.removeEventListener('keydown', triggerGTM, { passive: true });
 
       var s = document.createElement('script');
       s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
@@ -120,22 +118,18 @@
 
     function triggerGTM() {
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadGTM, { timeout: 1500 });
+        requestIdleCallback(loadGTM, { timeout: 2000 });
       } else {
         setTimeout(loadGTM, 300);
       }
     }
 
-    // 🟢 เอา pointerdown และ touchstart ออก (เพื่อไม่ให้แย่ง CPU ตอนผู้ใช้กดปุ่ม)
-    ['scroll', 'keydown'].forEach(function(evt){
-      window.addEventListener(evt, triggerGTM, { once: true, passive: true });
-    });
+    window.addEventListener('keydown', triggerGTM, { once: true, passive: true });
 
-    // สำรองกรณีผู้ใช้ไม่ได้แตะหรือเลื่อนจอ ให้โหลดอัตโนมัติที่ 3.5 วินาที
     window.addEventListener('load', function() {
       setTimeout(function() {
         if (!gtmLoaded) triggerGTM();
-      }, 3500);
+      }, 4500);
     }, { once: true });
   })();
 </script>
@@ -634,7 +628,7 @@
           <a href="/privacy-policy">Privacy Policy</a>
           <a href="/about">Terms & Safe Protocol</a>
         </div>
-        <div style="font-size: 10px; color: #94A3B8; max-width: 580px; margin: 10px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px; text-align: center; line-height: 1.5;">
+        <div style="font-size: 10px; color: #64748B; max-width: 580px; margin: 10px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px; text-align: center; line-height: 1.5;">
           <strong>Content & Copyright Notice:</strong> FirstModelHub operates purely as an online directory and information service. All promotional listings, profiles, and associated images are provided and updated independently by individual third-party advertisers. We do not claim ownership, control, or responsibility for any user-generated content. For immediate copyright verification or removal requests, please officially reach out to us at: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.
         </div>
       </div>
@@ -645,7 +639,7 @@
     <div id="lightbox-content-wrapper-el">
       <div class="sheet-drag-pill-bar" id="lightbox-drag-bar" aria-hidden="true"></div>
       <div class="lightbox-top-brand" style="position: absolute !important; top: 12px !important; left: 12px !important; right: auto !important; width: fit-content !important; max-width: fit-content !important; z-index: 60 !important; background: transparent !important; padding: 0 !important; margin: 0 !important;">
-        <span class="brand-luxe-logo is-compact" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 5px 12px 5px 8px !important; border-radius: 100px !important; background: rgba(18, 12, 34, 0.65) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;">
+        <span class="brand-luxe-logo is-compact" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 5px 12px 5px 8px !important; border-radius: 100px !important; background: rgba(18, 12, 34, 0.85) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;">
           <span class="luxe-star-crest" aria-hidden="true" style="display: flex; align-items: center; filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none">
               <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" fill="url(#fmh-gold-grad)"></path>
@@ -673,7 +667,8 @@
        alt="รูปโปรไฟล์ตัวจริงตรงปก" 
        width="400" 
        height="560" 
-       loading="lazy"
+       loading="eager"
+       fetchpriority="high"
        decoding="async"
        style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>
@@ -740,11 +735,11 @@
 
 
   <script id="ssr-profiles-data"> window.profilesData = null;</script>
-  <script type="module" src="main.js?v=v_20261126_01"></script>
+  <script type="module" src="main.js?v=v_20261126_02"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        const CURRENT_SW_VER = 'v_20261126_01';
+        const CURRENT_SW_VER = 'v_20261126_02';
         navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
           .then(function(reg) {
             reg.onupdatefound = function() {

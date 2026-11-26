@@ -47,7 +47,7 @@ function updateLiveRelativeTimestamps() {
         else text = `อัปเดตเมื่อ ${new Date(time).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`;
       }
     }
-    el.textContent = text;
+    if (el.textContent !== text) el.textContent = text;
   });
 }
 
@@ -86,7 +86,6 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "fmh_client_cache_v1";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
@@ -119,6 +118,11 @@ async function getSupabaseClient() {
  
 
   const appState = {
+    rawList: [],
+    rawProfileById: new Map(),
+    rawProfileBySlug: new Map(),
+    normalizedCount: 0,
+    isNormalizedAll: false,
     allProfiles: [],
     profileById: new Map(),
     profileBySlug: new Map(),
@@ -306,17 +310,17 @@ function optimizeImg(imagePath, mode = "card") {
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
 
-  let transform = "f_auto,q_auto:eco,w_320,h_448,c_fill,g_auto";
+  let transform = "f_auto,q_auto:eco,fl_lossy,w_320,h_448,c_fill,g_auto";
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
+    transform = "f_auto,q_auto:eco,fl_lossy,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+    transform = "f_auto,q_auto:eco,fl_lossy,w_300,h_420,c_fill,g_auto";
   } else if (mode === "card") {
-    transform = "f_auto,q_auto:eco,w_320,h_448,c_fill,g_auto";
+    transform = "f_auto,q_auto:eco,fl_lossy,w_320,h_448,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+    transform = "f_auto,q_auto:good,fl_lossy,w_1200,h_630,c_fill,g_face";
   } else if (mode === 600 || mode === "full" || typeof mode === "number") {
-    transform = "f_auto,q_auto:good,w_600,h_840,c_limit";
+    transform = "f_auto,q_auto:good,fl_lossy,w_600,h_840,c_limit";
   }
 
   const cldMarker = "/image/upload/";
@@ -466,7 +470,8 @@ function optimizeImg(imagePath, mode = "card") {
     const statsDisplay = statsStr;
 
     const slogan = raw.slogan || raw.quote || raw.tagline || (isEN ? "Romantic Girlfriend Experience, verified photos" : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
-    
+    const cleanStr = (window.__ssrSanitized || raw._sanitized) ? (s => s || "") : sanitizeThaiText;
+
     // 🟢 รวมคำสะกดแท็กให้เป็น "ฟิวแฟน" คำเดียวมาตรฐานทั้งระบบ
     const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
     const styleTags = (Array.isArray(rawTags) ? rawTags : typeof rawTags === "string" ? rawTags.split(",") : [])
@@ -476,7 +481,7 @@ function optimizeImg(imagePath, mode = "card") {
 
     const availabilityStatus = raw.availability || raw.status || (isEN ? "Available" : "รับงาน");
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
-    
+
     let rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
     if (/vos730x|318afxwt/i.test(rawLineVal)) {
       rawLineVal = "https://line.me/ti/p/u8Bz9HsaY8";
@@ -484,16 +489,17 @@ function optimizeImg(imagePath, mode = "card") {
 
     return {
       ...raw,
+      _sanitized: true,
       id: raw.id,
       slug: (() => {
         const s = String(raw.slug || "").trim().toLowerCase().replace(/\s+/g, "-");
         const bad = !s || /[\u0E00-\u0E7F]/.test(s) || /^(aekhth|ediyr|aikhejiyw|aetngom|aetngkwa|eoingeoy|emsa|hmiw)/.test(s);
         return bad ? `model-${raw.id}` : s;
       })(),
-      location: isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : sanitizeThaiText(raw.location || provinceThai),
-      description: sanitizeThaiText(raw.description || ""),
-      quote: isEN ? slogan : sanitizeThaiText(slogan),
-      slogan: isEN ? slogan : sanitizeThaiText(slogan),
+      location: isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : cleanStr(raw.location || provinceThai),
+      description: cleanStr(raw.description || ""),
+      quote: isEN ? slogan : cleanStr(slogan),
+      slogan: isEN ? slogan : cleanStr(slogan),
       displayName,
       images,
       provinceNameThai: provinceThai,
@@ -519,21 +525,103 @@ function optimizeImg(imagePath, mode = "card") {
     };
   }
 
-  function populateInitialComponents() {
-    if (domCache.provinceSelect) {
-      while (domCache.provinceSelect.options.length > 1) {
-        domCache.provinceSelect.remove(1);
-      }
-      const sortedProvinces = Array.from(appState.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
-      const fragment = document.createDocumentFragment();
-      sortedProvinces.forEach(([k, nameThai]) => {
-        const opt = document.createElement("option");
-        opt.value = k;
-        opt.textContent = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : nameThai;
-        fragment.appendChild(opt);
-      });
-      domCache.provinceSelect.appendChild(fragment);
+  function getOrNormalizeProfile(idVal, slugVal) {
+    const idKey = idVal != null ? String(idVal) : "";
+    const slugKey = slugVal ? String(slugVal).toLowerCase() : "";
+
+    const cached = (idKey && appState.profileById.get(idKey)) ||
+                   (slugKey && appState.profileBySlug.get(slugKey));
+    if (cached) return cached;
+
+    const raw = (idKey && appState.rawProfileById.get(idKey)) ||
+                (slugKey && appState.rawProfileBySlug.get(slugKey)) ||
+                (Array.isArray(window.profilesData) && window.profilesData.find(p =>
+                  (idKey && String(p.id) === idKey) ||
+                  (slugKey && String(p.slug || "").toLowerCase() === slugKey)
+                ));
+    if (!raw) return null;
+
+    const norm = normalizeProfile(raw);
+    if (norm) {
+      if (norm.id != null) appState.profileById.set(String(norm.id), norm);
+      if (norm.slug) appState.profileBySlug.set(String(norm.slug).toLowerCase(), norm);
     }
+    return norm;
+  }
+
+  function ensureAllProfilesNormalized() {
+    if (appState.isNormalizedAll || appState.normalizedCount >= appState.rawList.length) {
+      appState.isNormalizedAll = true;
+      return appState.allProfiles;
+    }
+    for (let i = appState.normalizedCount; i < appState.rawList.length; i++) {
+      const raw = appState.rawList[i];
+      if (!raw) continue;
+      const idKey = raw.id != null ? String(raw.id) : "";
+      let p = idKey ? appState.profileById.get(idKey) : null;
+      if (!p) {
+        p = normalizeProfile(raw);
+        if (p) {
+          if (p.id != null) appState.profileById.set(String(p.id), p);
+          if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+        }
+      }
+      if (p) appState.allProfiles.push(p);
+    }
+    appState.normalizedCount = appState.rawList.length;
+    appState.isNormalizedAll = true;
+    return appState.allProfiles;
+  }
+
+  function scheduleBackgroundNormalization() {
+    if (appState.isNormalizedAll || appState.normalizedCount >= appState.rawList.length) {
+      appState.isNormalizedAll = true;
+      return;
+    }
+    const runChunk = () => {
+      const end = Math.min(appState.normalizedCount + 12, appState.rawList.length);
+      for (let i = appState.normalizedCount; i < end; i++) {
+        const raw = appState.rawList[i];
+        if (!raw) continue;
+        const idKey = raw.id != null ? String(raw.id) : "";
+        let p = idKey ? appState.profileById.get(idKey) : null;
+        if (!p) {
+          p = normalizeProfile(raw);
+          if (p) {
+            if (p.id != null) appState.profileById.set(String(p.id), p);
+            if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
+          }
+        }
+        if (p) appState.allProfiles.push(p);
+      }
+      appState.normalizedCount = end;
+      if (end < appState.rawList.length) scheduleBackgroundNormalization();
+      else appState.isNormalizedAll = true;
+    };
+    if ("requestIdleCallback" in window) requestIdleCallback(runChunk, { timeout: 1200 });
+    else setTimeout(runChunk, 40);
+  }
+
+  function populateProvinceSelect() {
+    if (!domCache.provinceSelect || domCache.provinceSelect.options.length > 1) return;
+    const sortedProvinces = Array.from(appState.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
+    const fragment = document.createDocumentFragment();
+    sortedProvinces.forEach(([k, nameThai]) => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : nameThai;
+      fragment.appendChild(opt);
+    });
+    domCache.provinceSelect.appendChild(fragment);
+    const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
+    const activeProv = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
+    if (activeProv && activeProv !== "national") {
+      domCache.provinceSelect.value = activeProv;
+    }
+  }
+
+  function populateInitialComponents() {
+    populateProvinceSelect();
     
     initAgencyStories();
     
@@ -657,6 +745,7 @@ vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
 
   function executeFilterAndRender(isUserTriggered = true) {
   try {
+    ensureAllProfilesNormalized();
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     let urlProvince = null;
     let urlZone = null;
@@ -814,8 +903,8 @@ if (activeProvince !== "all" && activeProvince !== "national") {
       const zoneWithoutDash = targetZ.replace(/-/g, "");
 
       results = results.filter(p => {
-        const loc = sanitizeThaiText(p.location || "").toLowerCase();
-        const desc = sanitizeThaiText(p.description || "").toLowerCase();
+        const loc = (p.location || "").toLowerCase();
+        const desc = (p.description || "").toLowerCase();
         const rawTags = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
         const tags = rawTags.join(" ").toLowerCase();
         const combined = `${loc} ${desc} ${tags}`;
@@ -1141,6 +1230,37 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     }
     }
 
+function initLazyGoogleMap(provinceName = "", currentSlug = "") {
+    const mapIframe = document.getElementById("google-map");
+    if (!mapIframe || mapIframe.dataset.mapBound === "true") return;
+    if (!mapIframe.src || mapIframe.src === "about:blank" || mapIframe.src.endsWith("about:blank")) {
+      mapIframe.dataset.mapBound = "true";
+      const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+      const serverDataSrc = mapIframe.getAttribute("data-src");
+      const pathSegments = window.location.pathname.split("/").filter(Boolean);
+      const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
+      const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
+      const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+      const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
+      const queryText = isAllOrNational ? "ประเทศไทย" : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
+      const targetMapSrc = serverDataSrc || `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              mapIframe.src = targetMapSrc;
+              observer.disconnect();
+            }
+          });
+        }, { rootMargin: "250px" });
+        observer.observe(mapIframe);
+      } else {
+        mapIframe.src = targetMapSrc;
+      }
+    }
+  }
+  
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
     
@@ -1170,35 +1290,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     }
 
     // 🟢 3. จัดการ Google Map Iframe Lazy Load
-    const mapIframe = document.getElementById("google-map");
-    if (mapIframe) {
-      if (!mapIframe.src || mapIframe.src === "about:blank" || mapIframe.src.endsWith("about:blank")) {
-        const serverDataSrc = mapIframe.getAttribute("data-src");
-        const pathSegments = window.location.pathname.split("/").filter(Boolean);
-        const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
-        const currentZone = window.currentZoneSlug || (isSubZone && pathSegments[2] ? decodeURIComponent(pathSegments[2]) : "");
-        const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
-        const zoom = isAllOrNational ? 6 : (currentZone ? 14 : 12);
-        const queryText = isAllOrNational ? "ประเทศไทย" : `จังหวัด${targetName}${currentZone ? ` ${currentZone}` : ""}`;
-        
-        const targetMapSrc = serverDataSrc || `https://maps.google.com/maps?q=${encodeURIComponent(queryText)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
-
-        if ("IntersectionObserver" in window) {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                mapIframe.src = targetMapSrc;
-                observer.disconnect();
-              }
-            });
-          }, { rootMargin: "250px" });
-          observer.observe(mapIframe);
-        } else {
-          mapIframe.src = targetMapSrc;
-        }
-      }
-    }
-
+    initLazyGoogleMap(provinceName, currentSlug);
+    
     // 🟢 4. จัดการตัวนับจำนวนจังหวัด (Live Province Count)
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     const isSubZone = Boolean(window.currentZoneSlug) || (pathSegments.length >= 3 && pathSegments[0] === "location");
@@ -1244,6 +1337,7 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   }
 
   function showSearchSuggestions(inputVal) {
+    ensureAllProfilesNormalized();
     const popover = document.getElementById("search-suggestions");
     const clearBtn = document.getElementById("clear-search-btn");
 
@@ -1428,11 +1522,9 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
            loading="${index < 4 ? "eager" : "lazy"}" 
            fetchpriority="auto"
            decoding="async" 
-           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
-           
-      <div class="profile-card-gradient-overlay"></div>
+          onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
 
-      <div class="profile-card-badges-top">
+    <div class="profile-card-badges-top">
           <div class="badges-left">
               <span class="badge-status ${statusClass}">
                   <span class="status-dot"></span>
@@ -1451,9 +1543,9 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
               ${vibeTagsHtml}
           </div>
           
-         <div class="profile-card-social-strip" style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
+          <div class="profile-card-social-strip">
             <span class="social-badge-likes">
-              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <i class="fas fa-heart" aria-hidden="true"></i>
               <span>${likesText}</span>
             </span>
           </div>
@@ -1586,40 +1678,7 @@ async function renderProfilesBatch(containerEl, profilesList, renderId) {
     }
   }
 
-  function validateLightboxGallery(sessionId) {
-    const snapshot = [...currentActivePhotoList];
-    snapshot.forEach((photoObj) => {
-      const testUrl = photoObj.fullSrc || photoObj.src;
-      if (!testUrl || testUrl.includes("firstmodelhub.webp")) {
-        const pos = currentActivePhotoList.indexOf(photoObj);
-        if (pos !== -1 && currentActivePhotoList.length > 1) {
-          currentActivePhotoList.splice(pos, 1);
-          if (currentActivePhotoIdx >= currentActivePhotoList.length) {
-            currentActivePhotoIdx = currentActivePhotoList.length - 1;
-          }
-          syncLightboxGalleryUI();
-        }
-        return;
-      }
-      const probe = new Image();
-      probe.onerror = () => {
-        if (window.__lightboxSessionId !== sessionId) return;
-        const pos = currentActivePhotoList.indexOf(photoObj);
-        if (pos === -1 || currentActivePhotoList.length <= 1) return;
 
-        const wasViewingBroken = (pos === currentActivePhotoIdx);
-        currentActivePhotoList.splice(pos, 1);
-        if (pos < currentActivePhotoIdx) {
-          currentActivePhotoIdx = Math.max(0, currentActivePhotoIdx - 1);
-        } else if (currentActivePhotoIdx >= currentActivePhotoList.length) {
-          currentActivePhotoIdx = currentActivePhotoList.length - 1;
-        }
-        syncLightboxGalleryUI();
-        if (wasViewingBroken) updateLightboxPhoto(currentActivePhotoIdx);
-      };
-      probe.src = testUrl;
-    });
-  }
 
   function updateLightboxPhoto(idx) {
     if (!currentActivePhotoList || currentActivePhotoList.length === 0) return;
@@ -1760,7 +1819,7 @@ async function renderProfilesBatch(containerEl, profilesList, renderId) {
   }
   
 function generateModalPersonaBox(profile, displayName, provName, zoneName) {
-  let rawPersonalDesc = sanitizeThaiText(profile.description || "")
+  let rawPersonalDesc = (profile._sanitized ? (profile.description || "") : sanitizeThaiText(profile.description || ""))
     .replace(/เรทราคา|รายละเอียดค่ะ|1500\/1/gi, "")
     .replace(/[ฃ͡➴˚˳*•ㅅ•づ♡]+/g, "")
     .trim();
@@ -1820,19 +1879,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
   // ==============================================================================
   // 🟢 LIGHTBOX MODAL ENGINE (OPTIMIZED FOR ZERO-REFLOW & ULTRA-FAST INP < 40ms)
   // ==============================================================================
+  let isLightboxCurrentlyOpen = false;
+
   window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     const scrollBodyEl = document.getElementById("lightboxScrollBody");
+    const dockEl = document.querySelector(".floating-app-dock");
     if (!lightboxEl) return;
 
-    // ⚡ 1. รีเซ็ต Scroll ล่วงหน้าก่อนแตะ Class ป้องกัน Layout Thrashing
-    if (scrollBodyEl && scrollBodyEl.scrollTop !== 0) {
-      scrollBodyEl.scrollTop = 0;
-    }
+    const wasAlreadyOpen = isLightboxCurrentlyOpen;
+    isLightboxCurrentlyOpen = true;
 
-    // ⚡ 2. ปลดล็อก Next Paint ทันทีใน 0 ms (INP ผ่านเกณฑ์เขียวฉลุย)
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";
     lightboxEl.setAttribute("aria-hidden", "false");
@@ -1844,7 +1903,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       contentWrapperEl.style.opacity = "1";
     }
 
-    document.body.classList.add("lightbox-open");
+    document.documentElement.classList.add("lightbox-open");
+    if (dockEl) dockEl.classList.add("is-lightbox-hidden");
+
+    if (wasAlreadyOpen && scrollBodyEl) {
+      requestAnimationFrame(() => { scrollBodyEl.scrollTop = 0; });
+    }
 
     // สั่นแบบเบาไม่ขวาง Thread
     if (typeof triggerHaptic === "function") triggerHaptic("light");
@@ -1996,24 +2060,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       `;
     }
 
-    // ==========================================================================
-    // 🚀 STAGE 2: ทยอยเรนเดอร์ส่วนเนื้อหาหนักด้านล่างช่วง IDLE (ไม่ขวาง Main Thread)
-    // ==========================================================================
-    const runDeferredRenders = () => {
-      // 1. ซิงค์แถบรูปและตรวจสอบความถูกต้อง
-      syncLightboxGalleryUI();
-      validateLightboxGallery(window.__lightboxSessionId);
-
-      // 2. กล่องบทสนทนา (Persona Description)
-      const descContainer = document.getElementById("lightboxDescriptionContainer");
-      const descContent = document.getElementById("lightboxDescriptionContent");
-      if (descContent && typeof generateModalPersonaBox === "function") {
-        descContent.innerHTML = generateModalPersonaBox(profile, displayName, pProvText, primaryZone);
-        descContent.style.cssText = "margin: 10px 0;";
-        if (descContainer) descContainer.style.display = "block";
-      }
-
-      // 3. น้องๆ แนะนำเพิ่มเติม
+    // 🚀 STAGE 2: แบ่งการเรนเดอร์ส่วนล่างออกเป็น 2 เฟรมย่อย ไม่บล็อกเธรดหลัก
+    const runDeferredStep2 = () => {
       const relatedTitle = document.getElementById("lightboxRelatedTitle");
       if (relatedTitle) {
         relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
@@ -2022,47 +2070,59 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       const relatedGrid = document.getElementById("lightboxRelatedGrid");
       const relatedMore = document.getElementById("lightboxRelatedMoreLink");
       if (relatedGrid) {
-        let allList = (appState && appState.allProfiles && appState.allProfiles.length > 0) 
-          ? appState.allProfiles 
-          : (window.profilesData || []);
-
         const pKey = (profile.provinceKey || profile.province_slug || "chiangmai").toLowerCase();
-        let sameProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() === pKey);
-        let otherProv = allList.filter(m => String(m.id) !== String(profile.id) && String(m.provinceKey || m.province_slug || "").toLowerCase() !== pKey);
+        const rawPool = appState.rawList.length > 0 ? appState.rawList : (window.profilesData || []);
+        const sameRaw = [];
+        const otherRaw = [];
 
-        let candidates = [...sameProv.slice(0, 3), ...otherProv.slice(0, 3)];
-        if (candidates.length < 6) {
-          candidates = allList.filter(m => String(m.id) !== String(profile.id)).slice(0, 6);
+        for (let i = 0; i < rawPool.length; i++) {
+          const item = rawPool[i];
+          if (!item || String(item.id) === String(profile.id)) continue;
+          const itemProv = String(item.provinceKey || item.province_slug || "").toLowerCase();
+          if (itemProv === pKey) {
+            if (sameRaw.length < 3) sameRaw.push(item);
+          } else {
+            if (otherRaw.length < 3) otherRaw.push(item);
+          }
+          if (sameRaw.length >= 3 && otherRaw.length >= 3) break;
         }
 
+        let candidatesRaw = [...sameRaw, ...otherRaw];
+        if (candidatesRaw.length < 6) {
+          for (let i = 0; i < rawPool.length && candidatesRaw.length < 6; i++) {
+            const item = rawPool[i];
+            if (item && String(item.id) !== String(profile.id) && !candidatesRaw.includes(item)) {
+              candidatesRaw.push(item);
+            }
+          }
+        }
+
+        const candidates = candidatesRaw.map(r => getOrNormalizeProfile(r.id, r.slug) || r).filter(Boolean);
         if (candidates.length > 0) {
           relatedGrid.innerHTML = candidates.map(rm => {
-            const rmName = rm.displayName || rm.name;
-            const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || fallbackImg);
-            const rmSlug = rm.slug || rm.id;
+            const rmName = rm.displayName || formatDisplayName(rm.name || "สาวสวย");
+            const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : optimizeImg(rm.imagePath || "", "card");
+            const rmSlug = encodeURIComponent(rm.slug || rm.id);
             return `
-              <div class="lightbox-related-item" data-profile-slug="${rmSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); text-align: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                <img src="${rmImg}" alt="${rmName}" loading="lazy" width="100" height="125" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
-                <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rmName}</div>
+              <div class="lightbox-related-item" data-profile-id="${rm.id}" data-profile-slug="${rmSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); text-align: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                <img src="${rmImg}" alt="${escapeHTML(rmName)}" loading="lazy" decoding="async" width="100" height="125" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${escapeHTML(rmName)}</div>
               </div>
             `;
           }).join("");
 
-          // ใช้ Delegated Click ครั้งเดียว ไม่ผูก listener ซ้ำซ้อน
-          relatedGrid.onclick = function(e) {
+          relatedGrid.onclick = function (e) {
             const card = e.target.closest(".lightbox-related-item");
             if (!card) return;
             e.preventDefault();
-            const targetSlug = card.getAttribute("data-profile-slug");
-            const targetProfile = allList.find(m => String(m.slug) === String(targetSlug) || String(m.id) === String(targetSlug));
+            const tId = card.getAttribute("data-profile-id");
+            const tSlug = decodeURIComponent(card.getAttribute("data-profile-slug") || "");
+            const targetProfile = getOrNormalizeProfile(tId, tSlug);
             if (targetProfile) {
-              const normalized = (typeof normalizeProfile === "function" && !targetProfile.images) 
-                ? normalizeProfile(targetProfile) 
-                : targetProfile;
-              history.pushState(null, "", `/sideline/${encodeURIComponent(normalized.slug || normalized.id)}`);
-              window.openLightboxModal(normalized);
+              history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
+              window.openLightboxModal(targetProfile);
             } else {
-              window.location.href = `/sideline/${encodeURIComponent(targetSlug)}`;
+              window.location.href = `/sideline/${encodeURIComponent(tSlug || tId)}`;
             }
           };
         }
@@ -2084,7 +2144,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         }
       }
 
-      // 4. คำถามที่พบบ่อย (FAQ Accordion)
       const faqSection = document.getElementById("lightboxFaqSection");
       const faqList = document.getElementById("lightboxFaqList");
       if (faqSection && faqList) {
@@ -2107,7 +2166,6 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         `).join("");
       }
 
-      // 5. อัปเดต Title และ Canonical ใน Background
       const dynamicTitle = isEn
         ? `${displayName} - VIP Companion in ${pProvText} | FirstModelHub`
         : `น้อง${cleanName} สาวรับงาน${pProvText} ไซด์ไลน์${primaryZone} รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ`;
@@ -2127,12 +2185,19 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     };
 
-    // ใช้ requestIdleCallback ให้เบราว์เซอร์จัดการวาดเฟรมแรกให้เสร็จก่อนเสมอ
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(runDeferredRenders, { timeout: 300 });
-    } else {
-      setTimeout(runDeferredRenders, 60);
-    }
+    const runDeferredStep1 = () => {
+      syncLightboxGalleryUI();
+      const descContainer = document.getElementById("lightboxDescriptionContainer");
+      const descContent = document.getElementById("lightboxDescriptionContent");
+      if (descContent && typeof generateModalPersonaBox === "function") {
+        descContent.innerHTML = generateModalPersonaBox(profile, displayName, pProvText, primaryZone);
+        descContent.style.cssText = "margin: 10px 0;";
+        if (descContainer) descContainer.style.display = "block";
+      }
+      setTimeout(runDeferredStep2, 0);
+    };
+
+    requestAnimationFrame(runDeferredStep1);
   };
     
 
@@ -2153,8 +2218,10 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     lightboxEl.style.transition = "opacity 0.24s ease";
     lightboxEl.style.opacity = "0";
 
-    document.body.classList.remove("lightbox-open");
-    document.body.style.overflow = "";
+    isLightboxCurrentlyOpen = false;
+    document.documentElement.classList.remove("lightbox-open");
+    const dockEl = document.querySelector(".floating-app-dock");
+    if (dockEl) dockEl.classList.remove("is-lightbox-hidden");
 
     setTimeout(() => {
       lightboxEl.style.display = "none";
@@ -2347,14 +2414,24 @@ function initDockAutoHide() {
     floatingDock.dataset.scrollBound = "true";
 
     let lastScrollY = window.scrollY;
+    let isHidden = false;
+    let ticking = false;
+
     window.addEventListener("scroll", function () {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        floatingDock.classList.add("dock-hidden");
-      } else if (currentScrollY < lastScrollY) {
-        floatingDock.classList.remove("dock-hidden");
-      }
-      lastScrollY = Math.max(0, currentScrollY);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        if (currentScrollY > lastScrollY && currentScrollY > 80 && !isHidden) {
+          floatingDock.classList.add("dock-hidden");
+          isHidden = true;
+        } else if (currentScrollY < lastScrollY && isHidden) {
+          floatingDock.classList.remove("dock-hidden");
+          isHidden = false;
+        }
+        lastScrollY = Math.max(0, currentScrollY);
+        ticking = false;
+      });
     }, { passive: true });
   }
   
@@ -2389,16 +2466,7 @@ function initDockAutoHide() {
       let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
       appState.currentProfileSlug = slugVal;
 
-      let foundProfile = appState.allProfiles.find(p => 
-        String(p.slug || "").toLowerCase() === slugVal.toLowerCase() || 
-        String(p.id) === slugVal
-      );
-
-      if (!foundProfile && window.profilesData && Array.isArray(window.profilesData)) {
-        const rawP = window.profilesData.find(p => String(p.id) === slugVal || String(p.slug) === slugVal);
-        if (rawP && typeof normalizeProfile === "function") foundProfile = normalizeProfile(rawP);
-      }
-
+      const foundProfile = getOrNormalizeProfile(slugVal, slugVal);
       if (foundProfile) {
         window.openLightboxModal(foundProfile);
       }
@@ -2563,6 +2631,10 @@ function initDockAutoHide() {
     const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
     const toggleSearchDrawer = (isOpen) => {
+      if (isOpen) {
+        populateProvinceSelect();
+        if (!appState.isNormalizedAll) setTimeout(ensureAllProfilesNormalized, 50);
+      }
       if (searchBottomSheetEl) {
         searchBottomSheetEl.classList.toggle("active", isOpen);
         searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
@@ -2725,7 +2797,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
 
         const searchInputEl = document.getElementById("search-keyword");
         const suggestionsEl = document.getElementById("search-suggestions");
-        if (suggestionsEl && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
+        if (suggestionsEl && suggestionsEl.style.display !== "none" && searchInputEl && !searchInputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
           suggestionsEl.style.display = "none";
         }
 
@@ -2760,16 +2832,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
             const searchId = String(profileId || "");
             const searchSlug = String(profileSlug || "");
 
-            let targetProfile = appState.profileById.get(searchId) || appState.profileBySlug.get(searchSlug.toLowerCase()) || appState.allProfiles.find(p =>
-              String(p.id) === searchId ||
-              (p.slug && String(p.slug) === searchSlug) ||
-              (searchSlug && String(p.id) === searchSlug)
-            );
-
-            if (!targetProfile && Array.isArray(window.profilesData)) {
-              const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
-              if (rawP) targetProfile = normalizeProfile(rawP);
-            }
+            let targetProfile = getOrNormalizeProfile(searchId, searchSlug);
 
             if (targetProfile) {
               window.__returnUrlBeforeModal = window.location.pathname + window.location.search;
@@ -2876,36 +2939,66 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         }
 
         if (rawList && rawList.length > 0) {
-          const cleanProfiles = filterValidProfiles(rawList);
-          appState.allProfiles = cleanProfiles.map(normalizeProfile).filter(Boolean);
+          const cleanProfiles = window.__ssrSanitized ? rawList : filterValidProfiles(rawList);
+          appState.rawList = cleanProfiles;
+          appState.rawProfileById.clear();
+          appState.rawProfileBySlug.clear();
           appState.profileById.clear();
           appState.profileBySlug.clear();
-          appState.allProfiles.forEach(p => {
-            if (p.id != null) appState.profileById.set(String(p.id), p);
-            if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
-          });
-          populateInitialComponents();
+          appState.allProfiles = [];
+          appState.normalizedCount = 0;
+          appState.isNormalizedAll = false;
 
-          // โหลดโปรไฟล์ที่เหลือช่วง Idle เพื่อให้ค้นหา/กดแท็บหน้าแรกเจอครบทุกคน ไม่ติดแค่ 24 คนแรก
-          if (window.totalProfilesCount && appState.allProfiles.length < window.totalProfilesCount) {
+          for (let i = 0; i < cleanProfiles.length; i++) {
+            const r = cleanProfiles[i];
+            if (r.id != null) appState.rawProfileById.set(String(r.id), r);
+            if (r.slug) appState.rawProfileBySlug.set(String(r.slug).toLowerCase(), r);
+          }
+
+          const hasSSRGrid = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
+          if (hasSSRGrid) {
+            const vipSwiperEl = document.getElementById("vip-swiper-container");
+            if (vipSwiperEl) {
+              const existingVipCards = vipSwiperEl.querySelectorAll(".vip-card-item");
+              if (existingVipCards.length > 0) {
+                window.__hotProfileIds = new Set(Array.from(existingVipCards).map(el => String(el.dataset.profileId)));
+              }
+            }
+            const scheduleInitUI = window.requestIdleCallback || ((cb) => setTimeout(cb, 30));
+            scheduleInitUI(() => {
+              populateProvinceSelect();
+              scheduleBackgroundNormalization();
+            }, { timeout: 800 });
+          } else {
+            ensureAllProfilesNormalized();
+            populateInitialComponents();
+          }
+
+          // โหลดโปรไฟล์ที่เหลือช่วง Idle เพื่อให้ค้นหา/กดแท็บหน้าแรกเจอครบทุกคน
+          if (window.totalProfilesCount && cleanProfiles.length < window.totalProfilesCount) {
             const hydrateRemaining = async () => {
               const sb = await getSupabaseClient();
               if (!sb) return;
-              const { data, error } = await sb
-              .from("profiles")
-              .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
-              .eq("active", true)
+              const { data } = await sb
+                .from("profiles")
+                .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
+                .eq("active", true)
                 .order("isfeatured", { ascending: false })
                 .order("created_at", { ascending: false });
-              if (Array.isArray(data) && data.length > appState.allProfiles.length) {
-                const allNormalized = filterValidProfiles(data).map(normalizeProfile).filter(Boolean);
-                appState.allProfiles = allNormalized;
-                appState.profileById.clear();
-                appState.profileBySlug.clear();
-                allNormalized.forEach(p => {
-                  if (p.id != null) appState.profileById.set(String(p.id), p);
-                  if (p.slug) appState.profileBySlug.set(String(p.slug).toLowerCase(), p);
-                });
+              if (Array.isArray(data) && data.length > appState.rawList.length) {
+                const moreValid = filterValidProfiles(data);
+                appState.rawList = moreValid;
+                appState.rawProfileById.clear();
+                appState.rawProfileBySlug.clear();
+                appState.allProfiles = [];
+                appState.normalizedCount = 0;
+                appState.isNormalizedAll = false;
+                for (let i = 0; i < moreValid.length; i++) {
+                  const r = moreValid[i];
+                  if (r.id != null) appState.rawProfileById.set(String(r.id), r);
+                  if (r.slug) appState.rawProfileBySlug.set(String(r.slug).toLowerCase(), r);
+                }
+                scheduleBackgroundNormalization();
               }
             };
             if ("requestIdleCallback" in window) requestIdleCallback(hydrateRemaining, { timeout: 4000 });
@@ -3222,18 +3315,22 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
     };
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      initApplication();
-      initLightboxSwipeDown();
-      initStealthAdminPurge();
-      updateLiveRelativeTimestamps();
-    });
-  } else {
+  const boot = () => {
     initApplication();
-    initLightboxSwipeDown();
-    initStealthAdminPurge();
-    updateLiveRelativeTimestamps();
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        initLightboxSwipeDown();
+        initStealthAdminPurge();
+        updateLiveRelativeTimestamps();
+        initLazyGoogleMap(window.currentProvinceName || "", window.currentProvinceSlug || "");
+      }, 0);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();
 
