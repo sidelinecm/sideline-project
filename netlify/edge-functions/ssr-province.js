@@ -1579,7 +1579,8 @@ const profilesCanonical = pageNumForProfiles > 1
   ? `${primaryDomain}/profiles?page=${pageNumForProfiles}`
   : `${primaryDomain}/profiles`;
 
-const rawCanonicalUrl = isEnglishHome
+// เปลี่ยนจาก rawCanonicalUrl เป็น canonicalUrl แบบนี้ครับ
+const canonicalUrl = isEnglishHome
   ? `${primaryDomain}/index-en`
   : (isProfilesDirectory
       ? profilesCanonical
