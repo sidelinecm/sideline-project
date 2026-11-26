@@ -9,7 +9,7 @@ import {
 
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261126_01`;
+let GLOBAL_PROFILE_VERSION = `v_20261126_02`;
 const ONE_DAY_MS = 86400 * 1000;
 
 function setSafeProfileCache(key, data) {
@@ -42,7 +42,6 @@ const CONFIG = {
   DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 
-// ✅ Map Redirect URL เก่าภาษาไทยและ Typo ทั้งหมด (ทำงานก่อน Query DB ทันที)
 const LEGACY_PROFILE_REDIRECTS = {
   "ammie": "/sideline/ammie-127",
   "น้องammie": "/sideline/ammie-127",
@@ -469,7 +468,6 @@ export default async (req, context) => {
     });
   }
 
-  // ✅ เช็ก Legacy Thai/Typo Redirects ทันทีก่อนยิง Supabase
   const legacyTarget = LEGACY_PROFILE_REDIRECTS[rawSlug.toLowerCase()];
   if (legacyTarget) {
     return Response.redirect(`${CONFIG.DOMAIN}${legacyTarget}`, 301);
@@ -522,7 +520,6 @@ export default async (req, context) => {
       return context.next();
     }
 
-    // ✅ ใช้ Canonical Slug มาตรฐานเดียวกับ sitemap.js และ ssr-province.js
     const trueCanonicalSlug = getCanonicalProfileSlug(profile);
     const canonicalPath = `/sideline/${encodeURIComponent(trueCanonicalSlug)}`;
     if (segments.length !== 2 || rawSlug !== trueCanonicalSlug || url.pathname.endsWith("/")) {
@@ -601,7 +598,7 @@ export default async (req, context) => {
             const rpImg = safeOptimizeImg(rp.imagePath || rp.image_url || "", 400);
             return `
               <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" decoding="async" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
                 <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
               </a>
             `;
@@ -644,7 +641,7 @@ export default async (req, context) => {
       <div class="profile-gallery-strip" id="profile-gallery-strip" style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;">
         ${uniqueGallery.map((imgUrl, i) => `
           <button type="button" class="thumb-slot ${i === 0 ? "active" : ""}" data-full-src="${safeOptimizeImg(imgUrl, 600)}" style="padding: 0; width: 62px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid ${i === 0 ? "#7C3AED" : "transparent"}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: none;">
-            <img src="${safeOptimizeImg(imgUrl, "thumb")}" alt="รูปที่ ${i + 1}" width="62" height="80" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+            <img src="${safeOptimizeImg(imgUrl, "thumb")}" alt="รูปที่ ${i + 1}" width="62" height="80" decoding="async" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
           </button>
         `).join("")}
       </div>
@@ -653,7 +650,6 @@ export default async (req, context) => {
     const rawLineInput = (profile.line_id || profile.line || profile.lineId || profile.line_url || "").trim();
     const lineId = formatLineUrl(rawLineInput, liveAdminLine);
 
-    // ✅ ดึงเฉพาะข้อมูลจริงจาก DB ไม่สร้างตัวเลขสุ่มปลอมเมื่อค่าว่าง
     const cleanAge = profile.age && !["-", "0", "ไม่ระบุ"].includes(String(profile.age).trim())
       ? String(profile.age).replace(/\D/g, "")
       : "";
@@ -705,7 +701,6 @@ export default async (req, context) => {
 
     const primaryZone = extractedZone || cleanProvince;
 
-    // ✅ เทียบ Slug โซนจาก shared-config.js เสมอ
     const cleanZoneKey = primaryZone.trim().replace(/[\r\n\t]+/g, "").replace(/(?<!มช|มข|มฟล|มน|ม\.อ)\.+$/, "");
     const zoneKeyLower = cleanZoneKey.toLowerCase();
     let matchedSlugPart = "";
@@ -1039,22 +1034,22 @@ export default async (req, context) => {
           });
         };
 
-        ['scroll', 'keydown'].forEach(function(evt){
-          window.addEventListener(evt, loadGTM, { once: true, passive: true });
-        });
+        window.addEventListener('keydown', loadGTM, { once: true, passive: true });
         window.addEventListener('load', function() {
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(function() { setTimeout(loadGTM, 1500); }, { timeout: 4000 });
-          } else {
-            setTimeout(loadGTM, 3500);
-          }
+          setTimeout(function() {
+            if ('requestIdleCallback' in window) {
+              requestIdleCallback(loadGTM, { timeout: 2000 });
+            } else {
+              loadGTM();
+            }
+          }, 4200);
         }, { once: true });
       })();
     </script>
 </head>
 <body class="fmh-app-page is-profile-page" style="background-color: #F8F6FC; color: #140F22;">
 <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 8.5rem 1rem;">
-        <header id="page-header" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+        <header id="page-header" style="position: relative; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.97); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 16px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
           <div class="header-logo-container">
             <a href="/" class="brand-luxe-logo" aria-label="FirstModelHub หน้าแรก">
                 <span class="luxe-star-crest" aria-hidden="true">
@@ -1083,13 +1078,13 @@ export default async (req, context) => {
         <nav aria-label="breadcrumb">
           <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 12px;">
             <li><a href="/" style="color: #475569; text-decoration: none;">หน้าแรก</a></li>
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li style="color: #64748B;" aria-hidden="true">&raquo;</li>
             <li><a href="${provinceHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">${escapeHTML(activeBreadcrumbText)}</a></li>
             ${hasValidZoneSlug ? `
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li style="color: #64748B;" aria-hidden="true">&raquo;</li>
             <li><a href="${zoneHubUrl}" style="color: #7C3AED; text-decoration: none; font-weight: 600;">โซน${escapeHTML(primaryZone)}</a></li>
             ` : ""}
-            <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
+            <li style="color: #64748B;" aria-hidden="true">&raquo;</li>
             <li aria-current="page"><span style="color: #140F22; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
         </nav>
@@ -1116,7 +1111,7 @@ export default async (req, context) => {
                       <div style="display: inline-flex; align-items: center; gap: 5px; background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px;">
                           <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor};"></span>
                           <span style="color: #140F22; font-size: 11.5px; font-weight: 800;">${escapeHTML(realStatusText)}</span>
-                          <span style="color: #94A3B8; font-size: 10px;">•</span>
+                          <span style="color: #64748B; font-size: 10px;">•</span>
                           <time class="fmh-relative-time" datetime="${isoUpdatedTime}" style="color: #475569; font-size: 11.5px; font-weight: 600;">${realTimeText}</time>
                       </div>
                   </div>
@@ -1181,7 +1176,7 @@ export default async (req, context) => {
 
         <footer style="text-align: center; padding: 2rem 1rem; color: #64748B; font-size: 11.5px; line-height: 1.6;">
           <p style="margin: 0 0 6px 0;">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ศูนย์รวมเพื่อนเที่ยวฟิวแฟน ปลอดภัย จ่ายหน้างาน 100%</p>
-          <div style="font-size: 10px; color: #94A3B8; max-width: 580px; margin: 8px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px;">
+          <div style="font-size: 10px; color: #64748B; max-width: 580px; margin: 8px auto 0 auto; border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 8px;">
             <strong>Content &amp; Copyright Notice:</strong> FirstModelHub operates purely as an online directory and information service. All promotional listings, profiles, and associated images are provided and updated independently by individual third-party advertisers. We do not claim ownership, control, or responsibility for any user-generated content. For immediate copyright verification or removal requests, please officially reach out to us at: <a href="mailto:abuse@firstmodelhub.com" style="color: #7C3AED; text-decoration: underline;">abuse@firstmodelhub.com</a>.
           </div>
         </footer>
@@ -1210,22 +1205,7 @@ export default async (req, context) => {
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           const CURRENT_SW_VER = '${GLOBAL_PROFILE_VERSION}';
-          navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
-            .then(function(reg) {
-              reg.onupdatefound = function() {
-                const installingWorker = reg.installing;
-                if (installingWorker) {
-                  installingWorker.onstatechange = function() {
-                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      console.log('Profile page SW updated quietly.');
-                    }
-                  };
-                }
-              };
-            })
-            .catch(function(err) {
-              console.warn('SW Error bypassed:', err);
-            });
+          navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER).catch(function() {});
         });
       }
     </script>

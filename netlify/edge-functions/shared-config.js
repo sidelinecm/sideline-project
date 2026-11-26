@@ -150,15 +150,15 @@ export function safeOptimizeImg(imagePath, mode = "card") {
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
 
-  let transform = "f_auto,q_auto:good,w_320,h_448,c_fill,g_auto";
+  let transform = "f_auto,q_auto:eco,fl_lossy,w_320,h_448,c_fill,g_auto";
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_auto,q_auto:good,w_120,h_120,c_thumb,g_face";
+    transform = "f_auto,q_auto:eco,fl_lossy,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
+    transform = "f_auto,q_auto:eco,fl_lossy,w_300,h_420,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
+    transform = "f_auto,q_auto:good,fl_lossy,w_1200,h_630,c_fill,g_face";
   } else if (typeof mode === "number") {
-    transform = `f_auto,q_auto:good,w_${mode},h_${Math.round(mode * 1.4)},c_fill,g_auto`;
+    transform = `f_auto,q_auto:good,fl_lossy,w_${mode},h_${Math.round(mode * 1.4)},c_fill,g_auto`;
   }
 
   const cldMarker = "/image/upload/";

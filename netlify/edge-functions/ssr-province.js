@@ -9,8 +9,8 @@ import {
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = 'v_20261126_01';
-let TEMPLATE_HTML_CACHE = null;
+let GLOBAL_VERSION = "v_20261126_02";
+const TEMPLATE_HTML_CACHE = new Map();
 
 const ONE_DAY_MS = 86400 * 1000; 
 
@@ -930,15 +930,21 @@ function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai", zoneSl
   `;
 }
 
-async function getTemplateHtml(url, context) {
+async function getTemplateHtml(url, isForceRefresh = false) {
   const isEn = url.pathname.includes("-en");
-  const templateFileName = isEn ? "/index-en.html" : "/index.html"; // 👈 เลือกเทมเพลตตามภาษา
-  
+  const templateFileName = isEn ? "/index-en.html" : "/index.html";
+
+  if (!isForceRefresh && TEMPLATE_HTML_CACHE.has(templateFileName)) {
+    return TEMPLATE_HTML_CACHE.get(templateFileName);
+  }
+
   try {
     const templateUrl = new URL(templateFileName, url.origin);
     const res = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     if (res.ok) {
-      return await res.text();
+      const html = await res.text();
+      if (html) TEMPLATE_HTML_CACHE.set(templateFileName, html);
+      return html;
     }
   } catch (_err) {}
   return "";
@@ -1035,56 +1041,48 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   const rawLikes = p.likes_count || p.likes || 0;
   const likesText = rawLikes > 0 ? `${rawLikes} 💗` : `แนะนำ 💗`;
 
- return `
+return `
     <div class="profile-card-new-container">
- <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(canonicalProfileSlug)}">
-      <img src="${cardImg}" 
-         alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
-         width="400"
-         height="560"
+      <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(canonicalProfileSlug)}">
+        <img src="${cardImg}"
+             alt="น้อง${cleanName} โซน${loc} ${escapeHTML(provinceName)} - FirstModelHub"
+             width="400"
+             height="560"
              class="profile-card-img"
              loading="${isPriorityLCP ? "eager" : "lazy"}"
-             fetchpriority="${isPriorityLCP ? "high" : "auto"}"
+             fetchpriority="${isPriorityLCP ? "high" : "low"}"
              decoding="async"
              onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
-                 
-        <div class="profile-card-gradient-overlay"></div>
-
         <div class="profile-card-badges-top">
-            <div class="badges-left">
-                <span class="badge-status ${statusClass}">
-                    <span class="status-dot"></span>
-                    <span>${availStatus}</span>
-                </span>
-            </div>
-            <div class="badges-right">
-                ${rightBadgeHtml}
-            </div>
+          <div class="badges-left">
+            <span class="badge-status ${statusClass}">
+              <span class="status-dot"></span>
+              <span>${availStatus}</span>
+            </span>
+          </div>
+          <div class="badges-right">${rightBadgeHtml}</div>
         </div>
-        
-       <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}">
-  <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">ดูโปรไฟล์ น้อง${cleanName} รับงาน${escapeHTML(provinceName)} ไซด์ไลน์ตรงปก</span>
-</a>
-
+        <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+          <span class="sr-only">ดูโปรไฟล์ น้อง${cleanName} รับงาน${escapeHTML(provinceName)} ไซด์ไลน์ตรงปก</span>
+        </a>
         <div class="profile-card-info-content">
-            <div class="profile-card-tags-row">
-                ${vibeTagsHtml}
-            </div>
-            
-            <div class="profile-card-social-strip" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 6px; width: 100%; box-sizing: border-box;">
-              <span class="social-badge-likes" style="background: #3B0764; border: 0.8px solid #7C3AED; color: #F3E8FF; padding: 2px 7.5px; border-radius: 100px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);">
-                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>${likesText}</span>
-              </span>
-            </div>
-
-            <div class="profile-card-title-row"> <strong class="profile-card-name">น้อง${cleanName}</strong> <span class="profile-card-age-tag">${ageStr}</span> </div>
-            <div class="profile-card-bottom-row">
-                <span class="profile-card-location">
-                    <i class="fas fa-map-marker-alt"></i> ${loc}
-                </span>
-                <span class="profile-card-price">${luxuryPrice}</span>
-            </div>
+          <div class="profile-card-tags-row">${vibeTagsHtml}</div>
+          <div class="profile-card-social-strip">
+            <span class="social-badge-likes">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+              <span>${likesText}</span>
+            </span>
+          </div>
+          <div class="profile-card-title-row">
+            <strong class="profile-card-name">น้อง${cleanName}</strong>
+            <span class="profile-card-age-tag">${ageStr}</span>
+          </div>
+          <div class="profile-card-bottom-row">
+            <span class="profile-card-location">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${loc}
+            </span>
+            <span class="profile-card-price">${luxuryPrice}</span>
+          </div>
         </div>
       </article>
     </div>
@@ -1142,7 +1140,7 @@ export default async (req, context) => {
 
       if (secret && ((CONFIG.PURGE_SECRET && secret === CONFIG.PURGE_SECRET) || (adminPin && secret === adminPin))) {
         PAGE_CACHE.clear();
-        TEMPLATE_HTML_CACHE = null;
+        TEMPLATE_HTML_CACHE.clear();
         GLOBAL_VERSION = `v_${Date.now()}`;
 
         let cdnPurged = false;
@@ -1350,13 +1348,14 @@ export default async (req, context) => {
       .order("isfeatured", { ascending: false })
       .order("created_at", { ascending: false });
 
-    const [provinceDataRes, profilesRes, allProvincesRes, settingsRes] = await Promise.all([
+  const [provinceDataRes, profilesRes, allProvincesRes, settingsRes, templateHtml] = await Promise.all([
       isNational
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", provinceKeyVariants).limit(1).maybeSingle(),
       profilesQuery,
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
-      supabase.from("site_settings").select("key, value")
+      supabase.from("site_settings").select("key, value"),
+      getTemplateHtml(url, isForceRefresh)
     ]);
 
     if (profilesRes?.error) {
@@ -1526,7 +1525,7 @@ export default async (req, context) => {
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "low"}" decoding="${i === 0 ? "sync" : "async"}" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i < 2 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : (i === 1 ? "auto" : "low")}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -2105,7 +2104,7 @@ const canonicalUrl = isEnglishHome
     const gridProfilesList = profilesList;
 
     // เรนเดอร์การ์ด Grid โดยใช้รายการโปรไฟล์ทั้งหมดของจังหวัด/โซนนั้น
-    const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai, zoneSlug)).join("");
+    const allCardsHtml = gridProfilesList.map((p, i) => renderCardHtml(p, !hotSwiperCardsHtml && i === 0, provinceNameThai, zoneSlug)).join("");
    
     // ✅ ส่ง activeFaqs ชุดใหม่ที่มี Entity เข้าสู่ฟังก์ชันแสดงผล
     const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
@@ -2241,7 +2240,7 @@ const canonicalUrl = isEnglishHome
       </div>
     `;
 
-    let finalHtml = await getTemplateHtml(url, context);
+    let finalHtml = templateHtml || await getTemplateHtml(url, isForceRefresh);
     if (!finalHtml) return await context.next();
 
  const minRequired = activeZoneObj ? 2 : 1;
@@ -2463,7 +2462,7 @@ finalHtml = finalHtml.replace(
     finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? activeProvincesCount : 1}</strong>`);
 
     const topStoryProfiles = profilesList.slice(0, 10);
-    const renderStoryItem = (p) => {
+    const renderStoryItem = (p, idx = 0) => {
       const sName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const sSlug = encodeURIComponent(getCanonicalProfileSlug(p));
       let rawImg = p.imagePath || p.image_url || "";
@@ -2476,7 +2475,7 @@ finalHtml = finalHtml.replace(
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="ดูโปรไฟล์ น้อง${sName}">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-             <img src="${sImg}" alt="น้อง${sName} (${escapeHTML(provinceNameThai)})" loading="lazy" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+             <img src="${sImg}" alt="น้อง${sName} (${escapeHTML(provinceNameThai)})" loading="${idx < 6 ? "eager" : "lazy"}" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             </div>
             <span class="story-status-dot online" aria-hidden="true"></span>
           </div>
@@ -2484,7 +2483,7 @@ finalHtml = finalHtml.replace(
         </a>
       `;
     };
-    const primaryStories = topStoryProfiles.map(p => renderStoryItem(p)).join("");
+    const primaryStories = topStoryProfiles.map((p, i) => renderStoryItem(p, i)).join("");
     finalHtml = finalHtml.replace(/<div class="stories-track-inner" id="agency-stories-track">[\s\S]*?<\/div>/i, `<div class="stories-track-inner" id="agency-stories-track">${primaryStories}</div>`);
 
     
@@ -2789,6 +2788,7 @@ finalHtml = finalHtml.replace(
 const ssrDataScript = `
   <script id="ssr-profiles-data">
     window.profilesData = ${serializedProfilesJson};
+    window.__ssrSanitized = true;
     window.totalProfilesCount = ${totalCount};
     window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
     window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
@@ -2796,6 +2796,7 @@ const ssrDataScript = `
     window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
   </script>
 `;
+
 finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
 
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
@@ -2813,26 +2814,23 @@ const mapQuery = isNational
 const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
 const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-// 🟢 ใส่ URL แผนที่ลงใน src โดยตรง + มี title สำหรับบอท + ปิดเครื่องหมาย > ให้สมบูรณ์
 finalHtml = finalHtml.replace(
   /<iframe\s+id=["']google-map["'][^>]*>/i, 
-  `<iframe id="google-map" src="${mapEmbedUrl}" title="แผนที่พื้นที่ให้บริการ FirstModelHub" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;">`
+  `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}" title="แผนที่พื้นที่ให้บริการ FirstModelHub" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;">`
 );
     finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-  // ✅ Preload รูปแรกของแถบ HOT Swiper ที่โชว์บนหน้าจอแรก
-const lcpTargetProfile = (hotProfiles && hotProfiles.length > 0) ? hotProfiles[0] : null;
+const hasHot = hotProfiles && hotProfiles.length > 0;
+const lcpTargetProfile = hasHot ? hotProfiles[0] : (actualVisibleProfiles && actualVisibleProfiles[0] ? actualVisibleProfiles[0] : null);
 
 if (lcpTargetProfile) {
   const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
   if (rawLcpImg) {
-    const lcpExactUrl = optimizeImg(rawLcpImg, 300);
-    // 🟢 แก้ไข: ตัด type ออก ป้องกันเบราว์เซอร์เมินการพรีโหลด
+    const lcpExactUrl = optimizeImg(rawLcpImg, hasHot ? 300 : "card");
     const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
     finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
   }
 }
-
     finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
     finalHtml = finalHtml.replace(/(href=["'])\/?styles\.css\?v=[^"'\s>]+/g, `$1/styles.css?v=${GLOBAL_VERSION}`);
 finalHtml = finalHtml.replace(/(src=["'])\/?main\.js\?v=[^"'\s>]+/g, `$1/main.js?v=${GLOBAL_VERSION}`);
