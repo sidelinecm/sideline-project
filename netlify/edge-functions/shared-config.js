@@ -164,17 +164,12 @@ export function safeOptimizeImg(imagePath, mode = "card") {
     }
   }
 
-  if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
+if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
   const formatted = cleanPath.replace(/^\/+/, "");
   const finalPath = formatted.startsWith("images/") ? formatted : `images/${formatted}`;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
 
-// ✅ Dummy Handler ป้องกัน Netlify Auto-discovery Error
-export default async (req, context) => {
-  return context?.next ? context.next() : new Response(null, { status: 404 });
-};
-
-export default () => new Response("OK");
-
+// ✅ บรรทัดนี้บรรทัดเดียวจบ ห้ามมี export default ซ้ำอีก
+export default async (req, context) => context.next();
 
