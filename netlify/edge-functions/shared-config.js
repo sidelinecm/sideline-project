@@ -170,4 +170,11 @@ export function safeOptimizeImg(imagePath, mode = "card") {
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
 
-// ✅ Dummy Handler ป้องกัน Netlify Auto-discovery Error export default async (req, context) => { return context?.next ? context.next() : new Response(null, { status: 404 }); };
+// ✅ Dummy Handler ป้องกัน Netlify Auto-discovery Error
+export default async (req, context) => {
+  return context?.next ? context.next() : new Response(null, { status: 404 });
+};
+
+export default () => new Response("OK");
+
+
