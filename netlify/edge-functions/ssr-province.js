@@ -2739,7 +2739,7 @@ finalHtml = finalHtml.replace(
       slug: cleanModelSlug, // 👈 ใช้ค่าออโต้ตรงนี้
       name: (p.name || "น้อง").replace(/^(น้อง\s?)+/gi, "").trim(),
       imagePath: sanitizedImgPath,
-      galleryPaths: sanitizedGallery.slice(0, 3),
+      galleryPaths: sanitizedGallery,
       provinceKey: p.provinceKey || "chiangmai",
       location: sanitizeThaiText(p.location || ""),
       description: sanitizeThaiText(p.description || ""),
