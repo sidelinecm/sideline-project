@@ -740,22 +740,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         const CURRENT_SW_VER = 'v_20261126_02';
-        navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER)
-          .then(function(reg) {
-            reg.onupdatefound = function() {
-              const installingWorker = reg.installing;
-              if (installingWorker) {
-                installingWorker.onstatechange = function() {
-                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('FirstModelHub ServiceWorker updated successfully.');
-                  }
-                };
-              }
-            };
-          })
-          .catch(function(err) {
-            console.warn('SW registration bypassed:', err);
-          });
+        navigator.serviceWorker.register('/sw.js?v=' + CURRENT_SW_VER).catch(function() {});
       });
     }
   </script>
