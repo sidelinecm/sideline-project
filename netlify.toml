@@ -93,7 +93,11 @@
 
 [[edge_functions]]
   function = "ssr-province"
-  path = "/api/*"
+  path = "/api/clear-cache"
+
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/api/purge-cache"
 
 [[edge_functions]]
   function = "render-bot"
@@ -127,11 +131,7 @@
   function = "ssr-province"
   path = "/profiles"
 
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/index-en"
-
-# REDIRECTS & CLEAN URLS (ไม่มี Catch-all Soft 404 ที่ปลายไฟล์แล้ว)
+# REDIRECTS & CLEAN URLS
 [[redirects]]
   from = "/.well-known/ai-catalog.json"
   to = "/ai-catalog.json"

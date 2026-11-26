@@ -86,7 +86,7 @@ async function getSupabaseClient() {
 (function () {
   "use strict";
 
-  const CACHE_STORAGE_KEY = "fmh_super_admin_2026";
+  const CACHE_STORAGE_KEY = "fmh_client_cache_v1";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
@@ -258,6 +258,21 @@ window.trackLineClick = function(profileId) {
     return isEN ? clean : `น้อง${clean}`;
   }
 
+  // 🟢 ฟังก์ชันล็อกไม่ให้คนชื่อเดียวกันโผล่ซ้ำในหัวข้อ/กริดเดียวกัน
+  function deduplicateProfilesByName(list) {
+    if (!list || !Array.isArray(list)) return [];
+    const seen = new Set();
+    return list.filter(p => {
+      const cleanN = (p.displayName || p.name || "")
+        .replace(/^(น้อง|สาว|พี่)\s*/gi, "")
+        .trim()
+        .toLowerCase();
+      if (!cleanN || seen.has(cleanN)) return false;
+      seen.add(cleanN);
+      return true;
+    });
+  }
+
   function escapeHTML(str) {
     return str ? String(str).replace(/[&<>'"]/g, tag => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
@@ -290,31 +305,50 @@ function optimizeImg(imagePath, mode = "card") {
 
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
-  
-  // 🟢 ใช้ q_auto:eco และขนาดตรงกับ SSR
-  let transform = "f_webp,q_auto:eco,w_320,h_448,c_fill,g_auto";
 
+  let transform = "f_auto,q_auto:eco,w_320,h_448,c_fill,g_auto";
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
-    transform = "f_webp,q_auto:eco,w_100,h_100,c_thumb,g_face";
+    transform = "f_auto,q_auto:eco,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
-    transform = "f_webp,q_auto:eco,w_240,h_336,c_fill,g_auto";
+    transform = "f_auto,q_auto:good,w_300,h_420,c_fill,g_auto";
   } else if (mode === "card") {
-    transform = "f_webp,q_auto:eco,w_320,h_448,c_fill,g_auto";
+    transform = "f_auto,q_auto:eco,w_320,h_448,c_fill,g_auto";
   } else if (mode === "og") {
-    transform = "f_webp,q_auto:good,w_1200,h_630,c_fill,g_auto";
+    transform = "f_auto,q_auto:good,w_1200,h_630,c_fill,g_face";
   } else if (mode === 600 || mode === "full" || typeof mode === "number") {
-    transform = "f_webp,q_auto:good,w_600,h_840,c_limit";
+    transform = "f_auto,q_auto:good,w_600,h_840,c_limit";
   }
 
-  const match = cleanPath.match(/(?:images\/)?[^\/\s\?]+\.(?:png|jpg|jpeg|webp|avif)/i);
-  if (match) {
-    let fileName = match[0].replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
-    if (!fileName.startsWith("images/")) fileName = "images/" + fileName;
-    return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${fileName}`;
+  const cldMarker = "/image/upload/";
+  if (cleanPath.includes("res.cloudinary.com") && cleanPath.includes(cldMarker)) {
+    const markerIdx = cleanPath.indexOf(cldMarker);
+    const rest = cleanPath.slice(markerIdx + cldMarker.length);
+    if (rest) {
+      const parts = rest.split("/");
+      const verIdx = parts.findIndex((seg) => /^v\d+$/.test(seg));
+      let tailParts = [];
+      if (verIdx !== -1) {
+        tailParts = parts.slice(verIdx + 1);
+      } else {
+        const isTransformSeg = (seg) =>
+          seg.includes(",") ||
+          seg.includes(":") ||
+          /^(?:f|q|w|h|c|g|e|l|fl|ar|bo|dpr|t)_/i.test(seg);
+        let startIdx = 0;
+        while (startIdx < parts.length - 1 && isTransformSeg(parts[startIdx])) {
+          startIdx++;
+        }
+        tailParts = parts.slice(startIdx);
+      }
+      if (tailParts.length > 0) {
+        return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${tailParts.join("/")}`;
+      }
+    }
   }
 
-  const formatted = cleanPath.replace(/^\/+/, "").replace(/\.(png|jpg|jpeg|avif)$/i, ".webp");
-  const finalPath = formatted.startsWith("images/") ? formatted : "images/" + formatted;
+  if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
+  const formatted = cleanPath.replace(/^\/+/, "");
+  const finalPath = formatted.startsWith("images/") ? formatted : `images/${formatted}`;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
 
@@ -395,15 +429,13 @@ function optimizeImg(imagePath, mode = "card") {
     const numPrice = parseRateToNumber(rawRate);
     const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : (isEN ? "Inquire" : "สอบถาม");
 
-    // 🟢 กำหนดตัวเลขสเปกสมจริงโดยอิงจาก ID ของน้อง ป้องกันการขึ้น 20+ ปี หรือ ไม่ระบุ
-    const pSeed = Number(raw.id) || 1;
     const bust = raw.bust || raw.breast || "";
     const waist = raw.waist || "";
     const hips = raw.hip || raw.hips || "";
     const cup = (raw.cup_size || raw.cupSize || raw.cup || "").toString().toUpperCase().trim();
 
     const rawProp = String(raw.st || raw.stats || raw.proportion || raw.proportions || "").trim();
-    const hasValidDbStats = rawProp && rawProp !== "-" && rawProp !== "0" && rawProp !== "null" && rawProp !== "ไม่ระบุ";
+    const hasValidDbStats = rawProp && !["-", "0", "null", "ไม่ระบุ"].includes(rawProp);
 
     let statsStr = "";
     if (bust && waist && hips) {
@@ -413,33 +445,24 @@ function optimizeImg(imagePath, mode = "card") {
     } else {
       const fullBio = `${raw.description || ""} ${raw.slogan || ""} ${raw.quote || ""}`;
       const foundMatch = fullBio.match(/(\d{2,3}[A-Za-z]?\s*[-–]\s*\d{2}\s*[-–]\s*\d{2})/);
-      if (foundMatch && foundMatch[1]) {
-        statsStr = foundMatch[1].replace(/\s+/g, "");
-      } else {
-        const defaultBusts = ["32C", "34B", "34C", "36C"];
-        statsStr = `${defaultBusts[pSeed % defaultBusts.length]}-24-35`;
-      }
+      statsStr = (foundMatch && foundMatch[1]) ? foundMatch[1].replace(/\s+/g, "") : "";
     }
 
     const rawAge = raw.a || raw.age || raw.profile_age;
-    const cleanAge = rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0" ? String(rawAge).replace(/\D/g, "") : null;
-    const resolvedAge = cleanAge || String(21 + (pSeed % 4));
-    const ageDisplay = isEN ? `${resolvedAge} yrs` : `${resolvedAge} ปี`;
+    const cleanAge = rawAge && !["-", "0", "ไม่ระบุ"].includes(String(rawAge).trim()) ? String(rawAge).replace(/\D/g, "") : "";
+    const resolvedAge = cleanAge;
+    const ageDisplay = cleanAge ? (isEN ? `${cleanAge} yrs` : `${cleanAge} ปี`) : "";
 
     const rawHeight = raw.height || raw.profile_height;
-    const cleanHeight = rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0" ? String(rawHeight).replace(/\D/g, "") : null;
-    const resolvedHeight = cleanHeight || String(158 + (pSeed % 6));
-    const heightDisplay = isEN ? `${resolvedHeight} cm` : `${resolvedHeight} ซม.`;
+    const cleanHeight = rawHeight && !["-", "0", "ไม่ระบุ"].includes(String(rawHeight).trim()) ? String(rawHeight).replace(/\D/g, "") : "";
+    const heightDisplay = cleanHeight ? (isEN ? `${cleanHeight} cm` : `${cleanHeight} ซม.`) : "";
 
     const rawWeight = raw.weight || raw.profile_weight;
-    let cleanWeight = rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0" ? String(rawWeight).replace(/\D/g, "") : null;
-    if (!cleanWeight) {
-      cleanWeight = String(parseInt(resolvedHeight, 10) - 112);
-    }
-    const weightDisplay = isEN ? `${cleanWeight} kg` : `${cleanWeight} กก.`;
+    const cleanWeight = rawWeight && !["-", "0", "ไม่ระบุ"].includes(String(rawWeight).trim()) ? String(rawWeight).replace(/\D/g, "") : "";
+    const weightDisplay = cleanWeight ? (isEN ? `${cleanWeight} kg` : `${cleanWeight} กก.`) : "";
 
     const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-    const skinDisplay = rawSkin && String(rawSkin).trim() !== "-" ? String(rawSkin).trim() : (isEN ? "Fair" : "ผิวขาวเหลือง");
+    const skinDisplay = rawSkin && !["-", "ไม่ระบุ"].includes(String(rawSkin).trim()) ? String(rawSkin).trim() : "";
     const statsDisplay = statsStr;
 
     const slogan = raw.slogan || raw.quote || raw.tagline || (isEN ? "Romantic Girlfriend Experience, verified photos" : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
@@ -462,7 +485,11 @@ function optimizeImg(imagePath, mode = "card") {
     return {
       ...raw,
       id: raw.id,
-      slug: raw.slug || String(raw.id),
+      slug: (() => {
+        const s = String(raw.slug || "").trim().toLowerCase().replace(/\s+/g, "-");
+        const bad = !s || /[\u0E00-\u0E7F]/.test(s) || /^(aekhth|ediyr|aikhejiyw|aetngom|aetngkwa|eoingeoy|emsa|hmiw)/.test(s);
+        return bad ? `model-${raw.id}` : s;
+      })(),
       location: isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : sanitizeThaiText(raw.location || provinceThai),
       description: sanitizeThaiText(raw.description || ""),
       quote: isEN ? slogan : sanitizeThaiText(slogan),
@@ -1046,14 +1073,14 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
 
-    // 🟢 5. กรณีหน้าแรกทั่วไป: แสดงผลโปรไฟล์ทั้งหมด 115 คน (เรียงคนแนะนำไว้ด้านบน)
+    // 🟢 5. กรณีหน้าแรกทั่วไป: ตัดคนที่ชื่อซ้ำข้ามจังหวัดออก ให้เหลือแค่ 1 คนต่อ 1 รูป
     } else {
-      // ดึงโปรไฟล์ทั้งหมดมาแสดงผล 100% โดยจัดเรียงโปรไฟล์แนะนำ (Featured) ขึ้นก่อน
-      const feedProfiles = [...profiles].sort((a, b) => {
+      const sortedProfiles = [...profiles].sort((a, b) => {
         if (a.isfeatured && !b.isfeatured) return -1;
         if (!a.isfeatured && b.isfeatured) return 1;
         return 0;
       });
+      const feedProfiles = deduplicateProfilesByName(sortedProfiles);
 
       const cityHubsHtml = `
         <section class="national-city-hubs-section" style="margin-top: 10px; margin-bottom: 24px;">
@@ -1080,12 +1107,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
             <a href="/location/chiangrai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงราย</strong>
             </a>
-            <a href="/location/lampang" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
+           <a href="/location/lampang" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ลำปาง</strong>
-            </a>
-            <a href="/location/bangkok" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; justify-content:space-between; gap:6px;">
-              <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">กรุงเทพฯ</strong></div>
-              <span style="background:rgba(124,58,237,0.1); color:#7C3AED; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:100px;">เปิดรับ</span>
             </a>
           </div>
         </section>
@@ -1113,7 +1136,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
       domCache.profilesDisplayArea.innerHTML = "";
       domCache.profilesDisplayArea.appendChild(wrapper);
       const gridContainer = wrapper.querySelector(".profile-grid");
-      await renderProfilesBatch(gridContainer, feedProfiles, activeRenderId);
+      const cleanProfilesList = deduplicateProfilesByName(profiles);
+      await renderProfilesBatch(gridContainer, cleanProfilesList, activeRenderId);
     }
     }
 
@@ -1322,9 +1346,8 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     let rawName = p.displayName || p.name || "Model";
     const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
     
-    // 🟢 ดึงอายุที่คำนวณแล้ว ป้องกันการขึ้น 20+ ปี
-    const ageDisplay = p.safeAgeDisplay || `${p.safeAge || p.age || 21} ปี`;
     
+    const ageDisplay = p.safeAgeDisplay || (p.age && !["-", "0", "ไม่ระบุ"].includes(String(p.age).trim()) ? `${p.age} ปี` : "");
     let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
     const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
@@ -1896,29 +1919,22 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       heroImg.alt = `${displayName} เพื่อนเที่ยวฟิวแฟน${pProvText} โซน${primaryZone} ตรงปก 100% - FirstModelHub`;
     }
 
-    // ⚡ 6. แสดงข้อมูลสเปก 3 ช่อง + อัตราค่าบริการ
-    const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "21 ปี");
-    const safeStats = profile.safeStats || profile.stats || "34C-24-35";
-    const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "160 ซม.");
+    // ⚡ 6. แสดงข้อมูลสเปกเฉพาะที่มีจริง + อัตราค่าบริการ
+    const safeAge = profile.safeAgeDisplay || (profile.age && !["-", "0", "ไม่ระบุ"].includes(String(profile.age).trim()) ? `${profile.age} ปี` : "");
+    const safeStats = profile.safeStats || (profile.stats && !["-", "0", "ไม่ระบุ"].includes(String(profile.stats).trim()) ? profile.stats : "");
+    const safeHeight = profile.safeHeight || (profile.height && !["-", "0", "ไม่ระบุ"].includes(String(profile.height).trim()) ? `${profile.height} ซม.` : "");
     const displayPrice = profile.displayPrice || (profile.rate ? `${parseInt(profile.rate, 10).toLocaleString()}.-` : "1,500.-");
+
+    const statTiles = [
+      safeAge ? `<div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;"><div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Age" : "อายุ"}</div><div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeAge}</div></div>` : "",
+      safeStats ? `<div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;"><div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Stats" : "สัดส่วน"}</div><div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeStats}</div></div>` : "",
+      safeHeight ? `<div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;"><div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Height" : "ส่วนสูง"}</div><div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeHeight}</div></div>` : ""
+    ].filter(Boolean);
 
     const detailsCompactEl = document.getElementById("lightboxDetailsCompact");
     if (detailsCompactEl) {
       detailsCompactEl.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
-                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Age" : "อายุ"}</div>
-                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeAge}</div>
-            </div>
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
-                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Stats" : "สัดส่วน"}</div>
-                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeStats}</div>
-            </div>
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
-                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${isEn ? "Height" : "ส่วนสูง"}</div>
-                <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeHeight}</div>
-            </div>
-        </div>
+        ${statTiles.length > 0 ? `<div style="display: grid; grid-template-columns: repeat(${statTiles.length}, 1fr); gap: 8px; margin-bottom: 10px;">${statTiles.join("")}</div>` : ""}
         <div style="background: #F0ECF8; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="color: #4A4458; font-size: 12px; font-weight: 700;"><i class="fas fa-tag" style="color:#7C3AED; margin-right:4px;"></i> ${isEn ? "Rate" : "ค่าขนม"}</span>
@@ -2510,6 +2526,10 @@ function initDockAutoHide() {
     domCache.resetSearchBtn = document.getElementById("reset-search-btn");
     domCache.featuredSection = document.getElementById("featured-profiles");
     domCache.featuredContainer = document.getElementById("featured-profiles-container");
+    const initialQueryQ = new URLSearchParams(window.location.search).get("q");
+    if (domCache.searchInput && initialQueryQ) {
+      domCache.searchInput.value = initialQueryQ;
+    }
 
     const menuToggleBtn = document.getElementById("menu-toggle");
     const sidebarMenuEl = document.getElementById("sidebar-menu");
@@ -2846,9 +2866,9 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
           const sb = await getSupabaseClient();
           if (sb) {
             const { data, error } = await sb
-              .from("profiles")
-              .select("*")
-              .eq("active", true)
+                .from("profiles")
+                .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
+                .eq("active", true)
               .order("isfeatured", { ascending: false })
               .order("created_at", { ascending: false });
             if (!error && Array.isArray(data)) rawList = data;
@@ -2871,10 +2891,10 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
             const hydrateRemaining = async () => {
               const sb = await getSupabaseClient();
               if (!sb) return;
-              const { data } = await sb
-                .from("profiles")
-                .select("*")
-                .eq("active", true)
+              const { data, error } = await sb
+              .from("profiles")
+              .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
+              .eq("active", true)
                 .order("isfeatured", { ascending: false })
                 .order("created_at", { ascending: false });
               if (Array.isArray(data) && data.length > appState.allProfiles.length) {
@@ -3130,7 +3150,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         <div style="font-size: 34px; margin-bottom: 6px;">🔑</div>
         <h3 style="font-size: 16px; font-weight: 900; margin: 0 0 4px 0; color: #FFFFFF;">ADMIN CONTROL HUB</h3>
         <p style="font-size: 11.5px; color: #94A3B8; margin: 0 0 16px 0;">ใส่รหัสผ่านเพื่อสั่งล้างแคช CDN ทั่วโลก</p>
-        <input type="password" id="admin-custom-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" style="width: 100%; height: 48px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.5); border-radius: 14px; color: #FFFFFF; font-size: 26px; text-align: center; letter-spacing: 10px; outline: none; margin-bottom: 16px; box-sizing: border-box;">
+       <input type="password" id="admin-custom-pin-input" autocomplete="off" maxlength="32" placeholder="••••"style="width: 100%; height: 48px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.5); border-radius: 14px; color: #FFFFFF; font-size: 26px; text-align: center; letter-spacing: 10px; outline: none; margin-bottom: 16px; box-sizing: border-box;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <button type="button" id="admin-pin-cancel-btn" style="height: 44px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #CBD5E1; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;">ยกเลิก</button>
           <button type="button" id="admin-pin-submit-btn" style="height: 44px; background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%); border: none; color: #FFFFFF; border-radius: 12px; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);">ยืนยัน</button>

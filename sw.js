@@ -4,9 +4,8 @@
  */
 
 const swUrl = new URL(self.location);
-const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261115_69';
+const CURRENT_VERSION = swUrl.searchParams.get('v') || 'v_20261126_01';
 const CACHE_NAME = `firstmodelhub-cache-${CURRENT_VERSION}`;
-
 
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
@@ -26,13 +25,11 @@ self.addEventListener('install', event => {
   );
 });
 
-
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys.filter(key => key !== CACHE_NAME).map(key => {
-          console.log(`[SW] Purging old cache: ${key}`);
           return caches.delete(key);
         })
       );
@@ -41,12 +38,25 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
   const url = new URL(event.request.url);
 
-  if (url.origin.includes('supabase.co') || url.origin.includes('googletagmanager.com') || event.request.method !== 'GET') {
+  // 1. ข้าม non-HTTP(S) (เช่น chrome-extension://), API, Sitemap และระบบ Analytics ทั้งหมด
+  if (!url.protocol.startsWith('http')) return;
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname === '/sitemap.xml' ||
+    url.origin.includes('supabase.co') ||
+    url.origin.includes('googletagmanager.com') ||
+    url.origin.includes('google-analytics.com') ||
+    url.origin.includes('clarity.ms') ||
+    url.origin.includes('maps.google.com')
+  ) {
     return;
   }
 
+  // 2. หน้า HTML ใช้ Network-First เสมอ เพื่อรับอัปเดตโปรไฟล์และ SEO สดใหม่
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(event.request).catch(async () => {
@@ -62,45 +72,26 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // 3. รูป Cloudinary ปล่อยให้ HTTP Cache/CDN จัดการโดยตรง ไม่ถม CacheStorage มือถือจนเต็ม
   if (url.origin.includes('res.cloudinary.com')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(cache => {
-        return cache.match(event.request).then(cachedResponse => {
-          const fetchPromise = fetch(event.request).then(networkResponse => {
-            if (networkResponse && networkResponse.status === 200) {
-              cache.put(event.request, networkResponse.clone());
-            }
-            return networkResponse;
-          }).catch(() => null);
-
-          return cachedResponse || fetchPromise;
-        });
-      })
-    );
     return;
   }
 
-  event.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request).then(cachedResponse => {
-        if (cachedResponse) {
-          fetch(event.request).then(networkResponse => {
-            if (networkResponse && networkResponse.status === 200) {
+  // 4. Static Assets ของเว็บเอง (CSS, JS, Fonts, Local Icons) ใช้ Stale-While-Revalidate
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const networkFetch = fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
               cache.put(event.request, networkResponse.clone());
             }
-          }).catch(() => {});
-          return cachedResponse;
-        }
+            return networkResponse;
+          }).catch(() => cachedResponse || new Response('', { status: 408, statusText: 'Network Request Failed' }));
 
-        return fetch(event.request).then(networkResponse => {
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        }).catch(() => {
-          return new Response('', { status: 408, statusText: 'Network Request Failed' });
+          return cachedResponse || networkFetch;
         });
-      });
-    })
-  );
+      })
+    );
+  }
 });
