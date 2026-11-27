@@ -338,8 +338,10 @@ function sanitizeThaiText(text) {
     .replace(/[\uD800-\uDFFF\uFFFD]/g, "")
     .replace(/[જ⁀➴˚༘⋆🫦🌷͙֒🔥💥💦🐻‍❄️ྀི₊✮⸜⸝✧✦⁺]+/g, " ")
     .replace(/\.{2,}/g, " ")
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+        .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+    .replace(/พาพับ/g, "พายัพ")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
+
     .replace(/นิมาน/g, "นิมมาน")
     .replace(/(โซน|ย่าน|แถว|พัก|อยู่)\s*นิทาน/g, "$1นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -1014,8 +1016,8 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
   let rawTags = p.style_tags || p.styleTags || p.tags || [];
   if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
 
-  const cleanTags = (Array.isArray(rawTags) ? rawTags : [])
-    .map(t => String(t).replace(/^#+/, "").trim())
+    const cleanTags = (Array.isArray(rawTags) ? rawTags : [])
+    .map(t => sanitizeThaiText(String(t).replace(/^#+/, "").trim()))
     .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8);
 
   const vibeTagsHtml = cleanTags.length > 0
@@ -1094,9 +1096,10 @@ const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
   return faqs.map(f => `
     <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
-        <div style="font-size: 13px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">
-            Q: ${escapeHTML(sanitizeThaiText(f.q))}
-        </div>
+        <h3 style="font-size: 13px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0; line-height: 1.45;">
+    Q: ${escapeHTML(sanitizeThaiText(f.q))}
+</h3>
+        
         <div style="font-size: 12px; color: var(--text-gray, #4A4458); line-height: 1.5;">
             ${escapeHTML(sanitizeThaiText(f.a))}
         </div>
@@ -1118,15 +1121,31 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 2. AI Catalog Endpoint
-    if (url.pathname.endsWith("ai-catalog.json") || url.pathname.includes(".well-known/ai-catalog")) {
-      return new Response(JSON.stringify({ "specVersion": "1.0", "entries": [] }), {
+    
+    if (
+      url.pathname.endsWith("ai-catalog.json") ||
+      url.pathname.endsWith("ard.json") ||
+      url.pathname.includes(".well-known/ai-catalog") ||
+      url.pathname.includes(".well-known/ard")
+    ) {
+      return new Response(JSON.stringify({
+        "specVersion": "1.0",
+        "host": {
+          "displayName": "FirstModelHub",
+          "identifier": "firstmodelhub.com"
+        },
+        "entries": []
+      }), {
         status: 200,
-        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=86400", "Access-Control-Allow-Origin": "*" }
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "public, max-age=86400",
+          "Access-Control-Allow-Origin": "*"
+        }
       });
     }
 
-    // 🟢 3. เคลียร์แคชระบบ (รองรับ PURGE_SECRET และ ADMIN_PIN จาก Env Var เท่านั้น)
+    
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
       let bodyPin = "";
       if (req.method === "POST") {
@@ -1358,10 +1377,14 @@ export default async (req, context) => {
       getTemplateHtml(url, isForceRefresh)
     ]);
 
-    if (profilesRes?.error) {
+        if (profilesRes?.error) {
       console.error("Supabase profiles query error:", profilesRes.error);
+      if (cachedPage) {
+        return new Response(cachedPage.html, { headers: cachedPage.headers });
+      }
       return await context.next();
     }
+
 
     
 
@@ -1403,17 +1426,14 @@ export default async (req, context) => {
       p.provinceKey = realProvince;
       p.province_slug = realProvince;
 
-      const uniqueProfileId = String(p.id || "");
+            const uniqueProfileId = String(p.id || "");
       if (uniqueProfileId && seenNameKeys.has(uniqueProfileId)) continue;
       if (imgSig && seenImageKeys.has(imgSig)) continue;
 
-      // 🟢 ถ้าอยู่หน้าแรก (ทั่วไทย) หากชื่อน้องซ้ำกับคนที่มีอยู่แล้ว ให้ข้ามทันที
-      if (isNational && cleanName && seenNameKeys.has(cleanName)) continue;
-
       if (imgSig) seenImageKeys.add(imgSig);
       if (uniqueProfileId) seenNameKeys.add(uniqueProfileId);
-      if (cleanName) seenNameKeys.add(cleanName);
       deduplicatedProfiles.push(p);
+
     }
 
     // 🟢 2. แยกโปรไฟล์: เก็บรายชื่อคนทั้งจังหวัดไว้ก่อน (สำหรับทำ Hot Swiper ของจังหวัด)
@@ -1529,7 +1549,7 @@ export default async (req, context) => {
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
-              <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
+              <strong class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900; display: block;">น้อง${cleanName}</strong>
               <div class="vip-location">${loc}</div>
             </div>
           </div>
