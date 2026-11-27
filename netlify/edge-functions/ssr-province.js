@@ -1638,7 +1638,7 @@ const canonicalUrl = isEnglishHome
                    <span class="h1-line-2">คัดรูปจริงตรงปก ${liveTotalProfiles} โปรไฟล์ จ่ายหน้างาน ไม่มีมัดจำ</span>`;
       dynamicSubheadline = `สารบัญโปรไฟล์ทั้งหมด ${liveTotalProfiles} คนทั่วไทย`;
     } else if (isNational) { 
-      metaTitle = `รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ`; 
+      metaTitle = `รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ตรงปก ไม่มีมัดจำ`;
       ssrH1Html = `<span class="h1-line-1">รับงาน ไซด์ไลน์ <span class="t-chunk">ทั่วไทย</span></span>
                    <span class="h1-line-2">เด็กเอ็น เพื่อนเที่ยวฟิวแฟน รูปจริง 100% จ่ายหน้างาน ไม่มีมัดจำ</span>`; 
       dynamicSubheadline = "สาวรับงาน ไซด์ไลน์ ฟิวแฟนทั่วไทย";
@@ -2495,7 +2495,7 @@ finalHtml = finalHtml.replace(
         <a href="/sideline/${sSlug}" class="story-item-el interactive-card" data-profile-id="${p.id}" data-profile-slug="${sSlug}" aria-label="ดูโปรไฟล์ น้อง${sName}">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-             <img src="${sImg}" alt="น้อง${sName} (${escapeHTML(provinceNameThai)})" loading="${idx < 6 ? "eager" : "lazy"}" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+            <img src="${sImg}" alt="น้อง${sName} (${escapeHTML(provinceNameThai)})" loading="${idx < 2 ? "eager" : "lazy"}" fetchpriority="low" decoding="async" width="52" height="52" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             </div>
             <span class="story-status-dot online" aria-hidden="true"></span>
           </div>
@@ -2796,7 +2796,7 @@ finalHtml = finalHtml.replace(
     };
   });
 
-  const initialClientProfiles = isNational ? clientProfilesData.slice(0, 24) : clientProfilesData;
+  const initialClientProfiles = isNational ? clientProfilesData.slice(0, 40) : clientProfilesData;
   const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
 
     
