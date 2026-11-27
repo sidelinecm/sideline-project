@@ -395,8 +395,8 @@ function extractCleanNumber(rate) { // (หมายเหตุ: ในไฟ�
   const num = parseInt(cleanDigits, 10);
   
   if (isNaN(num) || num <= 0) return 1500;
-  // 🟢 ป้องกันเคสลืมพิมพ์เลขศูนย์ เช่น พิมพ์ 15 หมายถึง 1500
-  if (num < 100 && num >= 10) return num * 100; 
+  if (num < 10) return num * 1000;
+  if (num < 100 && num >= 10) return num * 100;
   if (num < 500) return num * 10;
   return num;
 }
@@ -979,19 +979,22 @@ function generateNaturalAlt(cleanName, provinceName, loc) {
 const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่", currentZone = "") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   
-  let rawLoc = sanitizeThaiText(p.location || "");
-  let cleaned = rawLoc
-    .replace(/[\r\n\t]+/g, " ")
-    .replace(/\.+$/, "")
-    .replace(new RegExp(`^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน|${provinceName})\\s*(\\/|และ)?\\s*`, "gi"), "")
-    .trim();
-  let firstPart = cleaned.split(/[,/]|และ/)[0].trim();
-  
-  let displayLoc = firstPart.trim();
-  if (currentZone && rawLoc.includes(currentZone)) {
-    displayLoc = currentZone;
+  const JUNK_LOCS = ["ใกล้เคียง", "พื้นที่ใกล้เคียง", "และใกล้เคียง", "ในพื้นที่ใกล้เคียง"];
+  let rawLoc = sanitizeThaiText(p.location || "").replace(/[\r\n\t]+/g, " ").trim();
+  const locTokens = rawLoc
+    .split(/[,/]|และใกล้เคียง|และ/)
+    .map(s => s.replace(/^(โซน|ย่าน)\s*/gi, "").replace(/\.+$/, "").trim())
+    .filter(s => s && !JUNK_LOCS.includes(s));
+
+  let firstPart = locTokens[0] || "";
+  if (/^(ในตัวเมือง|ตัวเมือง|ในเมือง)$/.test(firstPart)) {
+    firstPart = `ในเมือง${provinceName}`;
+  } else {
+    firstPart = firstPart.replace(new RegExp(`^(ในตัวเมือง|ตัวเมือง)\\s+${provinceName}$`, "gi"), `ในเมือง${provinceName}`);
   }
-  let loc = escapeHTML(displayLoc || currentZone || provinceName);
+
+  let displayLoc = currentZone ? currentZone : (firstPart || provinceName);
+  let loc = escapeHTML(displayLoc);
   
   const canonicalProfileSlug = getCanonicalProfileSlug(p);
   const profileUrl = `/sideline/${encodeURIComponent(canonicalProfileSlug)}`;
@@ -2130,7 +2133,10 @@ const canonicalUrl = isEnglishHome
     const faqsHtml = generateDynamicFAQsHTML(activeFaqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     
-    const linkedIntro = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug, zoneSlug);
+    
+    
+    const validIntroZones = isNational ? seoData.zones : activeZonesForPills.map(z => z.thai);
+    const linkedIntro = getDynamicIntro(provinceNameThai, validIntroZones, provinceSlug, zoneSlug);
 
     const provinceCounts = deduplicatedProfiles.reduce((acc, p) => {
       const k = String(p.provinceKey || "").toLowerCase();
@@ -2225,6 +2231,19 @@ const canonicalUrl = isEnglishHome
 
         const slugPart = getSafeZoneSlug(lookupKey, p.key);
         if (!slugPart) return "";
+
+        const { zone: zResolved } = resolveZone(p.key, slugPart);
+        if (zResolved) {
+          const zMatchCount = deduplicatedProfiles.filter(pr => {
+            if ((pr.provinceKey || "").toLowerCase() !== p.key) return false;
+            const rawT = pr.styleTags || pr.style_tags;
+            const tStr = Array.isArray(rawT) ? rawT.join(" ") : String(rawT || "");
+            const comb = `${sanitizeThaiText(pr.location || "")} ${sanitizeThaiText(pr.description || "")} ${tStr}`.toLowerCase();
+            return zResolved.match.some(m => comb.includes(m.toLowerCase()));
+          }).length;
+          if (zMatchCount < 2) return "";
+        }
+
         const zoneHref = `/location/${p.key}/${slugPart}`;
 
         return `
@@ -2364,25 +2383,7 @@ finalHtml = finalHtml.replace(
          aliases.some(alias => combined.includes(alias));
 }
 
-    // 🟢 คำนวณจำนวนน้องที่มีตัวตนจริงในแต่ละโซนจาก MASTER_ZONES (ตรงกับ shared-config.js และ sitemap.js 100%)
-    const baseProvProfiles = deduplicatedProfiles.filter(p => {
-      const pKey = (p.provinceKey || "").toLowerCase();
-      return provinceKeyVariants.includes(pKey);
-    });
-
-    const provMasterZones = MASTER_ZONES[provinceSlug] || [];
-    const activeZonesForPills = [];
-
-    provMasterZones.forEach(zObj => {
-      const count = baseProvProfiles.filter(p => {
-        const rawTags = p.styleTags || p.style_tags; const tagsStr = Array.isArray(rawTags) ? rawTags.join(" ") : String(rawTags || "");
-        const combined = `${sanitizeThaiText(p.location || "")} ${sanitizeThaiText(p.description || "")} ${tagsStr}`.toLowerCase();
-        return zObj.match.some(m => combined.includes(m.toLowerCase()));
-      }).length;
-      if (count > 0) {
-        activeZonesForPills.push({ ...zObj, count });
-      }
-    });
+    
 
     // 🟢 สร้างปุ่มลิงก์โซน (หน้าจังหวัด) หรือปุ่มจังหวัดอัตโนมัติ (หน้าแรก)
     let pills = `
@@ -2535,15 +2536,17 @@ finalHtml = finalHtml.replace(
         /<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i,
         `<div id="featured-profiles-container" class="profile-grid">${featuredCardsHtml}</div>`
       );
-    } else if (!isNational) {
-      // หน้าจังหวัด: ลบกล่องโปรไฟล์แนะนำออกทั้งหมด 100% (ไม่ให้มีกล่องแนะนำโผล่มากวนใจ)
+   } else {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
     // 🟢 3. เข้าสู่ส่วนแสดงโปรไฟล์หลักต่อไปตามปกติ
     let displayAreaHtml = "";
     if (isNational) {
-     const feedCardsHtml = actualVisibleProfiles.map((p, i) => { const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย"; return renderCardHtml(p, i === 0, pName); }).join("");
+      const feedCardsHtml = actualVisibleProfiles.map((p, i) => {
+        const pName = PROVINCE_SEO_DATA[p.provinceKey]?.name || "ทั่วไทย";
+        return renderCardHtml(p, !hotSwiperCardsHtml && !featuredCardsHtml && i === 0, pName);
+      }).join("");
 
       
       const popularProvinces = [
@@ -2736,9 +2739,8 @@ finalHtml = finalHtml.replace(
       }
 
       const rawImgPath = p.imagePath || p.image_url || "";
-    const sanitizedImgPath = forceAdjucgga(rawImgPath);
-    const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(forceAdjucgga).filter(Boolean);
-
+    const sanitizedImgPath = optimizeImg(forceAdjucgga(rawImgPath), 600);
+    const sanitizedGallery = (Array.isArray(rawGal) ? rawGal : []).map(g => optimizeImg(forceAdjucgga(g), 600)).filter(Boolean);
     
     const cleanModelSlug = (function(existingSlug, id) {
       if (!existingSlug) return `model-${id}`;
@@ -2859,10 +2861,11 @@ finalHtml = finalHtml.replace(/(src=["'])\/?main\.js\?v=[^"'\s>]+/g, `$1/main.js
     if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) {
       finalHtml = finalHtml.replace(/<head>/i, '<head>\n  <meta charset="utf-8">');
     }
-    const responseHeaders = {
+   const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": isForceRefresh ? "no-store" : "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
       "Netlify-CDN-Cache-Control": isForceRefresh ? "no-store" : "public, s-maxage=86400, stale-while-revalidate=86400",
+      "Netlify-Vary": "query=page|refresh",
       "ETag": `"${GLOBAL_VERSION}"`,
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
     };

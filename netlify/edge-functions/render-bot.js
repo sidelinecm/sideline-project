@@ -549,40 +549,29 @@ export default async (req, context) => {
         return img.length >= 15 && !img.includes("firstmodelhub.webp");
       };
 
-      const { data: sameProvinceProfiles } = await supabase
+      const { data: allActiveCandidates, error: relErr } = await supabase
         .from("profiles")
-        .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
+        .select("*")
         .eq("active", true)
         .neq("id", profile.id)
-        .in(provCol, provVariants)
-        .limit(8);
+        .order("isfeatured", { ascending: false })
+        .limit(40);
 
-      const { data: otherProfiles } = await supabase
-        .from("profiles")
-        .select("id, slug, name, imagePath, image_url, isfeatured, provinceKey")
-        .eq("active", true)
-        .neq("id", profile.id)
-        .not(provCol, "in", `(${provVariants.map((v) => `"${v}"`).join(",")})`)
-        .limit(8);
+      if (relErr) console.warn("Related profiles query error:", relErr);
 
-      const validSame = (sameProvinceProfiles || []).filter(hasValidImg).slice(0, 3);
-      const validOther = (otherProfiles || []).filter(hasValidImg).slice(0, 3);
+      const candidates = (allActiveCandidates || []).filter(hasValidImg);
+      const sameProv = candidates.filter((rp) => {
+        const rpProv = detectAccurateProvinceKey(rp);
+        return rpProv === provinceKey || provVariants.includes(rpProv);
+      });
+      const otherProv = candidates.filter((rp) => !sameProv.includes(rp));
+
+      const validSame = sameProv.slice(0, 3);
+      const validOther = otherProv.slice(0, 3);
       relatedProfiles = [...validSame, ...validOther].slice(0, 6);
-    } catch (err) {
-      console.warn("Related profiles fetch error:", err);
-    }
 
-    if (relatedProfiles.length === 0) {
-      try {
-        const { data: fallbackProfiles } = await supabase
-          .from("profiles")
-          .select("id, slug, name, imagePath, image_url, isfeatured")
-          .eq("active", true)
-          .neq("id", profile.id)
-          .limit(3);
-        relatedProfiles = fallbackProfiles || [];
-      } catch (_) {}
-    }
+      const validSame = sameProv.slice(0, 3);
+      
 
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
@@ -856,10 +845,12 @@ export default async (req, context) => {
       "gender": "https://schema.org/Female",
       "jobTitle": "เพื่อนเที่ยวฟิวแฟน",
       "description": `${stripHTML(displayName)} เพื่อนเที่ยวฟิวแฟน สแตนด์บาย${schemaPlaceText}${stats ? ` สัดส่วน ${stripHTML(stats)}` : ""} นัดพบตัวจริงจ่ายหน้างาน`,
-      "image": {
+   "image": {
         "@type": "ImageObject",
         "@id": `${canonicalUrl}#image`,
-        "url": heroImageLarge
+        "url": heroImageLarge,
+        "width": 600,
+        "height": 840
       },
       "url": canonicalUrl,
       "makesOffer": {
@@ -867,6 +858,16 @@ export default async (req, context) => {
         "name": `บริการเพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)}`,
         "price": rateNumber,
         "priceCurrency": "THB",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": rateNumber,
+          "priceCurrency": "THB",
+          "unitCode": "HUR"
+        },
+        "itemOffered": {
+          "@type": "Service",
+          "name": `เพื่อนเที่ยวฟิวแฟน ${stripHTML(displayName)} (${schemaPlaceText})`
+        },
         "availability": isOnlineNow ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
         "url": canonicalUrl
       },
@@ -1013,16 +1014,23 @@ export default async (req, context) => {
 
     <script type="application/ld+json">${JSON.stringify(schemaGraph).replace(/</g, "\\u003c")}</script>
 
-    <script>
+ <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ window.dataLayer.push(arguments); }
       window.gtag = gtag;
 
       (function() {
         let gtmLoaded = false;
+        const EVENTS = ['pointerdown', 'touchstart', 'scroll', 'keydown'];
+
         const loadGTM = function() {
           if (gtmLoaded) return;
           gtmLoaded = true;
+
+          EVENTS.forEach(function(ev) {
+            window.removeEventListener(ev, loadGTM);
+          });
+
           var s = document.createElement('script');
           s.src = "https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG";
           s.async = true;
@@ -1034,15 +1042,14 @@ export default async (req, context) => {
           });
         };
 
-        window.addEventListener('keydown', loadGTM, { once: true, passive: true });
+        window.__ensureGtmLoaded = loadGTM;
+
+        EVENTS.forEach(function(ev) {
+          window.addEventListener(ev, loadGTM, { once: true, passive: true });
+        });
+
         window.addEventListener('load', function() {
-          setTimeout(function() {
-            if ('requestIdleCallback' in window) {
-              requestIdleCallback(loadGTM, { timeout: 2000 });
-            } else {
-              loadGTM();
-            }
-          }, 4200);
+          setTimeout(loadGTM, 1800);
         }, { once: true });
       })();
     </script>
@@ -1196,9 +1203,10 @@ export default async (req, context) => {
         </button>
       </div>
 
-      <a href="${liveAdminLine}" target="_blank" rel="noopener nofollow" style="text-align: center; color: #64748B; font-size: 11px; font-weight: 700; text-decoration: none; padding: 2px 0;">
-        <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #7C3AED; text-decoration: underline;">ติดต่อแอดมินช่วยเช็กคิวทันที (ฟรี)</span>
-      </a>
+${lineId !== liveAdminLine ? `
+      <a href="${liveAdminLine}" target="_blank" rel="noopener nofollow" style="text-align: center; color: #475569; font-size: 11.5px; font-weight: 700; text-decoration: none; padding: 6px 0; display: block;">
+        <i class="fas fa-headset" style="color: #7C3AED; margin-right: 4px;"></i> ทักน้องไม่ตอบ? <span style="color: #6D28D9; text-decoration: underline;">ติดต่อแอดมินช่วยเช็กคิวทันที (ฟรี)</span>
+      </a>` : ""}
     </div>
 
     <script>
