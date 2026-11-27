@@ -54,7 +54,7 @@ function updateLiveRelativeTimestamps() {
 
 const SUPABASE_REST_URL = "https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-const PROFILE_SELECT_COLS = "id,slug,name,nameThai,age,height,weight,stats,skinTone,provinceKey,provinceThai,location,rate,availability,quote,styleTags,description,imagePath,galleryPaths,lineId,likes_count,likes,isfeatured,verified,updated_at,created_at";
+const PROFILE_SELECT_COLS = "*";
 
 async function fetchSupabaseRest(endpoint) {
   try {
@@ -167,8 +167,17 @@ async function fetchSupabaseRest(endpoint) {
   }
 };
 
- // 1. ค้นหา window.trackLineClick ใน main.js (ช่วงบรรทัด ~120) แล้วแทนที่ด้วย Native Fetch:
-window.trackLineClick = function(profileId) {
+ window.trackLineClick = function(profileId) {
+  try {
+    if (typeof window.__ensureGtmLoaded === "function") window.__ensureGtmLoaded();
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "line_booking_click", {
+        profile_id: String(profileId),
+        page_path: window.location.pathname
+      });
+    }
+  } catch (_) {}
+
   setTimeout(() => {
     try {
       const idNum = parseInt(profileId, 10);
@@ -970,6 +979,13 @@ if (activeProvince !== "all" && activeProvince !== "national") {
       });
     }
 
+    // 5.1 กรองเฉพาะโปรไฟล์แนะนำ
+    if (currentCriteria.featured) {
+      results = results.filter(p => Boolean(p.isfeatured || p.is_featured));
+    }
+
+    
+
     // 6. เรียงลำดับ
     if (!currentCriteria.text && !currentCriteria.zone) {
       results.sort((a, b) => {
@@ -1433,15 +1449,19 @@ function initLazyGoogleMap(provinceName = "", currentSlug = "") {
     const ageDisplay = p.safeAgeDisplay || (p.age && !["-", "0", "ไม่ระบุ"].includes(String(p.age).trim()) ? `${p.age} ปี` : "");
     let rawLoc = String(isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย"));
     let locName = "";
+    const JUNK_LOCS = ["ใกล้เคียง", "พื้นที่ใกล้เคียง", "และใกล้เคียง", "ในพื้นที่ใกล้เคียง"];
     const activeZone = window.currentZoneSlug ? window.currentZoneSlug.trim() : "";
-    if (activeZone && rawLoc.includes(activeZone)) {
+    if (activeZone) {
       locName = activeZone;
     } else {
-      locName = rawLoc
-        .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-        .split(/[,/]|และใกล้/)[0]
-        .trim();
-      if (!locName) locName = rawLoc;
+      const tokens = rawLoc
+        .split(/[,/]|และใกล้เคียง|และ/)
+        .map(s => s.replace(/^(โซน|ย่าน)\s*/gi, "").replace(/\.+$/, "").trim())
+        .filter(s => s && !JUNK_LOCS.includes(s));
+      locName = tokens[0] || (p.provinceNameThai || "ทั่วไทย");
+      if (/^(ในตัวเมือง|ตัวเมือง|ในเมือง)$/.test(locName)) {
+        locName = `ในเมือง${p.provinceNameThai || ""}`;
+      }
     }
 
     const isOnline = p.isAvailable !== undefined 
@@ -2477,7 +2497,7 @@ function initDockAutoHide() {
       return;
     }
 
-    // 🟢 ข้ามการ Re-render ซ้ำซ้อน หากหน้าเว็บมี SSR Render มาแล้ว
+    const hasInitialQuery = Boolean(domCache.searchInput && domCache.searchInput.value.trim());
     const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
     if (isInitial && hasExistingSSR) {
       const routeMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
@@ -2485,6 +2505,10 @@ function initDockAutoHide() {
       window.currentProvinceSlug = locSlug;
       if (domCache.provinceSelect && locSlug !== "national") {
         domCache.provinceSelect.value = locSlug;
+      }
+      if (hasInitialQuery) {
+        if (typeof window.__hydrateRemainingProfiles === "function") await window.__hydrateRemainingProfiles();
+        executeFilterAndRender(true);
       }
       return;
     }
