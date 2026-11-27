@@ -2512,7 +2512,7 @@ finalHtml = finalHtml.replace(
     if (hotSwiperCardsHtml) {
       finalHtml = finalHtml.replace(
         /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, 
-        `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
+        `<div id="vip-swiper-container" class="vip-swiper-wrapper" role="region" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
       );
       const hotTitle = isNational 
         ? "น้องๆ ไซด์ไลน์ HOT 🔥 ฟิวแฟนยอดนิยมทั่วไทย" 
@@ -2520,6 +2520,7 @@ finalHtml = finalHtml.replace(
       const hotPill = isNational 
         ? "ประจำเดือน #ฟิวแฟน" 
         : `ประจำเดือน จ.${escapeHTML(provinceNameThai)} #ฟิวแฟน`;
+
 
       finalHtml = finalHtml.replace(/<h2 id="hot-profiles-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="hot-profiles-heading" class="hot-main-title">${hotTitle}</h2>`);
       finalHtml = finalHtml.replace(/<span class="hot-monthly-pill">[\s\S]*?<\/span>/i, `<span class="hot-monthly-pill">${hotPill}</span>`);
