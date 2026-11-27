@@ -52,35 +52,24 @@ function updateLiveRelativeTimestamps() {
 }
 
 
-let supabaseClient = null;
-let supabasePromise = null;
+const SUPABASE_REST_URL = "https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
+const PROFILE_SELECT_COLS = "id,slug,name,nameThai,age,height,weight,stats,skinTone,provinceKey,provinceThai,location,rate,availability,quote,styleTags,description,imagePath,galleryPaths,lineId,likes_count,likes,isfeatured,verified,updated_at,created_at";
 
-async function getSupabaseClient() {
-  if (supabaseClient) return supabaseClient;
-  if (supabasePromise) return supabasePromise;
-
-  supabasePromise = (async () => {
-    try {
-      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.42.0");
-      supabaseClient = createClient(
-        "https://zxetzqwjaiumqhrpumln.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-        {
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false
-          }
-        }
-      );
-      window.supabase = supabaseClient;
-      return supabaseClient;
-    } catch (e) {
-      console.warn("Supabase dynamic import fallback:", e);
-      return null;
-    }
-  })();
-
-  return supabasePromise;
+async function fetchSupabaseRest(endpoint) {
+  try {
+    const res = await fetch(`${SUPABASE_REST_URL}/${endpoint}`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.warn("Supabase REST fallback:", e);
+    return null;
+  }
 }
 
 (function () {
@@ -1572,7 +1561,7 @@ async function renderProfilesBatch(containerEl, profilesList, renderId) {
   containerEl.dataset.activeRenderId = renderId;
   containerEl.innerHTML = "";
 
-  const BATCH_SIZE = 8; // วาด 8 คนแรกที่เห็นบนจอก่อนทันทีใน 0.02 วินาที
+  const BATCH_SIZE = 4; // วาดเฉพาะ 4 คนแรก (2 แถวบนจอมือถือ) ให้เสร็จในพริบตา
   const firstBatch = profilesList.slice(0, BATCH_SIZE);
   const remainingBatch = profilesList.slice(BATCH_SIZE);
 
@@ -1583,17 +1572,24 @@ async function renderProfilesBatch(containerEl, profilesList, renderId) {
   }
   containerEl.appendChild(fragment);
 
-  // คนที่เหลือ ทยอยวาดในรอบถัดไป เพื่อให้ Main-Thread ว่างตอบสนองการกดปุ่มของลูกค้าตลอดเวลา
+  // ที่เหลือทยอยวาดทีละ 6 ใบต่อเฟรม ไม่ให้เกิดอาการค้างบนมือถือ
   if (remainingBatch.length > 0) {
-    const scheduleNext = window.requestIdleCallback || ((cb) => setTimeout(cb, 50));
-    scheduleNext(() => {
+    let offset = 0;
+    const CHUNK = 6;
+    const renderNextChunk = () => {
       if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
       const restFragment = document.createDocumentFragment();
-      for (let j = 0; j < remainingBatch.length; j++) {
+      const limit = Math.min(offset + CHUNK, remainingBatch.length);
+      for (let j = offset; j < limit; j++) {
         restFragment.appendChild(createProfileCardDOM(remainingBatch[j], BATCH_SIZE + j));
       }
       containerEl.appendChild(restFragment);
-    }, { timeout: 1000 });
+      offset = limit;
+      if (offset < remainingBatch.length) {
+        requestAnimationFrame(renderNextChunk);
+      }
+    };
+    setTimeout(() => requestAnimationFrame(renderNextChunk), 16);
   }
 }
     
@@ -1889,23 +1885,26 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     const dockEl = document.querySelector(".floating-app-dock");
     if (!lightboxEl) return;
 
+    clearTimeout(window.__lightboxCloseTimer);
+    lightboxEl.dataset.isClosing = "false";
+
     const wasAlreadyOpen = isLightboxCurrentlyOpen;
     isLightboxCurrentlyOpen = true;
 
-    lightboxEl.style.display = "flex";
+    lightboxEl.style.transition = "opacity 0.18s ease";
+    lightboxEl.style.visibility = "visible";
     lightboxEl.style.pointerEvents = "auto";
     lightboxEl.setAttribute("aria-hidden", "false");
     lightboxEl.classList.add("active");
     lightboxEl.style.opacity = "1";
 
     if (contentWrapperEl) {
-      contentWrapperEl.style.transform = "translateY(0) scale(1)";
+      contentWrapperEl.style.transition = "none";
+      contentWrapperEl.style.transform = "translate3d(0, 0, 0) scale(1)";
       contentWrapperEl.style.opacity = "1";
     }
 
-    document.documentElement.classList.add("lightbox-open");
     if (dockEl) dockEl.classList.add("is-lightbox-hidden");
-
     if (wasAlreadyOpen && scrollBodyEl) {
       requestAnimationFrame(() => { scrollBodyEl.scrollTop = 0; });
     }
@@ -2185,19 +2184,24 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       }
     };
 
-    const runDeferredStep1 = () => {
-      syncLightboxGalleryUI();
-      const descContainer = document.getElementById("lightboxDescriptionContainer");
-      const descContent = document.getElementById("lightboxDescriptionContent");
-      if (descContent && typeof generateModalPersonaBox === "function") {
-        descContent.innerHTML = generateModalPersonaBox(profile, displayName, pProvText, primaryZone);
-        descContent.style.cssText = "margin: 10px 0;";
-        if (descContainer) descContainer.style.display = "block";
-      }
-      setTimeout(runDeferredStep2, 0);
-    };
-
-    requestAnimationFrame(runDeferredStep1);
+    const currentSessionId = window.__lightboxSessionId;
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (!isLightboxCurrentlyOpen || window.__lightboxSessionId !== currentSessionId) return;
+        syncLightboxGalleryUI();
+        const descContainer = document.getElementById("lightboxDescriptionContainer");
+        const descContent = document.getElementById("lightboxDescriptionContent");
+        if (descContent && typeof generateModalPersonaBox === "function") {
+          descContent.innerHTML = generateModalPersonaBox(profile, displayName, pProvText, primaryZone);
+          descContent.style.cssText = "margin: 10px 0;";
+          if (descContainer) descContainer.style.display = "block";
+        }
+        setTimeout(() => {
+          if (!isLightboxCurrentlyOpen || window.__lightboxSessionId !== currentSessionId) return;
+          runDeferredStep2();
+        }, 16);
+      }, 0);
+    });
   };
     
 
@@ -2219,12 +2223,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     lightboxEl.style.opacity = "0";
 
     isLightboxCurrentlyOpen = false;
-    document.documentElement.classList.remove("lightbox-open");
     const dockEl = document.querySelector(".floating-app-dock");
     if (dockEl) dockEl.classList.remove("is-lightbox-hidden");
 
-    setTimeout(() => {
-      lightboxEl.style.display = "none";
+    clearTimeout(window.__lightboxCloseTimer);
+    window.__lightboxCloseTimer = setTimeout(() => {
+      lightboxEl.style.visibility = "hidden";
       lightboxEl.classList.remove("active");
       lightboxEl.style.pointerEvents = "none";
       lightboxEl.setAttribute("aria-hidden", "true");
@@ -2633,8 +2637,10 @@ function initDockAutoHide() {
     const toggleSearchDrawer = (isOpen) => {
       if (isOpen) {
         populateProvinceSelect();
+        if (typeof window.__hydrateRemainingProfiles === "function") window.__hydrateRemainingProfiles();
         if (!appState.isNormalizedAll) setTimeout(ensureAllProfilesNormalized, 50);
       }
+      
       if (searchBottomSheetEl) {
         searchBottomSheetEl.classList.toggle("active", isOpen);
         searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
@@ -2755,10 +2761,13 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
     this.classList.add("active");
     appState.activePillTag = this.getAttribute("data-tag") || "all";
 
-    // 2. ปล่อยให้เบราว์เซอร์ Paint การเปลี่ยนสีปุ่มลงหน้าจอก่อนทันที (INP บันทึกตรงนี้: < 30ms)
-    await new Promise(resolve => setTimeout(resolve, 0));
+    // 2. รอให้เบราว์เซอร์วาดสีปุ่มขึ้นหน้าจอจริงก่อน 100%
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
-    // 3. เริ่มกรองและเปลี่ยนการ์ดโปรไฟล์
+    // 3. โหลดข้อมูลส่วนที่เหลือ (ถ้ายังโหลดไม่ครบ) แล้วค่อยกรองการ์ด
+    if (typeof window.__hydrateRemainingProfiles === "function") {
+      await window.__hydrateRemainingProfiles();
+    }
     executeFilterAndRender(true);
   });
 });
@@ -2911,7 +2920,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
       try {
         const provSource = (window.provincesData && Array.isArray(window.provincesData)) 
           ? window.provincesData 
-          : (await (await getSupabaseClient())?.from("provinces").select("*"))?.data;
+          : await fetchSupabaseRest("provinces?select=*");
 
         if (provSource && Array.isArray(provSource)) {
           appState.provincesMap.clear();
@@ -2926,16 +2935,10 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         let rawList = Array.isArray(window.profilesData) ? window.profilesData : null;
 
         if (!rawList || rawList.length === 0) {
-          const sb = await getSupabaseClient();
-          if (sb) {
-            const { data, error } = await sb
-                .from("profiles")
-                .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
-                .eq("active", true)
-              .order("isfeatured", { ascending: false })
-              .order("created_at", { ascending: false });
-            if (!error && Array.isArray(data)) rawList = data;
-          }
+          const data = await fetchSupabaseRest(
+            `profiles?select=${PROFILE_SELECT_COLS}&active=eq.true&order=isfeatured.desc,created_at.desc`
+          );
+          if (Array.isArray(data)) rawList = data;
         }
 
         if (rawList && rawList.length > 0) {
@@ -2974,17 +2977,14 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
             populateInitialComponents();
           }
 
-          // โหลดโปรไฟล์ที่เหลือช่วง Idle เพื่อให้ค้นหา/กดแท็บหน้าแรกเจอครบทุกคน
-          if (window.totalProfilesCount && cleanProfiles.length < window.totalProfilesCount) {
-            const hydrateRemaining = async () => {
-              const sb = await getSupabaseClient();
-              if (!sb) return;
-              const { data } = await sb
-                .from("profiles")
-                .select("id, slug, name, nameThai, age, height, weight, stats, skinTone, provinceKey, provinceThai, location, rate, availability, quote, styleTags, description, imagePath, galleryPaths, lineId, likes_count, likes, isfeatured, verified, updated_at, created_at")
-                .eq("active", true)
-                .order("isfeatured", { ascending: false })
-                .order("created_at", { ascending: false });
+          // โหลดโปรไฟล์ที่เหลือเฉพาะตอนคนกดเปิดตัวกรองหรือกดแท็บหมวดหมู่
+          window.__hydrateRemainingProfiles = async () => {
+            if (window.__hydrateDone || !window.totalProfilesCount || appState.rawList.length >= window.totalProfilesCount) return;
+            if (window.__hydratePromise) return window.__hydratePromise;
+            window.__hydratePromise = (async () => {
+              const data = await fetchSupabaseRest(
+                `profiles?select=${PROFILE_SELECT_COLS}&active=eq.true&order=isfeatured.desc,created_at.desc`
+              );
               if (Array.isArray(data) && data.length > appState.rawList.length) {
                 const moreValid = filterValidProfiles(data);
                 appState.rawList = moreValid;
@@ -2998,12 +2998,12 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
                   if (r.id != null) appState.rawProfileById.set(String(r.id), r);
                   if (r.slug) appState.rawProfileBySlug.set(String(r.slug).toLowerCase(), r);
                 }
-                scheduleBackgroundNormalization();
+                ensureAllProfilesNormalized();
               }
-            };
-            if ("requestIdleCallback" in window) requestIdleCallback(hydrateRemaining, { timeout: 4000 });
-            else setTimeout(hydrateRemaining, 2500);
-          }
+              window.__hydrateDone = true;
+            })();
+            return window.__hydratePromise;
+          };
 
           return true;
         }
