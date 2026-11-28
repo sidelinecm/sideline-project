@@ -2141,11 +2141,11 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
           if (!item || String(item.id) === String(profile.id)) continue;
           const itemProv = String(item.provinceKey || item.province_slug || "").toLowerCase();
           if (itemProv === pKey) {
-            if (sameRaw.length < 3) sameRaw.push(item);
+            if (sameRaw.length < 6) sameRaw.push(item);
           } else {
-            if (otherRaw.length < 3) otherRaw.push(item);
+            if (otherRaw.length < 6) otherRaw.push(item);
           }
-          if (sameRaw.length >= 3 && otherRaw.length >= 3) break;
+          if (sameRaw.length >= 6 && otherRaw.length >= 3) break;
         }
 
         let candidatesRaw = [...sameRaw, ...otherRaw];
@@ -2568,6 +2568,12 @@ function initDockAutoHide() {
       }
       return;
     }
+    
+    if (!isInitial && isLightboxCurrentlyOpen && window.__returnPathBeforeModal === rawPath && domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0) {
+  appState.currentProfileSlug = null;
+  window.closeLightboxModal(false);
+  return;
+}
 
     const hasInitialQuery = Boolean(domCache.searchInput && domCache.searchInput.value.trim());
     const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
@@ -2943,6 +2949,7 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
 
             if (targetProfile) {
               window.__returnUrlBeforeModal = window.location.pathname + window.location.search;
+              window.__returnPathBeforeModal = window.location.pathname.replace(/\/+$/, "") || "/";
               window.__isFromProfiles = window.location.pathname.startsWith("/profiles");
               const nextUrl = `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`;
               history.pushState(null, "", nextUrl);
@@ -3534,6 +3541,11 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
         const allPill = document.querySelector('.filter-pill-tab[data-tag="all"]');
         if (allPill) allPill.classList.add("active");
 
+const zonePathMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)\/([^/]+)/i);
+if (zonePathMatch && zonePathMatch[1]) {
+  window.location.href = `/location/${zonePathMatch[1]}`;
+  return;
+}
         if (typeof window.__resetAllFilters === "function") {
           window.__resetAllFilters();
         } else if (typeof window.executeFilterAndRender === "function") {
