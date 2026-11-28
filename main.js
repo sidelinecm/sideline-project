@@ -303,21 +303,22 @@ async function fetchSupabaseRest(endpoint) {
 function optimizeImg(imagePath, mode = "card") {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (!imagePath || typeof imagePath !== "string" || !imagePath.trim()) return DEFAULT_FALLBACK_IMG;
-  const cleanPath = imagePath.trim();
-
+  
+  let cleanPath = imagePath.trim();
   if (cleanPath.includes("firstmodelhub.webp") || cleanPath.length < 10) return DEFAULT_FALLBACK_IMG;
   if (cleanPath.startsWith("data:")) return cleanPath;
+
+  // บังคับชี้เข้า Cloudinary บัญชีใหม่ dduxw7k4 บัญชีเดียว
+  if (cleanPath.includes("res.cloudinary.com")) {
+    cleanPath = cleanPath.replace(/res\.cloudinary\.com\/[^\/]+\//i, "res.cloudinary.com/dduxw7k4/");
+  }
 
   let transform = "f_auto,q_auto:eco,fl_lossy,w_320,h_448,c_fill,g_auto";
   if (mode === "thumb" || (typeof mode === "number" && mode <= 150)) {
     transform = "f_auto,q_auto:eco,fl_lossy,w_120,h_120,c_thumb,g_face";
   } else if (mode === 300 || mode === "swiper") {
     transform = "f_auto,q_auto:eco,fl_lossy,w_300,h_420,c_fill,g_auto";
-  } else if (mode === "card") {
-    transform = "f_auto,q_auto:eco,fl_lossy,w_320,h_448,c_fill,g_auto";
-  } else if (mode === "og") {
-    transform = "f_auto,q_auto:good,fl_lossy,w_1200,h_630,c_fill,g_face";
-  } else if (mode === 600 || mode === "full" || typeof mode === "number") {
+  } else if (mode === "og" || mode === 600) {
     transform = "f_auto,q_auto:good,fl_lossy,w_600,h_840,c_limit";
   }
 
@@ -328,20 +329,7 @@ function optimizeImg(imagePath, mode = "card") {
     if (rest) {
       const parts = rest.split("/");
       const verIdx = parts.findIndex((seg) => /^v\d+$/.test(seg));
-      let tailParts = [];
-      if (verIdx !== -1) {
-        tailParts = parts.slice(verIdx + 1);
-      } else {
-        const isTransformSeg = (seg) =>
-          seg.includes(",") ||
-          seg.includes(":") ||
-          /^(?:f|q|w|h|c|g|e|l|fl|ar|bo|dpr|t)_/i.test(seg);
-        let startIdx = 0;
-        while (startIdx < parts.length - 1 && isTransformSeg(parts[startIdx])) {
-          startIdx++;
-        }
-        tailParts = parts.slice(startIdx);
-      }
+      let tailParts = verIdx !== -1 ? parts.slice(verIdx + 1) : parts.slice(1);
       if (tailParts.length > 0) {
         return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${tailParts.join("/")}`;
       }
@@ -353,6 +341,8 @@ function optimizeImg(imagePath, mode = "card") {
   const finalPath = formatted.startsWith("images/") ? formatted : `images/${formatted}`;
   return `https://res.cloudinary.com/dduxw7k4/image/upload/${transform}/${finalPath}`;
 }
+window.optimizeImg = optimizeImg;
+          
 
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
@@ -481,7 +471,8 @@ function optimizeImg(imagePath, mode = "card") {
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
 
     let rawLineVal = (raw.line_id || raw.lineId || raw.line || raw.line_url || raw.contact_line || "").toString().trim();
-    if (/vos730x|318afxwt/i.test(rawLineVal)) {
+    
+    if (/ZRDtq11|vos730x|318afxwt|6Lj8m9G|store\.line\.me/i.test(rawLineVal)) {
       rawLineVal = "https://line.me/ti/p/u8Bz9HsaY8";
     }
 
@@ -1050,15 +1041,13 @@ window.executeFilterAndRender = executeFilterAndRender;
     }, { capture: true });
   }
 
-// 🟢 โค้ดที่ต้องแก้ไข (ภายในฟังก์ชัน renderDisplayArea ใน main.js):
 async function renderDisplayArea(profiles, isFilteredOrLocationView) {
   if (!domCache.profilesDisplayArea) return;
-  
+
   const hasExistingSSR = domCache.profilesDisplayArea.querySelector(".profile-card-new");
   const hasSearchQuery = Boolean(domCache.searchInput?.value?.trim());
   const isPillFiltering = appState.activePillTag && appState.activePillTag !== "all";
 
-  // หากเปิดหน้าแรกครั้งแรก มี SSR แล้ว และไม่ได้ค้นหาหรือกดแท็บฟิลเตอร์ ค่อยข้าม
   if (hasExistingSSR && (appState.renderId || 0) === 0 && !hasSearchQuery && !isPillFiltering && !isFilteredOrLocationView) {
     appState.renderId = 1;
     return;
@@ -1066,7 +1055,6 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
 
   appState.renderId = (appState.renderId || 0) + 1;
   const activeRenderId = appState.renderId;
- 
 
   if (domCache.noResultsMessage) {
     domCache.noResultsMessage.classList.add("hidden");
@@ -1078,162 +1066,205 @@ async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     domCache.fetchErrorMessage.style.display = "none";
   }
 
-  
-    // 🟢 2. จัดการส่วน Featured (แนะนำ) ด้านบน
-    if (domCache.featuredSection) {
-      const isHomeView = !isFilteredOrLocationView && 
-                         !window.location.pathname.includes("/location/") && 
-                         !window.location.pathname.includes("/province/") && 
-                         (!appState.activePillTag || appState.activePillTag === "all") &&
-                         (!domCache.searchInput?.value?.trim());
+  // 🟢 2. จัดการส่วน Featured (แนะนำ) ด้านบน
+  if (domCache.featuredSection) {
+    const isHomeView = !isFilteredOrLocationView &&
+                       !window.location.pathname.includes("/location/") &&
+                       !window.location.pathname.includes("/province/") &&
+                       (!appState.activePillTag || appState.activePillTag === "all") &&
+                       (!domCache.searchInput?.value?.trim());
 
-      const alreadyHasCards = domCache.featuredContainer && domCache.featuredContainer.children.length > 0;
+    const alreadyHasCards = domCache.featuredContainer && domCache.featuredContainer.children.length > 0;
 
-      if (isHomeView && alreadyHasCards) {
-        domCache.featuredSection.classList.remove("hidden");
-      } else if (isHomeView) {
-        const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
-        const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
-        const hasFeatured = featuredList.length > 0;
+    if (isHomeView && alreadyHasCards) {
+      domCache.featuredSection.classList.remove("hidden");
+    } else if (isHomeView) {
+      const rawFeatured = appState.allProfiles.filter(p => p.isfeatured || p.is_featured);
+      const featuredList = rawFeatured.length > 0 ? rawFeatured.slice(0, 8) : appState.allProfiles.slice(0, 6);
+      const hasFeatured = featuredList.length > 0;
 
-        domCache.featuredSection.classList.toggle("hidden", !hasFeatured);
-        if (hasFeatured && domCache.featuredContainer) {
-          await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
-        }
-      } else {
-        // เมื่อค้นหา หรือดูหน้ารายจังหวัด ให้ซ่อนแถบ Featured แนะนำออก
-        domCache.featuredSection.classList.add("hidden");
+      domCache.featuredSection.classList.toggle("hidden", !hasFeatured);
+      if (hasFeatured && domCache.featuredContainer) {
+        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
       }
+    } else {
+      domCache.featuredSection.classList.add("hidden");
     }
+  }
 
-    // 🟢 3. กรณีค้นหาแล้ว "ไม่พบโปรไฟล์ตรงกับเงื่อนไข" (0 ผลลัพธ์)
-    if (!profiles || profiles.length === 0) {
-      domCache.profilesDisplayArea.innerHTML = "";
-      if (domCache.noResultsMessage) {
-        domCache.noResultsMessage.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-            <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
-            <p style="font-size: 14px; font-weight: 700; color: #140F22; margin: 0 0 6px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
-            <p style="font-size: 12px; color: #64748B; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
-          </div>
-        `;
-        domCache.noResultsMessage.classList.remove("hidden");
-        domCache.noResultsMessage.style.display = "block";
-      }
-      return;
+  // 🟢 3. กรณีค้นหาแล้ว "ไม่พบโปรไฟล์ตรงกับเงื่อนไข" (0 ผลลัพธ์)
+  if (!profiles || profiles.length === 0) {
+    domCache.profilesDisplayArea.innerHTML = "";
+    if (domCache.noResultsMessage) {
+      domCache.noResultsMessage.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+          <i class="fas fa-search" style="font-size: 32px; color: var(--violet-main); margin-bottom: 12px;"></i>
+          <p style="font-size: 14px; font-weight: 700; color: #140F22; margin: 0 0 6px 0;">ไม่พบโปรไฟล์ตรงกับเงื่อนไขการค้นหา</p>
+          <p style="font-size: 12px; color: #64748B; margin: 0;">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะคะ</p>
+        </div>
+      `;
+      domCache.noResultsMessage.classList.remove("hidden");
+      domCache.noResultsMessage.style.display = "block";
     }
-    
-  const isExplicitLocationPath = window.location.pathname.includes("/location/") || 
+    return;
+  }
+
+  const isExplicitLocationPath = window.location.pathname.includes("/location/") ||
                                  window.location.pathname.includes("/province/") ||
                                  window.location.pathname.startsWith("/profiles");
 
-    // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
-    if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
-      const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/);
-      const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
-      const currentZoneParam = routeMatch && routeMatch[2] ? decodeURIComponent(routeMatch[2]).trim() : (window.currentZoneSlug || "");
-      const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
-      const zoneLabelText = currentZoneParam ? ` โซน${escapeHTML(currentZoneParam)}` : "";
-      const searchKeyword = domCache.searchInput?.value?.trim();
+  // 🟢 4. กรณีเป็นมุมมองการค้นหา, เลือกแท็ก หรือเปิดหน้ารายจังหวัด
+  if (isFilteredOrLocationView || isExplicitLocationPath || (appState.activePillTag && appState.activePillTag !== "all")) {
+    const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)(?:\/([^/]+))?/);
+    const isProfilesPage = window.location.pathname.startsWith("/profiles");
+    const currentLocSlug = routeMatch
+      ? decodeURIComponent(routeMatch[1]).toLowerCase()
+      : (domCache.provinceSelect?.value || (isProfilesPage ? "national" : "chiangmai"));
+    const currentZoneParam = routeMatch && routeMatch[2] ? decodeURIComponent(routeMatch[2]).trim() : (window.currentZoneSlug || "");
+    const provinceLabel = isEN
+      ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug)
+      : (currentLocSlug === "national" ? "ทั่วไทย" : (appState.provincesMap.get(currentLocSlug) || "ทั่วไทย"));
+    const zoneLabelText = currentZoneParam ? ` โซน${escapeHTML(currentZoneParam)}` : "";
+    const searchKeyword = domCache.searchInput?.value?.trim();
 
-      let sectionTitle = isEN 
-        ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>` 
-        : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`;
-      if (searchKeyword) {
-        sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
-      } else if (appState.activePillTag && appState.activePillTag !== "all") {
-        sectionTitle = `✨ หมวดหมู่: <span class="province-name-highlight">#${escapeHTML(appState.activePillTag)}</span>`;
-      }
+    let sectionTitle = isEN
+      ? `📍 Models in <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`
+      : (currentLocSlug === "national"
+          ? `📍 รวมโปรไฟล์ <span class="province-name-highlight">ไซด์ไลน์ทั่วไทย</span>`
+          : `📍 น้องๆ ในจังหวัด <span class="province-name-highlight">${escapeHTML(provinceLabel)}${zoneLabelText}</span>`);
+    if (searchKeyword) {
+      sectionTitle = isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`;
+    } else if (appState.activePillTag && appState.activePillTag !== "all") {
+      sectionTitle = `✨ หมวดหมู่: <span class="province-name-highlight">#${escapeHTML(appState.activePillTag)}</span>`;
+    }
 
-      const countBadgeText = `${profiles.length} โปรไฟล์`;
-      const wrapper = document.createElement("div");
-      wrapper.className = "section-content-wrapper";
-      wrapper.style.cssText = "margin-top: 24px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
-      wrapper.innerHTML = `
-        <div class="province-header-row">
-            <h2 class="province-clean-title">
-                ${sectionTitle}
-            </h2>
-            <span class="province-count-pill">
-                <span class="pulse-dot-el"></span>
-                <span>${countBadgeText}</span>
-            </span>
-        </div>
-        <div class="profile-grid profiles-grid-row"></div>
-      `;
+    const countBadgeText = `${profiles.length} โปรไฟล์`;
+    const wrapper = document.createElement("div");
+    wrapper.className = "section-content-wrapper";
+    wrapper.style.cssText = "margin-top: 24px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
+    wrapper.innerHTML = `
+      <div class="province-header-row">
+          <h2 class="province-clean-title">
+              ${sectionTitle}
+          </h2>
+          <span class="province-count-pill">
+              <span class="pulse-dot-el"></span>
+              <span>${countBadgeText}</span>
+          </span>
+      </div>
+      <div class="profile-grid profiles-grid-row"></div>
+    `;
 
-      domCache.profilesDisplayArea.innerHTML = "";
-      domCache.profilesDisplayArea.appendChild(wrapper);
-      const gridContainer = wrapper.querySelector(".profile-grid");
-      await renderProfilesBatch(gridContainer, profiles, activeRenderId);
+    domCache.profilesDisplayArea.innerHTML = "";
+    domCache.profilesDisplayArea.appendChild(wrapper);
+    const gridContainer = wrapper.querySelector(".profile-grid");
+    await renderProfilesBatch(gridContainer, profiles, activeRenderId);
 
-    // 🟢 5. กรณีหน้าแรกทั่วไป: ตัดคนที่ชื่อซ้ำข้ามจังหวัดออก ให้เหลือแค่ 1 คนต่อ 1 รูป
-    } else {
-      const sortedProfiles = [...profiles].sort((a, b) => {
-        if (a.isfeatured && !b.isfeatured) return -1;
-        if (!a.isfeatured && b.isfeatured) return 1;
-        return 0;
-      });
-      const feedProfiles = deduplicateProfilesByName(sortedProfiles);
+  // 🟢 5. กรณีหน้าแรกทั่วไป: ตัดคนที่ชื่อซ้ำข้ามจังหวัดออก + สร้างปุ่มจังหวัดอัตโนมัติตรงกับ SSR
+  } else {
+    const sortedProfiles = [...profiles].sort((a, b) => {
+      if (a.isfeatured && !b.isfeatured) return -1;
+      if (!a.isfeatured && b.isfeatured) return 1;
+      return 0;
+    });
+    const feedProfiles = deduplicateProfilesByName(sortedProfiles);
 
-      const cityHubsHtml = `
-        <section class="national-city-hubs-section" style="margin-top: 10px; margin-bottom: 24px;">
-          <div class="featured-header-clean-row" style="margin-bottom: 12px;">
-            <div class="featured-title-flex">
-              <span class="section-tag-mini"><i class="fas fa-map-marked-alt"></i> พื้นที่หลัก</span>
-              <h2 class="clean-section-h2" style="font-size: 16px; margin: 0;">เลือกพื้นที่บริการ <span class="province-name-highlight">ครอบคลุมทั่วไทย</span></h2>
+    const sourceForCounts = (appState.allProfiles && appState.allProfiles.length > 0) ? appState.allProfiles : profiles;
+    const provCounts = {};
+    sourceForCounts.forEach(pr => {
+      let k = String(pr.provinceKey || "").toLowerCase().trim();
+      if (k === "chiang_mai" || k === "chiang-mai") k = "chiangmai";
+      if (k === "khonkaen" || k === "khon_kaen") k = "khon-kaen";
+      if (k) provCounts[k] = (provCounts[k] || 0) + 1;
+    });
+
+    const ALL_PROVINCE_HUBS = [
+      { key: "chiangmai", name: "เชียงใหม่", tag: "ภาคเหนือ" },
+      { key: "khon-kaen", name: "ขอนแก่น", tag: "ภาคอีสาน" },
+      { key: "phuket", name: "ภูเก็ต", tag: "ภาคใต้" },
+      { key: "udonthani", name: "อุดรธานี", tag: "ภาคอีสาน" },
+      { key: "chiangrai", name: "เชียงราย", tag: "ภาคเหนือ" },
+      { key: "lampang", name: "ลำปาง", tag: "ภาคเหนือ" },
+      { key: "bangkok", name: "กรุงเทพฯ", tag: "ภาคกลาง" },
+      { key: "chonburi", name: "ชลบุรี-พัทยา", tag: "ภาคตะวันออก" },
+      { key: "korat", name: "นครราชสีมา", tag: "ภาคอีสาน" },
+      { key: "songkhla", name: "สงขลา-หาดใหญ่", tag: "ภาคใต้" },
+      { key: "suratthani", name: "สุราษฎร์-สมุย", tag: "ภาคใต้" },
+      { key: "ayutthaya", name: "อยุธยา", tag: "ภาคกลาง" },
+      { key: "lamphun", name: "ลำพูน", tag: "ภาคเหนือ" },
+      { key: "phitsanulok", name: "พิษณุโลก", tag: "ภาคเหนือ" }
+    ];
+
+    const hasFullCount = sourceForCounts.length >= (window.totalProfilesCount || sourceForCounts.length);
+    const cityHubCardsHtml = ALL_PROVINCE_HUBS
+      .filter(cp => (provCounts[cp.key] || 0) > 0)
+      .map(cp => {
+        const countBadge = hasFullCount
+          ? `<span style="background: rgba(124, 58, 237, 0.1); color: #7C3AED; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">${provCounts[cp.key]} คน</span>`
+          : `<span style="color: #7C3AED; font-size: 11px; font-weight: 800;">&rarr;</span>`;
+        return `
+          <a href="/location/${cp.key}" class="city-hub-card" style="background: #FFFFFF !important; border: 1.5px solid rgba(124, 58, 237, 0.15) !important; border-radius: 16px; padding: 12px 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">📍</span>
+              <div>
+                <strong style="color: #140F22 !important; font-size: 12.5px; font-weight: 800; display: block;">${cp.name}</strong>
+                <span style="color: #64748B !important; font-size: 10.5px; font-weight: 600;">${cp.tag}</span>
+              </div>
             </div>
-            <a href="/locations" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูทั้งหมด &rarr;</a>
-          </div>
-         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
-            <a href="/location/chiangmai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงใหม่</strong>
-            </a>
-            <a href="/location/khon-kaen" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ขอนแก่น</strong>
-            </a>
-            <a href="/location/phuket" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ภูเก็ต</strong>
-            </a>
-            <a href="/location/udonthani" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">อุดรธานี</strong>
-            </a>
-            <a href="/location/chiangrai" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">เชียงราย</strong>
-            </a>
-           <a href="/location/lampang" style="background:#FFF; border:1.5px solid rgba(124,58,237,0.15); border-radius:14px; padding:10px 12px; text-decoration:none; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">📍</span><strong style="color:#140F22; font-size:12.5px;">ลำปาง</strong>
-            </a>
-          </div>
-        </section>
-      `;
+            ${countBadge}
+          </a>
+        `;
+      }).join("");
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "section-content-wrapper";
-      wrapper.style.cssText = "margin-top: 10px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
-      wrapper.innerHTML = `
-        ${cityHubsHtml}
-        <div class="province-header-row">
-            <h2 class="province-clean-title">
-                <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
-                <span class="province-prefix">สาวรับงาน & ไซด์ไลน์</span>
-                <span class="province-name-highlight">สไตล์ฟิวแฟน ยอดนิยมทั่วไทย</span>
-            </h2>
-            <span class="province-count-pill">
-                <span class="pulse-dot-el"></span>
-                <span>#ฟิวแฟนแท้ (${feedProfiles.length} โปรไฟล์)</span>
-            </span>
+    const cityHubsHtml = `
+      <section class="national-city-hubs-section" style="margin-top: 20px; margin-bottom: 26px;">
+        <div class="featured-header-clean-row" style="margin-bottom: 12px;">
+          <div class="featured-title-flex">
+            <span class="section-tag-mini"><i class="fas fa-map-marked-alt"></i> พื้นที่หลัก</span>
+            <h2 class="clean-section-h2" style="font-size: 16px; margin: 0;">เลือกพื้นที่บริการ <span class="province-name-highlight">ครอบคลุมทั่วไทย</span></h2>
+          </div>
+          <a href="/locations" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูทั้งหมด &rarr;</a>
         </div>
-        <div class="profile-grid profiles-grid-row"></div>
-      `;
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;">
+          ${cityHubCardsHtml}
+        </div>
+      </section>
+    `;
 
-      domCache.profilesDisplayArea.innerHTML = "";
-      domCache.profilesDisplayArea.appendChild(wrapper);
-      const gridContainer = wrapper.querySelector(".profile-grid");
-      const cleanProfilesList = deduplicateProfilesByName(profiles);
-      await renderProfilesBatch(gridContainer, cleanProfilesList, activeRenderId);
-    }
-    }
+    const totalLiveCount = window.totalProfilesCount || sourceForCounts.length || feedProfiles.length;
+    const visibleHomeFeed = feedProfiles.slice(0, 24);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "section-content-wrapper";
+    wrapper.style.cssText = "margin-top: 10px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
+    wrapper.innerHTML = `
+      ${cityHubsHtml}
+      <div class="province-header-row">
+          <h2 class="province-clean-title">
+              <span class="province-pin-icon"><i class="fas fa-heart" style="color: #E11D48;"></i></span>
+              <span class="province-prefix">สาวรับงาน &amp; ไซด์ไลน์</span>
+              <span class="province-name-highlight">สไตล์ฟิวแฟน ยอดนิยมทั่วไทย</span>
+          </h2>
+          <span class="province-count-pill">
+              <span class="pulse-dot-el"></span>
+              <span>#ฟิวแฟนแท้ (${totalLiveCount} โปรไฟล์)</span>
+          </span>
+      </div>
+      <div class="profile-grid profiles-grid-row"></div>
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/profiles" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%); color: #FFFFFF; font-size: 13px; font-weight: 800; padding: 11px 24px; border-radius: 100px; text-decoration: none; box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);">
+          <span>ดูโปรไฟล์สาวๆ ทั้งหมด (${totalLiveCount} คน)</span>
+          <span>&rarr;</span>
+        </a>
+      </div>
+    `;
+
+    domCache.profilesDisplayArea.innerHTML = "";
+    domCache.profilesDisplayArea.appendChild(wrapper);
+    const gridContainer = wrapper.querySelector(".profile-grid");
+    await renderProfilesBatch(gridContainer, visibleHomeFeed, activeRenderId);
+  }
+}
 
 function initLazyGoogleMap(provinceName = "", currentSlug = "") {
     const mapIframe = document.getElementById("google-map");
@@ -1433,13 +1464,21 @@ function initLazyGoogleMap(provinceName = "", currentSlug = "") {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
 
-    let rawPath = p.imagePath || p.image_url || p.imageUrl || "";
-    if (!rawPath || rawPath.includes("firstmodelhub.webp")) {
-  rawPath = "https://res.cloudinary.com/dduxw7k4/image/upload/e_blur:1500,w_400,h_560,c_fill/v1790435086/images/tdzubsqfcfdfmfqvuog0.png";
-}
-    const imgSrc = (p.images && p.images[0] && (p.images[0].cardSrc || p.images[0].src) && !p.images[0].src.includes("firstmodelhub.webp")) 
-      ? (p.images[0].cardSrc || p.images[0].src)
-      : optimizeImg(rawPath, "card");
+    // 🟢 แก้ตรงนี้: เช็ครูปจาก p.images ก่อน ถ้าไม่มีค่อยไปดึงจาก imagePath หรือ galleryPaths อย่างปลอดภัย
+    let rawPath = "";
+    if (p.images && p.images[0] && p.images[0].src && !p.images[0].src.includes("firstmodelhub.webp")) {
+      rawPath = p.images[0].cardSrc || p.images[0].src;
+    } else if (p.imagePath && !p.imagePath.includes("firstmodelhub.webp")) {
+      rawPath = p.imagePath;
+    } else if (p.image_url && !p.image_url.includes("firstmodelhub.webp")) {
+      rawPath = p.image_url;
+    } else if (p.imageUrl && !p.imageUrl.includes("firstmodelhub.webp")) {
+      rawPath = p.imageUrl;
+    } else if (Array.isArray(p.galleryPaths) && p.galleryPaths.length > 0) {
+      rawPath = p.galleryPaths.find(g => g && !g.includes("firstmodelhub.webp")) || "";
+    }
+
+    const imgSrc = rawPath ? optimizeImg(rawPath, "card") : "https://firstmodelhub.com/images/firstmodelhub.webp";
     
     const pKey = (p.provinceKey || p.province_slug || "national").toString().toLowerCase();
     let rawName = p.displayName || p.name || "Model";
@@ -1509,12 +1548,15 @@ function initLazyGoogleMap(provinceName = "", currentSlug = "") {
     }
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
-    const richAltText = `${modelName} โซน${locName} ${p.provinceNameThai || 'เชียงใหม่'} - FirstModelHub`;
+  
+    const provLabel = p.provinceNameThai || "เชียงใหม่";
+    const altZone = (locName && locName !== provLabel) ? ` โซน${locName}` : "";
+    const richAltText = `${modelName}${altZone} ${provLabel} - FirstModelHub`;
 
     const rawLikes = p.likes_count || p.likes || 0;
-    const likesText = rawLikes > 0 ? (rawLikes + " 💗") : "แนะนำ 💗";
+    const likesText = rawLikes >= 5 ? (rawLikes + " 💗") : "แนะนำ 💗";
 
-    const article = document.createElement("div");
+    const article = document.createElement("article");
     article.className = "profile-card-new interactive-card";
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
@@ -2273,19 +2315,16 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         targetUrl = zoneSlugKey ? `/location/${slug}/${zoneSlugKey}` : `/location/${slug}`;
         const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
 
-        // ✅ เพิ่มตัวแปรชื่อโซนภาษาไทย (เช่น นิมมาน, เจ็ดยอด)
-        const currentZoneName = window.currentZoneSlug || "";
-
+        // [แก้ไขเป็น]
         if (currentZoneName) {
-  const zoneLoc = window.currentZoneLocationParen || `(${provName})`;
-  targetTitle = isEN
-    ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
-    : `รับงาน${currentZoneName} สาวไซด์ไลน์ ${zoneLoc} รูปจริงตรงปก ไม่มีมัดจำ | FirstModelHub`;
+          const zoneLoc = window.currentZoneLocationParen || provName;
+          targetTitle = isEN
+            ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
+            : `ไซด์ไลน์${currentZoneName} รับงาน${currentZoneName} ${zoneLoc} รูปจริง ไม่มีมัดจำ`;
         } else {
-          // ถ้าปิด Modal ในหน้าจังหวัดปกติ ให้คืนค่า Title จังหวัดตามเดิม
           targetTitle = isEN 
             ? `${provName} Escorts & Companions | FirstModelHub` 
-            : `ไซด์ไลน์${provName} รับงาน${provName} ฟิวแฟน ตรงปก จ่ายหน้างาน 100% | FirstModelHub`;
+            : `ไซด์ไลน์${provName} รับงาน${provName} ฟิวแฟน รูปจริง ไม่มีมัดจำ`;
         }
 
         targetDesc = isEN
@@ -2688,20 +2727,22 @@ function initDockAutoHide() {
     if (closeSearchDrawerBtn) closeSearchDrawerBtn.onclick = () => toggleSearchDrawer(false);
     if (searchDrawerOverlayEl) searchDrawerOverlayEl.onclick = () => toggleSearchDrawer(false);
     
+    
     if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
-        const selectedProv = domCache.provinceSelect?.value;
+        const selectedProv = domCache.provinceSelect?.value || "";
+        const currentProv = (window.currentProvinceSlug || "national").toLowerCase();
         const searchKeyword = (domCache.searchInput?.value || "").trim();
         const queryParam = searchKeyword ? ("?q=" + encodeURIComponent(searchKeyword)) : "";
 
-        if (selectedProv && selectedProv !== "" && selectedProv !== "all" && selectedProv !== "national") {
-          window.location.href = "/location/" + selectedProv + queryParam;
-          return;
-        } else if (selectedProv === "" || selectedProv === "all" || selectedProv === "national") {
-          if (window.location.pathname !== "/") {
-            window.location.href = "/" + queryParam;
+        if (selectedProv && selectedProv !== "all" && selectedProv !== "national") {
+          if (selectedProv.toLowerCase() !== currentProv) {
+            window.location.href = "/location/" + selectedProv + queryParam;
             return;
           }
+        } else if (currentProv !== "national" && currentProv !== "all") {
+          window.location.href = "/" + queryParam;
+          return;
         }
 
         executeFilterAndRender(true);
@@ -3480,11 +3521,13 @@ document.querySelectorAll(".filter-pill-tab").forEach(pill => {
 
 document.addEventListener("error", function (e) {
   const img = e.target;
-  if (!img || !img.tagName || img.tagName.toLowerCase() !== "img") return;
+  if (!img || img.tagName !== "IMG") return;
   if (img.id === "lightboxHeroImage") return;
   if (img.dataset.fallbackApplied === "true") return;
 
   img.dataset.fallbackApplied = "true";
   if (img.hasAttribute("srcset")) img.removeAttribute("srcset");
+  
   img.src = "https://firstmodelhub.com/images/firstmodelhub.webp";
+  img.style.objectFit = "cover";
 }, true);
