@@ -9,7 +9,7 @@ import {
 
 const PAGE_CACHE = new Map();
 const MAX_PAGE_CACHE_ENTRIES = 80;
-let GLOBAL_VERSION = "v_20261126_02";
+let GLOBAL_VERSION = "v_20261126_22";
 const TEMPLATE_HTML_CACHE = new Map();
 
 const ONE_DAY_MS = 86400 * 1000; 
@@ -1574,7 +1574,10 @@ export default async (req, context) => {
     if (hotProfiles.length > 0) {
       hotSwiperCardsHtml = hotProfiles.map((p, i) => {
         const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
-        const loc = escapeHTML(sanitizeThaiText(p.location) || currentProvName);
+        const pProvName = isNational ? (PROVINCE_SEO_DATA[p.provinceKey]?.name || currentProvName) : currentProvName;
+        let rawLocText = sanitizeThaiText(p.location || "").replace(/^(โซน|ย่าน)\s*/gi, "").trim();
+        if (/^(ในตัวเมือง|ตัวเมือง|ในเมือง)$/.test(rawLocText)) rawLocText = `ในเมือง${pProvName}`;
+        const loc = escapeHTML(rawLocText || pProvName);
         const slug = encodeURIComponent(getCanonicalProfileSlug(p));
         const img = optimizeImg(p.imagePath || p.image_url || "", 300);
         const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
@@ -1582,7 +1585,7 @@ export default async (req, context) => {
           <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
             <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
             <span class="hot-rank-badge">#${i + 1} HOT</span>
-         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(currentProvName)})" width="175" height="245" loading="${i < 2 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : (i === 1 ? "auto" : "low")}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+         <img src="${img}" alt="น้อง${cleanName} (${escapeHTML(pProvName)})" width="175" height="245" loading="${i < 2 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : (i === 1 ? "auto" : "low")}" decoding="async" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
             <div class="vip-card-overlay"></div>
             <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
             <div class="vip-card-info">
@@ -1594,7 +1597,7 @@ export default async (req, context) => {
       }).join("");
     }
 
-   // [แก้ไขเป็น]
+  
     const featuredIdSet = new Set();
     const usedHomeNames = new Set();
     if (isNational && !isProfilesDirectory) {
@@ -2820,9 +2823,16 @@ finalHtml = finalHtml.replace(
     };
   });
 
-  const initialClientProfiles = isProfilesDirectory
-    ? clientProfilesData.slice((pageNumForProfiles - 1) * dirPerPage, pageNumForProfiles * dirPerPage)
-    : (isNational ? clientProfilesData.slice(0, 40) : clientProfilesData);
+  // วางทับด้วยอันนี้:
+  let initialClientProfiles;
+  if (isProfilesDirectory) {
+    initialClientProfiles = clientProfilesData.slice((pageNumForProfiles - 1) * dirPerPage, pageNumForProfiles * dirPerPage);
+  } else if (isNational) {
+    const visibleIdSet = new Set([...hotProfiles.map(p => String(p.id)), ...Array.from(featuredIdSet), ...actualVisibleProfiles.map(p => String(p.id))]);
+    initialClientProfiles = [...clientProfilesData.filter(p => visibleIdSet.has(String(p.id))), ...clientProfilesData.filter(p => !visibleIdSet.has(String(p.id)))].slice(0, 45);
+  } else {
+    initialClientProfiles = clientProfilesData;
+  }
 
   const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
     key: (p.key || p.slug || p.id || "").toString().toLowerCase(),

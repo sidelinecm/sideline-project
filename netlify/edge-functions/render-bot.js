@@ -9,7 +9,7 @@ import {
 
 const PROFILE_PAGE_CACHE = new Map();
 const MAX_CACHE_ENTRIES = 150;
-let GLOBAL_PROFILE_VERSION = `v_20261126_02`;
+let GLOBAL_PROFILE_VERSION = `v_20261126_22`;
 const ONE_DAY_MS = 86400 * 1000;
 
 function setSafeProfileCache(key, data) {
@@ -555,20 +555,32 @@ export default async (req, context) => {
         .eq("active", true)
         .neq("id", profile.id)
         .order("isfeatured", { ascending: false })
-        .limit(40);
+        .order("created_at", { ascending: false })
+        .limit(120);
 
       if (relErr) console.warn("Related profiles query error:", relErr);
 
       const candidates = (allActiveCandidates || []).filter(hasValidImg);
-      const sameProv = candidates.filter((rp) => {
+
+      // กันคนชื่อซ้ำมาเรียงติดกัน
+      const seenRelNames = new Set();
+      const uniqueCandidates = candidates.filter((rp) => {
+        const cleanN = (rp.name || "").replace(/^(น้อง|สาว|พี่)\s*/gi, "").trim().toLowerCase();
+        if (!cleanN || seenRelNames.has(cleanN)) return false;
+        seenRelNames.add(cleanN);
+        return true;
+      });
+
+      const sameProv = uniqueCandidates.filter((rp) => {
         const rpProv = detectAccurateProvinceKey(rp);
         return rpProv === provinceKey || provVariants.includes(rpProv);
       });
-      const otherProv = candidates.filter((rp) => !sameProv.includes(rp));
+      const otherProv = uniqueCandidates.filter((rp) => !sameProv.includes(rp));
 
-      const validSame = sameProv.slice(0, 3);
-      const validOther = otherProv.slice(0, 3);
-      relatedProfiles = [...validSame, ...validOther].slice(0, 6);
+      // ดึงจังหวัดเดียวกันให้ครบ 6 คนก่อน ถ้าไม่ครบค่อยเติมจังหวัดอื่น
+      relatedProfiles = sameProv.length >= 6
+        ? sameProv.slice(0, 6)
+        : [...sameProv, ...otherProv].slice(0, 6);
     } catch (relCatchErr) {
       console.warn("Related profiles fallback:", relCatchErr);
     }
@@ -577,17 +589,27 @@ export default async (req, context) => {
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `/location/${provinceKey}`;
 
+    const allSameProvince = relatedProfiles.every((rp) => {
+      const rpProv = detectAccurateProvinceKey(rp);
+      return rpProv === provinceKey || provVariants.includes(rpProv);
+    });
+    const relatedHeadingText = allSameProvince
+      ? `น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}`
+      : `น้องๆ แนะนำเพิ่มเติม`;
+
     const relatedCardsHtml = relatedProfiles.length > 0 ? `
       <section style="margin-top: 1.5rem; border-top: 1px solid rgba(124, 58, 237, 0.12); padding-top: 1.25rem;">
-        <h2 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h2>
+        <h2 style="color: #7C3AED; font-size: 13.5px; font-weight: 900; margin: 0 0 10px 0; text-align: center;">${relatedHeadingText}</h2>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
           ${relatedProfiles.map((rp) => {
             const rpName = `น้อง${escapeHTML((rp.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, ""))}`;
             const rpSlug = encodeURIComponent(getCanonicalProfileSlug(rp));
             const rpImg = safeOptimizeImg(rp.imagePath || rp.image_url || "", 400);
+            const rpProvKey = detectAccurateProvinceKey(rp);
+            const rpProvName = rp.provinceThai || PROVINCE_NAME_MAP[rpProvKey] || provinceNameThai;
             return `
               <a href="/sideline/${rpSlug}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(provinceNameThai)}" loading="lazy" decoding="async" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
+                <img src="${rpImg}" alt="${rpName} รับงาน${escapeHTML(rpProvName)}" loading="lazy" decoding="async" width="120" height="150" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block;">
                 <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rpName}</div>
               </a>
             `;
@@ -1109,7 +1131,7 @@ export default async (req, context) => {
             <article class="interactive-card fmh-bento-card">
                <section class="hero-section" style="padding: 0; margin-bottom: 1rem;">
                     <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4.2; width: 100%; border: 1px solid rgba(124, 58, 237, 0.15);">
-                     <img id="main-profile-img" src="${heroImageSmall}" ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 480px) 100vw, 400px"` : ""} class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${escapeHTML(primaryZone)} ตรงปก 100% - FirstModelHub" loading="eager" fetchpriority="high" decoding="async" width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img id="main-profile-img" src="${heroImageSmall}" ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 680px) calc(100vw - 2rem), 648px"` : ""} class="hero-img" alt="${escapeHTML(displayName)} เพื่อนเที่ยวฟิวแฟน${cleanProvince} โซน${escapeHTML(primaryZone)} ตรงปก 100% - FirstModelHub" loading="eager" fetchpriority="high" decoding="async" width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     ${galleryThumbnailsHtml}
                 </section>
