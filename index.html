@@ -23,9 +23,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ">
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน สาวไซด์ไลน์ และเด็กเอ็นฟิวแฟนทั่วไทย คัดตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ปลอดภัย ไม่โอนมัดจำ">
+  
   <meta property="og:url" content="https://firstmodelhub.com/">
   <meta property="og:image" content="https://res.cloudinary.com/dduxw7k4/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/images/firstmodelhub.webp">
   <meta property="og:image:secure_url" content="https://res.cloudinary.com/dduxw7k4/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/images/firstmodelhub.webp">
+  
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FirstModelHub ศูนย์รวมสาวรับงานและไซด์ไลน์ฟิวแฟนทั่วไทย">
@@ -40,13 +42,14 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="92x92" href="/images/favicon-92x92.png">
 <link rel="icon" type="image/png" sizes="180x180" href="/images/favicon-180x180.png">
-
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   
   <!-- Network Preconnect & Font Preload -->
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
  
    <style>
@@ -504,7 +507,8 @@
   </main>
 
   <div id="search-drawer-overlay" class="drawer-backdrop"></div>
-  <div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-label="ตัวกรองการค้นหา">
+  <div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-label="ตัวกรองการค้นหา">
+      
     <div class="sheet-drag-handle"></div>
    <div class="sheet-header">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -666,8 +670,7 @@
        alt="รูปโปรไฟล์ตัวจริงตรงปก" 
        width="400" 
        height="560" 
-       loading="eager"
-       fetchpriority="high"
+       loading="lazy"
        decoding="async"
        style="width: 100%; height: 100%; object-fit: cover;">
   <div id="lightbox-dots-indicator" class="lightbox-dots-wrapper" style="display: none;"></div>

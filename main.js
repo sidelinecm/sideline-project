@@ -2276,6 +2276,13 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
     if (lightboxEl.dataset.isClosing === "true") return;
     lightboxEl.dataset.isClosing = "true";
 
+    const wasModalOpen = isLightboxCurrentlyOpen || lightboxEl.classList.contains("active");
+
+    // ปลดโฟกัสปุ่มภายใน modal ก่อนซ่อนด้วย aria-hidden ป้องกัน Warning บนเบราว์เซอร์
+    if (lightboxEl.contains(document.activeElement) && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+
     if (contentWrapperEl) {
       contentWrapperEl.style.transition = "transform 0.24s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease";
       contentWrapperEl.style.transform = "translateY(40px) scale(0.97)";
@@ -2300,8 +2307,9 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       if (scrollBody) scrollBody.scrollTop = 0;
     }, 240);
 
-    if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
-      const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
+    const isProfilePath = window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/");
+    if (wasModalOpen || (updateHistory && isProfilePath)) {
+      const slug = (window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "").trim();
       const canonicalLink = document.getElementById("canonical-link") || document.querySelector('link[rel="canonical"]');
       const defaultHeroImg = (typeof DEFAULT_FALLBACK_IMG !== "undefined") ? DEFAULT_FALLBACK_IMG : "https://firstmodelhub.com/images/firstmodelhub.webp";
 
@@ -2309,36 +2317,59 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       let targetTitle = "";
       let targetDesc = "";
 
-      const savedReturnPath = window.__returnUrlBeforeModal || "";
-      if (slug && slug !== "national" && slug !== "all") {
-        const zoneSlugKey = window.currentZoneKey || (savedReturnPath.match(/^\/location\/[^/]+\/([^/?#]+)/i)?.[1] || "");
-        targetUrl = zoneSlugKey ? `/location/${slug}/${zoneSlugKey}` : `/location/${slug}`;
-        const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || "เชียงใหม่";
+      const savedReturnPath = window.__returnUrlBeforeModal || (isProfilePath ? "" : (window.location.pathname + window.location.search));
 
-        // [แก้ไขเป็น]
-        if (currentZoneName) {
-          const zoneLoc = window.currentZoneLocationParen || provName;
-          targetTitle = isEN
-            ? `${currentZoneName} (${provName}) Escorts | FirstModelHub`
-            : `ไซด์ไลน์${currentZoneName} รับงาน${currentZoneName} ${zoneLoc} รูปจริง ไม่มีมัดจำ`;
-        } else {
-          targetTitle = isEN 
-            ? `${provName} Escorts & Companions | FirstModelHub` 
-            : `ไซด์ไลน์${provName} รับงาน${provName} ฟิวแฟน รูปจริง ไม่มีมัดจำ`;
+      if (slug && slug !== "national" && slug !== "all") {
+        const zoneFromPath = savedReturnPath.match(/^\/location\/[^/]+\/([^/?#]+)/i)?.[1] || "";
+        const zoneSlugKey = window.currentZoneKey || zoneFromPath || "";
+        targetUrl = zoneSlugKey ? `/location/${slug}/${zoneSlugKey}` : `/location/${slug}`;
+
+        const provName = (appState.provincesMap && appState.provincesMap.get(slug)) || window.currentProvinceName || "เชียงใหม่";
+        const provNameEn = (typeof PROVINCE_EN_MAP !== "undefined" && PROVINCE_EN_MAP[slug]) || provName;
+
+        // ประกาศตัวแปร currentZoneName อย่างปลอดภัย และแปลงชื่อไทยหากเผลอเป็น slug อังกฤษ
+        let currentZoneName = String(window.currentZoneSlug || "").trim();
+        if (currentZoneName && zoneSlugKey && currentZoneName.toLowerCase() === zoneSlugKey.toLowerCase()) {
+          const h1Text = document.querySelector("#hero-h1 .h1-line-1")?.textContent || "";
+          const zoneFromH1 = h1Text.match(/ไซด์ไลน์([^\s]+)/)?.[1] || "";
+          if (zoneFromH1 && zoneFromH1 !== provName) {
+            currentZoneName = zoneFromH1;
+          }
         }
 
-        targetDesc = isEN
-          ? `Verified escorts & companions in ${provName}. Romantic Girlfriend Experience, pay on arrival.`
-          : `รวมสาวรับงาน${provName} ไซด์ไลน์${provName} รูปจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`;
+        if (currentZoneName && (zoneSlugKey || currentZoneName !== slug)) {
+          const zoneLoc = window.currentZoneLocationParen || provName;
+          targetTitle = isEN
+            ? `${currentZoneName} (${provNameEn}) Escorts | FirstModelHub`
+            : `ไซด์ไลน์${currentZoneName} รับงาน${currentZoneName} ${zoneLoc} รูปจริง ไม่มีมัดจำ`;
+          targetDesc = isEN
+            ? `Verified escorts & companions in ${currentZoneName}, ${provNameEn}. 100% real photos, pay on arrival.`
+            : `ค้นหาโปรไฟล์ สาวรับงาน${currentZoneName} ไซด์ไลน์${currentZoneName} คัดรูปจริง 100% ตรงปก นัดเจอง่าย จ่ายหน้างาน ไม่มีมัดจำ`;
+        } else {
+          targetTitle = isEN
+            ? `${provNameEn} Escorts & Companions | FirstModelHub`
+            : `ไซด์ไลน์${provName} รับงาน${provName} ฟิวแฟน รูปจริง ไม่มีมัดจำ`;
+          targetDesc = isEN
+            ? `Verified escorts & companions in ${provNameEn}. Romantic Girlfriend Experience, pay on arrival.`
+            : `รวมสาวรับงาน${provName} ไซด์ไลน์${provName} รูปจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่มีมัดจำ`;
+        }
 
         if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
       } else {
         const isFromProfiles = window.__isFromProfiles || savedReturnPath.startsWith("/profiles") || window.location.pathname.startsWith("/profiles");
-        targetUrl = isEN ? "/index-en" : (isFromProfiles ? "/profiles" : "/");
+        const pageMatch = savedReturnPath.match(/^\/profiles(?:\?page=(\d+))?/i);
+        const pageQuery = (pageMatch && pageMatch[1] && Number(pageMatch[1]) > 1) ? `?page=${pageMatch[1]}` : "";
+        targetUrl = isEN ? "/index-en" : (isFromProfiles ? `/profiles${pageQuery}` : "/");
 
-        targetTitle = isEN
-  ? "Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos (Pay on Arrival) | FirstModelHub"
-  : "รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ไม่มีมัดจำ";
+        if (isFromProfiles && !isEN) {
+          const pageSuffix = pageQuery ? ` (หน้า ${pageMatch[1]})` : "";
+          targetTitle = `รวมโปรไฟล์สาวรับงาน ไซด์ไลน์ VIP อัปเดตล่าสุด${pageSuffix} | FirstModelHub`;
+        } else {
+          targetTitle = isEN
+            ? "Thailand Travel Companions & VIP Dinner Dates • 100% Real Photos (Pay on Arrival) | FirstModelHub"
+            : "รับงาน ไซด์ไลน์ ทั่วไทย ฟิวแฟน รูปจริง ตรงปก ไม่มีมัดจำ";
+        }
+
         const liveCount = window.totalProfilesCount || appState.allProfiles?.length || 0;
         const liveProvinces = (appState.provincesMap && appState.provincesMap.size > 0)
           ? appState.provincesMap.size
@@ -2351,10 +2382,12 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
         if (domCache.provinceSelect) domCache.provinceSelect.value = "";
       }
 
-      history.replaceState(null, "", targetUrl);
+      if (updateHistory && isProfilePath) {
+        history.replaceState(null, "", targetUrl);
+      }
 
       document.title = targetTitle;
-      const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "" : targetUrl}`;
+      const fullCanonical = `https://firstmodelhub.com${targetUrl === "/" ? "/" : targetUrl}`;
       if (canonicalLink) canonicalLink.href = fullCanonical;
 
       const hreflangTh = document.querySelector('link[rel="alternate"][hreflang="th"]');
@@ -2378,8 +2411,8 @@ function generateModalPersonaBox(profile, displayName, provName, zoneName) {
       const ogImgEl = document.querySelector('meta[property="og:image"]');
       if (ogImgEl) ogImgEl.setAttribute("content", defaultHeroImg);
 
-      if (typeof gtag === "function") {
-        gtag("event", "page_view", {
+      if (updateHistory && isProfilePath && typeof window.gtag === "function") {
+        window.gtag("event", "page_view", {
           page_title: targetTitle,
           page_location: fullCanonical,
           page_path: targetUrl
