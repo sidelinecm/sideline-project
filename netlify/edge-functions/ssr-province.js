@@ -2814,20 +2814,24 @@ finalHtml = finalHtml.replace(
       availability: p.availability || "รับงาน",
       isfeatured: Boolean(p.isfeatured),
       verified: Boolean(p.verified),
-      styleTags: Array.isArray(rawTags) ? rawTags.filter(Boolean).slice(0, 3) : []
+      styleTags: Array.isArray(rawTags)
+        ? rawTags.map(t => sanitizeThaiText(String(t).replace(/^#+/, "").trim())).filter(Boolean).slice(0, 3)
+        : []
     };
   });
 
-  const initialClientProfiles = isProfilesDirectory ? clientProfilesData.slice((pageNumForProfiles - 1) * dirPerPage, pageNumForProfiles * dirPerPage) : (isNational ? clientProfilesData.slice(0, 40) : clientProfilesData);
+  const initialClientProfiles = isProfilesDirectory
+    ? clientProfilesData.slice((pageNumForProfiles - 1) * dirPerPage, pageNumForProfiles * dirPerPage)
+    : (isNational ? clientProfilesData.slice(0, 40) : clientProfilesData);
 
-    
-    const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
-      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
-      nameThai: p.nameThai || p.name
-    }));
+  const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
+    key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
+    nameThai: p.nameThai || p.name
+  }));
 
-    
-const ssrDataScript = `
+  const serializedProfilesJson = JSON.stringify(initialClientProfiles).replace(/</g, "\\u003c");
+
+  const ssrDataScript = `
   <script id="ssr-profiles-data">
     window.profilesData = ${serializedProfilesJson};
     window.__ssrSanitized = true;
@@ -2835,67 +2839,67 @@ const ssrDataScript = `
     window.provincesData = ${JSON.stringify(serializedProvinces).replace(/</g, "\\u003c")};
     window.currentProvinceSlug = ${JSON.stringify(provinceSlug)};
     window.currentProvinceName = ${JSON.stringify(provinceNameThai)};
-    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")}; window.currentZoneLocationParen = ${JSON.stringify(zoneLocationParen || "")}; </script>
+    window.currentZoneSlug = ${JSON.stringify(zoneSlug || "")};
+    window.currentZoneLocationParen = ${JSON.stringify(zoneLocationParen || "")};
+  </script>
 `;
 
-finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript);
+  finalHtml = finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, () => ssrDataScript);
 
-    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
-    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
-    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
-    
-    
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
-finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
+  finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
+  finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
+  finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
+  finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
+  finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
+  const mapQuery = isNational
+    ? encodeURIComponent("ประเทศไทย")
+    : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
+  const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
 
-const mapQuery = isNational 
-  ? encodeURIComponent("ประเทศไทย") 
-  : encodeURIComponent(`จังหวัด${provinceNameThai}${zoneSlug ? ` ${zoneSlug}` : ""}`);
-const mapZoom = isNational ? 6 : (zoneSlug ? 14 : 12);
-const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
+  finalHtml = finalHtml.replace(
+    /<iframe\s+id=["']google-map["'][^>]*>/i,
+    `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}" title="แผนที่พื้นที่ให้บริการ FirstModelHub" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;">`
+  );
+  finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
 
-finalHtml = finalHtml.replace(
-  /<iframe\s+id=["']google-map["'][^>]*>/i, 
-  `<iframe id="google-map" src="about:blank" data-src="${mapEmbedUrl}" title="แผนที่พื้นที่ให้บริการ FirstModelHub" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="width: 100%; height: 100%; border: 0; min-height: 350px;">`
-);
-    finalHtml = finalHtml.replace(/<link\s+rel=["']preload["']\s+as=["']image["'][^>]*>/gi, "");
+  const hasHot = hotProfiles && hotProfiles.length > 0;
+  const lcpTargetProfile = hasHot ? hotProfiles[0] : (actualVisibleProfiles && actualVisibleProfiles[0] ? actualVisibleProfiles[0] : null);
 
-const hasHot = hotProfiles && hotProfiles.length > 0;
-const lcpTargetProfile = hasHot ? hotProfiles[0] : (actualVisibleProfiles && actualVisibleProfiles[0] ? actualVisibleProfiles[0] : null);
-
-if (lcpTargetProfile) {
-  const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
-  if (rawLcpImg) {
-    const lcpExactUrl = optimizeImg(rawLcpImg, hasHot ? 300 : "card");
-    const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
-    finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+  if (lcpTargetProfile) {
+    const rawLcpImg = lcpTargetProfile.imagePath || lcpTargetProfile.image_url || "";
+    if (rawLcpImg) {
+      const lcpExactUrl = optimizeImg(rawLcpImg, hasHot ? 300 : "card");
+      const preloadTag = `  <link rel="preload" as="image" href="${lcpExactUrl}" fetchpriority="high">\n</head>`;
+      finalHtml = finalHtml.replace(/<\/head>/i, preloadTag);
+    }
   }
-}
-    finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
-    finalHtml = finalHtml.replace(/(href=["'])\/?styles\.css\?v=[^"'\s>]+/g, `$1/styles.css?v=${GLOBAL_VERSION}`);
-finalHtml = finalHtml.replace(/(src=["'])\/?main\.js\?v=[^"'\s>]+/g, `$1/main.js?v=${GLOBAL_VERSION}`);
 
-    if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) {
-      finalHtml = finalHtml.replace(/<head>/i, '<head>\n  <meta charset="utf-8">');
-    }
-   const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": isForceRefresh ? "no-store" : "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": isForceRefresh ? "no-store" : "public, s-maxage=86400, stale-while-revalidate=86400",
-      "Netlify-Vary": "query=page|refresh",
-      "ETag": `"${GLOBAL_VERSION}"`,
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
-    };
+  finalHtml = replaceGlobal(finalHtml, "https://line.me/ti/p/u8Bz9HsaY8", liveAdminLine);
+  finalHtml = finalHtml.replace(/(href=["'])\/?styles\.css\?v=[^"'\s>]+/g, `$1/styles.css?v=${GLOBAL_VERSION}`);
+  finalHtml = finalHtml.replace(/(src=["'])\/?main\.js\?v=[^"'\s>]+/g, `$1/main.js?v=${GLOBAL_VERSION}`);
 
-    if (!isForceRefresh) {
-      setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
-    }
-    return new Response(finalHtml, { headers: responseHeaders });
+  if (!finalHtml.includes('<meta charset="utf-8">') && !finalHtml.includes('<meta charset="utf-8" />')) {
+    finalHtml = finalHtml.replace(/<head>/i, '<head>\n  <meta charset="utf-8">');
+  }
+
+  const responseHeaders = {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": isForceRefresh ? "no-store" : "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+    "Netlify-CDN-Cache-Control": isForceRefresh ? "no-store" : "public, s-maxage=86400, stale-while-revalidate=86400",
+    "Netlify-Vary": "query=page|refresh",
+    "ETag": `"${GLOBAL_VERSION}"`,
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+  };
+
+  if (!isForceRefresh) {
+    setSafePageCache(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
+  }
+  return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);
     return await context.next();
   }
 };
-

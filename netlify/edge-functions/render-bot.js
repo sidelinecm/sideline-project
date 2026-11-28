@@ -905,6 +905,13 @@ export default async (req, context) => {
       "@context": "https://schema.org",
       "@graph": [
         {
+          "@type": "WebSite",
+          "@id": `${CONFIG.DOMAIN}/#website`,
+          "url": `${CONFIG.DOMAIN}/`,
+          "name": CONFIG.BRAND_NAME,
+          "inLanguage": "th-TH"
+        },
+        {
           "@type": "ProfilePage",
           "@id": `${canonicalUrl}#webpage`,
           "url": canonicalUrl,
@@ -968,7 +975,7 @@ export default async (req, context) => {
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     ${heroSrcSet
-      ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 480px) 100vw, 400px" fetchpriority="high">`
+      ? `<link rel="preload" as="image" href="${heroImageSmall}" imagesrcset="${heroSrcSet}" imagesizes="(max-width: 680px) calc(100vw - 2rem), 648px" fetchpriority="high">`
       : `<link rel="preload" as="image" href="${heroImageSmall}" fetchpriority="high">`
     }
 
@@ -990,8 +997,10 @@ export default async (req, context) => {
     </style>
 
     <link rel="stylesheet" href="/styles.css?v=${GLOBAL_PROFILE_VERSION}">
-    <link rel="shortcut icon" href="/images/favicon.ico">
+   <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    
 
     <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
