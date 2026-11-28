@@ -569,9 +569,9 @@ export default async (req, context) => {
       const validSame = sameProv.slice(0, 3);
       const validOther = otherProv.slice(0, 3);
       relatedProfiles = [...validSame, ...validOther].slice(0, 6);
-
-      const validSame = sameProv.slice(0, 3);
-      
+    } catch (relCatchErr) {
+      console.warn("Related profiles fallback:", relCatchErr);
+    }
 
     const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[provinceKey] || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
